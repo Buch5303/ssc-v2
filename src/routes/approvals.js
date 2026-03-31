@@ -1,0 +1,147 @@
+'use strict';
+
+const express = require('express');
+const approvalService = require('../services/approval-service');
+const { validate } = require('../common/validate');
+const schemas = require('../schemas/approvals');
+
+function _getTrustedContext(req) {
+    const userId = (req.user && req.user.id) || req.headers['x-user-id'] || null;
+    const orgId  = (req.org && req.org.id)   || req.headers['x-org-id']  || null;
+    return { userId, orgId };
+}
+
+function _requireTrustedContext(req, res) {
+    const ctx = _getTrustedContext(req);
+    if (!ctx.userId) { res.status(401).json({ error: 'actor_user_id_not_in_trusted_context' }); return null; }
+    if (!ctx.orgId)  { res.status(401).json({ error: 'org_id_not_in_trusted_context' });        return null; }
+    return ctx;
+}
+
+function _parseIntParam(val, name) {
+    const n = parseInt(val, 10);
+    if (isNaN(n) || n < 1) return { error: 'invalid_' + name };
+    return { value: n };
+}
+
+function _clampPagination(query) {
+    let limit = parseInt(query.limit, 10);
+    let offset = parseInt(query.offset, 10);
+    if (isNaN(limit) || limit < 1) limit = 50;
+    if (limit > 200) limit = 200;
+    if (isNaN(offset) || offset < 0) offset = 0;
+    return { limit, offset };
+}
+
+function _mapError(res, result) {
+    const e = result.error;
+    if (e === 'approval_request_not_found') return res.status(404).json({ error: e });
+    if (e === 'approver_not_authorized' || e === 'self_approval_prohibited') return res.status(403).json({ error: e });
+    if (typeof e === 'string' && e.startsWith('invalid_transition')) return res.status(409).json({ error: e });
+    return res.status(400).json({ error: e });
+}
+
+function createApprovalRoutes(db) {
+    if (!db) throw new Error('[approvals] FATAL: db required for approval routes — fail closed');
+
+    const router = express.Router();
+
+    // GET /
+    router.get('/', (req, res) => {
+        try {
+            const ctx = _requireTrustedContext(req, res); if (!ctx) return;
+            const { limit, offset } = _clampPagination(req.query);
+            const result = approvalService.listApprovalRequests(db, {
+                org_id: ctx.orgId,
+                request_status: req.query.status || undefined,
+                target_type: req.query.target_type || undefined,
+                action_key: req.query.action_key || undefined,
+                risk_level: req.query.risk_level || undefined,
+                limit, offset,
+            });
+            if (!result.success) return res.status(500).json({ error: result.error });
+            return res.json({ success: true, requests: result.requests, total: result.total, limit, offset });
+        } catch (err) { return res.status(500).json({ error: err.message }); }
+    });
+
+    // GET /summary
+    router.get('/summary', (req, res) => {
+        try {
+            const ctx = _requireTrustedContext(req, res); if (!ctx) return;
+            const result = approvalService.summarizeApprovalRequests(db, ctx.orgId);
+            if (!result.success) return res.status(500).json({ error: result.error });
+            return res.json({ success: true, summary: result.summary });
+        } catch (err) { return res.status(500).json({ error: err.message }); }
+    });
+
+    // GET /:id
+    router.get('/:id', (req, res) => {
+        try {
+            const ctx = _requireTrustedContext(req, res); if (!ctx) return;
+            const parsed = _parseIntParam(req.params.id, 'id');
+            if (parsed.error) return res.status(400).json({ error: parsed.error });
+            const result = approvalService.getApprovalRequest(db, parsed.value, ctx.orgId);
+            if (!result.success) return res.status(404).json({ error: result.error });
+            return res.json({ success: true, request: result.request });
+        } catch (err) { return res.status(500).json({ error: err.message }); }
+    });
+
+    // POST /:id/approve
+    router.post('/:id/approve', (req, res) => {
+        try {
+            const ctx = _requireTrustedContext(req, res); if (!ctx) return;
+            const parsed = _parseIntParam(req.params.id, 'id');
+            if (parsed.error) return res.status(400).json({ error: parsed.error });
+            const vr = validate(req.body, schemas.approve);
+            if (!vr.valid) return res.status(400).json({ error: 'validation_failed', details: vr.errors });
+            const result = approvalService.approveApprovalRequest(db, parsed.value, {
+                actor_user_id: ctx.userId, org_id: ctx.orgId,
+                reason: req.body.reason || null, metadata: req.body.metadata || {},
+            });
+            if (!result.success) return _mapError(res, result);
+            return res.json({
+                success: true, request: result.request,
+                idempotent: result.idempotent || false,
+                message: result.message || 'approved',
+            });
+        } catch (err) { return res.status(500).json({ error: err.message }); }
+    });
+
+    // POST /:id/reject
+    router.post('/:id/reject', (req, res) => {
+        try {
+            const ctx = _requireTrustedContext(req, res); if (!ctx) return;
+            const parsed = _parseIntParam(req.params.id, 'id');
+            if (parsed.error) return res.status(400).json({ error: parsed.error });
+            const vr = validate(req.body, schemas.reject);
+            if (!vr.valid) return res.status(400).json({ error: 'validation_failed', details: vr.errors });
+            const result = approvalService.rejectApprovalRequest(db, parsed.value, {
+                actor_user_id: ctx.userId, org_id: ctx.orgId,
+                reason: req.body.reason || null, metadata: req.body.metadata || {},
+            });
+            if (!result.success) return _mapError(res, result);
+            return res.json({ success: true, request: result.request });
+        } catch (err) { return res.status(500).json({ error: err.message }); }
+    });
+
+    // POST /:id/cancel
+    router.post('/:id/cancel', (req, res) => {
+        try {
+            const ctx = _requireTrustedContext(req, res); if (!ctx) return;
+            const parsed = _parseIntParam(req.params.id, 'id');
+            if (parsed.error) return res.status(400).json({ error: parsed.error });
+            const vr = validate(req.body, schemas.cancel);
+            if (!vr.valid) return res.status(400).json({ error: 'validation_failed', details: vr.errors });
+            const result = approvalService.cancelApprovalRequest(db, parsed.value, {
+                actor_user_id: ctx.userId, org_id: ctx.orgId,
+                reason: req.body.reason || null, metadata: req.body.metadata || {},
+            });
+            if (!result.success) return _mapError(res, result);
+            return res.json({ success: true, request: result.request });
+        } catch (err) { return res.status(500).json({ error: err.message }); }
+    });
+
+    return router;
+}
+
+module.exports = createApprovalRoutes;
