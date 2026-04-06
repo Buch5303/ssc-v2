@@ -1,19 +1,40 @@
 {
   "name": "ssc-v2",
-  "version": "1.0.0",
-  "description": "SSC Supply Chain V2 governance and supply chain platform",
+  "version": "2.0.0",
+  "description": "SSC Supply Chain V2 — Governance & Execution Platform",
   "main": "src/server.js",
-  "license": "MIT",
   "scripts": {
     "start": "node src/server.js",
     "test": "node tests/run-all-regressions.js",
-    "benchmark": "node benchmarks/run-benchmarks.js"
+    "test:day22": "node tests/day22-approval-governance-tests.js",
+    "test:day23": "node tests/day23-workflow-execution-tests.js",
+    "test:day24": "node tests/day24-input-validation-tests.js",
+    "test:day25": "node tests/day25-auth-hardening-tests.js",
+    "test:day26": "node tests/day26-governance-hardening-tests.js",
+    "test:day27": "node tests/day27-enforcement-tests.js",
+    "test:day28": "node tests/day28-logging-audit-ratelimit-tests.js",
+    "test:day29": "node tests/day29-distributed-infra-tests.js",
+    "test:day30": "node tests/day30-eqs-audit-tests.js",
+    "test:day31": "node tests/day31-grok-remediation-tests.js",
+    "test:day32": "node tests/day32-production-backbone-tests.js",
+    "test:day33": "node tests/day33-supply-chain-data-tests.js",
+    "test:day34": "node tests/day34-query-api-tests.js",
+    "test:day35": "node tests/day35-pilot-prep-tests.js",
+    "chaos": "node scripts/chaos-validate.js",
+    "benchmark": "node benchmarks/run-benchmarks.js",
+    "migrate": "node src/db/migrate.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
-    "express": "^4.21.2",
-    "ioredis": "^5.8.1",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.16.3",
-    "sql.js": "^1.13.0"
+    "express": "^4.21.0",
+    "ioredis": "^5.10.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.20.0",
+    "sql.js": "^1.11.0"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0"
   }
 }

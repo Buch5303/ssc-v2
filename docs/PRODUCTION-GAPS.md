@@ -1,33 +1,33 @@
-# Production Gaps
+# SSC V2 / FlowSeer — Production Gaps
 
-This build is **not yet production-ready**. It is a hardened development/staging platform.
+| Environment | Status | Notes |
+|-------------|--------|-------|
+| Local dev | ✅ GO | 669 tests, 0 failures — full governance + data + query + pilot-prep |
+| Docker local | ⚠️ CONDITIONAL | docker-compose ready, not yet validated against PG+Redis |
+| Staging | ⚠️ CONDITIONAL | Needs docker-compose validated end-to-end |
+| Pilot | ⚠️ CONDITIONAL | Runtime files present, chaos 8/8 pass, PG+Redis load test pending |
+| Enterprise | ❌ NO-GO | Needs all above + multi-region + external IdP + monitoring |
 
-## Remaining gaps
+## Implemented and Proven (Day 35 State)
 
-1. **Real PostgreSQL validation**
-   - Adapter exists and is runtime-wired
-   - Migrations exist
-   - Not yet tested against a live PostgreSQL instance
+| Layer | Status |
+|-------|--------|
+| Governance core (Days 22–31) | Mandatory gate, zero bypass, DUAL approval, DB triggers, audit trail |
+| Production backbone (Day 32) | PG/Redis runtime switch, Docker, async services, durable queue |
+| Supply chain entities (Day 33) | 7 entity tables, immutable lineage, governed CRUD, bulk import |
+| Query & API layer (Day 34) | 6 entity query surfaces, 6 relationship traversals, timeline/history, sort/pagination |
+| Auth hardening (Day 35) | verifyAccessToken() — JWT signature + expiry + revocation blocklist; revoked tokens return 401 |
+| Chaos validation (Day 35) | 8/8 chaos scenarios pass (scripts/chaos-validate.js) |
+| Pilot-prep (Day 35) | 45 pilot-prep tests; PILOT-DEPLOYMENT-GUIDE.md + PILOT-ROLLBACK-GUIDE.md published |
 
-2. **Real Redis validation**
-   - Rate limiting and replay protection exist and are wired
-   - Tested only against mock/null Redis scenarios
+## Not Yet Implemented
 
-3. **JWT / IdP maturity**
-   - HS256 JWT supported
-   - No OIDC/SAML integration
-   - No token refresh / revocation
-
-4. **Concurrency at scale**
-   - CAS guards, row locks, advisory locks designed
-   - No multi-instance stress test or chaos test run yet
-
-5. **Infra validation**
-   - Dockerfile and docker-compose.yml exist
-   - No end-to-end container validation run captured
-
-6. **Feature completeness**
-   - No dashboard / UI
-   - No analytics layer
-   - No predictive AI or decision intelligence
-   - No digital twin or simulation
+| Gap | Notes |
+|-----|-------|
+| PG+Redis load test | Benchmark harness exists; not yet run against production stack |
+| Token refresh endpoint | Access token revocation implemented; refresh-token rotation not wired |
+| Dashboards | No visualization layer |
+| Predictive AI | No inference/recommendation engine |
+| Digital twin / simulation | No simulation layer |
+| External IdP | JWT HS256 only — RS256/OIDC not implemented |
+| Multi-region | Single-node only |

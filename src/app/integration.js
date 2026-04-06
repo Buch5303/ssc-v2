@@ -9,6 +9,8 @@ const createSupplyChainRoutes = require('../routes/supply-chain');
 const logger = require('../common/logger');
 const metrics = require('../common/metrics');
 const { getDbMode } = require('../db/database');
+const { metricsEndpoint } = require('../common/metrics-export');
+const tokenService = require('../middleware/token-service');
 
 function createApp(db, opts = {}) {
     const app = express();
@@ -41,12 +43,45 @@ function createApp(db, opts = {}) {
         res.json(probe);
     });
     app.get('/api', (_r, res) => res.json({ service: 'ssc-v2', version: '2.0.0', db_mode: getDbMode(db), redis: redis ? 'connected' : 'disabled' }));
-    app.get('/api/metrics', (_r, res) => res.json(metrics.snapshot()));
+    app.get('/api/metrics', metricsEndpoint);
+    app.get('/metrics', metricsEndpoint); // Prometheus scrape path
+
+    // Token endpoints (public — no auth required)
+    app.post('/api/auth/token', async (req, res) => {
+        try {
+            const { user_id, org_id } = req.body;
+            if (!user_id || !org_id) return res.status(400).json({ error: 'user_id_and_org_id_required' });
+            const result = tokenService.issueTokenPair(user_id, org_id);
+            res.json(result);
+        } catch (err) { res.status(500).json({ error: err.message }); }
+    });
+    app.post('/api/auth/refresh', async (req, res) => {
+        try {
+            const { refresh_token } = req.body;
+            if (!refresh_token) return res.status(400).json({ error: 'refresh_token_required' });
+            const result = await tokenService.refreshAccessToken(refresh_token);
+            res.status(result.success ? 200 : 401).json(result);
+        } catch (err) { res.status(500).json({ error: err.message }); }
+    });
+    app.post('/api/auth/revoke', async (req, res) => {
+        try {
+            const { token } = req.body;
+            if (!token) return res.status(400).json({ error: 'token_required' });
+            const decoded = require('jsonwebtoken').decode(token);
+            if (decoded && decoded.jti) {
+                await tokenService.revokeToken(decoded.jti, decoded.exp ? decoded.exp - Math.floor(Date.now() / 1000) : 900);
+            }
+            res.json({ success: true });
+        } catch (err) { res.status(500).json({ error: err.message }); }
+    });
+
+    // Wire Redis into token service for distributed revocation
+    if (redis) { tokenService.setRedis(redis); }
 
     // Auth + identity + tenant isolation
     app.use('/api', authenticate, extractIdentity, requireTenant);
 
-    // Redis rate limiting – REAL RUNTIME WIRING
+    // Redis rate limiting — REAL RUNTIME WIRING
     if (redis) {
         const { rateLimitMiddleware } = require('../middleware/redis-rate-limit');
         app.use('/api', rateLimitMiddleware(redis, (req) => {
@@ -58,7 +93,7 @@ function createApp(db, opts = {}) {
         logger.info('integration', 'Redis rate limiting ACTIVE');
     }
 
-    // Redis replay protection – REAL RUNTIME WIRING
+    // Redis replay protection — REAL RUNTIME WIRING
     if (redis) {
         const { replayProtectionMiddleware } = require('../middleware/redis-replay-protection');
         app.use('/api', replayProtectionMiddleware(redis));

@@ -284,7 +284,7 @@ All services were converted from sync to async in Day 32 to support the PG adapt
 
 ## 9. KEY FILE RELATIONSHIPS
 
-```text
+```
 server.js
   → database.js (runtime switch: DATABASE_URL → PG or sql.js)
   → migrate.js (sql.js) or migrate-pg.js (PostgreSQL)

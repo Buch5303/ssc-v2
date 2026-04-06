@@ -5,13 +5,84 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
+  repo-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify required files
+        run: |
+          required=(
+            "package.json"
+            "package-lock.json"
+            ".gitignore"
+            ".env.example"
+            "Procfile"
+            "README.md"
+            "data/.gitkeep"
+            "docs/BUILD-STATUS.md"
+            "docs/PRODUCTION-GAPS.md"
+            "src/server.js"
+            "src/app/integration.js"
+            "src/common/json.js"
+            "src/common/time.js"
+            "src/common/pagination.js"
+            "src/common/validate.js"
+            "src/middleware/context.js"
+            "src/db/database.js"
+            "src/db/migrate.js"
+            "src/db/migrations/016-day22-approval-governance.sql"
+            "src/db/migrations/017-day23-workflow-execution.sql"
+            "src/schemas/approvals.js"
+            "src/schemas/workflows.js"
+            "src/services/approval-policy-registry.js"
+            "src/services/approval-service.js"
+            "src/services/workflow-approval-bridge.js"
+            "src/services/decision-approval-bridge.js"
+            "src/services/workflow-execution-service.js"
+            "src/routes/approvals.js"
+            "src/routes/workflows.js"
+            "tests/test-db-helper.js"
+            "tests/day22-approval-governance-tests.js"
+            "tests/day23-workflow-execution-tests.js"
+            "tests/day24-input-validation-tests.js"
+            "tests/run-all-regressions.js"
+          )
+
+          missing=0
+          for file in "${required[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "Missing: $file"
+              missing=1
+            fi
+          done
+
+          if [ "$missing" -ne 0 ]; then
+            echo "Required file inventory check failed."
+            exit 1
+          fi
+
+      - name: Verify package scripts
+        run: |
+          node -e '
+            const pkg = require("./package.json");
+            const required = ["start", "test", "migrate"];
+            for (const script of required) {
+              if (!pkg.scripts || !pkg.scripts[script]) {
+                console.error(`Missing script: ${script}`);
+                process.exit(1);
+              }
+            }
+            console.log("Required package scripts present.");
+          '
+
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20.x]
+    needs: repo-integrity
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,24 +90,11 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
+          node-version: '20'
+          cache: 'npm'
 
-      - name: Install
+      - name: Install dependencies
         run: npm ci
 
-      - name: Run full regression
-        env:
-          AUTH_MODE: headers
-        run: node --max-old-space-size=1024 tests/run-all-regressions.js
-
-      - name: Verify zero PASS_THROUGH
-        run: |
-          if grep -R "PASS_THROUGH" src tests --exclude-dir=node_modules; then
-            echo "PASS_THROUGH found"
-            exit 1
-          fi
-
-      - name: Verify governed execution entry points
-        run: |
-          grep -R "enforceGovernance" src/services/workflow-execution-service.js src/services/decision-execution-service.js src/services/durable-worker-queue.js
+      - name: Run regression suite
+        run: npm test

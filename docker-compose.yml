@@ -1,44 +1,42 @@
-version: '3.9'
+version: '3.8'
 services:
   postgres:
-    image: postgres:16
+    image: postgres:16-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ssc
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ssc_v2
+      POSTGRES_USER: ssc
+      POSTGRES_PASSWORD: ssc_dev_password
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d ssc"]
+      test: ["CMD-SHELL", "pg_isready -U ssc -d ssc_v2"]
       interval: 5s
-      timeout: 5s
-      retries: 20
+      timeout: 3s
+      retries: 5
 
   redis:
-    image: redis:7
-    ports:
-      - "6379:6379"
+    image: redis:7-alpine
+    ports: ["6379:6379"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
-      timeout: 5s
-      retries: 20
+      timeout: 3s
+      retries: 5
 
   app:
     build: .
+    ports: ["3000:3000"]
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
     environment:
+      NODE_ENV: production
       PORT: 3000
-      NODE_ENV: staging
       AUTH_MODE: jwt
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ssc
+      JWT_SECRET: change-me-in-production
+      DATABASE_URL: postgresql://ssc:ssc_dev_password@postgres:5432/ssc_v2
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: change-me
-      RATE_LIMIT_PER_MINUTE: 120
-      ENABLE_DURABLE_QUEUE: 'true'
-    ports:
-      - "3000:3000"
+      PG_POOL_MAX: 20
+
+volumes:
+  pgdata:
