@@ -1,38 +1,33 @@
-# SSC V2 — Production Gaps
+# Production Gaps
 
-| Environment | Status |
-|-------------|--------|
-| Local dev | ✅ GO |
-| Internal staging | ⚠️ CONDITIONAL |
-| Pilot customer | ❌ NO-GO |
-| Enterprise production | ❌ NO-GO |
+This build is **not yet production-ready**. It is a hardened development/staging platform.
 
-## Gap 1: Authentication
-Header-based identity. No JWT. Any client can impersonate.
+## Remaining gaps
 
-## Gap 2: PostgreSQL
-sql.js in-memory with file persist. Data loss on restart. Single-writer.
+1. **Real PostgreSQL validation**
+   - Adapter exists and is runtime-wired
+   - Migrations exist
+   - Not yet tested against a live PostgreSQL instance
 
-## Gap 3: Tenant Isolation
-Manual org_id filtering. No centralized proxy. No RLS.
+2. **Real Redis validation**
+   - Rate limiting and replay protection exist and are wired
+   - Tested only against mock/null Redis scenarios
 
-## Gap 4: Structured Logging
-console.log only. No JSON format. No correlation IDs.
+3. **JWT / IdP maturity**
+   - HS256 JWT supported
+   - No OIDC/SAML integration
+   - No token refresh / revocation
 
-## Gap 5: Observability
-No metrics endpoint. No DB health check.
+4. **Concurrency at scale**
+   - CAS guards, row locks, advisory locks designed
+   - No multi-instance stress test or chaos test run yet
 
-## Gap 6: Request-Level Idempotency
-Replay idempotency exists. General POST idempotency does not.
+5. **Infra validation**
+   - Dockerfile and docker-compose.yml exist
+   - No end-to-end container validation run captured
 
-## Gap 7: Concurrency Control
-CAS-style updates only. No version columns. No advisory locks.
-
-## Gap 8: Background Workers
-All synchronous. No auto-replay on approval.
-
-## Gap 9: Audit Log
-Embedded in entity rows. No append-only event log.
-
-## Gap 10: Rate Limiting
-None implemented.
+6. **Feature completeness**
+   - No dashboard / UI
+   - No analytics layer
+   - No predictive AI or decision intelligence
+   - No digital twin or simulation

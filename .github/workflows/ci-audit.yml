@@ -1,0 +1,42 @@
+name: SSC V2 CI Audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Run full regression
+        env:
+          AUTH_MODE: headers
+        run: node --max-old-space-size=1024 tests/run-all-regressions.js
+
+      - name: Verify zero PASS_THROUGH
+        run: |
+          if grep -R "PASS_THROUGH" src tests --exclude-dir=node_modules; then
+            echo "PASS_THROUGH found"
+            exit 1
+          fi
+
+      - name: Verify governed execution entry points
+        run: |
+          grep -R "enforceGovernance" src/services/workflow-execution-service.js src/services/decision-execution-service.js src/services/durable-worker-queue.js

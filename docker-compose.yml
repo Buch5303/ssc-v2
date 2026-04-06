@@ -1,0 +1,44 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ssc
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ssc"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      NODE_ENV: staging
+      AUTH_MODE: jwt
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ssc
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: change-me
+      RATE_LIMIT_PER_MINUTE: 120
+      ENABLE_DURABLE_QUEUE: 'true'
+    ports:
+      - "3000:3000"

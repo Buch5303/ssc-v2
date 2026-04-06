@@ -1,22 +1,33 @@
-# SSC V2 — Build Status
+# SSC V2 Build Status
 
-| Day | Module | Tests | Status |
-|-----|--------|-------|--------|
-| 22 | Approval Governance | 94 | ✅ |
-| 23 | Workflow Execution | 38 | ✅ |
-| 24 | Input Validation | 39 | ✅ |
-| **Total** | | **171** | **0 failures** |
+## Validated milestones
 
-## Evidence Map
+- Day 22: approval governance
+- Day 23: workflow execution
+- Day 24: input validation
+- Day 25: auth hardening
+- Day 26: governance hardening
+- Day 27: enforcement certainty
+- Day 28: structured logging, immutable audit, rate limiting
+- Day 29: distributed execution primitives, tenant isolation, queue and metrics
+- Day 30: Grok EQS audit closure for governance layer
+- Day 31: Grok remediation and adversarial hardening
+- Day 32: production backbone wiring for PostgreSQL and Redis
+- Day 33: supply chain data foundation with history/lineage
+- Day 34: advanced query and API expansion
 
-| Claim | File(s) |
-|-------|---------|
-| 12 endpoints | `src/app/integration.js`, `GET /api` |
-| 171 tests | `tests/run-all-regressions.js` → 3 suites |
-| Input validation | `src/common/validate.js` + `src/schemas/` |
-| Transaction-safe DB | `src/db/database.js` (inTx flag) |
-| UNIQUE idempotency | `017-day23-workflow-execution.sql` → `replay_idempotency_key TEXT UNIQUE` |
-| Fail-closed | `approval-policy-registry.js` → `_resolveByCategory()` |
-| Self-approval prevention | `approval-service.js` → `_transitionToTerminal()` |
-| Org-scoped queries | Every service uses `AND org_id = ?` |
-| Body identity ignored | Routes read headers only |
+## Current validated state
+
+- 624 tests passing across 13 suites
+- Runtime switch between sql.js and PostgreSQL implemented
+- Redis rate limiting and replay protection wired in app integration
+- Governance gate mandatory at every execution entry point
+- Supply chain entities plus advanced query layer operational
+- Dockerfile and docker-compose provided for real infra validation
+
+## Current limitations
+
+- PostgreSQL and Redis not yet proven against live infrastructure
+- Docker not yet exercised end to end
+- Dashboard / analytics / digital twin layers not started
+- JWT edge-case test coverage reduced during async refactor

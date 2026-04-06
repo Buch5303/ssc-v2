@@ -2,94 +2,129 @@
 
 Governance and execution platform for supply chain workflows. Deterministic approval policies, multi-level authorization, exact-once replay, and full audit trail.
 
+---
+
 ## Current State
 
-**Day 24 complete.** 171 tests passing across 3 suites. 12 verified endpoints. Server boots clean. Migrations run clean. Railway-deployable.
+**Day 34 complete.** 624 tests passing across 13 suites. Governance hardened, production backbone wired, supply chain data model added, advanced query/API layer operational.
 
-**Environment posture:** Development / staging. Not yet production-hardened. See [Production Gaps](docs/PRODUCTION-GAPS.md).
+**Environment posture:** Development / staging. Not yet production-hardened on real infra. See [docs/PRODUCTION-GAPS.md](docs/PRODUCTION-GAPS.md).
 
 ---
 
 ## Architecture
 
-```
-Request → Express → Identity Extraction → Input Validation → Route → Service → Database
-                         (headers)         (schema check)     (REST)  (logic)   (sql.js)
-```
+Request → Express → Auth → Identity Extraction → Tenant Isolation → Input Validation → Route → Service → Database → Audit/History
+
+### Layers
 
 | Layer | Responsibility | Location |
-|-------|---------------|----------|
-| Routes | HTTP, identity enforcement, input validation | `src/routes/` |
-| Services | Business logic, state machines, governance | `src/services/` |
-| Database | Persistence, migrations, transaction-safe writes | `src/db/` |
-| Common | JSON, time, pagination, validation utilities | `src/common/` |
-| Middleware | Identity extraction from trusted context | `src/middleware/` |
-| Schemas | Input validation rules per endpoint | `src/schemas/` |
+|------|----------------|----------|
+| Routes | HTTP, auth enforcement, input validation | `src/routes/` |
+| Services | Business logic, governance, workflows | `src/services/` |
+| Database | Persistence, migrations, adapters | `src/db/` |
+| Middleware | Auth, context, tenant isolation, RBAC, rate limiting | `src/middleware/` |
+| Common | Validation, logging, metrics, helpers | `src/common/` |
 
-**Design principles:**
-- **Fail-closed governance:** Unknown actions require approval, not bypass
-- **Deterministic:** No AI or probabilistic decisions in governance
-- **Exact-once replay:** UNIQUE database constraint prevents double execution
-- **Org-scoped reads:** Every query requires org_id
-- **Identity from trusted context only:** Body-supplied identity ignored
+### Design principles
+
+- **Fail-closed governance:** unknown actions require approval, not bypass
+- **Deterministic:** no AI/probabilistic decisions in governance
+- **Exact-once replay:** nonce/idempotency constraints prevent duplicate execution
+- **Org-scoped reads:** every query requires `org_id`
+- **Identity from trusted context only:** routes do not trust body-supplied identity
 
 ---
 
 ## Folder Structure
 
-```
+```text
 ssc-v2/
 ├── src/
-│   ├── app/integration.js          # Express factory
+│   ├── app/
+│   │   └── integration.js            # Express factory
 │   ├── common/
-│   │   ├── json.js                 # Safe JSON parse/stringify
-│   │   ├── time.js                 # SQLite-compatible timestamps
-│   │   ├── pagination.js           # Clamped limit/offset
-│   │   └── validate.js             # Schema validation engine
+│   │   ├── json.js                   # Safe JSON parse/stringify
+│   │   ├── logger.js                 # Structured logging
+│   │   ├── metrics.js                # Counters, histograms, health
+│   │   ├── pagination.js             # Clamped limit/offset helpers
+│   │   ├── time.js                   # Timestamp utilities
+│   │   └── validate.js               # Schema validation engine
 │   ├── db/
-│   │   ├── database.js             # sql.js wrapper, transaction-safe
-│   │   ├── migrate.js              # Migration runner
-│   │   └── migrations/
-│   │       ├── 016-day22-approval-governance.sql
-│   │       └── 017-day23-workflow-execution.sql
-│   ├── middleware/context.js        # Identity extraction
+│   │   ├── database.js               # Runtime DB switch (sql.js / PG)
+│   │   ├── migrate.js                # sql.js migration runner
+│   │   ├── migrate-pg.js             # PostgreSQL migration runner
+│   │   ├── pg-adapter.js             # better-sqlite3 compatible PG adapter
+│   │   ├── pg-client.js              # Pool, tx, row/advisory locks
+│   │   └── migrations/               # 016–022 migrations
+│   ├── middleware/
+│   │   ├── auth.js
+│   │   ├── context.js
+│   │   ├── rate-limit.js
+│   │   ├── redis-rate-limit.js
+│   │   ├── redis-replay-protection.js
+│   │   ├── request-integrity.js
+│   │   ├── rbac.js
+│   │   └── tenant-isolation.js
 │   ├── routes/
-│   │   ├── approvals.js            # Approval endpoints
-│   │   └── workflows.js            # Execution endpoints
-│   ├── schemas/
-│   │   ├── approvals.js            # Approval input schemas
-│   │   └── workflows.js            # Workflow input schemas
+│   │   ├── approvals.js
+│   │   ├── workflows.js
+│   │   └── supply-chain.js
 │   ├── services/
 │   │   ├── approval-policy-registry.js
 │   │   ├── approval-service.js
+│   │   ├── audit-trail.js
 │   │   ├── decision-approval-bridge.js
+│   │   ├── decision-execution-service.js
+│   │   ├── durable-worker-queue.js
+│   │   ├── entity-history.js
+│   │   ├── governance-gate.js
+│   │   ├── governance-invariants.js
+│   │   ├── query-service.js
+│   │   ├── supply-chain-service.js
+│   │   ├── worker-queue.js
 │   │   ├── workflow-approval-bridge.js
 │   │   └── workflow-execution-service.js
-│   └── server.js                   # Entry point
+│   └── server.js
 ├── tests/
-│   ├── test-db-helper.js
-│   ├── day22-approval-governance-tests.js  (94 tests)
-│   ├── day23-workflow-execution-tests.js   (38 tests)
-│   ├── day24-input-validation-tests.js     (39 tests)
-│   └── run-all-regressions.js
+│   ├── day22-approval-governance-tests.js
+│   ├── day23-workflow-execution-tests.js
+│   ├── day24-input-validation-tests.js
+│   ├── day25-auth-hardening-tests.js
+│   ├── day26-governance-hardening-tests.js
+│   ├── day27-enforcement-tests.js
+│   ├── day28-logging-audit-ratelimit-tests.js
+│   ├── day29-distributed-infra-tests.js
+│   ├── day30-eqs-audit-tests.js
+│   ├── day31-grok-remediation-tests.js
+│   ├── day32-production-backbone-tests.js
+│   ├── day33-supply-chain-data-tests.js
+│   ├── day34-query-api-tests.js
+│   ├── run-all-regressions.js
+│   └── test-db-helper.js
 ├── docs/
 │   ├── BUILD-STATUS.md
-│   └── PRODUCTION-GAPS.md
-├── data/                           # Runtime SQLite (gitignored)
-├── package.json
-├── .gitignore
-├── .env.example
-└── Procfile
+│   ├── PRODUCTION-GAPS.md
+│   └── TURNOVER-DOCUMENT.md
+├── benchmarks/
+│   └── run-benchmarks.js
+├── Dockerfile
+├── docker-compose.yml
+├── Procfile
+└── package.json
 ```
 
 ---
 
-## Endpoints (12)
+## Endpoints
+
+### Governance
 
 | Method | Path | Auth | Description |
-|--------|------|------|-------------|
+|-------|------|------|-------------|
 | GET | `/health` | No | Health check |
 | GET | `/api` | No | Route manifest |
+| GET | `/api/metrics` | Yes | Metrics snapshot |
 | GET | `/api/approvals` | Yes | List approval requests |
 | GET | `/api/approvals/summary` | Yes | Backlog summary |
 | GET | `/api/approvals/:id` | Yes | Get single request |
@@ -101,18 +136,20 @@ ssc-v2/
 | GET | `/api/workflows/executions` | Yes | List executions |
 | GET | `/api/workflows/executions/:id` | Yes | Get single execution |
 
-Auth = requires `x-user-id` and `x-org-id` headers. Returns 401 without.
+Auth: in headers mode requires `x-user-id` and `x-org-id`.
 
----
+### Supply Chain
 
-## Test Inventory
+Mounted at `/api/sc`.
 
-| Suite | File | Tests |
-|-------|------|-------|
-| Day 22: Approval Governance | `day22-approval-governance-tests.js` | 94 |
-| Day 23: Workflow Execution | `day23-workflow-execution-tests.js` | 38 |
-| Day 24: Input Validation | `day24-input-validation-tests.js` | 39 |
-| **Total** | | **171** |
+Examples:
+- `GET /api/sc/suppliers`
+- `POST /api/sc/suppliers`
+- `GET /api/sc/orders`
+- `PUT /api/sc/orders/:id/status`
+- `GET /api/sc/query/suppliers`
+- `GET /api/sc/query/orders`
+- `GET /api/sc/timeline/suppliers/:entityId`
 
 ---
 
@@ -122,20 +159,51 @@ Auth = requires `x-user-id` and `x-org-id` headers. Returns 401 without.
 git clone https://github.com/Buch5303/ssc-v2.git
 cd ssc-v2
 npm install
-npm test          # 171 tests
-npm start         # boots on port 3000
+AUTH_MODE=headers node --max-old-space-size=1024 tests/run-all-regressions.js
+AUTH_MODE=headers npm start
+```
+
+### Docker / production-like
+
+```bash
+docker-compose up --build
+```
+
+### Benchmarks
+
+```bash
+npm run benchmark
 ```
 
 ---
 
-## Authentication Model
+## Test Inventory
 
-**Current:** Dev mode. `x-user-id` / `x-org-id` headers. No token verification.
-**Future:** JWT bearer tokens with RBAC. See [Production Gaps](docs/PRODUCTION-GAPS.md).
+| Suite | File | Tests |
+|------|------|------:|
+| Day 22: Approval Governance | `day22-approval-governance-tests.js` | 94 |
+| Day 23: Workflow Execution | `day23-workflow-execution-tests.js` | 38 |
+| Day 24: Input Validation | `day24-input-validation-tests.js` | 39 |
+| Day 25: Auth Hardening | `day25-auth-hardening-tests.js` | 16 |
+| Day 26: Governance Hardening | `day26-governance-hardening-tests.js` | 54 |
+| Day 27: Enforcement | `day27-enforcement-tests.js` | 41 |
+| Day 28: Logging / Audit / Rate Limit | `day28-logging-audit-ratelimit-tests.js` | 28 |
+| Day 29: Distributed Infra | `day29-distributed-infra-tests.js` | 47 |
+| Day 30: EQS Audit | `day30-eqs-audit-tests.js` | 76 |
+| Day 31: Grok Remediation | `day31-grok-remediation-tests.js` | 51 |
+| Day 32: Production Backbone | `day32-production-backbone-tests.js` | 47 |
+| Day 33: Supply Chain Data | `day33-supply-chain-data-tests.js` | 45 |
+| Day 34: Query & API Expansion | `day34-query-api-tests.js` | 48 |
+| **Total** |  | **624** |
 
 ---
 
-## Deployment
+## Notes
 
-**Railway:** `Procfile` → `web: node src/server.js`. Set `PORT` (auto).
-**Database:** sql.js (SQLite/WASM). File-persists to `data/ssc-v2.db`.
+- `sql.js` is used for tests/dev by default.
+- `DATABASE_URL` enables PostgreSQL mode.
+- `REDIS_URL` enables Redis rate limiting and replay protection.
+- Audit trail and entity history are append-only and DB-protected.
+- Real PG/Redis infra validation is the next logical step.
+
+See [`docs/TURNOVER-DOCUMENT.md`](docs/TURNOVER-DOCUMENT.md) for the full technical turnover.

@@ -1,22 +1,19 @@
 {
   "name": "ssc-v2",
-  "version": "2.0.0",
-  "description": "SSC Supply Chain V2 — Governance & Execution Platform",
+  "version": "1.0.0",
+  "description": "SSC Supply Chain V2 governance and supply chain platform",
   "main": "src/server.js",
+  "license": "MIT",
   "scripts": {
     "start": "node src/server.js",
     "test": "node tests/run-all-regressions.js",
-    "test:day22": "node tests/day22-approval-governance-tests.js",
-    "test:day23": "node tests/day23-workflow-execution-tests.js",
-    "test:day24": "node tests/day24-input-validation-tests.js",
-    "migrate": "node src/db/migrate.js"
+    "benchmark": "node benchmarks/run-benchmarks.js"
   },
-  "engines": { "node": ">=18.0.0" },
   "dependencies": {
-    "express": "^4.21.0",
-    "sql.js": "^1.11.0"
-  },
-  "devDependencies": {
-    "supertest": "^7.0.0"
+    "express": "^4.21.2",
+    "ioredis": "^5.8.1",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3",
+    "sql.js": "^1.13.0"
   }
 }

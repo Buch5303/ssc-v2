@@ -1,6 +1,6 @@
 node_modules/
-data/*.db
-*.log
 .env
+.env.*
+data/
+*.db
 .DS_Store
-coverage/
