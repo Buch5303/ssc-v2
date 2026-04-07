@@ -30,3 +30,4 @@
 | Timelines | entity type, entity ID, action, actor, date range, source | status changes, import provenance | 7 tests |
 | Traversal | supplier→parts, supplier→certs, supplier→orders, order→lines, order→shipments, shipment→inspections | cross-tenant blocked | 7 tests |
 | Sort/Pagination | whitelisted sort fields, direction, limit clamp, offset clamp | SQL injection safe | 5 tests |
+test
