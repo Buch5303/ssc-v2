@@ -134,9 +134,9 @@ function createDashboardRoutes(db, opts = {}) {
             const entities = {};
             const entityDefs = [
                 { key: 'suppliers', table: 'suppliers', statusCol: 'status' },
-                { key: 'parts', table: 'parts', statusCol: 'status' },
+                { key: 'parts', table: 'parts', statusCol: 'criticality' },
                 { key: 'purchase_orders', table: 'purchase_orders', statusCol: 'status' },
-                { key: 'warehouses', table: 'warehouses', statusCol: 'status' },
+                { key: 'warehouses', table: 'warehouses', statusCol: null },
                 { key: 'shipments', table: 'shipments', statusCol: 'status' },
                 { key: 'inventory', table: 'inventory', statusCol: null },
             ];
@@ -148,9 +148,18 @@ function createDashboardRoutes(db, opts = {}) {
                         entities[def.key] = { total: parseInt(total?.cnt, 10) || 0 };
                         if (def.statusCol) {
                             const byStatus = await db.prepare(
-                                `SELECT ${def.statusCol} as status, COUNT(*) as count FROM ${def.table} GROUP BY ${def.statusCol}`
+                                `SELECT ${def.statusCol} as status, COUNT(*) as count FROM ${def.table} WHERE org_id = 'twp' GROUP BY ${def.statusCol}`
                             ).all();
                             entities[def.key].by_status = byStatus;
+                        }
+                        // Parts: also get by category
+                        if (def.key === 'parts') {
+                            try {
+                                const byCat = await db.prepare(
+                                    `SELECT category, COUNT(*) as count FROM parts WHERE org_id = 'twp' GROUP BY category ORDER BY count DESC LIMIT 10`
+                                ).all();
+                                entities.parts.by_category = byCat;
+                            } catch { /* ignore */ }
                         }
                     } catch { entities[def.key] = { total: 0, by_status: [] }; }
                 }
@@ -632,15 +641,46 @@ function createDashboardRoutes(db, opts = {}) {
                         a.risk_level === 'HIGH' ? 'DUAL' : 'SINGLE',
                         a.risk_level, a.user);
                     if (a.status === 'APPROVED' && r?.id) {
-                        await db.prepare(
-                            `UPDATE approval_requests SET approved_by_user_id = ?, resolved_at = NOW() WHERE id = ?`
-                        ).run('gbuchanan', r.id);
+                        try {
+                            await db.prepare(
+                                `UPDATE approval_requests SET approved_by_user_id = ?, resolved_at = NOW() WHERE id = ?`
+                            ).run('gbuchanan', r.id);
+                        } catch(ue) { results.errors.push('upd:' + r.id + ':' + ue.message.slice(0,40)); }
                     }
                     results.approvals++;
                 } catch (e) { results.errors.push('A:' + a.action_key + ':' + e.message.slice(0, 80)); }
             }
 
             res.json({ status: 'ok', seeded: results, errors: results.errors, timestamp: new Date().toISOString() });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+
+    // GET /api/dashboard/parts-list — full parts catalog for dashboard
+    router.get('/parts-list', async (req, res) => {
+        try {
+            const limit = Math.min(parseInt(req.query.limit) || 300, 500);
+            const category = req.query.category || null;
+            let sql = `SELECT part_number, description, category, criticality, unit_of_measure FROM parts WHERE org_id = 'twp'`;
+            const params = [];
+            if (category) { sql += ` AND category ILIKE ?`; params.push('%' + category + '%'); }
+            sql += ` ORDER BY category, part_number LIMIT ${limit}`;
+            const parts = await db.prepare(sql).all(...params);
+            res.json({ status: 'ok', count: parts.length, parts, timestamp: new Date().toISOString() });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    // GET /api/dashboard/suppliers-list — supplier roster for dashboard
+    router.get('/suppliers-list', async (req, res) => {
+        try {
+            const suppliers = await db.prepare(
+                `SELECT supplier_code, name, status, category, country, rating FROM suppliers WHERE org_id = 'twp' ORDER BY name`
+            ).all();
+            res.json({ status: 'ok', count: suppliers.length, suppliers, timestamp: new Date().toISOString() });
         } catch (err) {
             res.status(500).json({ error: err.message });
         }

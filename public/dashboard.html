@@ -817,6 +817,70 @@ html, body {
 }
 
 .toast.show { opacity: 1; transform: translateY(0); }
+
+.cat-btn {
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  cursor: pointer;
+  transition: all 0.12s;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.cat-btn:hover { background: var(--bg-elevated); color: var(--text-secondary); }
+.cat-btn.active { background: var(--cyan-dim); color: var(--cyan); border-color: rgba(0,212,255,0.3); }
+
+.catalog-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  border-radius: 4px;
+  transition: background 0.1s;
+  cursor: default;
+}
+.catalog-row:hover { background: var(--bg-elevated); }
+.catalog-pn {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--cyan);
+  width: 110px;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.catalog-name {
+  font-size: 11px;
+  color: var(--text-secondary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.catalog-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  padding: 1px 5px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.supplier-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+.supplier-name { font-size: 11px; font-weight: 500; color: var(--text-primary); }
+.supplier-cat { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); margin-top: 1px; }
+
 </style>
 </head>
 <body>
@@ -1277,6 +1341,53 @@ html, body {
         </div>
       </div>
 
+
+      <!-- TG20 Equipment Catalog Panel -->
+      <div class="panel span-2" id="catalog-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--cyan)"></div>
+            TG20B7-8 Equipment Catalog
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">W251 POWER ISLAND</span>
+            <span class="panel-tag">285 ITEMS</span>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:12px 16px">
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap" id="categoryFilters">
+            <button onclick="filterCatalog('')" class="cat-btn active" data-cat="">All</button>
+            <button onclick="filterCatalog('Gas Turbine Unit')" class="cat-btn" data-cat="Gas Turbine Unit">GT Unit</button>
+            <button onclick="filterCatalog('Fuel')" class="cat-btn" data-cat="Fuel">Fuel Systems</button>
+            <button onclick="filterCatalog('Lube')" class="cat-btn" data-cat="Lube">Lube Oil</button>
+            <button onclick="filterCatalog('Control')" class="cat-btn" data-cat="Control">Controls</button>
+            <button onclick="filterCatalog('Electrical')" class="cat-btn" data-cat="Electrical">Electrical</button>
+            <button onclick="filterCatalog('Exhaust')" class="cat-btn" data-cat="Exhaust">Exhaust</button>
+            <button onclick="filterCatalog('DLN')" class="cat-btn" data-cat="DLN">DLN</button>
+          </div>
+          <div style="overflow-y:auto;max-height:240px" id="catalogList">
+            <div class="empty-state">Loading catalog...</div>
+          </div>
+          <div style="margin-top:8px;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)" id="catalogCount"></div>
+        </div>
+      </div>
+
+      <!-- Supplier Intelligence Panel -->
+      <div class="panel" id="supplier-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--green)"></div>
+            Supplier Network
+          </div>
+          <span class="panel-tag live">12 ACTIVE</span>
+        </div>
+        <div class="panel-body" style="padding:8px 12px">
+          <div id="supplierList" style="display:flex;flex-direction:column;gap:4px">
+            <div class="empty-state">Loading...</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Recent Approvals Table -->
       <div class="panel span-3">
         <div class="panel-header">
@@ -1514,6 +1625,7 @@ async function refreshAll() {
     loadSystemHealth(),
     loadAlerts(),
     loadTrend(),
+    loadCatalog(),
   ]);
 }
 
@@ -1750,6 +1862,87 @@ async function seedData() {
     if (status) status.textContent = '❌ Network error: ' + e.message;
     if (btn) { btn.disabled = false; btn.textContent = '🌱 Retry Seed'; }
   }
+}
+
+
+// Catalog data cache
+let _catalogData = [];
+let _supplierData = [];
+
+async function loadCatalog() {
+  try {
+    const r = await fetchJSON('/api/dashboard/supply-chain');
+    if (!r?.entities) return;
+
+    // Parts by category
+    const byCat = r.entities.parts?.by_category || [];
+    if (byCat.length > 0) {
+      // Update cat filter buttons with counts
+    }
+
+    // Load full parts list
+    const parts = await fetchJSON('/api/dashboard/parts-list');
+    if (parts?.parts) {
+      _catalogData = parts.parts;
+      renderCatalog('');
+    }
+
+    // Suppliers
+    const sups = await fetchJSON('/api/dashboard/suppliers-list');
+    if (sups?.suppliers) {
+      _supplierData = sups.suppliers;
+      renderSuppliers();
+    }
+  } catch(e) { console.warn('catalog:', e); }
+}
+
+function renderCatalog(filter) {
+  const list = document.getElementById('catalogList');
+  const countEl = document.getElementById('catalogCount');
+  if (!list) return;
+
+  const filtered = filter
+    ? _catalogData.filter(p => (p.category || '').toLowerCase().includes(filter.toLowerCase()) ||
+                                (p.part_number || '').toLowerCase().includes(filter.toLowerCase()))
+    : _catalogData;
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state">No items match filter</div>';
+    return;
+  }
+
+  if (countEl) countEl.textContent = `Showing ${filtered.length} of ${_catalogData.length} items`;
+
+  list.innerHTML = filtered.slice(0, 80).map(p => {
+    const crit = p.criticality || 'STANDARD';
+    const critCls = crit === 'CRITICAL' ? 'badge-err' : crit === 'SAFETY' ? 'badge-warn' : 'badge-info';
+    return `<div class="catalog-row">
+      <span class="catalog-pn">${esc(p.part_number || '—')}</span>
+      <span class="catalog-name" title="${esc(p.description || '')}">${esc((p.description || '—').substring(0, 60))}</span>
+      <span class="catalog-badge ${critCls}">${crit}</span>
+    </div>`;
+  }).join('');
+}
+
+function filterCatalog(cat) {
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.cat === cat);
+  });
+  renderCatalog(cat);
+}
+
+function renderSuppliers() {
+  const el = document.getElementById('supplierList');
+  if (!el || !_supplierData.length) return;
+  el.innerHTML = _supplierData.map(s => `
+    <div class="supplier-row">
+      <div>
+        <div class="supplier-name">${esc(s.name)}</div>
+        <div class="supplier-cat">${esc(s.category || '')} · ${esc(s.country || '')}</div>
+      </div>
+      <span class="status-badge ${s.status === 'ACTIVE' ? 'badge-ok' : 'badge-warn'}">${esc(s.status || 'ACTIVE')}</span>
+    </div>
+  `).join('');
 }
 
 // ─── HELPER BUILDERS ─────────────────────────────
