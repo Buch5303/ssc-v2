@@ -44,8 +44,15 @@ function createApp(db, opts = {}) {
             timestamp: new Date().toISOString(),
         };
         try {
-            const probe = metrics.healthProbe(db);
-            checks.postgres = probe.db_ok ? 'ok' : 'fail';
+            const mode = getDbMode(db);
+            if (mode === 'postgres') {
+                // Direct async query for PG — metrics.healthProbe uses sql.js API only
+                await db.prepare('SELECT 1').get();
+                checks.postgres = 'ok';
+            } else {
+                const probe = metrics.healthProbe(db);
+                checks.postgres = probe.db_status === 'error' ? 'fail' : 'ok';
+            }
         } catch { checks.postgres = 'fail'; }
         if (redis) {
             try { await redis.ping(); checks.redis = 'ok'; }
