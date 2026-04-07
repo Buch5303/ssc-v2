@@ -1,11 +1,11 @@
 {
   "name": "ssc-v2",
   "version": "2.0.0",
-  "description": "SSC Supply Chain V2 — Governance & Execution Platform",
+  "description": "SSC Supply Chain V2 \u2014 Governance & Execution Platform",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "test": "node tests/run-all-regressions.js",
+    "test": "AUTH_MODE=headers node --max-old-space-size=1024 tests/run-all-regressions.js",
     "test:day22": "node tests/day22-approval-governance-tests.js",
     "test:day23": "node tests/day23-workflow-execution-tests.js",
     "test:day24": "node tests/day24-input-validation-tests.js",

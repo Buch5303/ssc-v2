@@ -34,15 +34,43 @@ function createApp(db, opts = {}) {
 
     // Public endpoints
     app.get('/health', async (_r, res) => {
-        const probe = metrics.healthProbe(db);
-        probe.db_mode = getDbMode(db);
-        probe.redis = redis ? 'connected' : 'disabled';
+        const checks = {
+            status: 'ok',
+            environment: process.env.APP_ENV || process.env.NODE_ENV || 'unknown',
+            db_mode: getDbMode(db),
+            postgres: 'unknown',
+            redis: 'unknown',
+            uptimeSeconds: process.uptime(),
+            timestamp: new Date().toISOString(),
+        };
+        try {
+            const probe = metrics.healthProbe(db);
+            checks.postgres = probe.db_ok ? 'ok' : 'fail';
+        } catch { checks.postgres = 'fail'; }
         if (redis) {
-            try { await redis.ping(); probe.redis_healthy = true; }
-            catch { probe.redis_healthy = false; }
+            try { await redis.ping(); checks.redis = 'ok'; }
+            catch { checks.redis = 'fail'; }
+        } else {
+            checks.redis = 'disabled';
         }
-        res.json(probe);
+        const healthy = checks.postgres !== 'fail' && checks.redis !== 'fail';
+        res.status(healthy ? 200 : 503).json(checks);
     });
+
+    app.get('/version', (_r, res) => {
+        const os = require('os');
+        res.json({
+            service: 'ssc-v2',
+            environment: process.env.APP_ENV || process.env.NODE_ENV || 'unknown',
+            commitSha: process.env.BUILD_COMMIT_SHA || 'unknown',
+            buildTimestamp: process.env.BUILD_TIMESTAMP || 'unknown',
+            branchFidelityBaseline: process.env.BASELINE_BRANCH_FIDELITY || 'b78a49d',
+            deploymentValidationBaseline: process.env.BASELINE_DEPLOYMENT_VALIDATION || '9c3a9b7',
+            hostname: os.hostname(),
+            timestamp: new Date().toISOString(),
+        });
+    });
+
     app.get('/api', (_r, res) => res.json({ service: 'ssc-v2', version: '2.0.0', db_mode: getDbMode(db), redis: redis ? 'connected' : 'disabled' }));
     app.get('/api/metrics', metricsEndpoint);
     app.get('/metrics', metricsEndpoint); // Prometheus scrape path

@@ -1,0 +1,81 @@
+services:
+  - type: web
+    name: ssc-v2-pilot
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    autoDeploy: true
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: APP_ENV
+        value: pilot
+
+      - key: PORT
+        value: 10000
+
+      - key: AUTH_MODE
+        value: jwt
+
+      - key: ACCESS_TOKEN_TTL
+        value: "900"
+
+      - key: REFRESH_TOKEN_TTL
+        value: "604800"
+
+      - key: PG_POOL_MAX
+        value: "20"
+
+      - key: BASELINE_BRANCH_FIDELITY
+        value: b78a49d
+
+      - key: BASELINE_DEPLOYMENT_VALIDATION
+        value: 9c3a9b7
+
+      - key: BUILD_COMMIT_SHA
+        sync: false
+
+      - key: BUILD_TIMESTAMP
+        sync: false
+
+      - key: JWT_SECRET
+        sync: false
+
+      - key: JWT_REFRESH_SECRET
+        sync: false
+
+      - key: LOG_EXPORT_PATH
+        value: /tmp/ssc-v2.ndjson
+
+      - key: METRICS_ENABLED
+        value: "true"
+
+      - key: CORS_ORIGIN
+        sync: false
+
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ssc-v2-postgres
+          property: connectionString
+
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: ssc-v2-redis
+          property: connectionString
+
+databases:
+  - name: ssc-v2-postgres
+    plan: free
+    databaseName: sscv2
+    user: sscv2
+
+  - type: redis
+    name: ssc-v2-redis
+    plan: free
+    ipAllowList: []
