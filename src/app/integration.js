@@ -12,10 +12,17 @@ const { getDbMode } = require('../db/database');
 const { metricsEndpoint } = require('../common/metrics-export');
 const tokenService = require('../middleware/token-service');
 const createAuthRoutes = require('../routes/auth');
+const createDashboardRoutes = require('../routes/dashboard');
 
 function createApp(db, opts = {}) {
     const app = express();
     const redis = opts.redis || null;
+
+    const path = require('path');
+    const fs = require('fs');
+    // Static assets (dashboard UI)
+    const publicDir = path.join(__dirname, '../../public');
+    if (fs.existsSync(publicDir)) app.use(express.static(publicDir));
 
     app.use(express.json({ limit: '10mb' }));
     app.use(express.urlencoded({ extended: true }));
@@ -90,6 +97,15 @@ function createApp(db, opts = {}) {
 
     // Auth endpoints: /api/auth/token, /api/auth/refresh, /api/auth/revoke (public — no auth required)
     createAuthRoutes(app);
+
+    // Dashboard aggregation API (public for pilot demo)
+    app.use('/api/dashboard', createDashboardRoutes(db, { redis }));
+
+    // Serve dashboard UI
+    app.get('/dashboard', (_req, res) => {
+        const path = require('path');
+        res.sendFile(path.join(__dirname, '../../public/dashboard.html'));
+    });
 
     // Wire Redis into token service for distributed revocation
     if (redis) { tokenService.setRedis(redis); }

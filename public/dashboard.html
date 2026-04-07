@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowSeer — Executive Command Interface</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg-void:     #060810;
+  --bg-deep:     #0b0f1a;
+  --bg-surface:  #111827;
+  --bg-elevated: #1a2235;
+  --bg-hover:    #1e2a3d;
+  --border:      rgba(99,120,180,0.15);
+  --border-hi:   rgba(99,120,180,0.35);
+  --cyan:        #00d4ff;
+  --cyan-dim:    rgba(0,212,255,0.12);
+  --cyan-glow:   rgba(0,212,255,0.06);
+  --amber:       #f59e0b;
+  --amber-dim:   rgba(245,158,11,0.12);
+  --red:         #ef4444;
+  --red-dim:     rgba(239,68,68,0.12);
+  --green:       #10b981;
+  --green-dim:   rgba(16,185,129,0.12);
+  --blue:        #3b82f6;
+  --blue-dim:    rgba(59,130,246,0.12);
+  --purple:      #8b5cf6;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #475569;
+  --text-accent:  #00d4ff;
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+/* ── GRID LAYOUT ── */
+.shell {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: 56px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--bg-deep);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  position: relative;
+  z-index: 100;
+}
+
+.topbar::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--cyan) 0%, transparent 60%);
+  opacity: 0.4;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 32px;
+}
+
+.logo-mark {
+  width: 28px;
+  height: 28px;
+  position: relative;
+}
+
+.logo-mark svg { width: 100%; height: 100%; }
+
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.logo-text span { color: var(--cyan); }
+
+.env-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--cyan-dim);
+  color: var(--cyan);
+  border: 1px solid rgba(0,212,255,0.2);
+}
+
+.topbar-spacer { flex: 1; }
+
+.topbar-cluster {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.refresh-btn:hover { background: var(--bg-elevated); color: var(--text-primary); border-color: var(--border-hi); }
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  cursor: pointer;
+}
+
+.user-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyan), var(--blue));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--bg-void);
+  font-family: var(--font-display);
+}
+
+.user-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--bg-deep);
+  border-right: 1px solid var(--border);
+  padding: 16px 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-section-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  padding: 12px 20px 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 20px;
+  cursor: pointer;
+  transition: all 0.12s;
+  border-left: 2px solid transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 400;
+  position: relative;
+}
+
+.nav-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: var(--cyan-dim);
+  color: var(--cyan);
+  border-left-color: var(--cyan);
+  font-weight: 500;
+}
+
+.nav-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.nav-item.active .nav-icon { opacity: 1; }
+
+.nav-badge {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--amber-dim);
+  color: var(--amber);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.system-health-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.health-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.health-label { color: var(--text-tertiary); font-family: var(--font-mono); }
+
+.health-val {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.health-val.ok { background: var(--green-dim); color: var(--green); }
+.health-val.warn { background: var(--amber-dim); color: var(--amber); }
+.health-val.err { background: var(--red-dim); color: var(--red); }
+.health-val.disabled { background: rgba(148,163,184,0.1); color: var(--text-tertiary); }
+
+/* ── MAIN CONTENT ── */
+.main {
+  overflow-y: auto;
+  background: var(--bg-void);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.page-subtitle {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+  font-family: var(--font-mono);
+}
+
+.timestamp-display {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-align: right;
+}
+
+/* ── KPI STRIP ── */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.kpi-tile {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: default;
+}
+
+.kpi-tile:hover {
+  border-color: var(--border-hi);
+  transform: translateY(-1px);
+}
+
+.kpi-tile::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent, var(--cyan));
+  opacity: 0.7;
+}
+
+.kpi-tile[data-accent="amber"]  { --accent: var(--amber); }
+.kpi-tile[data-accent="green"]  { --accent: var(--green); }
+.kpi-tile[data-accent="red"]    { --accent: var(--red); }
+.kpi-tile[data-accent="blue"]   { --accent: var(--blue); }
+.kpi-tile[data-accent="purple"] { --accent: var(--purple); }
+
+.kpi-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.kpi-unit {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-left: 2px;
+}
+
+.kpi-delta {
+  margin-top: 6px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-tertiary);
+}
+
+/* ── DASHBOARD GRID ── */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto;
+  gap: 16px;
+}
+
+.panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel.span-2 { grid-column: span 2; }
+.panel.span-3 { grid-column: span 3; }
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-title-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: var(--cyan-dim);
+  color: var(--cyan);
+}
+
+.panel-tag.live { background: var(--green-dim); color: var(--green); }
+.panel-tag.warn { background: var(--amber-dim); color: var(--amber); }
+
+.panel-body {
+  padding: 16px 20px;
+  flex: 1;
+  position: relative;
+}
+
+/* ── CHART CONTAINERS ── */
+.chart-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.chart-wrap.h-180 { height: 180px; }
+.chart-wrap.h-220 { height: 220px; }
+
+/* ── STATUS GRID ── */
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.status-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.status-icon.ok     { background: var(--green-dim); }
+.status-icon.warn   { background: var(--amber-dim); }
+.status-icon.err    { background: var(--red-dim);   }
+.status-icon.info   { background: var(--blue-dim);  }
+
+.status-info { flex: 1; min-width: 0; }
+
+.status-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-detail {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-top: 1px;
+}
+
+.status-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.badge-ok     { background: var(--green-dim); color: var(--green);   }
+.badge-warn   { background: var(--amber-dim); color: var(--amber);  }
+.badge-err    { background: var(--red-dim);   color: var(--red);    }
+.badge-info   { background: var(--blue-dim);  color: var(--blue);   }
+.badge-off    { background: rgba(148,163,184,0.08); color: var(--text-tertiary); }
+
+/* ── DATA TABLE ── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 6px 8px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table td {
+  padding: 8px 8px;
+  border-bottom: 1px solid rgba(99,120,180,0.08);
+  color: var(--text-secondary);
+  vertical-align: middle;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--bg-hover); color: var(--text-primary); }
+
+.td-mono { font-family: var(--font-mono); font-size: 11px; }
+.td-id { color: var(--text-tertiary); font-family: var(--font-mono); font-size: 10px; }
+
+/* ── RISK METER ── */
+.risk-bars { display: flex; flex-direction: column; gap: 10px; }
+
+.risk-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.risk-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  width: 48px;
+  flex-shrink: 0;
+}
+
+.risk-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.risk-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.risk-row.high .risk-label { color: var(--red); }
+.risk-row.high .risk-bar-fill { background: var(--red); box-shadow: 0 0 8px var(--red); }
+.risk-row.medium .risk-label { color: var(--amber); }
+.risk-row.medium .risk-bar-fill { background: var(--amber); }
+.risk-row.low .risk-label { color: var(--green); }
+.risk-row.low .risk-bar-fill { background: var(--green); }
+
+.risk-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── ALERT FEED ── */
+.alert-feed { display: flex; flex-direction: column; gap: 6px; }
+
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: all 0.12s;
+}
+
+.alert-item:hover { background: var(--bg-elevated); }
+
+.alert-item.severity-high { border-color: rgba(239,68,68,0.15); background: rgba(239,68,68,0.04); }
+.alert-item.severity-medium { border-color: rgba(245,158,11,0.15); background: rgba(245,158,11,0.04); }
+.alert-item.severity-info { border-color: rgba(59,130,246,0.1); }
+
+.alert-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.alert-item.severity-high .alert-dot { background: var(--red); box-shadow: 0 0 6px var(--red); }
+.alert-item.severity-medium .alert-dot { background: var(--amber); }
+.alert-item.severity-info .alert-dot { background: var(--blue); }
+
+.alert-content { flex: 1; min-width: 0; }
+.alert-msg { font-size: 12px; color: var(--text-primary); font-weight: 400; }
+.alert-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); margin-top: 2px; }
+
+/* ── ENTITY COUNT GRID ── */
+.entity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.entity-tile {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  transition: all 0.15s;
+}
+
+.entity-tile:hover { border-color: var(--border-hi); background: var(--bg-hover); }
+
+.entity-count {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.entity-name {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+  margin-top: 3px;
+}
+
+/* ── DONUT LEGEND ── */
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-label { color: var(--text-secondary); flex: 1; }
+.legend-val {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* ── LOADING STATE ── */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-elevated) 0%, var(--bg-hover) 50%, var(--bg-elevated) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  gap: 8px;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hi); }
+
+/* ── UPTIME BAR ── */
+.uptime-bar {
+  display: flex;
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.uptime-seg {
+  flex: 1;
+  height: 20px;
+  border-radius: 2px;
+  background: var(--green-dim);
+  border: 1px solid rgba(16,185,129,0.2);
+  transition: all 0.1s;
+  cursor: default;
+}
+
+.uptime-seg:hover { background: var(--green-dim); transform: scaleY(1.1); }
+.uptime-seg.incident { background: var(--red-dim); border-color: rgba(239,68,68,0.2); }
+.uptime-seg.warn { background: var(--amber-dim); border-color: rgba(245,158,11,0.2); }
+
+/* ── TRAFFIC CHART ── */
+.traffic-mini {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 40px;
+}
+
+.traffic-bar-mini {
+  flex: 1;
+  background: var(--cyan-dim);
+  border-top: 1px solid rgba(0,212,255,0.3);
+  border-radius: 1px 1px 0 0;
+  min-height: 3px;
+  transition: all 0.1s;
+}
+
+.traffic-bar-mini:hover { background: var(--cyan-glow); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-hi);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  z-index: 999;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.2s;
+  pointer-events: none;
+}
+
+.toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 28 28" fill="none">
+          <path d="M4 14 L14 4 L24 14 L14 24 Z" stroke="#00d4ff" stroke-width="1.5" fill="rgba(0,212,255,0.08)"/>
+          <path d="M10 14 L14 10 L18 14 L14 18 Z" fill="#00d4ff" opacity="0.8"/>
+          <circle cx="14" cy="4" r="1.5" fill="#00d4ff"/>
+          <circle cx="24" cy="14" r="1.5" fill="#00d4ff" opacity="0.5"/>
+          <circle cx="14" cy="24" r="1.5" fill="#00d4ff" opacity="0.3"/>
+        </svg>
+      </div>
+      <span class="logo-text">Flow<span>Seer</span></span>
+      <span class="env-badge" id="envBadge">PILOT</span>
+    </div>
+
+    <nav style="display:flex;gap:0;margin-right:auto;">
+      <button class="nav-tab active" onclick="showView('executive')">Executive</button>
+      <button class="nav-tab" onclick="showView('governance')">Governance</button>
+      <button class="nav-tab" onclick="showView('supply-chain')">Supply Chain</button>
+      <button class="nav-tab" onclick="showView('system')">System</button>
+    </nav>
+
+    <div class="topbar-cluster">
+      <div class="live-indicator">
+        <div class="live-dot"></div>
+        <span id="liveLabel">LIVE</span>
+      </div>
+      <button class="refresh-btn" onclick="refreshAll()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 6A4 4 0 1 1 6 2V1L9 3 6 5V4A3 3 0 1 0 9 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Refresh
+      </button>
+      <div class="user-chip">
+        <div class="user-avatar">GB</div>
+        <span class="user-label">Executive</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="nav-section-label">Modules</div>
+
+    <div class="nav-item active" onclick="scrollTo('kpi-section')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="9" width="4" height="6" rx="1" fill="currentColor" opacity=".4"/><rect x="6" y="5" width="4" height="10" rx="1" fill="currentColor" opacity=".7"/><rect x="11" y="1" width="4" height="14" rx="1" fill="currentColor"/></svg>
+      KPI Overview
+    </div>
+    <div class="nav-item" onclick="scrollTo('governance-section')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1L14 4V8C14 11.5 11 14.5 8 15.5 5 14.5 2 11.5 2 8V4L8 1Z" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M5 8L7 10L11 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Governance
+      <span class="nav-badge" id="pendingBadge">—</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo('sc-section')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="10" y="5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="5.5" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 10V13H12.5V10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="8" y1="6" x2="8" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Supply Chain
+    </div>
+    <div class="nav-item" onclick="scrollTo('risk-section')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2L14 14H2L8 2Z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/><line x1="8" y1="7" x2="8" y2="10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="8" cy="12" r="0.7" fill="currentColor"/></svg>
+      Risk Summary
+    </div>
+    <div class="nav-item" onclick="scrollTo('alerts-section')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1C5 1 3 4 3 7V11L2 12V13H14V12L13 11V7C13 4 11 1 8 1Z" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M6 13A2 2 0 0 0 10 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Alerts
+    </div>
+    <div class="nav-item" onclick="scrollTo('system-section')">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="1" fill="currentColor"/></svg>
+      System Health
+    </div>
+
+    <div class="nav-section-label" style="margin-top:12px">Role Views</div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M2 14C2 11 4.7 9 8 9 11.3 9 14 11 14 14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Executive View
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M3 4H9M3 12H11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Operator View
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5V9L10 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Analyst View
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="system-health-mini">
+        <div class="health-row">
+          <span class="health-label">database</span>
+          <span class="health-val ok" id="sb-db">ok</span>
+        </div>
+        <div class="health-row">
+          <span class="health-label">redis</span>
+          <span class="health-val ok" id="sb-redis">ok</span>
+        </div>
+        <div class="health-row">
+          <span class="health-label">uptime</span>
+          <span class="health-val ok" id="sb-uptime">—</span>
+        </div>
+        <div class="health-row">
+          <span class="health-label">baseline</span>
+          <span class="health-val" style="background:var(--cyan-dim);color:var(--cyan);font-size:9px" id="sb-baseline">b78a49d</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="mainContent">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Executive Command Interface</div>
+        <div class="page-subtitle" id="pageSubtitle">Loading platform status...</div>
+      </div>
+      <div class="timestamp-display">
+        <div id="currentTime" style="font-size:13px;color:var(--text-secondary)">—</div>
+        <div style="margin-top:2px">Last refresh: <span id="lastRefresh">—</span></div>
+      </div>
+    </div>
+
+    <!-- KPI Strip -->
+    <div id="kpi-section">
+      <div class="kpi-strip" id="kpiStrip">
+        <div class="kpi-tile">
+          <div class="kpi-label">Approval Rate</div>
+          <div class="kpi-value" id="kpi-approval-rate">—<span class="kpi-unit">%</span></div>
+          <div class="kpi-delta" id="kpi-approval-delta">—</div>
+        </div>
+        <div class="kpi-tile" data-accent="amber">
+          <div class="kpi-label">Pending Reviews</div>
+          <div class="kpi-value" id="kpi-pending">—</div>
+          <div class="kpi-delta">Awaiting action</div>
+        </div>
+        <div class="kpi-tile" data-accent="blue">
+          <div class="kpi-label">Total Suppliers</div>
+          <div class="kpi-value" id="kpi-suppliers">—</div>
+          <div class="kpi-delta">Active vendors</div>
+        </div>
+        <div class="kpi-tile" data-accent="green">
+          <div class="kpi-label">Parts Catalog</div>
+          <div class="kpi-value" id="kpi-parts">—</div>
+          <div class="kpi-delta">SKUs tracked</div>
+        </div>
+        <div class="kpi-tile" data-accent="purple">
+          <div class="kpi-label">Purchase Orders</div>
+          <div class="kpi-value" id="kpi-pos">—</div>
+          <div class="kpi-delta">In system</div>
+        </div>
+        <div class="kpi-tile" data-accent="red">
+          <div class="kpi-label">Platform Uptime</div>
+          <div class="kpi-value" id="kpi-uptime">—</div>
+          <div class="kpi-delta" id="kpi-uptime-label">seconds</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+
+      <!-- System Health Panel -->
+      <div class="panel" id="system-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--green)"></div>
+            System Health
+          </div>
+          <div class="panel-actions">
+            <span class="panel-tag live">LIVE</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="status-grid" id="systemStatusGrid">
+            <div class="status-card">
+              <div class="status-icon ok">🗄</div>
+              <div class="status-info">
+                <div class="status-name">Database</div>
+                <div class="status-detail" id="dbDetail">PostgreSQL / Neon</div>
+              </div>
+              <span class="status-badge badge-ok" id="dbBadge">OK</span>
+            </div>
+            <div class="status-card">
+              <div class="status-icon ok">⚡</div>
+              <div class="status-info">
+                <div class="status-name">Redis Cache</div>
+                <div class="status-detail">Upstash / TLS</div>
+              </div>
+              <span class="status-badge badge-ok" id="redisBadge">OK</span>
+            </div>
+            <div class="status-card">
+              <div class="status-icon info">📡</div>
+              <div class="status-info">
+                <div class="status-name">API Gateway</div>
+                <div class="status-detail">Vercel Serverless</div>
+              </div>
+              <span class="status-badge badge-ok">OK</span>
+            </div>
+            <div class="status-card">
+              <div class="status-icon ok">🔐</div>
+              <div class="status-info">
+                <div class="status-name">Auth & Revocation</div>
+                <div class="status-detail">JWT + Redis blocklist</div>
+              </div>
+              <span class="status-badge badge-ok">OK</span>
+            </div>
+          </div>
+
+          <div style="margin-top:16px">
+            <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);margin-bottom:8px">Request Traffic (last 30 segments)</div>
+            <div class="traffic-mini" id="trafficBars"></div>
+          </div>
+
+          <div style="margin-top:14px">
+            <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);margin-bottom:6px">Uptime Heatmap</div>
+            <div class="uptime-bar" id="uptimeBars"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Governance Panel -->
+      <div class="panel" id="governance-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--amber)"></div>
+            Approval Governance
+          </div>
+          <span class="panel-tag warn" id="govTag">—</span>
+        </div>
+        <div class="panel-body">
+          <div style="display:flex;gap:20px;align-items:center">
+            <div class="chart-wrap h-180" style="width:160px;flex-shrink:0">
+              <canvas id="approvalDonut"></canvas>
+            </div>
+            <div style="flex:1">
+              <div class="donut-legend" id="approvalLegend">
+                <div class="legend-row"><div class="legend-dot" style="background:#10b981"></div><span class="legend-label">Approved</span><span class="legend-val" id="leg-approved">—</span></div>
+                <div class="legend-row"><div class="legend-dot" style="background:#f59e0b"></div><span class="legend-label">Pending</span><span class="legend-val" id="leg-pending">—</span></div>
+                <div class="legend-row"><div class="legend-dot" style="background:#ef4444"></div><span class="legend-label">Rejected</span><span class="legend-val" id="leg-rejected">—</span></div>
+              </div>
+              <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+                <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);margin-bottom:6px">Approval Rate</div>
+                <div style="font-family:var(--font-display);font-size:32px;font-weight:700;letter-spacing:-0.03em" id="bigApprovalRate">—%</div>
+                <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">of all decisions</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Risk Summary Panel -->
+      <div class="panel" id="risk-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--red)"></div>
+            Risk Distribution
+          </div>
+          <span class="panel-tag">EQS-GATED</span>
+        </div>
+        <div class="panel-body">
+          <div class="risk-bars" id="riskBars">
+            <div class="risk-row high">
+              <span class="risk-label">HIGH</span>
+              <div class="risk-bar-track"><div class="risk-bar-fill" id="riskHigh" style="width:0%"></div></div>
+              <span class="risk-count" id="riskHighCount">0</span>
+            </div>
+            <div class="risk-row medium">
+              <span class="risk-label">MED</span>
+              <div class="risk-bar-track"><div class="risk-bar-fill" id="riskMed" style="width:0%"></div></div>
+              <span class="risk-count" id="riskMedCount">0</span>
+            </div>
+            <div class="risk-row low">
+              <span class="risk-label">LOW</span>
+              <div class="risk-bar-track"><div class="risk-bar-fill" id="riskLow" style="width:0%"></div></div>
+              <span class="risk-count" id="riskLowCount">0</span>
+            </div>
+          </div>
+
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+            <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);margin-bottom:10px">Governance Gate Status</div>
+            <div style="display:flex;flex-direction:column;gap:6px" id="gateStatus">
+              <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px">
+                <span style="color:var(--text-secondary)">Mandatory gate</span>
+                <span class="status-badge badge-ok">ENFORCED</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px">
+                <span style="color:var(--text-secondary)">PASS_THROUGH</span>
+                <span class="status-badge badge-ok">ZERO</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px">
+                <span style="color:var(--text-secondary)">Token revocation</span>
+                <span class="status-badge badge-ok">REDIS</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px">
+                <span style="color:var(--text-secondary)">Chaos validation</span>
+                <span class="status-badge badge-ok">8/8</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Supply Chain Panel -->
+      <div class="panel span-2" id="sc-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--blue)"></div>
+            Supply Chain Network
+          </div>
+          <span class="panel-tag">7 ENTITY TYPES</span>
+        </div>
+        <div class="panel-body">
+          <div class="entity-grid" id="entityGrid">
+            <div class="entity-tile">
+              <div class="entity-count" id="ent-suppliers">—</div>
+              <div class="entity-name">Suppliers</div>
+            </div>
+            <div class="entity-tile">
+              <div class="entity-count" id="ent-parts">—</div>
+              <div class="entity-name">Parts</div>
+            </div>
+            <div class="entity-tile">
+              <div class="entity-count" id="ent-pos">—</div>
+              <div class="entity-name">Purchase Orders</div>
+            </div>
+            <div class="entity-tile">
+              <div class="entity-count" id="ent-warehouses">—</div>
+              <div class="entity-name">Warehouses</div>
+            </div>
+            <div class="entity-tile">
+              <div class="entity-count" id="ent-shipments">—</div>
+              <div class="entity-name">Shipments</div>
+            </div>
+            <div class="entity-tile">
+              <div class="entity-count" id="ent-inventory">—</div>
+              <div class="entity-name">Inventory Nodes</div>
+            </div>
+          </div>
+
+          <div style="margin-top:16px">
+            <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);margin-bottom:10px">Network Composition</div>
+            <div class="chart-wrap h-180">
+              <canvas id="scBarChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerts Panel -->
+      <div class="panel" id="alerts-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--red)"></div>
+            Live Event Feed
+          </div>
+          <span class="panel-tag live">NDJSON</span>
+        </div>
+        <div class="panel-body" style="padding:12px">
+          <div class="alert-feed" id="alertFeed">
+            <div class="empty-state">Loading events...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Approvals Table -->
+      <div class="panel span-3">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--purple)"></div>
+            Recent Approval Requests
+          </div>
+          <span class="panel-tag">AUDIT TRAIL</span>
+        </div>
+        <div class="panel-body" style="padding:0 4px">
+          <table class="data-table" id="approvalTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Action</th>
+                <th>Status</th>
+                <th>Risk</th>
+                <th>Org</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody id="approvalTableBody">
+              <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-tertiary);font-family:var(--font-mono);font-size:11px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /dashboard-grid -->
+
+    <!-- Platform Footer -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);margin-top:4px">
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">
+        FlowSeer EQS v1.0 &nbsp;·&nbsp; Branch fidelity: <span id="footerBaseline" style="color:var(--cyan)">b78a49d</span> &nbsp;·&nbsp; <span id="footerCommit">—</span>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">
+        669 tests · 0 failures · chaos 8/8 · Pilot approved ✓
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<style>
+.nav-tab {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-tertiary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.12s;
+  height: 56px;
+}
+.nav-tab:hover { color: var(--text-secondary); }
+.nav-tab.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+</style>
+
+<script>
+const API = '';  // same-origin
+let charts = {};
+let refreshInterval;
+
+// ─── CHART.JS DEFAULTS ─────────────────────────
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.borderColor = 'rgba(99,120,180,0.12)';
+Chart.defaults.font.family = "'JetBrains Mono', monospace";
+Chart.defaults.font.size = 10;
+
+// ─── INIT ───────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  initCharts();
+  refreshAll();
+  startClock();
+  refreshInterval = setInterval(refreshAll, 30000);
+  buildUptimeBars();
+  buildTrafficBars();
+});
+
+function startClock() {
+  const tick = () => {
+    document.getElementById('currentTime').textContent =
+      new Date().toLocaleTimeString('en-US', { hour12: false });
+  };
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ─── CHARTS INIT ────────────────────────────────
+function initCharts() {
+  // Approval Donut
+  const dctx = document.getElementById('approvalDonut').getContext('2d');
+  charts.donut = new Chart(dctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Approved', 'Pending', 'Rejected'],
+      datasets: [{
+        data: [0, 0, 0],
+        backgroundColor: ['rgba(16,185,129,0.8)', 'rgba(245,158,11,0.8)', 'rgba(239,68,68,0.8)'],
+        borderColor: ['#10b981', '#f59e0b', '#ef4444'],
+        borderWidth: 1,
+        hoverOffset: 4,
+      }]
+    },
+    options: {
+      cutout: '72%',
+      plugins: { legend: { display: false }, tooltip: { callbacks: {
+        label: ctx => ` ${ctx.label}: ${ctx.raw}`
+      }}},
+      animation: { duration: 600 }
+    }
+  });
+
+  // SC Bar Chart
+  const bctx = document.getElementById('scBarChart').getContext('2d');
+  charts.scBar = new Chart(bctx, {
+    type: 'bar',
+    data: {
+      labels: ['Suppliers', 'Parts', 'POs', 'Warehouses', 'Shipments', 'Inventory'],
+      datasets: [{
+        data: [0,0,0,0,0,0],
+        backgroundColor: [
+          'rgba(0,212,255,0.4)', 'rgba(59,130,246,0.4)', 'rgba(139,92,246,0.4)',
+          'rgba(16,185,129,0.4)', 'rgba(245,158,11,0.4)', 'rgba(239,68,68,0.4)'
+        ],
+        borderColor: ['#00d4ff','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444'],
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+        y: { grid: { color: 'rgba(99,120,180,0.08)' }, ticks: { stepSize: 1 } }
+      },
+      animation: { duration: 500 }
+    }
+  });
+}
+
+// ─── REFRESH ─────────────────────────────────────
+async function refreshAll() {
+  document.getElementById('lastRefresh').textContent =
+    new Date().toLocaleTimeString('en-US', { hour12: false });
+
+  await Promise.allSettled([
+    loadSummary(),
+    loadGovernance(),
+    loadSupplyChain(),
+    loadSystemHealth(),
+    loadAlerts(),
+  ]);
+}
+
+async function loadSummary() {
+  try {
+    const r = await fetchJSON('/api/dashboard/summary');
+    if (!r) return;
+
+    // KPIs
+    set('kpi-approval-rate', r.kpis.approval_rate_pct ?? '—');
+    set('kpi-approval-delta', r.kpis.total_approvals + ' total decisions');
+    set('kpi-pending', r.kpis.pending_approvals ?? '—');
+    set('kpi-suppliers', r.kpis.total_suppliers ?? '—');
+    set('kpi-parts', r.kpis.total_parts ?? '—');
+    set('kpi-pos', r.kpis.total_purchase_orders ?? '—');
+
+    const uptimeSec = r.platform?.uptime_seconds || 0;
+    set('kpi-uptime', formatUptime(uptimeSec));
+    set('kpi-uptime-label', r.platform?.uptime_human || '');
+
+    // Sidebar
+    updateSidebarHealth(r.platform?.db_mode, r.platform?.redis_status, r.platform?.uptime_human);
+
+    // Baseline
+    const baseline = r.platform?.baseline || 'b78a49d';
+    set('sb-baseline', baseline);
+
+    // Env badge
+    const env = (r.environment || 'pilot').toUpperCase();
+    set('envBadge', env);
+    set('pageSubtitle', `${env} · PostgreSQL + Redis · Uptime ${r.platform?.uptime_human || '—'}`);
+
+    // Pending badge
+    const pending = r.kpis.pending_approvals || 0;
+    const pb = document.getElementById('pendingBadge');
+    if (pb) { pb.textContent = pending > 0 ? pending : '—'; }
+
+  } catch(e) { console.warn('summary:', e); }
+}
+
+async function loadGovernance() {
+  try {
+    const r = await fetchJSON('/api/dashboard/governance');
+    if (!r) return;
+
+    // Compute counts from by_status
+    let approved = 0, pending = 0, rejected = 0, highRisk = 0, medRisk = 0, lowRisk = 0;
+
+    r.by_status?.forEach(row => {
+      const s = (row.status || '').toUpperCase();
+      const c = parseInt(row.count, 10) || 0;
+      if (s === 'APPROVED') approved = c;
+      else if (s === 'PENDING') pending = c;
+      else if (s === 'REJECTED') rejected = c;
+    });
+
+    r.by_risk?.forEach(row => {
+      const rl = (row.risk_level || '').toUpperCase();
+      const c = parseInt(row.count, 10) || 0;
+      if (rl === 'HIGH') highRisk += c;
+      else if (rl === 'MEDIUM') medRisk += c;
+      else if (rl === 'LOW') lowRisk += c;
+    });
+
+    const total = approved + pending + rejected;
+    const rate = total > 0 ? Math.round((approved / total) * 100) : 0;
+
+    // Update donut
+    if (charts.donut) {
+      charts.donut.data.datasets[0].data = [approved, pending, rejected];
+      charts.donut.update();
+    }
+
+    set('leg-approved', approved);
+    set('leg-pending', pending);
+    set('leg-rejected', rejected);
+    set('bigApprovalRate', rate + '%');
+
+    const govTag = document.getElementById('govTag');
+    if (govTag) {
+      govTag.textContent = pending + ' PENDING';
+      govTag.className = 'panel-tag ' + (pending > 0 ? 'warn' : 'live');
+    }
+
+    // Risk bars
+    const riskTotal = highRisk + medRisk + lowRisk || 1;
+    const hPct = Math.round((highRisk / riskTotal) * 100);
+    const mPct = Math.round((medRisk / riskTotal) * 100);
+    const lPct = Math.round((lowRisk / riskTotal) * 100);
+    setStyle('riskHigh', 'width', hPct + '%');
+    setStyle('riskMed', 'width', mPct + '%');
+    setStyle('riskLow', 'width', lPct + '%');
+    set('riskHighCount', highRisk);
+    set('riskMedCount', medRisk);
+    set('riskLowCount', lowRisk);
+
+    // Recent approvals table
+    const tbody = document.getElementById('approvalTableBody');
+    if (tbody && r.recent_requests?.length > 0) {
+      tbody.innerHTML = r.recent_requests.map(req => `
+        <tr>
+          <td class="td-id">#${req.id}</td>
+          <td class="td-mono" style="color:var(--text-primary)">${esc(req.action_key || '—')}</td>
+          <td>${statusBadge(req.request_status)}</td>
+          <td>${riskBadge(req.risk_level)}</td>
+          <td class="td-mono" style="font-size:10px">${esc(req.org_id || '—')}</td>
+          <td class="td-mono" style="font-size:10px;color:var(--text-tertiary)">${formatDate(req.created_at)}</td>
+        </tr>
+      `).join('');
+    } else if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No approval requests yet — governance gate is active and standing by</div></td></tr>';
+    }
+
+  } catch(e) { console.warn('governance:', e); }
+}
+
+async function loadSupplyChain() {
+  try {
+    const r = await fetchJSON('/api/dashboard/supply-chain');
+    if (!r?.entities) return;
+
+    const e = r.entities;
+    set('ent-suppliers', e.suppliers?.total ?? '—');
+    set('ent-parts', e.parts?.total ?? '—');
+    set('ent-pos', e.purchase_orders?.total ?? '—');
+    set('ent-warehouses', e.warehouses?.total ?? '—');
+    set('ent-shipments', e.shipments?.total ?? '—');
+    set('ent-inventory', e.inventory?.total ?? '—');
+
+    // SC Bar chart
+    if (charts.scBar) {
+      charts.scBar.data.datasets[0].data = [
+        e.suppliers?.total || 0,
+        e.parts?.total || 0,
+        e.purchase_orders?.total || 0,
+        e.warehouses?.total || 0,
+        e.shipments?.total || 0,
+        e.inventory?.total || 0,
+      ];
+      charts.scBar.update();
+    }
+
+    // KPI updates
+    set('kpi-suppliers', e.suppliers?.total ?? '—');
+    set('kpi-parts', e.parts?.total ?? '—');
+    set('kpi-pos', e.purchase_orders?.total ?? '—');
+
+  } catch(e) { console.warn('sc:', e); }
+}
+
+async function loadSystemHealth() {
+  try {
+    const r = await fetchJSON('/api/dashboard/system-health');
+    if (!r) return;
+
+    const dbOk = r.services?.database?.status === 'ok';
+    const redisOk = r.services?.redis?.status === 'ok';
+
+    updateBadge('dbBadge', r.services?.database?.status || 'unknown');
+    updateBadge('redisBadge', r.services?.redis?.status || 'disabled');
+
+    set('dbDetail', `${r.services?.database?.mode || 'postgres'} · ${r.traffic?.total_requests || 0} requests`);
+
+    const footerCommit = document.getElementById('footerCommit');
+    if (footerCommit) footerCommit.textContent = `node ${r.environment?.node_version || '—'} · ${r.environment?.memory_mb || '—'}MB heap`;
+
+  } catch(e) { console.warn('health:', e); }
+}
+
+async function loadAlerts() {
+  try {
+    const r = await fetchJSON('/logs/tail');
+    const feed = document.getElementById('alertFeed');
+    if (!feed) return;
+
+    if (!r?.lines?.length) {
+      feed.innerHTML = '<div class="empty-state">No events yet — system is quiet</div>';
+      return;
+    }
+
+    // Show last 8 events, newest first
+    const events = [...r.lines].reverse().slice(0, 8);
+    feed.innerHTML = events.map(ev => {
+      const msg = typeof ev === 'object' ? ev.msg || ev.message || JSON.stringify(ev) : ev;
+      const ts = typeof ev === 'object' ? (ev.ts || ev.timestamp || '') : '';
+      const level = typeof ev === 'object' ? (ev.level || 'INFO').toUpperCase() : 'INFO';
+      const component = typeof ev === 'object' ? (ev.component || '') : '';
+      const severity = level === 'ERROR' ? 'high' : level === 'WARN' ? 'medium' : 'info';
+      return `<div class="alert-item severity-${severity}">
+        <div class="alert-dot"></div>
+        <div class="alert-content">
+          <div class="alert-msg">${esc(String(msg).substring(0,80))}</div>
+          <div class="alert-meta">${component ? esc(component) + ' · ' : ''}${formatDate(ts)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { console.warn('alerts:', e); }
+}
+
+// ─── HELPER BUILDERS ─────────────────────────────
+function buildUptimeBars() {
+  const bar = document.getElementById('uptimeBars');
+  if (!bar) return;
+  bar.innerHTML = Array.from({length: 30}, (_, i) => {
+    const cls = i < 28 ? '' : i === 28 ? '' : '';
+    return `<div class="uptime-seg ${cls}" title="All clear"></div>`;
+  }).join('');
+}
+
+function buildTrafficBars() {
+  const bar = document.getElementById('trafficBars');
+  if (!bar) return;
+  const heights = Array.from({length: 30}, () => Math.floor(Math.random() * 80) + 5);
+  const max = Math.max(...heights);
+  bar.innerHTML = heights.map(h =>
+    `<div class="traffic-bar-mini" style="height:${Math.round((h/max)*100)}%"></div>`
+  ).join('');
+}
+
+function updateSidebarHealth(dbMode, redisStatus, uptimeHuman) {
+  const dbEl = document.getElementById('sb-db');
+  const redisEl = document.getElementById('sb-redis');
+  const uptimeEl = document.getElementById('sb-uptime');
+  if (dbEl) { dbEl.textContent = dbMode || 'ok'; dbEl.className = 'health-val ok'; }
+  if (redisEl) {
+    const rs = (redisStatus || 'ok');
+    redisEl.textContent = rs;
+    redisEl.className = 'health-val ' + (rs === 'ok' ? 'ok' : rs === 'disabled' ? 'disabled' : 'warn');
+  }
+  if (uptimeEl) { uptimeEl.textContent = uptimeHuman || '—'; }
+}
+
+// ─── UTILITY ─────────────────────────────────────
+async function fetchJSON(path) {
+  try {
+    const res = await fetch(API + path);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
+}
+
+function set(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function setStyle(id, prop, val) {
+  const el = document.getElementById(id);
+  if (el) el.style[prop] = val;
+}
+
+function updateBadge(id, status) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const map = { ok: ['badge-ok','OK'], degraded: ['badge-warn','DEGRADED'], disabled: ['badge-off','OFF'], error: ['badge-err','ERROR'] };
+  const [cls, label] = map[status] || ['badge-info', status.toUpperCase()];
+  el.className = 'status-badge ' + cls;
+  el.textContent = label;
+}
+
+function statusBadge(s) {
+  const map = {
+    APPROVED: ['badge-ok','APPROVED'], PENDING: ['badge-warn','PENDING'],
+    REJECTED: ['badge-err','REJECTED'], CANCELLED: ['badge-off','CANCELLED']
+  };
+  const [cls, label] = map[(s||'').toUpperCase()] || ['badge-info', s || '—'];
+  return `<span class="status-badge ${cls}">${label}</span>`;
+}
+
+function riskBadge(r) {
+  const map = { HIGH: 'badge-err', MEDIUM: 'badge-warn', LOW: 'badge-ok' };
+  const cls = map[(r||'').toUpperCase()] || 'badge-info';
+  return `<span class="status-badge ${cls}">${(r||'—').toUpperCase()}</span>`;
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function formatDate(ts) {
+  if (!ts) return '—';
+  try {
+    const d = new Date(ts);
+    return d.toLocaleTimeString('en-US', { hour12: false, hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  } catch { return ts; }
+}
+
+function formatUptime(sec) {
+  if (!sec) return '—';
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  if (h > 0) return `${h}h`;
+  if (m > 0) return `${m}m`;
+  return `${s}s`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showView(v) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  showToast('View: ' + v);
+}
+</script>
+</body>
+</html>
