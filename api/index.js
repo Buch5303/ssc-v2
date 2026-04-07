@@ -72,20 +72,17 @@ async function initApp() {
 }
 
 module.exports = async (req, res) => {
-    // Always serve /version and /health from pre-boot app if not yet initialized
-    if (!_app && (req.url === '/version' || req.url.startsWith('/health'))) {
-        return preBootApp(req, res);
-    }
-
     try {
         const app = await initApp();
         return app(req, res);
     } catch (err) {
         console.error('[vercel] Request failed — app not initialized:', err.message);
+        // Serve minimal /version even if init fails
+        if (req.url === '/version') return preBootApp(req, res);
         return res.status(503).json({
             status: 'unavailable',
             error: err.message,
-            hint: 'Set DATABASE_URL in Vercel environment variables',
+            hint: 'Check DATABASE_URL in Vercel environment variables',
             timestamp: new Date().toISOString(),
         });
     }
