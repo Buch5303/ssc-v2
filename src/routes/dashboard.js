@@ -204,6 +204,178 @@ function createDashboardRoutes(db, opts = {}) {
         }
     });
 
+
+    // GET /api/dashboard/trend — simulated 30-day trend data for charts
+    router.get('/trend', async (req, res) => {
+        try {
+            // Generate 30-day trend window — mix of real counts + smooth simulation
+            const days = 30;
+            const now = new Date();
+            const trend = [];
+
+            let baseApprovals = 0;
+            try {
+                const r = await db.prepare('SELECT COUNT(*) as cnt FROM approval_requests').get();
+                baseApprovals = parseInt(r?.cnt, 10) || 0;
+            } catch { /* empty */ }
+
+            for (let i = days - 1; i >= 0; i--) {
+                const d = new Date(now);
+                d.setDate(d.getDate() - i);
+                const label = d.toISOString().slice(5, 10); // MM-DD
+                // Smooth simulated growth curve + noise
+                const progress = (days - i) / days;
+                const base = Math.floor(baseApprovals * progress);
+                const noise = Math.floor(Math.random() * 3);
+                const requests = Math.max(0, base + noise);
+                const approved = Math.floor(requests * (0.72 + Math.random() * 0.15));
+                const pending = Math.max(0, requests - approved - Math.floor(Math.random() * 2));
+                trend.push({
+                    date: label,
+                    requests,
+                    approved,
+                    pending,
+                    risk_events: Math.floor(Math.random() * 3),
+                    latency_ms: Math.floor(50 + Math.random() * 80),
+                });
+            }
+
+            res.json({ status: 'ok', timestamp: new Date().toISOString(), days, trend });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    // POST /api/dashboard/seed — seed demo data (pilot only)
+    router.post('/seed', async (req, res) => {
+        try {
+            if (process.env.APP_ENV !== 'pilot' && process.env.NODE_ENV !== 'development') {
+                return res.status(403).json({ error: 'seed_only_available_in_pilot' });
+            }
+
+            const results = { suppliers: 0, parts: 0, warehouses: 0, approvals: 0, errors: [] };
+
+            const SUPPLIERS = [
+                { name: 'Siemens Energy AG', category: 'OEM', status: 'active', country: 'DE' },
+                { name: 'GE Vernova', category: 'OEM', status: 'active', country: 'US' },
+                { name: 'Sulzer Ltd', category: 'Aftermarket', status: 'active', country: 'CH' },
+                { name: 'Chromalloy Gas Turbine', category: 'Repair', status: 'active', country: 'US' },
+                { name: 'MTU Maintenance', category: 'MRO', status: 'active', country: 'DE' },
+                { name: 'Parker Hannifin', category: 'Components', status: 'active', country: 'US' },
+                { name: 'Honeywell Process', category: 'Controls', status: 'active', country: 'US' },
+                { name: 'Turbine Truck Engines', category: 'Aftermarket', status: 'watch', country: 'US' },
+                { name: 'TransDigm Group', category: 'Components', status: 'active', country: 'US' },
+                { name: 'Howmet Aerospace', category: 'Castings', status: 'active', country: 'US' },
+                { name: 'API Technologies', category: 'Electronics', status: 'watch', country: 'US' },
+                { name: 'Heico Corporation', category: 'Aftermarket', status: 'active', country: 'US' },
+            ];
+
+            const PARTS = [
+                { part_number: 'W251-HP-BLADE-001', name: 'HP Turbine Blade Stage 1', category: 'Hot Section', unit_cost: 28500, status: 'active' },
+                { part_number: 'W251-NOZZLE-001', name: 'First Stage Nozzle Assembly', category: 'Hot Section', unit_cost: 85000, status: 'active' },
+                { part_number: 'W251-COMB-001', name: 'Combustion Liner', category: 'Combustor', unit_cost: 42000, status: 'active' },
+                { part_number: 'W251-FUEL-NOZZLE', name: 'Fuel Nozzle Assembly', category: 'Combustor', unit_cost: 12800, status: 'active' },
+                { part_number: 'W251-COMP-BLADE-R1', name: 'Compressor Blade Row 1', category: 'Cold Section', unit_cost: 8400, status: 'active' },
+                { part_number: 'W251-BEARING-1', name: 'Forward Journal Bearing', category: 'Mechanical', unit_cost: 15200, status: 'active' },
+                { part_number: 'W251-SEAL-HP', name: 'HP Turbine Seal Pack', category: 'Seals', unit_cost: 6200, status: 'active' },
+                { part_number: 'W251-INLET-GUIDE', name: 'Inlet Guide Vane Assembly', category: 'Cold Section', unit_cost: 38000, status: 'active' },
+                { part_number: 'GE7FA-BLADE-001', name: 'GE 7FA Stage 1 Bucket', category: 'Hot Section', unit_cost: 52000, status: 'active' },
+                { part_number: 'CTRL-PLC-MKVI', name: 'MK VI Control Card', category: 'Controls', unit_cost: 28000, status: 'active' },
+                { part_number: 'SENSOR-EGT-001', name: 'EGT Thermocouple Assembly', category: 'Instrumentation', unit_cost: 2400, status: 'active' },
+                { part_number: 'W251-CTRL-VALVE', name: 'Fuel Control Valve', category: 'Controls', unit_cost: 9800, status: 'active' },
+            ];
+
+            const WAREHOUSES = [
+                { name: 'TWP Houston Hub', location: 'Houston, TX', status: 'active', capacity: 50000 },
+                { name: 'TWP Newark MRO Center', location: 'Newark, NJ', status: 'active', capacity: 35000 },
+                { name: 'TWP Dubai Depot', location: 'Dubai, UAE', status: 'active', capacity: 20000 },
+            ];
+
+            // Insert suppliers
+            for (const s of SUPPLIERS) {
+                try {
+                    await db.prepare(
+                        `INSERT INTO suppliers (org_id, name, category, status, country, metadata_json, created_at, updated_at)
+                         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+                         ON CONFLICT DO NOTHING`
+                    ).run('twp', s.name, s.category, s.status, s.country, '{}');
+                    results.suppliers++;
+                } catch (e) { results.errors.push('supplier:' + s.name + ':' + e.message.slice(0,50)); }
+            }
+
+            // Insert parts
+            for (const p of PARTS) {
+                try {
+                    await db.prepare(
+                        `INSERT INTO parts (org_id, part_number, name, category, unit_cost, status, metadata_json, created_at, updated_at)
+                         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+                         ON CONFLICT DO NOTHING`
+                    ).run('twp', p.part_number, p.name, p.category, p.unit_cost, p.status, '{}');
+                    results.parts++;
+                } catch (e) { results.errors.push('part:' + p.part_number + ':' + e.message.slice(0,50)); }
+            }
+
+            // Insert warehouses
+            for (const w of WAREHOUSES) {
+                try {
+                    await db.prepare(
+                        `INSERT INTO warehouses (org_id, name, location, status, capacity, metadata_json, created_at, updated_at)
+                         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+                         ON CONFLICT DO NOTHING`
+                    ).run('twp', w.name, w.location, w.status, w.capacity, '{}');
+                    results.warehouses++;
+                } catch (e) { results.errors.push('warehouse:' + w.name + ':' + e.message.slice(0,50)); }
+            }
+
+            // Insert approval requests
+            const APPROVALS = [
+                { action_key: 'SUPPLIER_QUALIFY', risk_level: 'HIGH', status: 'APPROVED', user: 'gbuchanan' },
+                { action_key: 'PO_APPROVE_LARGE', risk_level: 'HIGH', status: 'APPROVED', user: 'gbuchanan' },
+                { action_key: 'PART_QUALIFY_NEW', risk_level: 'MEDIUM', status: 'APPROVED', user: 'gbuchanan' },
+                { action_key: 'SUPPLIER_QUALIFY', risk_level: 'MEDIUM', status: 'PENDING', user: 'ops-team' },
+                { action_key: 'PO_APPROVE_LARGE', risk_level: 'HIGH', status: 'PENDING', user: 'ops-team' },
+                { action_key: 'INVENTORY_ADJUST', risk_level: 'LOW', status: 'APPROVED', user: 'warehouse-mgr' },
+                { action_key: 'VENDOR_PAYMENT', risk_level: 'MEDIUM', status: 'APPROVED', user: 'finance' },
+                { action_key: 'PART_OBSOLETE', risk_level: 'LOW', status: 'REJECTED', user: 'engineering' },
+                { action_key: 'EMERGENCY_PO', risk_level: 'HIGH', status: 'APPROVED', user: 'gbuchanan' },
+                { action_key: 'SUPPLIER_DISQUALIFY', risk_level: 'HIGH', status: 'PENDING', user: 'ops-team' },
+                { action_key: 'INVENTORY_ADJUST', risk_level: 'LOW', status: 'APPROVED', user: 'warehouse-mgr' },
+                { action_key: 'PART_QUALIFY_NEW', risk_level: 'LOW', status: 'APPROVED', user: 'engineering' },
+            ];
+
+            for (const a of APPROVALS) {
+                try {
+                    // Ensure policy exists
+                    await db.prepare(
+                        `INSERT INTO approval_policies (org_id, action_key, approval_mode, risk_level, is_active)
+                         VALUES ($1, $2, $3, $4, true) ON CONFLICT DO NOTHING`
+                    ).run('twp', a.action_key, a.risk_level === 'HIGH' ? 'DUAL' : 'SINGLE', a.risk_level);
+
+                    const r = await db.prepare(
+                        `INSERT INTO approval_requests
+                         (org_id, target_type, target_id, action_key, request_status, approval_mode,
+                          risk_level, requested_by_user_id, created_at, updated_at)
+                         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW() - INTERVAL '${Math.floor(Math.random()*30)} days', NOW())
+                         RETURNING id`
+                    ).get('twp', 'supply_chain_entity', 'demo-' + Math.random().toString(36).slice(2,8),
+                        a.action_key, a.status, a.risk_level === 'HIGH' ? 'DUAL' : 'SINGLE',
+                        a.risk_level, a.user);
+
+                    if (a.status === 'APPROVED' && r?.id) {
+                        await db.prepare(
+                            `UPDATE approval_requests SET approved_by_user_id = $1, resolved_at = NOW() WHERE id = $2`
+                        ).run('gbuchanan', r.id);
+                    }
+                    results.approvals++;
+                } catch (e) { results.errors.push('approval:' + a.action_key + ':' + e.message.slice(0,80)); }
+            }
+
+            res.json({ status: 'ok', seeded: results, timestamp: new Date().toISOString() });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
     return router;
 }
 

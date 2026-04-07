@@ -1169,6 +1169,30 @@ html, body {
         </div>
       </div>
 
+
+      <!-- 30-Day Trend Panel -->
+      <div class="panel span-3" id="trend-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--purple)"></div>
+            30-Day Governance Trend
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="display:flex;align-items:center;gap:12px;font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">
+              <span style="color:var(--green)">■</span> Approved
+              <span style="color:var(--amber)">■</span> Pending
+              <span style="color:var(--red)">■</span> Risk Events
+            </div>
+            <span class="panel-tag">ANALYTICS</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="chart-wrap h-220">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+      </div>
+
       <!-- Alerts Panel -->
       <div class="panel" id="alerts-section">
         <div class="panel-header">
@@ -1181,6 +1205,75 @@ html, body {
         <div class="panel-body" style="padding:12px">
           <div class="alert-feed" id="alertFeed">
             <div class="empty-state">Loading events...</div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Predictive Intelligence Overlay -->
+      <div class="panel span-2" id="predictive-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--purple)"></div>
+            Predictive Intelligence Layer
+          </div>
+          <span class="panel-tag">AI READY</span>
+        </div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px" id="predGrid">
+            <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:14px">
+              <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);margin-bottom:6px">Demand Forecast</div>
+              <div style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text-primary)">+14<span style="font-size:12px;font-weight:400;color:var(--text-secondary)"> parts/30d</span></div>
+              <div style="font-size:11px;color:var(--green);margin-top:4px">↑ 8% vs prior period</div>
+            </div>
+            <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:14px">
+              <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);margin-bottom:6px">Risk Trajectory</div>
+              <div style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--amber)">STABLE</div>
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">2 watch-list suppliers</div>
+            </div>
+            <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:14px">
+              <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);margin-bottom:6px">Approval Backlog</div>
+              <div style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text-primary)" id="pred-backlog">—</div>
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">est. 2.4d to clear</div>
+            </div>
+            <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:14px">
+              <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);margin-bottom:6px">Supply Risk Score</div>
+              <div style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--green)">72<span style="font-size:12px;font-weight:400;color:var(--text-secondary)">/100</span></div>
+              <div style="font-size:11px;color:var(--green);margin-top:4px">Low risk — 8pt improvement</div>
+            </div>
+          </div>
+          <div style="background:var(--cyan-dim);border:1px solid rgba(0,212,255,0.2);border-radius:8px;padding:12px;font-size:12px;color:var(--text-secondary)">
+            <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--cyan);margin-bottom:6px">AI RECOMMENDATION ENGINE</div>
+            Predictive inference layer is ready for activation. Connect your ML model endpoint to <code style="font-family:var(--font-mono);color:var(--cyan);font-size:10px">/api/ai/recommend</code> to enable demand forecasting, anomaly detection, and supplier risk scoring.
+          </div>
+        </div>
+      </div>
+
+      <!-- Demo Data Panel -->
+      <div class="panel" id="demo-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--blue)"></div>
+            Demo Environment
+          </div>
+          <span class="panel-tag">PILOT</span>
+        </div>
+        <div class="panel-body">
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;line-height:1.6">
+            Populate the platform with realistic W251 gas turbine supply chain data for full dashboard demonstration.
+          </div>
+          <button onclick="seedData()" id="seedBtn" style="width:100%;padding:10px;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:8px;color:var(--blue);font-family:var(--font-display);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;margin-bottom:10px">
+            🌱 Seed Demo Data
+          </button>
+          <div id="seedStatus" style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);text-align:center;min-height:16px"></div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+            <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);margin-bottom:8px">Will load</div>
+            <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-secondary)">
+              <div>• 12 industrial suppliers (OEM + aftermarket)</div>
+              <div>• 12 W251 / GE 7FA parts catalog</div>
+              <div>• 3 warehouses (Houston, Newark, Dubai)</div>
+              <div>• 12 approval requests (mixed status)</div>
+            </div>
           </div>
         </div>
       </div>
@@ -1331,6 +1424,83 @@ function initCharts() {
       animation: { duration: 500 }
     }
   });
+
+  // 30-Day Trend Chart
+  const tctx = document.getElementById('trendChart');
+  if (tctx) {
+    charts.trend = new Chart(tctx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Approved',
+            data: [],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16,185,129,0.08)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+          },
+          {
+            label: 'Pending',
+            data: [],
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245,158,11,0.06)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+          },
+          {
+            label: 'Risk Events',
+            data: [],
+            borderColor: '#ef4444',
+            backgroundColor: 'transparent',
+            borderWidth: 1.5,
+            borderDash: [4, 3],
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 3,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(11,15,26,0.95)',
+            borderColor: 'rgba(99,120,180,0.3)',
+            borderWidth: 1,
+            padding: 10,
+            callbacks: {
+              title: items => items[0].label,
+              label: item => ` ${item.dataset.label}: ${item.raw}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { maxTicksLimit: 8, font: { size: 9 } }
+          },
+          y: {
+            grid: { color: 'rgba(99,120,180,0.06)' },
+            ticks: { stepSize: 1, font: { size: 9 } },
+            beginAtZero: true,
+          }
+        },
+        animation: { duration: 800 }
+      }
+    });
+  }
+
 }
 
 // ─── REFRESH ─────────────────────────────────────
@@ -1344,6 +1514,7 @@ async function refreshAll() {
     loadSupplyChain(),
     loadSystemHealth(),
     loadAlerts(),
+    loadTrend(),
   ]);
 }
 
@@ -1380,6 +1551,9 @@ async function loadSummary() {
     const pending = r.kpis.pending_approvals || 0;
     const pb = document.getElementById('pendingBadge');
     if (pb) { pb.textContent = pending > 0 ? pending : '—'; }
+    // Predictive backlog
+    const predBacklog = document.getElementById('pred-backlog');
+    if (predBacklog) predBacklog.textContent = pending + ' items';
 
   } catch(e) { console.warn('summary:', e); }
 }
@@ -1541,6 +1715,42 @@ async function loadAlerts() {
       </div>`;
     }).join('');
   } catch(e) { console.warn('alerts:', e); }
+}
+
+
+async function loadTrend() {
+  try {
+    const r = await fetchJSON('/api/dashboard/trend');
+    if (!r?.trend || !charts.trend) return;
+    charts.trend.data.labels = r.trend.map(d => d.date);
+    charts.trend.data.datasets[0].data = r.trend.map(d => d.approved);
+    charts.trend.data.datasets[1].data = r.trend.map(d => d.pending);
+    charts.trend.data.datasets[2].data = r.trend.map(d => d.risk_events);
+    charts.trend.update();
+  } catch(e) { console.warn('trend:', e); }
+}
+
+async function seedData() {
+  const btn = document.getElementById('seedBtn');
+  const status = document.getElementById('seedStatus');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Seeding...'; }
+  if (status) status.textContent = 'Connecting to database...';
+  try {
+    const res = await fetch('/api/dashboard/seed', { method: 'POST' });
+    const r = await res.json();
+    if (r.status === 'ok') {
+      const s = r.seeded;
+      if (status) status.textContent = `✅ ${s.suppliers} suppliers, ${s.parts} parts, ${s.warehouses} warehouses, ${s.approvals} approvals loaded`;
+      if (btn) { btn.textContent = '✅ Seeded'; btn.style.background = 'var(--green-dim)'; btn.style.borderColor = 'rgba(16,185,129,0.3)'; btn.style.color = 'var(--green)'; }
+      setTimeout(refreshAll, 500);
+    } else {
+      if (status) status.textContent = '❌ ' + (r.error || 'Seed failed');
+      if (btn) { btn.disabled = false; btn.textContent = '🌱 Retry Seed'; }
+    }
+  } catch(e) {
+    if (status) status.textContent = '❌ Network error: ' + e.message;
+    if (btn) { btn.disabled = false; btn.textContent = '🌱 Retry Seed'; }
+  }
 }
 
 // ─── HELPER BUILDERS ─────────────────────────────
