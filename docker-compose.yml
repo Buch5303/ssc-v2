@@ -34,9 +34,16 @@ services:
       PORT: 3000
       AUTH_MODE: jwt
       JWT_SECRET: change-me-in-production
+      JWT_REFRESH_SECRET: change-me-refresh-secret
+      ACCESS_TOKEN_TTL: 900
+      REFRESH_TOKEN_TTL: 604800
       DATABASE_URL: postgresql://ssc:ssc_dev_password@postgres:5432/ssc_v2
-      REDIS_URL: redis://redis:6379
       PG_POOL_MAX: 20
+      REDIS_URL: redis://redis:6379
+      LOG_EXPORT_PATH: /var/log/ssc-v2/app.ndjson
+    volumes:
+      - ssc_logs:/var/log/ssc-v2
 
 volumes:
   pgdata:
+  ssc_logs:
