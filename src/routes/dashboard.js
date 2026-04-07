@@ -640,7 +640,7 @@ function createDashboardRoutes(db, opts = {}) {
                 } catch (e) { results.errors.push('A:' + a.action_key + ':' + e.message.slice(0, 80)); }
             }
 
-            res.json({ status: 'ok', seeded: results, timestamp: new Date().toISOString() });
+            res.json({ status: 'ok', seeded: results, errors: results.errors, timestamp: new Date().toISOString() });
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
