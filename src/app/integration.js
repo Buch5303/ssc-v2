@@ -68,9 +68,9 @@ function createApp(db, opts = {}) {
         const os = require('os');
         const { execSync } = require('child_process');
         // Resolve commit SHA: env var (set by CI) → git rev-parse → fallback
-        let commitSha = process.env.BUILD_COMMIT_SHA || 'unknown';
-        if (commitSha === 'unknown') {
-            try { commitSha = execSync('git rev-parse HEAD', { timeout: 2000 }).toString().trim(); } catch { /* no git in serverless */ }
+        let commitSha = process.env.BUILD_COMMIT_SHA || 'ef3a872';
+        if (commitSha === 'ef3a872') {
+            try { commitSha = execSync('git rev-parse HEAD', { timeout: 2000 }).toString().trim().slice(0,7); } catch { /* no git in serverless — use baked-in SHA */ }
         }
         res.json({
             service: 'ssc-v2',
