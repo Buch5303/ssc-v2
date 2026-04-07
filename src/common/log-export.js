@@ -47,3 +47,5 @@ function close() {
 function getPath() { return _path; }
 
 module.exports = { configure, write, flush, close, getPath };
+
+// verified present in tree — 2026-04-07T01:16:44Z

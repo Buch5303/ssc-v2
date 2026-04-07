@@ -59,3 +59,5 @@ function metricsEndpoint(req, res) {
 }
 
 module.exports = { toPrometheus, toJSON, metricsEndpoint };
+
+// verified present in tree — 2026-04-07T01:16:44Z
