@@ -1024,15 +1024,43 @@ html, body {
   <!-- MAIN -->
   <main class="main" id="mainContent">
 
-    <!-- Page Header -->
-    <div class="page-header">
-      <div>
-        <div class="page-title">Executive Command Interface</div>
-        <div class="page-subtitle" id="pageSubtitle">Loading platform status...</div>
+    <!-- Executive Project Intelligence Header -->
+    <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:24px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--blue),var(--purple));opacity:0.8"></div>
+      <div style="flex:1">
+        <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.15em;color:var(--text-tertiary);margin-bottom:4px">Active Project</div>
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;letter-spacing:-0.01em;color:var(--text-primary)">TG20B7-8 · W251 Power Island</div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px;font-family:var(--font-mono)" id="pageSubtitle">Loading platform status...</div>
       </div>
-      <div class="timestamp-display">
-        <div id="currentTime" style="font-size:13px;color:var(--text-secondary)">—</div>
-        <div style="margin-top:2px">Last refresh: <span id="lastRefresh">—</span></div>
+      <div style="display:flex;gap:16px">
+        <div style="text-align:center">
+          <div style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--cyan)" id="hdr-parts">285</div>
+          <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-tertiary)">Equipment Items</div>
+        </div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center">
+          <div style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--green)" id="hdr-suppliers">12</div>
+          <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-tertiary)">Suppliers</div>
+        </div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center">
+          <div style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--purple)" id="hdr-po-value">$9.6M</div>
+          <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-tertiary)">PO Value</div>
+        </div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center">
+          <div style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--amber)" id="hdr-pending">—</div>
+          <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-tertiary)">Pending</div>
+        </div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center">
+          <div style="font-family:var(--font-display);font-size:20px;font-weight:700" id="hdr-rate">—%</div>
+          <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-tertiary)">Approval Rate</div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div id="currentTime" style="font-family:var(--font-mono);font-size:14px;color:var(--text-secondary);font-weight:500">—</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);margin-top:2px">Refreshed: <span id="lastRefresh">—</span></div>
       </div>
     </div>
 
@@ -1850,6 +1878,16 @@ async function loadSummary() {
     // Predictive backlog
     const predBacklog = document.getElementById('pred-backlog');
     if (predBacklog) predBacklog.textContent = pending + ' items';
+    // Header KPIs
+    set('hdr-parts', r.kpis.total_parts || 285);
+    set('hdr-suppliers', r.kpis.total_suppliers || 12);
+    set('hdr-pending', pending || '0');
+    const rate = r.kpis.approval_rate_pct || 0;
+    const rateEl = document.getElementById('hdr-rate');
+    if (rateEl) {
+      rateEl.textContent = rate + '%';
+      rateEl.style.color = rate >= 70 ? 'var(--green)' : rate >= 40 ? 'var(--amber)' : 'var(--red)';
+    }
 
   } catch(e) { console.warn('summary:', e); }
 }
@@ -2089,6 +2127,8 @@ async function loadPOs() {
     let total = 0;
     r.pos.forEach(p => total += parseFloat(p.total_value) || 0);
     if (totalEl) totalEl.textContent = '$' + (total / 1000000).toFixed(1) + 'M';
+    const hdrPOVal = document.getElementById('hdr-po-value');
+    if (hdrPOVal) hdrPOVal.textContent = '$' + (total / 1000000).toFixed(1) + 'M';
     if (list && r.pos.length) {
       const statusMap = {
         DRAFT: 'badge-off', SUBMITTED: 'badge-info', ACKNOWLEDGED: 'badge-info',
