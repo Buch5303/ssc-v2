@@ -281,8 +281,8 @@ function createDashboardRoutes(db, opts = {}) {
                     if (exists) continue;
                     await db.prepare(
                         `INSERT INTO suppliers (org_id, supplier_code, name, status, category, country, metadata_json, created_by, created_at, updated_at)
-                         VALUES (?, ?, ?, 'ACTIVE', ?, ?, '{}', ?, ?, ?)`
-                    ).run('twp', s.code, s.name, s.category, s.country, actor, now, now);
+                         VALUES (?, ?, ?, 'ACTIVE', ?, ?, ?, ?, ?, ?)`
+                    ).run('twp', s.code, s.name, s.category, s.country, '{}', actor, now, now);
                     results.suppliers++;
                 } catch (e) { results.errors.push('S:' + s.code + ':' + e.message.slice(0, 60)); }
             }
