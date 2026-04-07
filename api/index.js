@@ -61,6 +61,10 @@ async function initApp() {
             }
         }
 
+        // Configure NDJSON log export
+        const logExport = require('../src/common/log-export');
+        logExport.configure({ path: process.env.LOG_EXPORT_PATH || '/tmp/ssc-v2.ndjson' });
+
         _app = createApp(db, { redis });
         // Wire Redis into token-service for distributed revocation
         if (redis) {
