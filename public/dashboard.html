@@ -1342,6 +1342,44 @@ html, body {
       </div>
 
 
+
+      <!-- Parts Category Breakdown -->
+      <div class="panel" id="parts-breakdown-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--cyan)"></div>
+            Parts by System
+          </div>
+          <span class="panel-tag">285 ITEMS</span>
+        </div>
+        <div class="panel-body">
+          <div class="chart-wrap h-180">
+            <canvas id="categoryDonut"></canvas>
+          </div>
+          <div id="categoryLegend" style="margin-top:10px;display:flex;flex-direction:column;gap:4px"></div>
+        </div>
+      </div>
+
+      <!-- Purchase Order Status -->
+      <div class="panel" id="po-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--purple)"></div>
+            Purchase Orders
+          </div>
+          <span class="panel-tag" id="poTag">LOADING</span>
+        </div>
+        <div class="panel-body" style="padding:10px 14px">
+          <div id="poList" style="display:flex;flex-direction:column;gap:6px">
+            <div class="empty-state">Loading...</div>
+          </div>
+          <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+            <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);margin-bottom:6px">Total Committed Value</div>
+            <div style="font-family:var(--font-display);font-size:24px;font-weight:700;letter-spacing:-0.03em" id="poTotalValue">—</div>
+          </div>
+        </div>
+      </div>
+
       <!-- TG20 Equipment Catalog Panel -->
       <div class="panel span-2" id="catalog-section">
         <div class="panel-header">
@@ -1611,6 +1649,37 @@ function initCharts() {
     });
   }
 
+
+  // Category breakdown donut
+  const cctx = document.getElementById('categoryDonut');
+  if (cctx) {
+    charts.catDonut = new Chart(cctx.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: [],
+        datasets: [{
+          data: [],
+          backgroundColor: [
+            'rgba(0,212,255,0.7)', 'rgba(59,130,246,0.7)', 'rgba(139,92,246,0.7)',
+            'rgba(16,185,129,0.7)', 'rgba(245,158,11,0.7)', 'rgba(239,68,68,0.7)',
+            'rgba(236,72,153,0.7)', 'rgba(20,184,166,0.7)', 'rgba(251,191,36,0.7)',
+            'rgba(167,139,250,0.7)'
+          ],
+          borderWidth: 0,
+          hoverOffset: 6,
+        }]
+      },
+      options: {
+        cutout: '65%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} parts` } }
+        },
+        animation: { duration: 700 }
+      }
+    });
+  }
+
 }
 
 // ─── REFRESH ─────────────────────────────────────
@@ -1626,6 +1695,8 @@ async function refreshAll() {
     loadAlerts(),
     loadTrend(),
     loadCatalog(),
+    loadCategoryBreakdown(),
+    loadPOs(),
   ]);
 }
 
@@ -1868,6 +1939,62 @@ async function seedData() {
 // Catalog data cache
 let _catalogData = [];
 let _supplierData = [];
+
+
+async function loadCategoryBreakdown() {
+  try {
+    const r = await fetchJSON('/api/dashboard/parts-by-category');
+    if (!r?.categories || !charts.catDonut) return;
+    const top10 = r.categories.slice(0, 10);
+    charts.catDonut.data.labels = top10.map(c => c.category || 'Unknown');
+    charts.catDonut.data.datasets[0].data = top10.map(c => parseInt(c.count, 10));
+    charts.catDonut.update();
+    // Legend
+    const colors = charts.catDonut.data.datasets[0].backgroundColor;
+    const legend = document.getElementById('categoryLegend');
+    if (legend) {
+      legend.innerHTML = top10.slice(0, 6).map((c, i) => `
+        <div style="display:flex;align-items:center;gap:6px;font-size:10px">
+          <div style="width:8px;height:8px;border-radius:50%;background:${colors[i]};flex-shrink:0"></div>
+          <span style="color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.category || 'Unknown')}</span>
+          <span style="font-family:var(--font-mono);color:var(--text-primary)">${c.count}</span>
+        </div>
+      `).join('');
+    }
+  } catch(e) { console.warn('category:', e); }
+}
+
+async function loadPOs() {
+  try {
+    const r = await fetchJSON('/api/dashboard/po-list');
+    const list = document.getElementById('poList');
+    const tag = document.getElementById('poTag');
+    const totalEl = document.getElementById('poTotalValue');
+    if (!r?.pos) return;
+    if (tag) { tag.textContent = r.pos.length + ' ORDERS'; tag.className = 'panel-tag'; }
+    let total = 0;
+    r.pos.forEach(p => total += parseFloat(p.total_value) || 0);
+    if (totalEl) totalEl.textContent = '$' + (total / 1000000).toFixed(1) + 'M';
+    if (list && r.pos.length) {
+      const statusMap = {
+        DRAFT: 'badge-off', SUBMITTED: 'badge-info', ACKNOWLEDGED: 'badge-info',
+        IN_PRODUCTION: 'badge-warn', SHIPPED: 'badge-ok', DELIVERED: 'badge-ok', CLOSED: 'badge-off'
+      };
+      list.innerHTML = r.pos.map(po => `
+        <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;padding:8px 10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--cyan)">${esc(po.po_number)}</span>
+            <span class="status-badge ${statusMap[po.status] || 'badge-info'}">${esc(po.status)}</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(po.notes || '—')}</div>
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-primary);margin-top:3px">$${(parseFloat(po.total_value)/1000).toFixed(0)}K</div>
+        </div>
+      `).join('');
+    } else if (list) {
+      list.innerHTML = '<div class="empty-state">No POs yet — seed data to populate</div>';
+    }
+  } catch(e) { console.warn('po:', e); }
+}
 
 async function loadCatalog() {
   try {

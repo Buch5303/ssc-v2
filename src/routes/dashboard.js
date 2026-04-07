@@ -629,26 +629,46 @@ function createDashboardRoutes(db, opts = {}) {
                         ).run('twp', a.action_key, a.risk_level === 'HIGH' ? 'DUAL' : 'SINGLE', a.risk_level);
                     }
                     const daysAgo = Math.floor(Math.random() * 30);
-                    const r = await db.prepare(
+                    const approvedBy = a.status === 'APPROVED' ? 'gbuchanan' : null;
+                    await db.prepare(
                         `INSERT INTO approval_requests
                          (org_id, target_type, target_id, action_key, request_status, approval_mode,
-                          risk_level, requested_by_user_id, created_at, updated_at)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW() - INTERVAL '${daysAgo} days', NOW())
-                         RETURNING id`
-                    ).get('twp', 'supply_chain_entity',
+                          risk_level, requested_by_user_id, approved_by_user_id, created_at, updated_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW() - INTERVAL '${daysAgo} days', NOW())`
+                    ).run('twp', 'supply_chain_entity',
                         'tg20-' + Math.random().toString(36).slice(2, 8),
                         a.action_key, a.status,
                         a.risk_level === 'HIGH' ? 'DUAL' : 'SINGLE',
-                        a.risk_level, a.user);
-                    if (a.status === 'APPROVED' && r?.id) {
-                        try {
-                            await db.prepare(
-                                `UPDATE approval_requests SET approved_by_user_id = ?, resolved_at = NOW() WHERE id = ?`
-                            ).run('gbuchanan', r.id);
-                        } catch(ue) { results.errors.push('upd:' + r.id + ':' + ue.message.slice(0,40)); }
-                    }
+                        a.risk_level, a.user, approvedBy);
                     results.approvals++;
                 } catch (e) { results.errors.push('A:' + a.action_key + ':' + e.message.slice(0, 80)); }
+            }
+
+            // ── PURCHASE ORDERS
+            const PO_SEEDS = [
+                { po_number: 'PO-TWP-2026-001', supplier_code: 'SIE-001', status: 'IN_PRODUCTION', value: 2850000, notes: 'HP Turbine Blade Stage 1 — 100 units' },
+                { po_number: 'PO-TWP-2026-002', supplier_code: 'CHR-001', status: 'SUBMITTED', value: 850000, notes: 'Hot section repair kit W251B8' },
+                { po_number: 'PO-TWP-2026-003', supplier_code: 'MTU-001', status: 'DRAFT', value: 420000, notes: 'MRO services Q2 2026' },
+                { po_number: 'PO-TWP-2026-004', supplier_code: 'GEV-001', status: 'ACKNOWLEDGED', value: 5200000, notes: 'GE 7FA Stage 1 Bucket — 50 units' },
+                { po_number: 'PO-TWP-2026-005', supplier_code: 'PHC-001', status: 'SHIPPED', value: 280000, notes: 'Control valves and actuators' },
+            ];
+            results.pos = 0;
+            for (const po of PO_SEEDS) {
+                try {
+                    const exists = await db.prepare(
+                        `SELECT id FROM purchase_orders WHERE org_id = ? AND po_number = ? LIMIT 1`
+                    ).get('twp', po.po_number);
+                    if (exists) { results.pos++; continue; }
+                    const sup = await db.prepare(
+                        `SELECT id FROM suppliers WHERE org_id = ? AND supplier_code = ? LIMIT 1`
+                    ).get('twp', po.supplier_code);
+                    if (!sup?.id) { results.errors.push('PO:no sup:' + po.supplier_code); continue; }
+                    await db.prepare(
+                        `INSERT INTO purchase_orders (org_id, po_number, supplier_id, status, total_value, currency, notes, metadata_json, created_by, created_at, updated_at)
+                         VALUES (?, ?, ?, ?, ?, 'USD', ?, '{}', 'gbuchanan', NOW(), NOW())`
+                    ).run('twp', po.po_number, sup.id, po.status, po.value, po.notes);
+                    results.pos++;
+                } catch(e) { results.errors.push('PO:' + po.po_number + ':' + e.message.slice(0,60)); }
             }
 
             res.json({ status: 'ok', seeded: results, errors: results.errors, timestamp: new Date().toISOString() });
@@ -681,6 +701,36 @@ function createDashboardRoutes(db, opts = {}) {
                 `SELECT supplier_code, name, status, category, country, rating FROM suppliers WHERE org_id = 'twp' ORDER BY name`
             ).all();
             res.json({ status: 'ok', count: suppliers.length, suppliers, timestamp: new Date().toISOString() });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+
+    // GET /api/dashboard/parts-by-category — breakdown for donut chart
+    router.get('/parts-by-category', async (req, res) => {
+        try {
+            const rows = await db.prepare(
+                `SELECT category, COUNT(*) as count FROM parts WHERE org_id = 'twp' GROUP BY category ORDER BY count DESC`
+            ).all();
+            res.json({ status: 'ok', categories: rows, timestamp: new Date().toISOString() });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+
+    // GET /api/dashboard/po-list — purchase orders for dashboard
+    router.get('/po-list', async (req, res) => {
+        try {
+            const pos = await db.prepare(
+                `SELECT p.po_number, p.status, p.total_value, p.currency, p.notes, s.name as supplier_name
+                 FROM purchase_orders p
+                 LEFT JOIN suppliers s ON s.id = p.supplier_id
+                 WHERE p.org_id = 'twp'
+                 ORDER BY p.created_at DESC LIMIT 20`
+            ).all();
+            res.json({ status: 'ok', count: pos.length, pos, timestamp: new Date().toISOString() });
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
