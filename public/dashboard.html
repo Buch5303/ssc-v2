@@ -966,6 +966,11 @@ html, body {
         <div class="live-dot"></div>
         <span id="liveLabel">LIVE</span>
       </div>
+      <button class="refresh-btn" onclick="openSearch()" title="Search (Cmd+K)" style="gap:6px">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.3"/><line x1="9.5" y1="9.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Search
+        <kbd style="font-family:var(--font-mono);font-size:9px;opacity:0.5">⌘K</kbd>
+      </button>
       <button class="refresh-btn" onclick="refreshAll()">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 6A4 4 0 1 1 6 2V1L9 3 6 5V4A3 3 0 1 0 9 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
         Refresh
@@ -1625,6 +1630,26 @@ html, body {
         </div>
       </div>
 
+
+      <!-- Operator Workstation Panel (span 3) -->
+      <div class="panel span-3" id="operator-section" style="display:none">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--amber)"></div>
+            Operator Workstation — Pending Approval Queue
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)" id="op-queue-count">Loading...</span>
+            <span class="panel-tag warn">ACTION REQUIRED</span>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0">
+          <div id="operatorQueue" style="display:flex;flex-direction:column">
+            <div class="empty-state" style="padding:40px">Loading queue...</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Recent Approvals Table -->
       <div class="panel span-3">
         <div class="panel-header">
@@ -1668,6 +1693,26 @@ html, body {
   </main>
 </div>
 
+
+
+<!-- Global Search Modal (Cmd+K) -->
+<div id="searchModal" style="display:none;position:fixed;inset:0;background:rgba(6,8,16,0.9);z-index:600;align-items:flex-start;justify-content:center;padding-top:80px" onclick="if(event.target===this)closeSearch()">
+  <div style="background:var(--bg-surface);border:1px solid var(--border-hi);border-radius:14px;width:560px;max-width:90vw;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.6)">
+    <div style="display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border)">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="color:var(--text-tertiary);flex-shrink:0"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.3"/><line x1="9.5" y1="9.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      <input id="globalSearchInput" type="text" placeholder="Search parts, suppliers, approvals..."
+        style="flex:1;background:transparent;border:none;color:var(--text-primary);font-family:var(--font-body);font-size:14px;outline:none"
+        oninput="globalSearch(this.value)" autofocus>
+      <kbd style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);background:var(--bg-elevated);padding:2px 6px;border-radius:4px;border:1px solid var(--border)">ESC</kbd>
+    </div>
+    <div id="searchResults" style="max-height:360px;overflow-y:auto;padding:8px">
+      <div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">Type to search across all entities</div>
+    </div>
+    <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:16px;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">
+      <span>↑↓ navigate</span><span>⏎ select</span><span>ESC close</span>
+    </div>
+  </div>
+</div>
 
 <!-- Drill-Down Modal -->
 <div id="drillModal" style="display:none;position:fixed;inset:0;background:rgba(6,8,16,0.85);z-index:500;align-items:center;justify-content:center" onclick="if(event.target===this)closeDrill()">
@@ -1735,6 +1780,11 @@ Chart.defaults.font.family = "'JetBrains Mono', monospace";
 Chart.defaults.font.size = 10;
 
 // ─── INIT ───────────────────────────────────────
+window.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+  if (e.key === 'Escape') { closeSearch(); closeDrill(); }
+});
+
 window.addEventListener('DOMContentLoaded', () => {
   initCharts();
   refreshAll();
@@ -2636,7 +2686,93 @@ function showToast(msg) {
 function showView(v) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
-  showToast('View: ' + v);
+  const opPanel = document.getElementById('operator-section');
+  if (opPanel) opPanel.style.display = v === 'governance' ? 'flex' : 'none';
+  if (v === 'governance') loadOperatorQueue();
+}
+
+function openSearch() {
+  const modal = document.getElementById('searchModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    setTimeout(() => document.getElementById('globalSearchInput')?.focus(), 50);
+  }
+}
+
+function closeSearch() {
+  const modal = document.getElementById('searchModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function globalSearch(term) {
+  const results = document.getElementById('searchResults');
+  if (!results) return;
+  if (!term || term.length < 2) {
+    results.innerHTML = '<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">Type to search across all entities</div>';
+    return;
+  }
+  const tl = term.toLowerCase();
+  const matches = [];
+
+  // Search parts
+  _catalogData.filter(p =>
+    (p.part_number||'').toLowerCase().includes(tl) ||
+    (p.description||'').toLowerCase().includes(tl)
+  ).slice(0,5).forEach(p => matches.push({ type:'PART', icon:'⚙', title: p.part_number, sub: p.description, color: 'var(--cyan)' }));
+
+  // Search suppliers
+  _supplierData.filter(s =>
+    (s.name||'').toLowerCase().includes(tl) ||
+    (s.category||'').toLowerCase().includes(tl) ||
+    (s.country||'').toLowerCase().includes(tl)
+  ).slice(0,3).forEach(s => matches.push({ type:'SUPPLIER', icon:'🏭', title: s.name, sub: s.category + ' · ' + s.country, color: 'var(--green)' }));
+
+  if (!matches.length) {
+    results.innerHTML = '<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">No results for "' + esc(term) + '"</div>';
+    return;
+  }
+
+  results.innerHTML = matches.map(m => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:6px;cursor:pointer;transition:background 0.1s" onmouseover="this.style.background='var(--bg-elevated)'" onmouseout="this.style.background='transparent'">
+      <span style="font-size:16px">${m.icon}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:500;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(m.title)}</div>
+        <div style="font-size:11px;color:var(--text-tertiary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(m.sub||'')}</div>
+      </div>
+      <span style="font-family:var(--font-mono);font-size:9px;padding:2px 6px;border-radius:3px;background:var(--bg-elevated);color:${m.color}">${m.type}</span>
+    </div>
+  `).join('');
+}
+
+async function loadOperatorQueue() {
+  try {
+    const r = await fetchJSON('/api/dashboard/governance');
+    const queue = document.getElementById('operatorQueue');
+    const countEl = document.getElementById('op-queue-count');
+    if (!r || !queue) return;
+    const pending = r.recent_requests?.filter(req => req.request_status === 'PENDING') || [];
+    if (countEl) countEl.textContent = pending.length + ' pending actions';
+    if (!pending.length) {
+      queue.innerHTML = '<div class="empty-state" style="padding:40px">No pending approvals — queue is clear ✓</div>';
+      return;
+    }
+    queue.innerHTML = pending.map(req => `
+      <div style="display:flex;align-items:center;gap:16px;padding:14px 20px;border-bottom:1px solid var(--border);transition:background 0.1s" onmouseover="this.style.background='var(--bg-elevated)'" onmouseout="this.style.background='transparent'">
+        <div style="width:4px;height:40px;border-radius:2px;background:${req.risk_level==='HIGH'?'var(--red)':req.risk_level==='MEDIUM'?'var(--amber)':'var(--green)'};flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500;color:var(--text-primary)">${esc(req.action_key.replace(/_/g,' '))}</div>
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);margin-top:2px">
+            #${req.id} · ${req.org_id} · Created ${formatDate(req.created_at)}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${riskBadge(req.risk_level)}
+          <button onclick="showToast('Approve #${req.id} — connect to approval API')" style="padding:5px 12px;background:var(--green-dim);border:1px solid rgba(16,185,129,0.3);border-radius:6px;color:var(--green);font-family:var(--font-body);font-size:11px;cursor:pointer;font-weight:500">Approve</button>
+          <button onclick="showToast('Reject #${req.id} — connect to approval API')" style="padding:5px 12px;background:var(--red-dim);border:1px solid rgba(239,68,68,0.2);border-radius:6px;color:var(--red);font-family:var(--font-body);font-size:11px;cursor:pointer;font-weight:500">Reject</button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) { console.warn('operator queue:', e); }
 }
 </script>
 </body>
