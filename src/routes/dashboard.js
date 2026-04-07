@@ -294,10 +294,14 @@ function createDashboardRoutes(db, opts = {}) {
             // Insert suppliers
             for (const s of SUPPLIERS) {
                 try {
+                    // Check if already exists
+                    const exists = await db.prepare(
+                        `SELECT id FROM suppliers WHERE org_id = ? AND name = ? LIMIT 1`
+                    ).get('twp', s.name);
+                    if (exists) continue;
                     await db.prepare(
                         `INSERT INTO suppliers (org_id, name, category, status, country, metadata_json, created_at, updated_at)
-                         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-                         ON CONFLICT DO NOTHING`
+                         VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`
                     ).run('twp', s.name, s.category, s.status, s.country, '{}');
                     results.suppliers++;
                 } catch (e) { results.errors.push('supplier:' + s.name + ':' + e.message.slice(0,50)); }
@@ -306,10 +310,13 @@ function createDashboardRoutes(db, opts = {}) {
             // Insert parts
             for (const p of PARTS) {
                 try {
+                    const exists = await db.prepare(
+                        `SELECT id FROM parts WHERE org_id = ? AND part_number = ? LIMIT 1`
+                    ).get('twp', p.part_number);
+                    if (exists) continue;
                     await db.prepare(
                         `INSERT INTO parts (org_id, part_number, name, category, unit_cost, status, metadata_json, created_at, updated_at)
-                         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
-                         ON CONFLICT DO NOTHING`
+                         VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`
                     ).run('twp', p.part_number, p.name, p.category, p.unit_cost, p.status, '{}');
                     results.parts++;
                 } catch (e) { results.errors.push('part:' + p.part_number + ':' + e.message.slice(0,50)); }
@@ -318,10 +325,13 @@ function createDashboardRoutes(db, opts = {}) {
             // Insert warehouses
             for (const w of WAREHOUSES) {
                 try {
+                    const exists = await db.prepare(
+                        `SELECT id FROM warehouses WHERE org_id = ? AND name = ? LIMIT 1`
+                    ).get('twp', w.name);
+                    if (exists) continue;
                     await db.prepare(
                         `INSERT INTO warehouses (org_id, name, location, status, capacity, metadata_json, created_at, updated_at)
-                         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-                         ON CONFLICT DO NOTHING`
+                         VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`
                     ).run('twp', w.name, w.location, w.status, w.capacity, '{}');
                     results.warehouses++;
                 } catch (e) { results.errors.push('warehouse:' + w.name + ':' + e.message.slice(0,50)); }
@@ -346,16 +356,22 @@ function createDashboardRoutes(db, opts = {}) {
             for (const a of APPROVALS) {
                 try {
                     // Ensure policy exists
-                    await db.prepare(
-                        `INSERT INTO approval_policies (org_id, action_key, approval_mode, risk_level, is_active)
-                         VALUES ($1, $2, $3, $4, true) ON CONFLICT DO NOTHING`
-                    ).run('twp', a.action_key, a.risk_level === 'HIGH' ? 'DUAL' : 'SINGLE', a.risk_level);
+                    const pExists = await db.prepare(
+                        `SELECT id FROM approval_policies WHERE org_id = ? AND action_key = ? LIMIT 1`
+                    ).get('twp', a.action_key);
+                    if (!pExists) {
+                        await db.prepare(
+                            `INSERT INTO approval_policies (org_id, action_key, approval_mode, risk_level, is_active)
+                             VALUES (?, ?, ?, ?, true)`
+                        ).run('twp', a.action_key, a.risk_level === 'HIGH' ? 'DUAL' : 'SINGLE', a.risk_level);
+                    }
 
+                    const daysAgo = Math.floor(Math.random()*30);
                     const r = await db.prepare(
                         `INSERT INTO approval_requests
                          (org_id, target_type, target_id, action_key, request_status, approval_mode,
                           risk_level, requested_by_user_id, created_at, updated_at)
-                         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW() - INTERVAL '${Math.floor(Math.random()*30)} days', NOW())
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW() - INTERVAL '${daysAgo} days', NOW())
                          RETURNING id`
                     ).get('twp', 'supply_chain_entity', 'demo-' + Math.random().toString(36).slice(2,8),
                         a.action_key, a.status, a.risk_level === 'HIGH' ? 'DUAL' : 'SINGLE',
@@ -363,7 +379,7 @@ function createDashboardRoutes(db, opts = {}) {
 
                     if (a.status === 'APPROVED' && r?.id) {
                         await db.prepare(
-                            `UPDATE approval_requests SET approved_by_user_id = $1, resolved_at = NOW() WHERE id = $2`
+                            `UPDATE approval_requests SET approved_by_user_id = ?, resolved_at = NOW() WHERE id = ?`
                         ).run('gbuchanan', r.id);
                     }
                     results.approvals++;
