@@ -112,15 +112,27 @@ CREATE INDEX IF NOT EXISTS idx_we_approval ON workflow_executions(approval_reque
 CREATE INDEX IF NOT EXISTS idx_gal_org ON governance_audit_log(org_id);
 CREATE INDEX IF NOT EXISTS idx_gal_created ON governance_audit_log(created_at);
 
--- Row Level Security Policies
-CREATE POLICY IF NOT EXISTS tenant_approval_requests ON approval_requests
-    USING (org_id = current_setting('app.current_org_id', true));
+-- Row Level Security Policies (DO blocks used because CREATE POLICY IF NOT EXISTS is not valid PG syntax)
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'tenant_approval_requests' AND tablename = 'approval_requests') THEN
+        CREATE POLICY tenant_approval_requests ON approval_requests
+            USING (org_id = current_setting('app.current_org_id', true));
+    END IF;
+END $$;
 
-CREATE POLICY IF NOT EXISTS tenant_workflow_executions ON workflow_executions
-    USING (org_id = current_setting('app.current_org_id', true));
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'tenant_workflow_executions' AND tablename = 'workflow_executions') THEN
+        CREATE POLICY tenant_workflow_executions ON workflow_executions
+            USING (org_id = current_setting('app.current_org_id', true));
+    END IF;
+END $$;
 
-CREATE POLICY IF NOT EXISTS tenant_audit_log ON governance_audit_log
-    USING (org_id = current_setting('app.current_org_id', true));
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'tenant_audit_log' AND tablename = 'governance_audit_log') THEN
+        CREATE POLICY tenant_audit_log ON governance_audit_log
+            USING (org_id = current_setting('app.current_org_id', true));
+    END IF;
+END $$;
 
 -- Trigger: prevent terminal state changes (PostgreSQL version)
 CREATE OR REPLACE FUNCTION prevent_terminal_change() RETURNS TRIGGER AS $$
