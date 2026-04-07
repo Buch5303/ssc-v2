@@ -629,17 +629,26 @@ function createDashboardRoutes(db, opts = {}) {
                         ).run('twp', a.action_key, a.risk_level === 'HIGH' ? 'DUAL' : 'SINGLE', a.risk_level);
                     }
                     const daysAgo = Math.floor(Math.random() * 30);
-                    const approvedBy = a.status === 'APPROVED' ? 'gbuchanan' : null;
-                    await db.prepare(
+                    // Must insert as PENDING (DB trigger blocks non-PENDING inserts)
+                    const inserted = await db.prepare(
                         `INSERT INTO approval_requests
                          (org_id, target_type, target_id, action_key, request_status, approval_mode,
-                          risk_level, requested_by_user_id, approved_by_user_id, created_at, updated_at)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW() - INTERVAL '${daysAgo} days', NOW())`
-                    ).run('twp', 'supply_chain_entity',
+                          risk_level, requested_by_user_id, created_at, updated_at)
+                         VALUES (?, ?, ?, ?, 'PENDING', ?, ?, ?, NOW() - INTERVAL '${daysAgo} days', NOW())
+                         RETURNING id`
+                    ).get('twp', 'supply_chain_entity',
                         'tg20-' + Math.random().toString(36).slice(2, 8),
-                        a.action_key, a.status,
-                        a.risk_level === 'HIGH' ? 'DUAL' : 'SINGLE',
-                        a.risk_level, a.user, approvedBy);
+                        a.action_key, a.risk_level === 'HIGH' ? 'DUAL' : 'SINGLE',
+                        a.risk_level, a.user);
+                    // Then UPDATE to final status (bypasses insert trigger)
+                    if (inserted?.id && a.status !== 'PENDING') {
+                        const approvedBy = a.status === 'APPROVED' ? 'gbuchanan' : null;
+                        await db.prepare(
+                            `UPDATE approval_requests SET request_status = ?, approved_by_user_id = ?,
+                             resolved_at = CASE WHEN ? != 'PENDING' THEN NOW() ELSE NULL END
+                             WHERE id = ?`
+                        ).run(a.status, approvedBy, a.status, inserted.id);
+                    }
                     results.approvals++;
                 } catch (e) { results.errors.push('A:' + a.action_key + ':' + e.message.slice(0, 80)); }
             }

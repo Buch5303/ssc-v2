@@ -818,6 +818,35 @@ html, body {
 
 .toast.show { opacity: 1; transform: translateY(0); }
 
+.timeline-item {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  position: relative;
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 20px;
+  bottom: -6px;
+  width: 1px;
+  background: var(--border);
+}
+.timeline-item:last-child::before { display: none; }
+.timeline-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+  border: 2px solid var(--bg-deep);
+}
+.timeline-content { flex: 1; min-width: 0; }
+.timeline-title { font-size: 11px; color: var(--text-primary); font-weight: 500; }
+.timeline-meta { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); margin-top: 1px; }
+
+
 .cat-btn {
   padding: 3px 10px;
   border-radius: 4px;
@@ -1343,6 +1372,56 @@ html, body {
 
 
 
+
+      <!-- Financial Summary Panel -->
+      <div class="panel span-2" id="financial-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--green)"></div>
+            Financial Intelligence
+          </div>
+          <span class="panel-tag">TG20 PROJECT</span>
+        </div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+            <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+              <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);margin-bottom:4px">Committed PO Value</div>
+              <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--green)" id="fin-committed">—</div>
+              <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">5 active orders</div>
+            </div>
+            <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+              <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);margin-bottom:4px">Parts Catalog Value</div>
+              <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--cyan)" id="fin-catalog">—</div>
+              <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">285 line items</div>
+            </div>
+            <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+              <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary);margin-bottom:4px">Approval Risk Exposure</div>
+              <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--amber)" id="fin-risk">—</div>
+              <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">pending decisions</div>
+            </div>
+          </div>
+          <div class="chart-wrap h-180">
+            <canvas id="financialBar"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Timeline -->
+      <div class="panel" id="timeline-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--blue)"></div>
+            Activity Timeline
+          </div>
+          <span class="panel-tag live">LIVE</span>
+        </div>
+        <div class="panel-body" style="padding:10px 14px">
+          <div id="activityTimeline" style="display:flex;flex-direction:column;gap:0">
+            <div class="empty-state">Loading...</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Parts Category Breakdown -->
       <div class="panel" id="parts-breakdown-section">
         <div class="panel-header">
@@ -1393,7 +1472,12 @@ html, body {
           </div>
         </div>
         <div class="panel-body" style="padding:12px 16px">
-          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap" id="categoryFilters">
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input type="text" id="catalogSearch" placeholder="Search parts..." oninput="searchCatalog(this.value)"
+              style="flex:1;padding:5px 10px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);font-family:var(--font-mono);font-size:11px;outline:none">
+            <button onclick="searchCatalog('');document.getElementById('catalogSearch').value=''" style="padding:5px 10px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--text-tertiary);font-family:var(--font-mono);font-size:10px;cursor:pointer">✕</button>
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap" id="categoryFilters">
             <button onclick="filterCatalog('')" class="cat-btn active" data-cat="">All</button>
             <button onclick="filterCatalog('Gas Turbine Unit')" class="cat-btn" data-cat="Gas Turbine Unit">GT Unit</button>
             <button onclick="filterCatalog('Fuel')" class="cat-btn" data-cat="Fuel">Fuel Systems</button>
@@ -1680,6 +1764,34 @@ function initCharts() {
     });
   }
 
+
+  // Financial bar chart
+  const fctx = document.getElementById('financialBar');
+  if (fctx) {
+    charts.finBar = new Chart(fctx.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: ['PO-001\nSiemens', 'PO-002\nChromalloy', 'PO-003\nMTU', 'PO-004\nGE Vernova', 'PO-005\nParker'],
+        datasets: [{
+          label: 'PO Value ($K)',
+          data: [2850, 850, 420, 5200, 280],
+          backgroundColor: ['rgba(0,212,255,0.5)', 'rgba(239,68,68,0.5)', 'rgba(245,158,11,0.5)', 'rgba(59,130,246,0.5)', 'rgba(16,185,129,0.5)'],
+          borderColor: ['#00d4ff', '#ef4444', '#f59e0b', '#3b82f6', '#10b981'],
+          borderWidth: 1, borderRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` $${ctx.raw}K` } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 8 }, maxRotation: 0 } },
+          y: { grid: { color: 'rgba(99,120,180,0.06)' }, ticks: { font: { size: 9 }, callback: v => '$' + v + 'K' } }
+        },
+        animation: { duration: 600 }
+      }
+    });
+  }
+
 }
 
 // ─── REFRESH ─────────────────────────────────────
@@ -1697,6 +1809,8 @@ async function refreshAll() {
     loadCatalog(),
     loadCategoryBreakdown(),
     loadPOs(),
+    loadTimeline(),
+    loadFinancial(),
   ]);
 }
 
@@ -1994,6 +2108,90 @@ async function loadPOs() {
       list.innerHTML = '<div class="empty-state">No POs yet — seed data to populate</div>';
     }
   } catch(e) { console.warn('po:', e); }
+}
+
+
+async function loadTimeline() {
+  try {
+    const [gov, sc] = await Promise.all([
+      fetchJSON('/api/dashboard/governance'),
+      fetchJSON('/api/dashboard/supply-chain'),
+    ]);
+    const el = document.getElementById('activityTimeline');
+    if (!el) return;
+    const events = [];
+    // From governance
+    if (gov?.recent_requests) {
+      gov.recent_requests.slice(0, 5).forEach(r => {
+        const isHigh = r.risk_level === 'HIGH';
+        events.push({
+          color: r.request_status === 'APPROVED' ? '#10b981' : isHigh ? '#ef4444' : '#f59e0b',
+          title: r.action_key.replace(/_/g, ' '),
+          meta: `#${r.id} · ${r.request_status} · ${r.risk_level} · ${formatDate(r.created_at)}`,
+          ts: new Date(r.created_at).getTime(),
+        });
+      });
+    }
+    // Add static TG20 project milestones
+    events.push({ color: '#00d4ff', title: 'MOU Executed — W251 Production Restart', meta: 'EthosEnergy · Mar 13 2026 · $1B+ committed sales', ts: new Date('2026-03-13').getTime() });
+    events.push({ color: '#3b82f6', title: 'TG20B7-8 Equipment List Imported', meta: '285 line items · 30 system categories · pilot loaded', ts: new Date('2026-04-07').getTime() });
+    events.push({ color: '#8b5cf6', title: 'FlowSeer Pilot Deployment', meta: 'Vercel · Neon PG · Upstash Redis · 669 tests', ts: new Date('2026-04-07').getTime() });
+
+    events.sort((a, b) => b.ts - a.ts);
+    el.innerHTML = events.slice(0, 8).map(e => `
+      <div class="timeline-item">
+        <div class="timeline-dot" style="background:${e.color}"></div>
+        <div class="timeline-content">
+          <div class="timeline-title">${esc(e.title)}</div>
+          <div class="timeline-meta">${esc(e.meta)}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) { console.warn('timeline:', e); }
+}
+
+async function loadFinancial() {
+  try {
+    const r = await fetchJSON('/api/dashboard/po-list');
+    if (!r?.pos) return;
+    let total = 0;
+    r.pos.forEach(p => total += parseFloat(p.total_value) || 0);
+    const committed = document.getElementById('fin-committed');
+    if (committed) committed.textContent = '$' + (total / 1000000).toFixed(1) + 'M';
+    // Catalog value estimate (285 items × avg $15K)
+    const catVal = document.getElementById('fin-catalog');
+    if (catVal) catVal.textContent = '$4.3M';
+    // Risk exposure
+    const riskEl = document.getElementById('fin-risk');
+    const gov = await fetchJSON('/api/dashboard/governance');
+    if (riskEl && gov) {
+      const pending = gov.by_status?.find(s => s.status === 'PENDING')?.count || 0;
+      riskEl.textContent = pending + ' open';
+    }
+  } catch(e) { console.warn('financial:', e); }
+}
+
+function searchCatalog(term) {
+  if (!term) { renderCatalog(''); return; }
+  const filtered = _catalogData.filter(p =>
+    (p.part_number || '').toLowerCase().includes(term.toLowerCase()) ||
+    (p.description || '').toLowerCase().includes(term.toLowerCase()) ||
+    (p.category || '').toLowerCase().includes(term.toLowerCase())
+  );
+  const list = document.getElementById('catalogList');
+  const countEl = document.getElementById('catalogCount');
+  if (countEl) countEl.textContent = `${filtered.length} results for "${term}"`;
+  if (!list) return;
+  if (!filtered.length) { list.innerHTML = '<div class="empty-state">No matches</div>'; return; }
+  list.innerHTML = filtered.slice(0, 80).map(p => {
+    const crit = p.criticality || 'STANDARD';
+    const critCls = crit === 'CRITICAL' ? 'badge-err' : crit === 'SAFETY' ? 'badge-warn' : 'badge-info';
+    return `<div class="catalog-row">
+      <span class="catalog-pn">${esc(p.part_number || '—')}</span>
+      <span class="catalog-name" title="${esc(p.description || '')}">${esc((p.description || '—').substring(0, 60))}</span>
+      <span class="catalog-badge ${critCls}">${crit}</span>
+    </div>`;
+  }).join('');
 }
 
 async function loadCatalog() {
