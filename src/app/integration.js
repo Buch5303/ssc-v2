@@ -121,8 +121,8 @@ function createApp(db, opts = {}) {
     app.use('/api/workflows', createWorkflowRoutes(db));
     app.use('/api/sc', createSupplyChainRoutes(db));
 
-    // NDJSON log tail — last 100 lines, audit-inspectable
-    app.get('/api/logs/tail', async (_req, res) => {
+    // NDJSON log tail — last 100 lines, audit-inspectable (public — no auth required)
+    app.get('/logs/tail', async (_req, res) => {
         const logExport = require('../common/log-export');
         const fs = require('fs');
         const path = require('path');
