@@ -66,11 +66,17 @@ function createApp(db, opts = {}) {
 
     app.get('/version', (_r, res) => {
         const os = require('os');
+        const { execSync } = require('child_process');
+        // Resolve commit SHA: env var (set by CI) → git rev-parse → fallback
+        let commitSha = process.env.BUILD_COMMIT_SHA || 'unknown';
+        if (commitSha === 'unknown') {
+            try { commitSha = execSync('git rev-parse HEAD', { timeout: 2000 }).toString().trim(); } catch { /* no git in serverless */ }
+        }
         res.json({
             service: 'ssc-v2',
             environment: process.env.APP_ENV || process.env.NODE_ENV || 'unknown',
-            commitSha: process.env.BUILD_COMMIT_SHA || 'unknown',
-            buildTimestamp: process.env.BUILD_TIMESTAMP || 'unknown',
+            commitSha,
+            buildTimestamp: process.env.BUILD_TIMESTAMP || new Date().toISOString(),
             branchFidelityBaseline: process.env.BASELINE_BRANCH_FIDELITY || 'b78a49d',
             deploymentValidationBaseline: process.env.BASELINE_DEPLOYMENT_VALIDATION || '9c3a9b7',
             hostname: os.hostname(),
@@ -114,6 +120,23 @@ function createApp(db, opts = {}) {
     app.use('/api/approvals', createApprovalRoutes(db));
     app.use('/api/workflows', createWorkflowRoutes(db));
     app.use('/api/sc', createSupplyChainRoutes(db));
+
+    // NDJSON log tail — last 100 lines, audit-inspectable
+    app.get('/api/logs/tail', async (_req, res) => {
+        const logExport = require('../common/log-export');
+        const fs = require('fs');
+        const path = require('path');
+        const logPath = logExport.getPath ? logExport.getPath() : (process.env.LOG_EXPORT_PATH || null);
+        if (!logPath) return res.json({ status: 'no_log_path', lines: [] });
+        try {
+            if (!fs.existsSync(logPath)) return res.json({ status: 'log_not_yet_written', path: logPath, lines: [] });
+            const raw = fs.readFileSync(logPath, 'utf-8');
+            const lines = raw.trim().split('\n').filter(Boolean).slice(-100).map(l => { try { return JSON.parse(l); } catch { return l; } });
+            return res.json({ status: 'ok', path: logPath, count: lines.length, lines });
+        } catch (err) {
+            return res.json({ status: 'error', error: err.message, lines: [] });
+        }
+    });
 
     app.use((req, res) => res.status(404).json({ error: 'not_found', path: req.path }));
     app.use((err, _r, res, _n) => { logger.error('http', err.message); metrics.increment('errors.total'); res.status(500).json({ error: 'internal_server_error' }); });

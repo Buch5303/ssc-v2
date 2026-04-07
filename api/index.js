@@ -62,6 +62,12 @@ async function initApp() {
         }
 
         _app = createApp(db, { redis });
+        // Wire Redis into token-service for distributed revocation
+        if (redis) {
+            const tokenService = require('../src/middleware/token-service');
+            tokenService.setRedis(redis);
+            console.log('[vercel] Redis wired into token-service for distributed revocation');
+        }
         console.log('[vercel] App initialized successfully');
         return _app;
     } catch (err) {
