@@ -432,9 +432,10 @@ function createWave9Routes(db, opts = {}) {
         if (!db) return res.status(503).json({ error: 'No database' });
         try {
             const rows = await db.prepare(`
-                SELECT seniority, COUNT(*) as contacts,
-                       COUNT(email) FILTER (WHERE email IS NOT NULL AND email != '') as with_email,
-                       COUNT(bop_category) FILTER (WHERE bop_category IS NOT NULL) as bop_tagged
+                SELECT seniority,
+                       COUNT(*)::int as contacts,
+                       COUNT(email) FILTER (WHERE email IS NOT NULL AND email != '')::int as with_email,
+                       COUNT(bop_category) FILTER (WHERE bop_category IS NOT NULL)::int as bop_tagged
                 FROM supplier_contacts
                 WHERE seniority IS NOT NULL
                 GROUP BY seniority ORDER BY contacts DESC
