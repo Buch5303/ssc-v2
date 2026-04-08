@@ -152,6 +152,29 @@ function createWave9Routes(db, opts = {}) {
 
     // ─── AUTO-TAG CONTACTS ────────────────────────────────────────────────────
     // Matches W251 supplier_contacts to BOP categories via supplier name lookup
+
+    // GET trigger — browser/tool accessible
+    router.get('/run-auto-tag', async (req, res) => {
+        if (!db) return res.status(503).json({ error: 'No database' });
+        try {
+            const nameMap = {};
+            DISCOVERED_SUPPLIERS.forEach(s => {
+                const key = s.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                nameMap[key] = s.bop_category;
+                if (s.domain) { const d = s.domain.split('.')[0].toLowerCase(); if (!nameMap[d]) nameMap[d] = s.bop_category; }
+            });
+            const contacts = await db.prepare(`SELECT id, supplier_name FROM supplier_contacts`).all();
+            let tagged = 0, skipped = 0;
+            for (const c of contacts) {
+                const key = (c.supplier_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                let category = nameMap[key];
+                if (!category) { for (const [k, cat] of Object.entries(nameMap)) { if (k.length > 4 && key.includes(k)) { category = cat; break; } } }
+                if (category) { try { await db.prepare(`UPDATE supplier_contacts SET bop_category=$1 WHERE id=$2`).run(category, c.id); tagged++; } catch {} } else skipped++;
+            }
+            res.json({ ok: true, total: contacts.length, tagged, skipped });
+        } catch (e) { res.status(500).json({ error: e.message }); }
+    });
+
     router.post('/auto-tag', async (req, res) => {
         if (!db) return res.status(503).json({ error: 'No database' });
         try {
