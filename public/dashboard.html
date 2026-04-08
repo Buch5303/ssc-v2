@@ -3784,6 +3784,38 @@ async function loadEngineHealth() {
       [claudeBtn, rfqBtn].forEach(b => { if (b) { b.style.opacity = '1'; b.style.cursor = 'pointer'; b.title = ''; } });
     }
 
+    // ─── Dedicated Perplexity panel state banner ─────────────────────────────
+    const px = h.engines?.perplexity;
+    const pxDot   = document.getElementById('px-state-dot');
+    const pxLabel = document.getElementById('px-state-label');
+    const pxDetail = document.getElementById('px-state-detail');
+    const pxBadge = document.getElementById('px-output-badge');
+    if (px && pxDot && pxLabel) {
+      const isLive = px.status === 'operational';
+      pxDot.style.background   = isLive ? 'var(--green)' : 'var(--amber)';
+      pxLabel.style.color      = isLive ? 'var(--green)' : 'var(--amber)';
+      pxLabel.textContent      = isLive ? 'LIVE · OPERATIONAL' : 'AWAITING KEY';
+      if (pxDetail) pxDetail.textContent = isLive
+        ? 'Perplexity Sonar active · verified citations · real-time web search per request'
+        : 'Add PERPLEXITY_API_KEY to Vercel env vars → vercel.com/gregory-j-buchanans-projects/ssc-v2/settings/environment-variables';
+      if (pxBadge) {
+        pxBadge.textContent = isLive ? 'OUTPUT: verified | derived' : 'OUTPUT: placeholder (key absent)';
+        pxBadge.style.background = isLive ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)';
+        pxBadge.style.color      = isLive ? 'var(--green)' : 'var(--amber)';
+      }
+    }
+
+    // ─── Dedicated Claude panel state banner ─────────────────────────────────
+    const cl = h.engines?.claude;
+    const clDot   = document.getElementById('claude-state-dot');
+    const clLabel = document.getElementById('claude-state-label');
+    if (cl && clDot && clLabel) {
+      const isLive = cl.status === 'operational';
+      clDot.style.background   = isLive ? 'var(--green)' : 'var(--amber)';
+      clLabel.style.color      = isLive ? 'var(--green)' : 'var(--amber)';
+      clLabel.textContent      = isLive ? 'LIVE · OPERATIONAL' : 'AWAITING KEY';
+    }
+
     renderActivationBanner(h);
 
     // Update dedicated engine panel banners
@@ -3951,21 +3983,26 @@ async function runSingleIntegrityCheck() {
 
         const scoreColor = intScoreColor(result.integrity_score);
         const citations  = result.citations || [];
+        const env = result._envelope || {};
+        const outputTypeBadge = env.output_type ? `<span style="font-family:var(--font-mono);font-size:8px;padding:2px 6px;border-radius:3px;background:${env.output_type==='verified'?'rgba(16,185,129,0.1)':'rgba(245,158,11,0.1)'};color:${env.output_type==='verified'?'var(--green)':'var(--amber)'}">EQS: ${env.output_type.toUpperCase()}</span>` : '';
+        const liveCallBadge = result.live_call ? `<span style="font-family:var(--font-mono);font-size:8px;padding:2px 6px;border-radius:3px;background:rgba(16,185,129,0.08);color:var(--green)">● LIVE CALL</span>` : '';
 
         if (el) el.innerHTML = `
           <div style="padding:16px 20px">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
               <span style="font-family:var(--font-mono);font-size:11px;padding:3px 10px;border-radius:4px;background:${scoreColor}22;border:1px solid ${scoreColor}44;color:${scoreColor};font-weight:700">${esc(result.integrity_score || 'UNKNOWN')}</span>
               <span style="font-size:13px;font-weight:600;color:var(--text-primary)">${esc(name)}</span>
+              ${outputTypeBadge}
+              ${liveCallBadge}
               <span style="margin-left:auto;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">${result.model || 'sonar'} · ${result.tokens_used || 0} tokens · $${(result.cost_usd||0).toFixed(4)}</span>
             </div>
             <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);line-height:1.6;white-space:pre-wrap;background:var(--bg-elevated);border-radius:6px;padding:12px;margin-bottom:12px">${esc(result.analysis || result.briefing || '')}</div>
             ${citations.length ? `
               <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">
-                <strong style="color:var(--text-secondary)">CITATIONS (${citations.length}):</strong><br>
+                <strong style="color:var(--text-secondary)">CITATIONS (${citations.length}) — source: ${env.source_summary || 'Perplexity Sonar'}:</strong><br>
                 ${citations.slice(0,5).map((c,i) => `<span style="color:var(--cyan)">[${i+1}]</span> <a href="${esc(c)}" target="_blank" style="color:var(--cyan);text-decoration:none">${esc(c.replace(/^https?:\/\//, '').substring(0,60))}…</a>`).join('<br>')}
               </div>
-            ` : '<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">No citations returned</div>'}
+            ` : '<div style="font-family:var(--font-mono);font-size:9px;color:var(--amber)">No citations — output_type: derived (not verified)</div>'}
           </div>
         ` + (el.innerHTML.includes('Loading') ? '' : el.innerHTML);
 
@@ -4107,19 +4144,26 @@ async function loadClaudeStatus() {
   } catch(e) {}
 }
 
-function showClaudeResult(title, content, costUsd, model) {
+function showClaudeResult(title, content, costUsd, model, envelope) {
   const el = document.getElementById('claude-results');
   if (!el) return;
   claudeSessionCost += costUsd || 0;
   const costEl = document.getElementById('claude-cost-display');
   if (costEl) costEl.textContent = 'Session cost: $' + claudeSessionCost.toFixed(4);
 
+  const env = envelope || {};
+  const outputBadge = env.output_type ? `<span style="font-family:var(--font-mono);font-size:8px;padding:2px 6px;background:rgba(6,182,212,0.1);border-radius:3px;color:var(--cyan)">${env.output_type.toUpperCase()}</span>` : '';
+  const liveBadge = `<span style="font-family:var(--font-mono);font-size:8px;padding:2px 6px;background:rgba(16,185,129,0.08);border-radius:3px;color:var(--green)">● LIVE CALL</span>`;
+  const tokenInfo = (env.input_tokens || env.output_tokens) ? `${env.input_tokens||0}in / ${env.output_tokens||0}out tokens` : '';
+
   const newDiv = document.createElement('div');
   newDiv.style.cssText = 'padding:16px 20px;border-bottom:1px solid var(--border)';
   newDiv.innerHTML = `
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
       <span style="font-family:var(--font-mono);font-size:9px;padding:2px 8px;background:var(--cyan-dim);border:1px solid rgba(6,182,212,0.4);border-radius:3px;color:var(--cyan);font-weight:600">${esc(title)}</span>
-      <span style="margin-left:auto;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">${model || 'claude-sonnet-4-6'} · $${(costUsd||0).toFixed(4)}</span>
+      ${outputBadge}
+      ${liveBadge}
+      <span style="margin-left:auto;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">${model || 'claude-sonnet-4-6'} · ${tokenInfo} · $${(costUsd||0).toFixed(4)}</span>
     </div>
     <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);line-height:1.6;white-space:pre-wrap;background:var(--bg-elevated);border-radius:6px;padding:12px;max-height:300px;overflow-y:auto">${esc(content || '')}</div>
   `;
@@ -4140,24 +4184,24 @@ async function runClaudeAction() {
     if (action === 'analyze-pricing') {
       result = await fetchJSON('/api/claude/analyze-pricing', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' });
       title  = 'PRICING ANOMALY ANALYSIS';
-      if (result?.analysis) showClaudeResult(title, result.analysis, result.cost_usd, result.model);
+      if (result?.analysis) showClaudeResult(title, result.analysis, result.cost_usd, result.model, result._envelope);
 
     } else if (action === 'procurement-summary') {
       result = await fetchJSON('/api/claude/procurement-summary', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' });
       title  = 'EXECUTIVE PROCUREMENT SUMMARY';
-      if (result?.summary) showClaudeResult(title, result.summary, result.cost_usd, result.model);
+      if (result?.summary) showClaudeResult(title, result.summary, result.cost_usd, result.model, result._envelope);
 
     } else if (action === 'compare-suppliers') {
       const category = document.getElementById('pricing-category-filter')?.value || 'Lube_Oil_System';
       result = await fetchJSON('/api/claude/compare-suppliers', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ category }) });
       title  = 'SUPPLIER COMPARISON: ' + category.replace(/_/g,' ');
-      if (result?.comparison) showClaudeResult(title, result.comparison, result.cost_usd, result.model);
+      if (result?.comparison) showClaudeResult(title, result.comparison, result.cost_usd, result.model, result._envelope);
 
     } else if (action === 'outreach-strategy') {
       const category = document.getElementById('pricing-category-filter')?.value || 'Lube_Oil_System';
       result = await fetchJSON('/api/claude/outreach-strategy', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ category }) });
       title  = 'OUTREACH STRATEGY: ' + category.replace(/_/g,' ');
-      if (result?.strategy) showClaudeResult(title, result.strategy, result.cost_usd, result.model);
+      if (result?.strategy) showClaudeResult(title, result.strategy, result.cost_usd, result.model, result._envelope);
     }
 
     if (result?.error) {
@@ -4189,7 +4233,7 @@ async function runClaudeRFQ() {
     });
 
     if (result?.rfq) {
-      showClaudeResult(`RFQ DRAFT: ${supplier.toUpperCase()}`, result.rfq, result.cost_usd, result.model);
+      showClaudeResult(`RFQ DRAFT: ${supplier.toUpperCase()}`, result.rfq, result.cost_usd, result.model, result._envelope);
       showToast('RFQ drafted — copy from panel below');
     } else if (result?.error) {
       if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--red)">Error: ${esc(result.error)}${result.hint ? ' — ' + esc(result.hint) : ''}</div>`;
