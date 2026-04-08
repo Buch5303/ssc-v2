@@ -59,7 +59,7 @@ async function runMigrations(pool) {
                 // SQLite-only migrations contain TRIGGER...BEGIN...END blocks or
                 // SQLite-specific pragmas. PG migrations contain standard DDL/DML.
                 // Legacy explicit list retained as fallback for known-good files.
-                const legacyPgList = ['day29-postgresql', 'day31', 'day32', '023', '024', '025', '026', '027', '028'];
+                const legacyPgList = ['day29-postgresql', 'day31', 'day32', '023', '024', '025', '026', '027', '028', '029'];
                 const hasPgSignature = (
                     /CREATE TABLE/i.test(sql) ||
                     /CREATE INDEX/i.test(sql) ||

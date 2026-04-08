@@ -3361,7 +3361,7 @@ function showView(v) {
   const miView = document.getElementById('market-intel-view');
   if (miView) miView.style.display = v === 'market-intel' ? 'block' : 'none';
   if (v === 'governance') loadOperatorQueue();
-  if (v === 'market-intel') { loadMarketIntel(); loadEngineHealth(); loadClaudeHistory(); loadWave9Panel(); }
+  if (v === 'market-intel') { loadMarketIntel(); loadEngineHealth(); loadClaudeHistory(); loadWave9Panel(); setTimeout(loadWave9TopTargets, 800); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -4272,8 +4272,10 @@ async function loadWave9Panel() {
           </div>`).join('')}
       </div>` : '<div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">No tagged contacts yet. Click AUTO-TAG to categorize W251 contacts.</div>'}
       <div style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">
-        Apollo Basic ($49/mo) needed for contact enrichment. ${actionable} contacts ready for RFQ drafting now.
-      </div>`;
+        Apollo Basic ($49/mo) needed for contact enrichment.
+      </div>
+      <div style="margin-top:10px;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);font-weight:600;margin-bottom:6px">TOP RFQ TARGETS (C-SUITE WITH EMAIL)</div>
+      <div id="wave9-top-targets" style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">Loading...</div>`;
   } catch(e) {
     if (panel) panel.innerHTML = `<div style="font-family:var(--font-mono);font-size:10px;color:var(--red)">Wave 9 load error: ${esc(e.message)}</div>`;
   }
@@ -4287,6 +4289,43 @@ async function runAutoTag() {
     showToast(`Tagged ${r.tagged}/${r.total} contacts with BOP categories`);
     await loadWave9Panel();
   } catch(e) { showToast('Auto-tag failed: ' + e.message); }
+}
+
+async function loadWave9TopTargets() {
+  const el = document.getElementById('wave9-top-targets');
+  if (!el) return;
+  try {
+    const data = await fetchJSON('/api/wave9/top-targets');
+    const targets = (data?.targets || []).filter(t => t.bop_category).slice(0, 8);
+    if (!targets.length) { el.textContent = 'No BOP-tagged targets with email yet. Run AUTO-TAG first.'; return; }
+    el.innerHTML = targets.map(t => `
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1;min-width:0">
+          <div style="color:var(--text-primary);font-size:9px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.contact_name)} <span style="color:var(--text-tertiary)">— ${esc(t.title?.slice(0,40)||'')}</span></div>
+          <div style="color:var(--cyan);font-size:8px">${esc(t.supplier_name?.slice(0,35)||'')} · ${esc((t.bop_category||'').replace(/_/g,' '))}</div>
+        </div>
+        <button onclick="draftContactRFQ(${t.id}, '${esc(t.contact_name)}')" style="padding:2px 8px;background:var(--cyan-dim);border:1px solid rgba(6,182,212,0.4);border-radius:4px;color:var(--cyan);font-family:var(--font-mono);font-size:8px;cursor:pointer;white-space:nowrap">DRAFT RFQ</button>
+      </div>`).join('');
+  } catch(e) { el.textContent = 'Error loading targets'; }
+}
+
+async function draftContactRFQ(contactId, contactName) {
+  const el = document.getElementById('claude-results');
+  if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--cyan)">⟳ Drafting RFQ for ${esc(contactName)}... (10-20s)</div>`;
+  showToast('Drafting RFQ for ' + contactName);
+  try {
+    const r = await fetchJSON('/api/wave9/contacts/' + contactId + '/rfq', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ project_name: 'Project Jupiter — TG20B7-8 W251 Power Island', delivery_location: 'Santa Teresa, New Mexico, USA' })
+    });
+    if (r?.rfq) {
+      showClaudeResult('RFQ DRAFT: ' + (contactName||'').toUpperCase(), r.rfq, r.cost_usd, r.model, { output_type: 'generated_draft', input_tokens: r.input_tokens, output_tokens: r.output_tokens });
+      showToast('RFQ drafted' + (r.outreach_id ? ' and saved (id:' + r.outreach_id + ')' : ''));
+    } else if (r?.error) {
+      if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--red)">RFQ Error: ${esc(r.error)}</div>`;
+    }
+  } catch(e) { showToast('RFQ failed: ' + e.message); }
 }
 
 async function loadClaudeHistory() {
