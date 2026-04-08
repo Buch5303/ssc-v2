@@ -7,135 +7,108 @@ import { KpiCard } from '../../../components/cards/KpiCard';
 function fmtK(n: number) { return `$${(n/1000).toFixed(0)}K`; }
 function fmtM(n: number) { return `$${(n/1_000_000).toFixed(3)}M`; }
 
-const CHART_COLORS = ['#06b6d4','#0ea5e9','#3b82f6','#6366f1','#8b5cf6','#a855f7','#d946ef','#ec4899','#f43f5e','#ef4444','#f97316','#f59e0b','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#38bdf8','#93c5fd'];
+const GROUP_COLORS: Record<string, string> = {
+  Mechanical:'#06b6d4',Electrical:'#10b981',Fuel:'#f59e0b',
+  Safety:'#ef4444',Instrumentation:'#8b5cf6',Unknown:'#64748b',
+};
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
-    <div className="bg-[#1a2236] border border-white/10 rounded-lg p-3 text-[10px] font-mono">
-      <div className="text-slate-300 mb-1">{label?.replace(/_/g,' ')}</div>
-      <div className="text-red-400">Low: {fmtK(d.low)}</div>
+    <div className="bg-[#1a2236] border border-white/10 rounded-lg p-3 text-[10px] font-mono space-y-0.5">
+      <div className="text-slate-300 mb-1 font-semibold">{d.name}</div>
+      <div className="text-amber-400">Low: {fmtK(d.low)}</div>
       <div className="text-cyan-400 font-bold">Mid: {fmtK(d.mid)}</div>
       <div className="text-emerald-400">High: {fmtK(d.high)}</div>
+      <div className="text-slate-500 mt-1">{d.items} line items</div>
     </div>
   );
 };
 
 export default function CostIntelPage() {
   const { data, isLoading } = useQuery({
-    queryKey: ['pricing-summary'], queryFn: fetchPricingSummary, refetchInterval: 60_000,
+    queryKey:['pricing-summary'], queryFn:fetchPricingSummary, refetchInterval:60_000,
   });
-
-  // Aggregate by BOP category
-  const categoryMap: Record<string, { low: number; mid: number; high: number }> = {};
-  data?.records.forEach((r) => {
-    if (!categoryMap[r.bop_category]) categoryMap[r.bop_category] = { low: 0, mid: 0, high: 0 };
-    categoryMap[r.bop_category].low  += r.price_low_usd;
-    categoryMap[r.bop_category].mid  += r.price_mid_usd;
-    categoryMap[r.bop_category].high += r.price_high_usd;
-  });
-
-  const chartData = Object.entries(categoryMap)
-    .map(([cat, v]) => ({ name: cat.replace(/_/g, ' ').replace('System', 'Sys').replace('Equipment', 'Equip'), ...v }))
-    .sort((a, b) => b.mid - a.mid);
+  const s = data?.summary;
+  const chartData = (data?.by_category||[])
+    .map(c=>({ name:c.category_name.replace(' System','').replace(' Package','').replace(' Equipment',''),
+      low:c.total_low_usd, mid:c.total_mid_usd, high:c.total_high_usd, items:c.item_count, group:c.group }))
+    .sort((a,b)=>b.mid-a.mid);
+  const groupData = (data?.by_group||[]).filter(g=>g.group!=='Unknown').sort((a,b)=>b.total_mid-a.total_mid);
 
   return (
     <div className="p-6 space-y-6 max-w-7xl">
-      {/* Header */}
       <div>
         <h1 className="text-sm font-mono font-bold text-slate-200 uppercase tracking-wider">BOP Cost Intelligence</h1>
-        <p className="text-[10px] font-mono text-slate-500 mt-0.5">W251 Power Island — Indicative pricing ±15% · Not RFQ · For budgeting reference</p>
+        <p className="text-[10px] font-mono text-slate-500 mt-0.5">W251 Power Island · Indicative ±15% · Web research · Not RFQ</p>
       </div>
-
-      {/* Totals */}
       <div className="grid grid-cols-3 gap-3">
-        <KpiCard
-          label="Total Low"
-          value={data ? fmtM(data.total_low_usd) : '—'}
-          sub="-15% from mid"
-          accent="amber"
-          badge="ESTIMATED"
-        />
-        <KpiCard
-          label="Total Mid"
-          value={data ? fmtM(data.total_mid_usd) : '—'}
-          sub={`${data?.records.length ?? 0} pricing records · ${data?.category_count ?? 0} categories`}
-          accent="cyan"
-          badge="ESTIMATED"
-        />
-        <KpiCard
-          label="Total High"
-          value={data ? fmtM(data.total_high_usd) : '—'}
-          sub="+15% from mid"
-          accent="green"
-          badge="ESTIMATED"
-        />
+        <KpiCard label="Budget Floor" value={s?fmtM(s.bop_total_low_usd):'—'} sub="-15% from mid" accent="amber" badge="ESTIMATED"/>
+        <KpiCard label="Planning Case" value={s?fmtM(s.bop_total_mid_usd):'—'} sub={`${s?.pricing_records??0} records · ${s?.categories_priced??0} categories`} accent="cyan" badge="ESTIMATED"/>
+        <KpiCard label="Budget Ceiling" value={s?fmtM(s.bop_total_high_usd):'—'} sub="+15% from mid" accent="green" badge="ESTIMATED"/>
       </div>
-
-      {/* Bar Chart */}
+      {groupData.length>0&&(
+        <div>
+          <h2 className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-3">By System Group</h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+            {groupData.map(g=>(
+              <div key={g.group} className="bg-[#0f1524] border border-white/[0.06] rounded-lg p-3">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <div className="w-2 h-2 rounded-full" style={{backgroundColor:GROUP_COLORS[g.group]||'#64748b'}}/>
+                  <span className="text-[9px] font-mono text-slate-500">{g.group}</span>
+                </div>
+                <div className="text-[15px] font-mono font-bold" style={{color:GROUP_COLORS[g.group]||'#64748b'}}>{fmtK(g.total_mid)}</div>
+                <div className="text-[8px] font-mono text-slate-600 mt-0.5">{g.categories.length} cats</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="bg-[#0f1524] border border-white/[0.06] rounded-lg p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider">Cost by BOP Category — Mid Estimate</h2>
-          <span className="text-[8px] font-mono text-slate-600">● ESTIMATED · WEB RESEARCH</span>
+          <h2 className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider">Mid Estimate by Category</h2>
+          <span className="text-[8px] font-mono text-slate-600">● ESTIMATED · ±15%</span>
         </div>
-        {isLoading ? (
-          <div className="h-64 flex items-center justify-center text-[10px] font-mono text-slate-600">Loading pricing data...</div>
-        ) : (
+        {isLoading?(
+          <div className="h-64 flex items-center justify-center text-[10px] font-mono text-slate-600">Loading...</div>
+        ):(
           <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={chartData} margin={{ top: 4, right: 16, left: 8, bottom: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-              <XAxis
-                dataKey="name"
-                tick={{ fontSize: 8, fontFamily: 'monospace', fill: '#64748b' }}
-                angle={-40} textAnchor="end" interval={0}
-              />
-              <YAxis
-                tickFormatter={(v) => `$${(v/1000).toFixed(0)}K`}
-                tick={{ fontSize: 8, fontFamily: 'monospace', fill: '#64748b' }}
-              />
-              <Tooltip content={<CustomTooltip />} />
+            <BarChart data={chartData} margin={{top:4,right:8,left:8,bottom:70}}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
+              <XAxis dataKey="name" tick={{fontSize:8,fontFamily:'monospace',fill:'#64748b'}} angle={-45} textAnchor="end" interval={0}/>
+              <YAxis tickFormatter={fmtK} tick={{fontSize:8,fontFamily:'monospace',fill:'#64748b'}}/>
+              <Tooltip content={<CustomTooltip/>}/>
               <Bar dataKey="mid" radius={[2,2,0,0]}>
-                {chartData.map((_, i) => (
-                  <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} fillOpacity={0.8} />
-                ))}
+                {chartData.map((entry,i)=>(<Cell key={i} fill={GROUP_COLORS[entry.group]||'#64748b'} fillOpacity={0.8}/>))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         )}
       </div>
-
-      {/* Detail table */}
       <div className="bg-[#0f1524] border border-white/[0.06] rounded-lg overflow-hidden">
-        <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
-          <h2 className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider">Pricing Detail</h2>
-          <span className="text-[8px] font-mono text-slate-600">{data?.records.length ?? 0} records</span>
+        <div className="px-5 py-3 border-b border-white/[0.06]">
+          <h2 className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider">Category Detail</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead>
-              <tr className="border-b border-white/[0.04]">
-                {['Category','Sub-category','Low','Mid','High','Lead (wks)'].map((h) => (
-                  <th key={h} className="px-4 py-2 text-left text-[8px] font-mono text-slate-600 uppercase">{h}</th>
-                ))}
-              </tr>
-            </thead>
+            <thead><tr className="border-b border-white/[0.04]">
+              {['Category','Group','Low','Mid','High','Items'].map(h=>(
+                <th key={h} className="px-4 py-2 text-left text-[8px] font-mono text-slate-600 uppercase">{h}</th>
+              ))}
+            </tr></thead>
             <tbody>
-              {data?.records
-                .slice()
-                .sort((a,b) => b.price_mid_usd - a.price_mid_usd)
-                .map((r, i) => (
-                  <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01]">
-                    <td className="px-4 py-2 text-[9px] font-mono text-cyan-400">{r.bop_category.replace(/_/g,' ')}</td>
-                    <td className="px-4 py-2 text-[9px] font-mono text-slate-400 max-w-[200px] truncate">{r.sub_category}</td>
-                    <td className="px-4 py-2 text-[9px] font-mono text-amber-400">{fmtK(r.price_low_usd)}</td>
-                    <td className="px-4 py-2 text-[9px] font-mono text-cyan-400 font-bold">{fmtK(r.price_mid_usd)}</td>
-                    <td className="px-4 py-2 text-[9px] font-mono text-emerald-400">{fmtK(r.price_high_usd)}</td>
-                    <td className="px-4 py-2 text-[9px] font-mono text-slate-500">
-                      {(r as any).lead_time_weeks_low && `${(r as any).lead_time_weeks_low}–${(r as any).lead_time_weeks_high}`}
-                    </td>
-                  </tr>
-                ))}
+              {chartData.map((r,i)=>(
+                <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.01]">
+                  <td className="px-4 py-2 text-[9px] font-mono text-slate-300">{r.name}</td>
+                  <td className="px-4 py-2"><span className="text-[7px] font-mono px-1.5 py-0.5 rounded"
+                    style={{backgroundColor:(GROUP_COLORS[r.group]||'#64748b')+'20',color:GROUP_COLORS[r.group]||'#64748b'}}>{r.group}</span></td>
+                  <td className="px-4 py-2 text-[9px] font-mono text-amber-400">{fmtK(r.low)}</td>
+                  <td className="px-4 py-2 text-[9px] font-mono text-cyan-400 font-bold">{fmtK(r.mid)}</td>
+                  <td className="px-4 py-2 text-[9px] font-mono text-emerald-400">{fmtK(r.high)}</td>
+                  <td className="px-4 py-2 text-[9px] font-mono text-slate-600">{r.items}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
