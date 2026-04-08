@@ -59,7 +59,7 @@ async function runMigrations(pool) {
                 // SQLite-only migrations contain TRIGGER...BEGIN...END blocks or
                 // SQLite-specific pragmas. PG migrations contain standard DDL/DML.
                 // Legacy explicit list retained as fallback for known-good files.
-                const legacyPgList = ['day29-postgresql', 'day31', 'day32', '023', '024', '025', '026', '027'];
+                const legacyPgList = ['day29-postgresql', 'day31', 'day32', '023', '024', '025', '026', '027', '028'];
                 const hasPgSignature = (
                     /CREATE TABLE/i.test(sql) ||
                     /CREATE INDEX/i.test(sql) ||
@@ -88,8 +88,15 @@ async function runMigrations(pool) {
                 logger.info('migrate-pg', 'applied', { file, checksum });
             } catch (err) {
                 await client.query('ROLLBACK');
-                logger.error('migrate-pg', 'migration failed', { file, error: err.message });
-                throw err;
+                logger.error('migrate-pg', 'migration failed — skipping, app will continue', { file, error: err.message });
+                // Do NOT throw — a failed migration must not crash the cold start.
+                // Record the failure so it won't be re-attempted every request.
+                try {
+                    await client.query(
+                        'INSERT INTO schema_migrations (filename, checksum) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                        [file, 'FAILED:' + checksum]
+                    );
+                } catch {}
             }
         }
         logger.info('migrate-pg', 'complete', { applied: count, total: files.length });
