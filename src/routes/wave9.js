@@ -462,6 +462,55 @@ function createWave9Routes(db, opts = {}) {
     });
 
 
+    // ─── RFQ QUEUE ───────────────────────────────────────────────────────────────
+    // Returns BOP-tagged C-Suite/VP contacts with email, enriched with pricing context
+    router.get('/rfq-queue', async (req, res) => {
+        if (!db) return res.status(503).json({ error: 'No database' });
+        await ensureOutreachTable();
+        try {
+            const contacts = await db.prepare(`
+                SELECT sc.id, sc.supplier_name, sc.contact_name, sc.title,
+                       sc.email, sc.bop_category, sc.seniority,
+                       co.id as outreach_id, co.status as outreach_status
+                FROM supplier_contacts sc
+                LEFT JOIN contact_outreach co ON co.contact_id = sc.id
+                WHERE sc.seniority IN ('c_suite','vp')
+                  AND sc.email IS NOT NULL AND sc.email != ''
+                  AND sc.bop_category IS NOT NULL
+                ORDER BY
+                    CASE WHEN co.id IS NULL THEN 0 ELSE 1 END,
+                    CASE sc.seniority WHEN 'c_suite' THEN 1 ELSE 2 END,
+                    sc.supplier_name
+            `).all();
+
+            // Enrich with pricing midpoints per category
+            const pricing = await db.prepare(`
+                SELECT bop_category, SUM(price_mid_usd) as category_mid
+                FROM market_pricing GROUP BY bop_category
+            `).all();
+            const pricingMap = {};
+            pricing.forEach(p => { pricingMap[p.bop_category] = parseFloat(p.category_mid||0); });
+
+            const queue = contacts.map(c => ({
+                id: c.id, supplier_name: c.supplier_name, contact_name: c.contact_name,
+                title: c.title, email: c.email, bop_category: c.bop_category, seniority: c.seniority,
+                category_mid_usd: pricingMap[c.bop_category] || 0,
+                rfq_status: c.outreach_id ? (c.outreach_status || 'drafted') : 'not_started',
+                outreach_id: c.outreach_id || null,
+                action: c.outreach_id ? `POST /api/wave9/outreach/${c.outreach_id}/send` : `POST /api/wave9/contacts/${c.id}/rfq`
+            }));
+
+            const not_started = queue.filter(q => q.rfq_status === 'not_started').length;
+            res.json({
+                ok: true, total: queue.length,
+                not_started, drafted: queue.filter(q=>q.rfq_status==='draft').length,
+                sent: queue.filter(q=>q.rfq_status==='sent').length,
+                next: queue.find(q => q.rfq_status === 'not_started') || null,
+                queue
+            });
+        } catch (e) { res.status(500).json({ error: e.message }); }
+    });
+
     // ─── PIPELINE SUMMARY ────────────────────────────────────────────────────────
     // Single-call procurement pipeline state — contacts + outreach + seniority
     router.get('/pipeline', async (req, res) => {
