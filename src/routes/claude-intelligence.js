@@ -47,13 +47,16 @@ async function saveClaudeResult(db, { analysisType, subjectName, content, usage,
                  model_cost_usd, model, triggered_by, created_at)
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW())
             RETURNING id
-        `).get([
+        `).get(
             analysisType, subjectName, content,
             usage?.input_tokens || 0, usage?.output_tokens || 0,
             cost, model, triggeredBy
-        ]);
-        return row?.id;
-    } catch { return null; }
+        );
+        return row?.id || null;
+    } catch (e) {
+        console.error('saveClaudeResult failed:', e.message);
+        return null;
+    }
 }
 
 function createClaudeRoutes(db, opts = {}) {
