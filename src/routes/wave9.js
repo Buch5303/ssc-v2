@@ -19,6 +19,24 @@ const { DISCOVERED_SUPPLIERS } = require('./discovery');
 function createWave9Routes(db, opts = {}) {
     const router = express.Router();
 
+    // Ensure Wave 9 tables exist (migration 028 may have partially failed)
+    if (db) {
+        db.prepare(`CREATE TABLE IF NOT EXISTS contact_outreach (
+            id              SERIAL PRIMARY KEY,
+            contact_id      INTEGER,
+            supplier_name   TEXT NOT NULL,
+            outreach_type   TEXT DEFAULT 'rfq',
+            status          TEXT DEFAULT 'draft',
+            rfq_category    TEXT,
+            rfq_content     TEXT,
+            sent_at         TIMESTAMPTZ,
+            replied_at      TIMESTAMPTZ,
+            notes           TEXT,
+            created_at      TIMESTAMPTZ DEFAULT NOW()
+        )`).run().catch(()=>{});
+        db.prepare(`CREATE INDEX IF NOT EXISTS idx_contact_outreach_status ON contact_outreach(status)`).run().catch(()=>{});
+    }
+
     // ─── STATUS ──────────────────────────────────────────────────────────────
     router.get('/status', async (req, res) => {
         const counts = { total: 0, with_email: 0, with_title: 0, tagged: 0, untagged: 0 };
