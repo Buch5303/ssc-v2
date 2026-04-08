@@ -75,11 +75,16 @@ function createStatusRoutes(db, opts = {}) {
                 activation_path: 'Upgrade Apollo to Basic ($49/mo) → POST /api/wave9/enrich-contacts'
             },
             audit_endpoints: {
-                claude_live_test:     'GET /api/claude/live-test',
-                integrity_live_test:  'GET /api/integrity/live-test',
-                health:               'GET /api/health',
-                pricing_summary:      'GET /api/discovery/pricing/summary',
-                claude_results:       'GET /api/claude/results?limit=5',
+                claude_live_test:       'GET /api/claude/live-test',
+                integrity_live_test:    'GET /api/integrity/live-test',
+                health:                 'GET /api/health',
+                pricing_summary:        'GET /api/discovery/pricing/summary',
+                claude_results:         'GET /api/claude/results?limit=5',
+                wave9_status:           'GET /api/wave9/status',
+                wave9_top_targets:      'GET /api/wave9/top-targets',
+                wave9_by_seniority:     'GET /api/wave9/contacts/by-seniority',
+                wave9_by_category:      'GET /api/wave9/contacts/by-category',
+                wave9_outreach:         'GET /api/wave9/outreach-readiness',
             }
         });
     });

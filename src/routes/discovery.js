@@ -277,6 +277,14 @@ const LV_MCC_SUPPLIERS = [
     { name: 'Emerson (Control Techniques)', domain: 'emerson.com', apollo_id: '54a129c469702d8b19d64302', tier: 1, bop_category: 'LV_MCC_System', revenue_usd: 18_016_000_000, employee_count: 73000, hq_country: 'United States', phone: '+1 314-553-2000', source: 'apollo_bulk_enrich' },
 ];
 
+// ─── ADDITIONAL SUPPLIERS — Batch 7 ────────────────────────────────────────────
+const BATCH7_SUPPLIERS = [
+    // Fire Fighting — FOGTEC (water mist, GT turbine hall fire protection)
+    { name: 'FOGTEC Fire Protection', domain: 'fogtec-international.com', apollo_id: '57c4f150a6da9869f768571e', tier: 2, bop_category: 'Fire_Fighting', revenue_usd: 41_000_000, employee_count: 150, hq_country: 'Germany', phone: '+49 221 962230', source: 'apollo_bulk_enrich' },
+    // Compressor Washing — 3rd supplier (EcoServices / StandardAero compressor wash programs)
+    { name: 'EcoServices (StandardAero)', domain: 'standardaero.com', apollo_id: null, tier: 2, bop_category: 'Compressor_Washing', revenue_usd: null, employee_count: 7000, hq_country: 'United States', phone: null, source: 'web_research' },
+];
+
 // ─── ADDITIONAL SUPPLIERS — Batch 6: Thin category depth ────────────────────
 const BATCH6_SUPPLIERS = [
     // Fire Fighting — add Marioff (HI-FOG water mist) and Fike (clean agent)
@@ -306,7 +314,7 @@ const DISCOVERED_SUPPLIERS_ALL = [
     ...DISCOVERED_SUPPLIERS, ...EXHAUST_SUPPLIERS, ...WATER_INJECTION_SUPPLIERS,
     ...COUPLING_SUPPLIERS, ...ENCLOSURE_SUPPLIERS, ...COOLING_WATER_SUPPLIERS,
     ...SAFETY_SUPPLIERS, ...VIBRATION_SUPPLIERS, ...PIPING_VALVES_SUPPLIERS,
-    ...LV_MCC_SUPPLIERS, ...BATCH6_SUPPLIERS
+    ...LV_MCC_SUPPLIERS, ...BATCH6_SUPPLIERS, ...BATCH7_SUPPLIERS
 ];
 
 function createDiscoveryRoutes(db, opts = {}) {

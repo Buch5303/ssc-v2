@@ -448,6 +448,30 @@ function createWave9Routes(db, opts = {}) {
     });
 
 
+    // ─── TOP TARGETS ─────────────────────────────────────────────────────────────
+    // C-Suite + VP contacts with email addresses — highest priority RFQ targets
+    router.get('/top-targets', async (req, res) => {
+        if (!db) return res.status(503).json({ error: 'No database' });
+        try {
+            const targets = await db.prepare(`
+                SELECT id, supplier_name, contact_name, title, email, bop_category, seniority
+                FROM supplier_contacts
+                WHERE email IS NOT NULL AND email != ''
+                  AND seniority IN ('c_suite','vp')
+                ORDER BY
+                    CASE seniority WHEN 'c_suite' THEN 1 WHEN 'vp' THEN 2 ELSE 3 END,
+                    bop_category NULLS LAST,
+                    supplier_name
+            `).all();
+            res.json({
+                ok: true,
+                total: targets.length,
+                note: `${targets.length} C-Suite/VP contacts with verified emails — ready for Claude RFQ. POST /api/wave9/contacts/:id/rfq to draft.`,
+                targets
+            });
+        } catch (e) { res.status(500).json({ error: e.message }); }
+    });
+
     // ─── OUTREACH READINESS ───────────────────────────────────────────────────
     // Returns actionable contacts (have email + BOP category) grouped by category
     router.get('/outreach-readiness', async (req, res) => {
