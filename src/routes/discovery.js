@@ -167,8 +167,97 @@ const INDICATIVE_PRICING = [
     { bop_category: 'Gas_Detection', sub_category: 'GT Enclosure Gas Detection System', part_description: 'Fixed gas detection system — catalytic/IR sensors, control panel, GT enclosure', price_low_usd: 35_700, price_mid_usd: 42_000, price_high_usd: 48_300, source_supplier: 'MSA Safety / Honeywell / Draeger', source_type: 'web_research', confidence: 'indicative', lead_time_weeks_low: 6, lead_time_weeks_high: 12, price_basis: 'Per GT enclosure. ATEX certified. 6-10 sensors. Control panel + SCADA interface. ±15% from mid.', notes: 'MSA Ultima X5000 or Honeywell Manning typical. Add flame detection +$15-25K.' },
 ];
 
+// ─── ADDITIONAL SUPPLIERS — Exhaust System (Apollo-enriched, batch 2) ─────────
+const EXHAUST_SUPPLIERS = [
+    { name: 'NEOS Enerji', domain: 'neosenerji.com', apollo_id: '60f79e16a8da790001007fc0', tier: 3, bop_category: 'Exhaust_System', revenue_usd: null, employee_count: 5, hq_country: 'Turkey', phone: '+90 312 484 8433', capabilities: ['GT exhaust stacks', 'acoustic silencers', 'dampers', 'expansion joints', 'diffusers', 'complete exhaust systems'], source: 'apollo_bulk_enrich' },
+    { name: 'G+H Group', domain: 'guh-group.com', apollo_id: '5b1478c1a6da98712ebf6c7a', tier: 2, bop_category: 'Exhaust_System', revenue_usd: null, employee_count: 260, hq_country: 'Germany', phone: null, capabilities: ['GT exhaust stacks', 'bypass stacks', 'integrated silencers', 'acoustic noise control', 'expansion joints', 'thermal insulation', 'part of VINCI Energies'], source: 'apollo_bulk_enrich' },
+    { name: 'SVI BREMCO', domain: 'svi-bremco.com', apollo_id: '5ed5cb1d4d4c6d000168c659', tier: 3, bop_category: 'Exhaust_System', revenue_usd: null, employee_count: 46, hq_country: 'United States', phone: '+1 704-688-9800', capabilities: ['GT exhaust silencers', 'exhaust stacks', 'HRSG exhaust systems', 'silencer baffles', 'CFD analysis', 'turnkey exhaust support', '50yr GT experience'], source: 'apollo_bulk_enrich' },
+    { name: 'DEKOMTE', domain: 'dekomte.com', apollo_id: '6190bf4319b1490001186cd8', tier: 2, bop_category: 'Exhaust_System', revenue_usd: null, employee_count: 98, hq_country: 'Germany', phone: '+49 6182 21014', capabilities: ['metallic bellows expansion joints', 'fabric expansion joints', 'GT exhaust expansion joints', 'HRSG penetration seals', 'up to 25yr lifespan', '100K+ joints delivered', '11 global facilities'], source: 'apollo_bulk_enrich' },
+    { name: 'Maxim Silencers', domain: 'maximsilencers.com', apollo_id: '57c4f0eba6da986a2f705d99', tier: 3, bop_category: 'Exhaust_System', revenue_usd: 13_794_000, employee_count: 18, hq_country: 'United States', phone: '+1 832-554-0980', capabilities: ['GT exhaust silencers', 'industrial silencers', 'OEM + aftermarket', 'low flow restriction', '50yr GT experience', 'catalytic converters', 'Houston TX'], source: 'apollo_bulk_enrich' },
+    { name: 'Burgess-Manning', domain: 'burgessmanning.com', apollo_id: '673023769c24470001d9bd3f', tier: 3, bop_category: 'Exhaust_System', revenue_usd: 14_694_000, employee_count: 14, hq_country: 'United States', phone: '+1 214-357-6181', capabilities: ['flue gas silencers', 'GT exhaust silencers', 'acoustical shrouds', 'noise control', 'part of CECO Environmental', '1910 founded', 'global offices'], source: 'apollo_bulk_enrich' },
+    { name: 'SAI France', domain: 'saifrance.com', apollo_id: '556d3862736964126c9abc00', tier: 3, bop_category: 'Exhaust_System', revenue_usd: null, employee_count: 47, hq_country: 'France', phone: '+33 1 69 30 90 10', capabilities: ['GT exhaust stack systems', 'silencers', 'acoustic enclosures', 'air filtration', '350+ GT exhaust systems supplied', '20 stacks for Saudi SEC 80MW GTs', '45yr experience'], source: 'apollo_bulk_enrich' },
+    { name: 'Schock Manufacturing', domain: 'schock-mfg.com', apollo_id: '5f47ed02ac843d00018e9dbd', tier: 4, bop_category: 'Exhaust_System', revenue_usd: null, employee_count: 19, hq_country: 'United States', phone: '+1 918-609-3600', capabilities: ['GT exhaust system design', 'silencer baffles', 'exhaust liner repair', 'CFD modeling', 'FEA analysis', 'Owasso OK', 'MHI/GE/Siemens/Alstom experience'], source: 'apollo_bulk_enrich' },
+];
+
+// ─── ADDITIONAL SUPPLIERS — Water Injection / Demineralized Water ─────────────
+const WATER_INJECTION_SUPPLIERS = [
+    { name: 'Petrotech Inc', domain: 'petrotechinc.com', apollo_id: '54a1367d69702d38bbe8ec00', tier: 2, bop_category: 'Water_Injection', revenue_usd: 60_283_000, employee_count: 110, hq_country: 'United States', phone: '+1 504-620-6600', capabilities: ['water injection skids', 'NOx reduction systems', 'GE Frame 5/7 experience', 'turbomachinery controls', 'New Orleans LA', '1978 founded', 'complete turnkey WI systems'], source: 'apollo_bulk_enrich' },
+    { name: 'Turbo Control Solutions', domain: 'tcssb.com', apollo_id: '5d0a0ced80f93e474bcb941a', tier: 3, bop_category: 'Water_Injection', revenue_usd: null, employee_count: 17, hq_country: 'Malaysia', phone: '+60 3-7614 7758', capabilities: ['water injection skids', 'GT NOx control systems', 'control system retrofits', 'DLE/DLN combustion tuning', 'SE Asia focus', 'GE Speedtronic controls'], source: 'apollo_bulk_enrich' },
+    { name: 'Veolia Water Technologies', domain: 'veolia.com', apollo_id: '54a1bc4c74686954758f4b0c', tier: 1, bop_category: 'Water_Injection', revenue_usd: 52_000_000_000, employee_count: 202_000, hq_country: 'France', phone: '+33 1 85 57 70 00', capabilities: ['TERION demin water systems', 'RO + CEDI technology', 'GT injection grade water', '5-52 m3/hr capacity', 'plug-and-play skid systems', 'global'], source: 'apollo_bulk_enrich' },
+    { name: 'Carotek', domain: 'carotek.com', apollo_id: '54a12a2c69702dcef9d6fe01', tier: 3, bop_category: 'Water_Injection', revenue_usd: 25_300_000, employee_count: 190, hq_country: 'United States', phone: '+1 704-844-1100', capabilities: ['demin water skids', 'fuel + water process skids', 'CCGT skid packages', 'custom fabrication', 'SunSource subsidiary', 'SE USA'], source: 'apollo_bulk_enrich' },
+    { name: 'American Moistening Company (AMCO)', domain: 'amco.com', apollo_id: '64d3b020beaf9e00ba0f63e1', tier: 4, bop_category: 'Water_Injection', revenue_usd: 6_220_000, employee_count: 4, hq_country: 'United States', phone: '+1 704-889-7281', capabilities: ['DI water systems', 'GT injection demin water', 'ion exchange systems', 'electrodeionization units', '100yr+ history', 'Pineville NC'], source: 'apollo_bulk_enrich' },
+    { name: 'FAIST Anlagenbau', domain: 'faistgroup.com', apollo_id: '5fc8e5ec932e16000187b1f6', tier: 2, bop_category: 'Enclosures', revenue_usd: 232_731_000, employee_count: 2000, hq_country: 'Germany', phone: '+44 20 7484 0522', capabilities: ['GT acoustic enclosures', 'noise control enclosures', 'ventilation systems', '1978 founded', 'global manufacturing', 'power generation focus'], source: 'apollo_bulk_enrich' },
+];
+
+// Merge all supplier arrays
+const DISCOVERED_SUPPLIERS_ALL = [...DISCOVERED_SUPPLIERS, ...EXHAUST_SUPPLIERS, ...WATER_INJECTION_SUPPLIERS];
+
 function createDiscoveryRoutes(db, opts = {}) {
     const router = express.Router();
+
+    // ─── INIT — seed all data on GET (no auth needed, idempotent) ─────────────
+    router.get('/init', async (req, res) => {
+        if (!db) return res.json({ ok: false, reason: 'no_db' });
+        let suppliersInserted = 0, suppliersSkipped = 0, pricingInserted = 0, pricingSkipped = 0;
+
+        // Check if already seeded
+        try {
+            const existing = await db.prepare('SELECT COUNT(*) as cnt FROM supplier_tiers').get();
+            if (parseInt(existing?.cnt || 0) >= DISCOVERED_SUPPLIERS_ALL.length) {
+                return res.json({ ok: true, already_seeded: true, suppliers: parseInt(existing.cnt), message: 'Already initialized' });
+            }
+        } catch {}
+
+        // Seed supplier tiers
+        for (const s of DISCOVERED_SUPPLIERS_ALL) {
+            try {
+                await db.prepare(`
+                    INSERT INTO supplier_tiers (supplier_name, domain, apollo_org_id, tier, bop_category,
+                        revenue_usd, employee_count, hq_country, phone, capabilities, source, last_enriched_at)
+                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,NOW())
+                    ON CONFLICT DO NOTHING
+                `).run([s.name, s.domain, s.apollo_id||null, s.tier, s.bop_category,
+                    s.revenue_usd||null, s.employee_count||null, s.hq_country||null, s.phone||null,
+                    s.capabilities||[], s.source||'web_search']);
+                suppliersInserted++;
+            } catch { suppliersSkipped++; }
+        }
+
+        // Seed market pricing
+        for (const p of INDICATIVE_PRICING) {
+            try {
+                await db.prepare(`
+                    INSERT INTO market_pricing (bop_category, sub_category, part_description,
+                        price_low_usd, price_mid_usd, price_high_usd, currency, price_basis,
+                        lead_time_weeks_low, lead_time_weeks_high, source_supplier, source_type, confidence, notes)
+                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+                `).run([p.bop_category, p.sub_category||null, p.part_description,
+                    p.price_low_usd, p.price_mid_usd, p.price_high_usd,
+                    p.currency||'USD', p.price_basis||null,
+                    p.lead_time_weeks_low||null, p.lead_time_weeks_high||null,
+                    p.source_supplier||null, p.source_type||'web_research',
+                    p.confidence||'indicative', p.notes||null]);
+                pricingInserted++;
+            } catch { pricingSkipped++; }
+        }
+
+        // Update category counts
+        try {
+            await db.prepare(`
+                UPDATE bop_categories bc SET supplier_count = (
+                    SELECT COUNT(*) FROM supplier_tiers st WHERE st.bop_category = bc.category_key
+                ), pricing_record_count = (
+                    SELECT COUNT(*) FROM market_pricing mp WHERE mp.bop_category = bc.category_key
+                )
+            `).run();
+        } catch {}
+
+        res.json({
+            ok: true, initialized: true,
+            suppliers: { inserted: suppliersInserted, skipped: suppliersSkipped, total: DISCOVERED_SUPPLIERS_ALL.length },
+            pricing:   { inserted: pricingInserted,   skipped: pricingSkipped,   total: INDICATIVE_PRICING.length }
+        });
+    });
 
     // ─── STATUS ───────────────────────────────────────────────────────────────
     router.get('/status', async (req, res) => {
@@ -189,7 +278,7 @@ function createDiscoveryRoutes(db, opts = {}) {
                 version: '1.0.0',
                 status: 'operational',
                 capabilities: ['supplier_discovery', 'tier_classification', 'indicative_pricing', 'price_history', 'multi_tier_search'],
-                seeded_suppliers: DISCOVERED_SUPPLIERS.length,
+                seeded_suppliers: DISCOVERED_SUPPLIERS_ALL.length,
                 seeded_pricing: INDICATIVE_PRICING.length,
                 bop_categories: BOP_CATEGORIES.length,
                 db_stats: stats,
@@ -245,7 +334,7 @@ function createDiscoveryRoutes(db, opts = {}) {
 
             // Fallback to seeded data
             if (!suppliers.length) {
-                let filtered = DISCOVERED_SUPPLIERS;
+                let filtered = DISCOVERED_SUPPLIERS_ALL;
                 if (tier) filtered = filtered.filter(s => s.tier === tier);
                 if (category) filtered = filtered.filter(s => s.bop_category === category);
                 if (search) { const q = search.toLowerCase(); filtered = filtered.filter(s => s.name.toLowerCase().includes(q) || (s.domain||'').toLowerCase().includes(q)); }
@@ -377,7 +466,7 @@ function createDiscoveryRoutes(db, opts = {}) {
         if (!db) return res.status(503).json({ error: 'No database' });
         try {
             let inserted = 0, skipped = 0;
-            for (const s of DISCOVERED_SUPPLIERS) {
+            for (const s of DISCOVERED_SUPPLIERS_ALL) {
                 try {
                     await db.prepare(`
                         INSERT INTO supplier_tiers (
@@ -394,7 +483,7 @@ function createDiscoveryRoutes(db, opts = {}) {
                     inserted++;
                 } catch { skipped++; }
             }
-            res.json({ ok: true, inserted, skipped, total: DISCOVERED_SUPPLIERS.length });
+            res.json({ ok: true, inserted, skipped, total: DISCOVERED_SUPPLIERS_ALL.length });
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
@@ -445,8 +534,8 @@ function createDiscoveryRoutes(db, opts = {}) {
 
             // Simulate discovery run stats
             const suppliersFound = category
-                ? DISCOVERED_SUPPLIERS.filter(s => s.bop_category === category).length
-                : DISCOVERED_SUPPLIERS.length;
+                ? DISCOVERED_SUPPLIERS_ALL.filter(s => s.bop_category === category).length
+                : DISCOVERED_SUPPLIERS_ALL.length;
             const pricesUpdated = category
                 ? INDICATIVE_PRICING.filter(p => p.bop_category === category).length
                 : INDICATIVE_PRICING.length;
@@ -497,10 +586,10 @@ function createDiscoveryRoutes(db, opts = {}) {
     router.get('/cron', async (req, res) => {
         // Vercel cron calls this daily — runs a lightweight re-enrichment pass
         try {
-            const result = { triggered: true, timestamp: new Date().toISOString(), categories: BOP_CATEGORIES.length, suppliers_in_engine: DISCOVERED_SUPPLIERS.length, pricing_records: INDICATIVE_PRICING.length };
+            const result = { triggered: true, timestamp: new Date().toISOString(), categories: BOP_CATEGORIES.length, suppliers_in_engine: DISCOVERED_SUPPLIERS_ALL.length, pricing_records: INDICATIVE_PRICING.length };
             if (db) {
                 try {
-                    await db.prepare(`INSERT INTO discovery_jobs (job_type, status, triggered_by, suppliers_found, prices_updated, started_at, completed_at) VALUES ('cron_sweep','complete','cron',$1,$2,NOW(),NOW())`).run([DISCOVERED_SUPPLIERS.length, INDICATIVE_PRICING.length]);
+                    await db.prepare(`INSERT INTO discovery_jobs (job_type, status, triggered_by, suppliers_found, prices_updated, started_at, completed_at) VALUES ('cron_sweep','complete','cron',$1,$2,NOW(),NOW())`).run([DISCOVERED_SUPPLIERS_ALL.length, INDICATIVE_PRICING.length]);
                 } catch {}
             }
             res.json({ ok: true, ...result });
@@ -511,9 +600,9 @@ function createDiscoveryRoutes(db, opts = {}) {
     router.get('/tier-stats', async (req, res) => {
         try {
             const tierCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
-            DISCOVERED_SUPPLIERS.forEach(s => { tierCounts[s.tier] = (tierCounts[s.tier] || 0) + 1; });
+            DISCOVERED_SUPPLIERS_ALL.forEach(s => { tierCounts[s.tier] = (tierCounts[s.tier] || 0) + 1; });
             const byCategory = {};
-            DISCOVERED_SUPPLIERS.forEach(s => {
+            DISCOVERED_SUPPLIERS_ALL.forEach(s => {
                 if (!byCategory[s.bop_category]) byCategory[s.bop_category] = { T1: 0, T2: 0, T3: 0, T4: 0, total: 0 };
                 byCategory[s.bop_category][`T${s.tier}`]++;
                 byCategory[s.bop_category].total++;
@@ -524,7 +613,7 @@ function createDiscoveryRoutes(db, opts = {}) {
                     T2: { count: tierCounts[2], label: 'Major Independent Supplier ($50M-$500M)' },
                     T3: { count: tierCounts[3], label: 'Specialty Manufacturer ($5M-$50M)' },
                     T4: { count: tierCounts[4], label: 'Small Manufacturer / Trader (<$5M)' },
-                    total: DISCOVERED_SUPPLIERS.length
+                    total: DISCOVERED_SUPPLIERS_ALL.length
                 },
                 by_category: byCategory
             });
@@ -534,4 +623,4 @@ function createDiscoveryRoutes(db, opts = {}) {
     return router;
 }
 
-module.exports = { createDiscoveryRoutes, DISCOVERED_SUPPLIERS, INDICATIVE_PRICING, BOP_CATEGORIES, classifyTier };
+module.exports = { createDiscoveryRoutes, DISCOVERED_SUPPLIERS: DISCOVERED_SUPPLIERS_ALL, INDICATIVE_PRICING, BOP_CATEGORIES, classifyTier };

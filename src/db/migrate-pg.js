@@ -57,7 +57,8 @@ async function runMigrations(pool) {
             try {
                 // Skip SQLite-specific syntax (CREATE TRIGGER IF NOT EXISTS with BEGIN/END)
                 // PostgreSQL migrations use 020-day29-postgresql.sql which has PG-native syntax
-                if (file.includes('day29-postgresql') || file.includes('day31') || file.includes('day32') || file.includes('023') || file.includes('024')) {
+                const pgMigrations = ['day29-postgresql', 'day31', 'day32', '023', '024', '025', '026', '027'];
+                if (pgMigrations.some(p => file.includes(p))) {
                     await client.query(sql);
                 } else {
                     // For SQLite-origin migrations, skip them on PG (covered by 020)
