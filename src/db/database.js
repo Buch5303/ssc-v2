@@ -35,6 +35,9 @@ async function _initPostgres() {
         max: parseInt(process.env.PG_POOL_MAX, 10) || 20,
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 5000,
+        ssl: process.env.DATABASE_URL?.includes('neon.tech') || process.env.DATABASE_URL?.includes('sslmode=require')
+            ? { rejectUnauthorized: false }
+            : false,
     });
 
     pool.on('error', (err) => logger.error('database', 'pg pool error', { error: err.message }));
