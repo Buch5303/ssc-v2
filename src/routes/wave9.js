@@ -151,6 +151,26 @@ function createWave9Routes(db, opts = {}) {
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
+    // ─── CONTACTS BY SENIORITY ───────────────────────────────────────────────
+    router.get('/contacts/by-seniority', async (req, res) => {
+        if (!db) return res.status(503).json({ error: 'No database' });
+        try {
+            const rows = await db.prepare(`
+                SELECT seniority,
+                       COUNT(*)::int as contacts,
+                       COUNT(email) FILTER (WHERE email IS NOT NULL AND email != '')::int as with_email,
+                       COUNT(bop_category) FILTER (WHERE bop_category IS NOT NULL)::int as bop_tagged
+                FROM supplier_contacts
+                WHERE seniority IS NOT NULL
+                GROUP BY seniority ORDER BY contacts DESC
+            `).all();
+            const safe = v => parseInt(v||0)||0;
+            const total = rows.reduce((s,r)=>s+safe(r.contacts),0);
+            res.json({ ok: true, total_classified: total,
+                by_seniority: rows.map(r=>({ seniority: r.seniority, contacts: safe(r.contacts), with_email: safe(r.with_email), bop_tagged: safe(r.bop_tagged) })) });
+        } catch (e) { res.status(500).json({ error: e.message }); }
+    });
+
     // ─── SINGLE CONTACT ───────────────────────────────────────────────────────
     router.get('/contacts/:id', async (req, res) => {
         if (!db) return res.status(503).json({ error: 'No database' });
@@ -427,25 +447,6 @@ function createWave9Routes(db, opts = {}) {
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
-    // ─── CONTACTS BY SENIORITY ───────────────────────────────────────────────
-    router.get('/contacts/by-seniority', async (req, res) => {
-        if (!db) return res.status(503).json({ error: 'No database' });
-        try {
-            const rows = await db.prepare(`
-                SELECT seniority,
-                       COUNT(*)::int as contacts,
-                       COUNT(email) FILTER (WHERE email IS NOT NULL AND email != '')::int as with_email,
-                       COUNT(bop_category) FILTER (WHERE bop_category IS NOT NULL)::int as bop_tagged
-                FROM supplier_contacts
-                WHERE seniority IS NOT NULL
-                GROUP BY seniority ORDER BY contacts DESC
-            `).all();
-            const safe = v => parseInt(v||0)||0;
-            const total = rows.reduce((s,r)=>s+safe(r.contacts),0);
-            res.json({ ok: true, total_classified: total,
-                by_seniority: rows.map(r=>({ seniority: r.seniority, contacts: safe(r.contacts), with_email: safe(r.with_email), bop_tagged: safe(r.bop_tagged) })) });
-        } catch (e) { res.status(500).json({ error: e.message }); }
-    });
 
     // ─── OUTREACH READINESS ───────────────────────────────────────────────────
     // Returns actionable contacts (have email + BOP category) grouped by category
