@@ -158,14 +158,14 @@ function perplexityEnvelope({ mod, result, data, cached = false }) {
         outputType: hasCitations ? OUTPUT_TYPES.VERIFIED : OUTPUT_TYPES.DERIVED,
         freshness: cached ? FRESHNESS.CACHED : FRESHNESS.LIVE,
         sourceSummary: hasCitations
-            ? `Perplexity Sonar — ${result.citations.length} web citation(s)`
-            : `Perplexity Sonar — no citations returned`,
+            ? `Perplexity Sonar — ${result.citations.length} citation(s) · live web search`
+            : `Perplexity Sonar — live web search · no citations returned`,
         data: {
             ...data,
-            citations: result?.citations || [],
+            live_call:   !cached,  // true = real Perplexity API call this request
+            citations:   result?.citations || [],
             tokens_used: result?.usage?.total_tokens,
-            cost_usd: result?.usage ? undefined : undefined,
-            model: result?.model,
+            model:       result?.model,
         }
     });
 }
@@ -179,12 +179,14 @@ function claudeEnvelope({ mod, outputType, result, data }) {
         mod: mod || 'claude_sonnet',
         outputType: outputType || OUTPUT_TYPES.GENERATED_ANALYSIS,
         freshness: FRESHNESS.LIVE,
-        sourceSummary: `Claude ${result?.model || 'claude-sonnet-4-6'} — AI-generated`,
+        sourceSummary: `Claude ${result?.model || 'claude-sonnet-4-6'} — live AI call · ${result?.usage?.output_tokens || 0} tokens out`,
         data: {
             ...data,
+            live_call:     true,  // Confirmed: real Anthropic API call, not staged/placeholder
             input_tokens:  result?.usage?.input_tokens,
             output_tokens: result?.usage?.output_tokens,
-            model:         result?.model,
+            model:         result?.model || 'claude-sonnet-4-6',
+            cost_usd:      data?.cost_usd,
         }
     });
 }

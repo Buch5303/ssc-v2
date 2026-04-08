@@ -2051,7 +2051,7 @@ html, body {
         </div>
       </div>
 
-      <!-- Discovery Engine Log -->
+      <!-- ═══ PERPLEXITY INTEGRITY ENGINE — Dedicated Panel ══════════════════ -->
       <div class="panel" style="margin-bottom:16px">
         <div class="panel-header">
           <div class="panel-title">
@@ -2066,6 +2066,14 @@ html, body {
             </select>
             <button onclick="runBatchIntegrity()" style="padding:4px 12px;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.4);border-radius:5px;color:#a855f7;font-family:var(--font-mono);font-size:9px;cursor:pointer;font-weight:600">▶ BATCH SWEEP</button>
           </div>
+        </div>
+        <!-- Engine state banner — driven by /api/health -->
+        <div id="px-engine-banner" style="padding:8px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--bg-elevated)">
+          <span id="px-state-dot" style="width:7px;height:7px;border-radius:50%;background:var(--amber);display:inline-block;flex-shrink:0"></span>
+          <span id="px-state-label" style="font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--amber)">AWAITING KEY</span>
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">·</span>
+          <span id="px-state-detail" style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">Add PERPLEXITY_API_KEY to Vercel env vars to activate real-time web validation</span>
+          <span style="margin-left:auto;font-family:var(--font-mono);font-size:8px;padding:2px 6px;background:rgba(245,158,11,0.1);border-radius:3px;color:var(--amber)" id="px-output-badge">OUTPUT: PLACEHOLDER</span>
         </div>
         <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)">
           <div style="padding:10px;background:var(--bg-card);text-align:center"><div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--green)" id="int-high">—</div><div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">HIGH</div></div>
@@ -2089,6 +2097,7 @@ html, body {
       </div>
 
       <!-- Claude Intelligence Panel -->
+      <!-- ═══ CLAUDE INTELLIGENCE ENGINE — Dedicated Panel ════════════════════ -->
       <div class="panel" style="margin-bottom:16px">
         <div class="panel-header">
           <div class="panel-title">
@@ -2106,8 +2115,19 @@ html, body {
             <button onclick="runClaudeAction()" style="padding:4px 12px;background:var(--cyan-dim);border:1px solid rgba(6,182,212,0.4);border-radius:5px;color:var(--cyan);font-family:var(--font-mono);font-size:9px;cursor:pointer;font-weight:600">▶ RUN</button>
           </div>
         </div>
+        <!-- Engine state banner — driven by /api/health -->
+        <div id="claude-engine-banner" style="padding:8px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--bg-elevated)">
+          <span id="claude-state-dot" style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0"></span>
+          <span id="claude-state-label" style="font-family:var(--font-mono);font-size:9px;font-weight:700;color:var(--green)">OPERATIONAL</span>
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">·</span>
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">Live Anthropic API · claude-sonnet-4-6 · real calls, not staged output</span>
+          <span style="margin-left:auto;display:flex;gap:6px">
+            <span style="font-family:var(--font-mono);font-size:8px;padding:2px 6px;background:rgba(6,182,212,0.1);border-radius:3px;color:var(--cyan)">ANALYSIS → generated_analysis</span>
+            <span style="font-family:var(--font-mono);font-size:8px;padding:2px 6px;background:rgba(6,182,212,0.1);border-radius:3px;color:var(--cyan)">RFQ → generated_draft</span>
+          </span>
+        </div>
         <div style="padding:8px 20px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">
-          Claude Sonnet · Deep reasoning + synthesis · RFQ drafting · Pricing anomaly detection · Supplier ranking · Complements Perplexity real-time search
+          <span style="color:var(--cyan)">●</span> AI GENERATED — Claude Sonnet · Deep reasoning + synthesis · RFQ drafting · Pricing anomaly detection · Supplier ranking · Complements Perplexity real-time search
         </div>
         <!-- Quick RFQ generator -->
         <div style="padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg-elevated)">
@@ -3766,7 +3786,35 @@ async function loadEngineHealth() {
 
     renderActivationBanner(h);
 
+    // Update dedicated engine panel banners
+    updatePxPanelBanner(h.engines?.perplexity);
+    updateClaudePanelBanner(h.engines?.claude);
+
   } catch(e) { console.warn('loadEngineHealth:', e); }
+}
+
+function updatePxPanelBanner(px) {
+  const dot = document.getElementById('px-state-dot');
+  const label = document.getElementById('px-state-label');
+  const detail = document.getElementById('px-state-detail');
+  const badge = document.getElementById('px-output-badge');
+  if (!dot) return;
+  const op = px?.status === 'operational';
+  dot.style.background = op ? 'var(--green)' : 'var(--amber)';
+  if (label) { label.textContent = op ? 'OPERATIONAL — LIVE SEARCH' : 'AWAITING KEY'; label.style.color = op ? 'var(--green)' : 'var(--amber)'; }
+  if (detail) detail.textContent = op
+    ? 'Perplexity Sonar — real-time web validation · verified output when citations present · derived when absent'
+    : 'Add PERPLEXITY_API_KEY to Vercel env vars → perplexity.ai/settings/api';
+  if (badge) { badge.textContent = op ? 'OUTPUT: VERIFIED / DERIVED' : 'OUTPUT: PLACEHOLDER'; badge.style.color = op ? 'var(--cyan)' : 'var(--amber)'; badge.style.background = op ? 'rgba(6,182,212,0.1)' : 'rgba(245,158,11,0.1)'; }
+}
+
+function updateClaudePanelBanner(cl) {
+  const dot = document.getElementById('claude-state-dot');
+  const label = document.getElementById('claude-state-label');
+  if (!dot) return;
+  const op = cl?.status === 'operational';
+  dot.style.background = op ? 'var(--green)' : 'var(--amber)';
+  if (label) { label.textContent = op ? 'OPERATIONAL — LIVE API' : 'AWAITING KEY'; label.style.color = op ? 'var(--green)' : 'var(--amber)'; }
 }
 
 function renderActivationBanner(h) {

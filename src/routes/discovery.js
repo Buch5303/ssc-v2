@@ -392,6 +392,7 @@ function createDiscoveryRoutes(db, opts = {}) {
                 } catch {}
             }
             res.json({
+                _envelope: { contract_version: '1.0', engine: 'FlowSeer Discovery Engine', module: 'status', timestamp: new Date().toISOString(), freshness: FRESHNESS.SEEDED, output_type: OUTPUT_TYPES.DERIVED, source_summary: 'DB stats + seeded memory', readiness: 'operational', error: null },
                 engine: 'FlowSeer Continuous Intelligence Engine',
                 version: '1.0.0',
                 status: 'operational',
@@ -417,7 +418,7 @@ function createDiscoveryRoutes(db, opts = {}) {
                 } catch {}
             }
             if (!cats.length) cats = BOP_CATEGORIES;
-            res.json({ categories: cats, total: cats.length });
+            res.json({ _envelope: { contract_version: '1.0', engine: 'FlowSeer Discovery Engine', module: 'bop_categories', timestamp: new Date().toISOString(), freshness: FRESHNESS.SEEDED, output_type: OUTPUT_TYPES.SEEDED, source_summary: 'BOP category taxonomy — seeded', readiness: 'operational', error: null }, categories: cats, total: cats.length });
         } catch (e) {
             res.status(500).json({ error: e.message });
         }
@@ -468,6 +469,7 @@ function createDiscoveryRoutes(db, opts = {}) {
             suppliers = suppliers.map(s => ({ ...s, tier_label: tierLabels[s.tier] || `Tier ${s.tier}` }));
 
             res.json({
+                _envelope: { contract_version: '1.0', engine: 'FlowSeer Discovery Engine', module: 'supplier_list', timestamp: new Date().toISOString(), freshness: FRESHNESS.CACHED, output_type: OUTPUT_TYPES.SEEDED, source_summary: 'DB supplier tiers — Apollo enriched', readiness: 'operational', error: null },
                 suppliers,
                 pagination: { page, limit, total, pages: Math.ceil(total / limit) },
                 filters: { tier, category, search }
@@ -732,6 +734,7 @@ function createDiscoveryRoutes(db, opts = {}) {
                 byCategory[s.bop_category].total++;
             });
             res.json({
+                _envelope: { contract_version: '1.0', engine: 'FlowSeer Discovery Engine', module: 'tier_stats', timestamp: new Date().toISOString(), freshness: FRESHNESS.SEEDED, output_type: OUTPUT_TYPES.DERIVED, source_summary: `In-memory tier distribution — ${DISCOVERED_SUPPLIERS_ALL.length} suppliers`, readiness: 'operational', error: null },
                 overall: {
                     T1: { count: tierCounts[1], label: 'OEM / Major Manufacturer (>$500M, >5000 emp)' },
                     T2: { count: tierCounts[2], label: 'Major Independent Supplier ($50M-$500M)' },

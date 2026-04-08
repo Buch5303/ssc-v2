@@ -210,7 +210,7 @@ function createIntegrityRoutes(db, opts = {}) {
                     `SELECT * FROM market_briefings WHERE bop_category = $1 AND valid_until > NOW() ORDER BY created_at DESC LIMIT 1`
                 ).get([bop_category]);
                 if (cached) {
-                    return res.json({ ok: true, cached: true, bop_category, briefing: cached.briefing_content, citations: JSON.parse(cached.citations || '[]'), created_at: cached.created_at });
+                    return res.json({ _envelope: { contract_version: '1.0', engine: 'FlowSeer Integrity Engine', module: 'market_briefing', timestamp: new Date().toISOString(), freshness: FRESHNESS.CACHED, output_type: OUTPUT_TYPES.CACHED, source_summary: 'Cached Perplexity briefing (7-day TTL)', readiness: 'operational', error: null }, ok: true, cached: true, bop_category, briefing: cached.briefing_content, citations: JSON.parse(cached.citations || '[]'), created_at: cached.created_at });
                 }
             } catch {}
         }
@@ -293,7 +293,7 @@ function createIntegrityRoutes(db, opts = {}) {
             } catch {}
         }
 
-        res.json({ results, page, limit, total: results.length });
+        res.json({ _envelope: { contract_version: '1.0', engine: 'FlowSeer Integrity Engine', module: 'integrity_results', timestamp: new Date().toISOString(), freshness: FRESHNESS.CACHED, output_type: OUTPUT_TYPES.DERIVED, source_summary: 'DB integrity check history', readiness: 'operational', error: null }, results, page, limit, total: results.length });
     });
 
     // ─── SCORES SUMMARY ───────────────────────────────────────────────────────
@@ -315,7 +315,7 @@ function createIntegrityRoutes(db, opts = {}) {
             } catch {}
         }
 
-        res.json(scores);
+        res.json({ _envelope: { contract_version: '1.0', engine: 'FlowSeer Integrity Engine', module: 'integrity_scores', timestamp: new Date().toISOString(), freshness: FRESHNESS.CACHED, output_type: OUTPUT_TYPES.DERIVED, source_summary: 'DB aggregated integrity scores', readiness: 'operational', error: null }, ...scores });
     });
 
     // ─── BATCH SWEEP — run integrity checks on all seeded suppliers ───────────
@@ -392,6 +392,7 @@ function createIntegrityRoutes(db, opts = {}) {
             }
 
             res.json({
+                _envelope: { contract_version: '1.0', engine: 'FlowSeer Integrity Engine', module: 'sweep', timestamp: new Date().toISOString(), freshness: FRESHNESS.LIVE, output_type: OUTPUT_TYPES.DERIVED, source_summary: `Batch sweep — ${results.length} checks via Perplexity Sonar`, readiness: 'operational', error: null },
                 ok: true, check_type: checkType, checked: results.length,
                 results, total_cost_usd: Math.round(totalCost * 10000) / 10000,
                 total_tokens: totalTokens,
@@ -421,7 +422,7 @@ function createIntegrityRoutes(db, opts = {}) {
                 } catch {}
             }
 
-            res.json({ ok: true, swept, total_cost_usd: Math.round(totalCost * 10000) / 10000, timestamp: new Date().toISOString() });
+            res.json({ _envelope: { contract_version: '1.0', engine: 'FlowSeer Integrity Engine', module: 'cron_sweep', timestamp: new Date().toISOString(), freshness: FRESHNESS.LIVE, output_type: OUTPUT_TYPES.DERIVED, source_summary: 'Weekly cron integrity sweep', readiness: 'operational', error: null }, ok: true, swept, total_cost_usd: Math.round(totalCost * 10000) / 10000, timestamp: new Date().toISOString() });
         } catch (e) {
             res.status(500).json({ error: e.message });
         }

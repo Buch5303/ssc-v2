@@ -76,6 +76,7 @@ function createClaudeRoutes(db, opts = {}) {
         }
 
         res.json({
+            _envelope: { contract_version: '1.0', engine: 'Claude Intelligence Engine', module: 'status', timestamp: new Date().toISOString(), freshness: 'seeded', output_type: 'derived', source_summary: 'Local DB stats + env config', readiness: claudeConfigured ? 'operational' : 'awaiting_key', error: null },
             engine: 'FlowSeer Claude Intelligence Engine',
             version: '1.0.0',
             status: hasKey ? 'operational' : 'no_api_key',
@@ -323,7 +324,7 @@ function createClaudeRoutes(db, opts = {}) {
             } catch {}
         }
 
-        res.json({ results, page, limit });
+        res.json({ _envelope: { contract_version: '1.0', engine: 'Claude Intelligence Engine', module: 'analysis_results', timestamp: new Date().toISOString(), freshness: 'cached', output_type: 'derived', source_summary: 'DB Claude analysis history', readiness: 'operational', error: null }, results, page, limit });
     });
 
     return router;
