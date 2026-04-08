@@ -3348,7 +3348,7 @@ function showView(v) {
   const miView = document.getElementById('market-intel-view');
   if (miView) miView.style.display = v === 'market-intel' ? 'block' : 'none';
   if (v === 'governance') loadOperatorQueue();
-  if (v === 'market-intel') { loadMarketIntel(); loadEngineHealth(); }
+  if (v === 'market-intel') { loadMarketIntel(); loadEngineHealth(); loadClaudeHistory(); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -4176,18 +4176,18 @@ function showClaudeResult(title, content, costUsd, model, envelope) {
 async function runClaudeAction() {
   const action = document.getElementById('claude-action-select')?.value;
   const el = document.getElementById('claude-results');
-  if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--cyan)">Running Claude ${action}...</div>`;
+  if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--cyan)">⟳ Running Claude ${action?.replace(/-/g,' ')}... (10-30s)</div>`;
 
   try {
     let result, title;
 
     if (action === 'analyze-pricing') {
-      result = await fetchJSON('/api/claude/analyze-pricing', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' });
+      result = await fetchJSON('/api/claude/run-pricing-analysis');
       title  = 'PRICING ANOMALY ANALYSIS';
       if (result?.analysis) showClaudeResult(title, result.analysis, result.cost_usd, result.model, result._envelope);
 
     } else if (action === 'procurement-summary') {
-      result = await fetchJSON('/api/claude/procurement-summary', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' });
+      result = await fetchJSON('/api/claude/run-procurement-summary');
       title  = 'EXECUTIVE PROCUREMENT SUMMARY';
       if (result?.summary) showClaudeResult(title, result.summary, result.cost_usd, result.model, result._envelope);
 
@@ -4199,17 +4199,41 @@ async function runClaudeAction() {
 
     } else if (action === 'outreach-strategy') {
       const category = document.getElementById('pricing-category-filter')?.value || 'Lube_Oil_System';
-      result = await fetchJSON('/api/claude/outreach-strategy', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ category }) });
+      result = await fetchJSON('/api/claude/run-outreach-strategy?category=' + encodeURIComponent(category));
       title  = 'OUTREACH STRATEGY: ' + category.replace(/_/g,' ');
       if (result?.strategy) showClaudeResult(title, result.strategy, result.cost_usd, result.model, result._envelope);
     }
 
-    if (result?.error) {
-      if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--red)">Error: ${esc(result.error)}${result.hint ? '<br><span style="color:var(--amber)">' + esc(result.hint) + '</span>' : ''}</div>`;
+    if (result?._envelope?.readiness === 'awaiting_key' || result?._envelope?.readiness === 'credits_insufficient') {
+      if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--amber)">${esc(result._envelope.source_summary)}</div>`;
+    } else if (result?.error && !result?.ok) {
+      if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--red)">Error: ${esc(result.error)}</div>`;
     }
   } catch(e) {
     if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--red)">Claude request failed: ${esc(e.message)}</div>`;
   }
+}
+
+async function loadClaudeHistory() {
+  const el = document.getElementById('claude-results');
+  if (!el) return;
+  try {
+    const data = await fetchJSON('/api/claude/results?limit=5');
+    if (!data?.results?.length) {
+      el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">Claude Intelligence Engine is ready. Select an action above and click ▶ RUN to generate live analysis.</div>`;
+      return;
+    }
+    el.innerHTML = '';
+    data.results.forEach(r => {
+      showClaudeResult(
+        (r.analysis_type || 'analysis').toUpperCase().replace(/_/g,' '),
+        r.preview || r.content || '',
+        null,
+        r.model,
+        { output_type: r.analysis_type?.includes('draft') ? 'generated_draft' : 'generated_analysis', input_tokens: r.input_tokens, output_tokens: r.output_tokens }
+      );
+    });
+  } catch(e) { /* silent — panel will just be empty */ }
 }
 
 async function runClaudeRFQ() {
