@@ -165,6 +165,18 @@ const INDICATIVE_PRICING = [
 
     // GAS DETECTION
     { bop_category: 'Gas_Detection', sub_category: 'GT Enclosure Gas Detection System', part_description: 'Fixed gas detection system — catalytic/IR sensors, control panel, GT enclosure', price_low_usd: 35_700, price_mid_usd: 42_000, price_high_usd: 48_300, source_supplier: 'MSA Safety / Honeywell / Draeger', source_type: 'web_research', confidence: 'indicative', lead_time_weeks_low: 6, lead_time_weeks_high: 12, price_basis: 'Per GT enclosure. ATEX certified. 6-10 sensors. Control panel + SCADA interface. ±15% from mid.', notes: 'MSA Ultima X5000 or Honeywell Manning typical. Add flame detection +$15-25K.' },
+
+    // COUPLING JOINTS
+    { bop_category: 'Coupling_Joints', sub_category: 'GT-Gearbox Flexible Disc Coupling', part_description: 'API 671 flexible disc coupling — GT to gearbox, high-speed, torsionally rigid, lubrication-free', price_low_usd: 127_500, price_mid_usd: 150_000, price_high_usd: 172_500, source_supplier: 'Kop-Flex (Regal Rexnord) / Ameridrives', source_type: 'web_research', confidence: 'indicative', lead_time_weeks_low: 16, lead_time_weeks_high: 30, price_basis: 'Per coupling set (driver + driven halves), 50MW GT class. API 671 certified. ±15% from mid.', notes: '1B+ hours API 671 operation (Kop-Flex). Critical high-speed item — needs certified balancing.' },
+    { bop_category: 'Coupling_Joints', sub_category: 'Gearbox-Generator Flexible Coupling', part_description: 'Flexible coupling — gearbox to generator, resilient design, torque-limiting, vibration-damping', price_low_usd: 63_750, price_mid_usd: 75_000, price_high_usd: 86_250, source_supplier: 'VULKAN Group / Ringfeder', source_type: 'web_research', confidence: 'indicative', lead_time_weeks_low: 12, lead_time_weeks_high: 24, price_basis: 'Per coupling set, lower-speed generator end. ±15% from mid.', notes: 'VULKAN specializes in marine + power plant coupling systems. Torque-limiting protects generator.' },
+
+    // WATER INJECTION SYSTEM
+    { bop_category: 'Water_Injection', sub_category: 'Water Injection Skid — Complete NOx Control System', part_description: 'Complete water injection skid for GT NOx control — pump, control valves, instrumentation, demin water interface, skid-mounted', price_low_usd: 148_750, price_mid_usd: 175_000, price_high_usd: 201_250, source_supplier: 'Petrotech / TCS / Carotek', source_type: 'web_research', confidence: 'indicative', lead_time_weeks_low: 14, lead_time_weeks_high: 26, price_basis: 'Per GT unit. Simplex or duplex pump skid. NOx target 25ppm gas / 42ppm liquid fuel. ±15% from mid.', notes: 'Requires demineralized water input (filtered to 20 microns). Separate demin water system budget below.' },
+    { bop_category: 'Water_Injection', sub_category: 'Demineralized Water System (RO + CEDI)', part_description: 'Demin water production system — RO + continuous electrodeionization, 10-30 m³/hr capacity, skid-mounted', price_low_usd: 127_500, price_mid_usd: 150_000, price_high_usd: 172_500, source_supplier: 'Veolia Water Technologies (TERION) / Carotek', source_type: 'web_research', confidence: 'indicative', lead_time_weeks_low: 12, lead_time_weeks_high: 22, price_basis: 'Per skid, 10-30 m³/hr GT injection grade. Conductivity <10 μS/m. RO + CEDI combined. ±15% from mid.', notes: 'Veolia TERION S is plug-and-play. Flow rate sized to 31-70 GPM GT requirement. Separate day tank not included.' },
+
+    // COOLING WATER SYSTEM
+    { bop_category: 'Cooling_Water', sub_category: 'Mechanical Draft Cooling Tower — GT Auxiliary Systems', part_description: 'Induced draft cooling tower for GT lube oil / intercooler heat rejection — FRP or steel, 5-15 MWth duty', price_low_usd: 170_000, price_mid_usd: 200_000, price_high_usd: 230_000, source_supplier: 'Baltimore Aircoil / EVAPCO / Kelvion', source_type: 'web_research', confidence: 'indicative', lead_time_weeks_low: 12, lead_time_weeks_high: 22, price_basis: 'Per cooling tower cell, factory-assembled, CTI-certified. 5-15 MWth heat rejection. ±15% from mid.', notes: 'Simple cycle GT BOP — primarily for lube oil and auxiliary cooling. Not a full CCGT condenser tower.' },
+    { bop_category: 'Cooling_Water', sub_category: 'Plate Heat Exchanger — Lube Oil / Auxiliary Cooling', part_description: 'Gasketed plate heat exchanger — auxiliary cooling circuit, GT auxiliary systems interface', price_low_usd: 42_500, price_mid_usd: 50_000, price_high_usd: 57_500, source_supplier: 'Alfa Laval / Kelvion', source_type: 'web_research', confidence: 'indicative', lead_time_weeks_low: 6, lead_time_weeks_high: 14, price_basis: 'Per PHE unit, stainless plates, gaskets, frame. GT lube oil / intercooler duty. ±15% from mid.', notes: 'Alfa Laval dominant in plate HX. Add water treatment system separately — typically $15-30K additional.' },
 ];
 
 // ─── ADDITIONAL SUPPLIERS — Exhaust System (Apollo-enriched, batch 2) ─────────
@@ -204,8 +216,17 @@ const ENCLOSURE_SUPPLIERS = [
     { name: 'MEDAS GmbH', domain: 'medasgmbh.com', apollo_id: '60af33f9873e33000162599e', tier: 4, bop_category: 'Enclosures', revenue_usd: null, employee_count: 8, hq_country: 'Germany', phone: '+49 231 91296010', source: 'apollo_bulk_enrich' },
 ];
 
+// ─── ADDITIONAL SUPPLIERS — Cooling Water / Heat Exchangers (Apollo-enriched, batch 4) ──
+const COOLING_WATER_SUPPLIERS = [
+    { name: 'Baltimore Aircoil Company', domain: 'baltimoreaircoil.com', apollo_id: '54a1173269702d4623e90800', tier: 1, bop_category: 'Cooling_Water', revenue_usd: 285_964_000, employee_count: 3000, hq_country: 'United States', phone: '+1 410-799-6200', source: 'apollo_bulk_enrich' },
+    { name: 'EVAPCO Inc', domain: 'evapco.com', apollo_id: '54a12ad069702dc1289a0302', tier: 1, bop_category: 'Cooling_Water', revenue_usd: 160_000_000, employee_count: 2000, hq_country: 'United States', phone: '+1 410-756-2600', source: 'apollo_bulk_enrich' },
+    { name: 'Kelvion', domain: 'kelvion.com', apollo_id: '56d8e004f3e5bb57db001ea7', tier: 1, bop_category: 'Cooling_Water', revenue_usd: 1_100_000_000, employee_count: 5200, hq_country: 'Germany', phone: '+49 234 9800', source: 'apollo_bulk_enrich' },
+    { name: 'John Cockerill', domain: 'johncockerill.com', apollo_id: '54a1354169702d48e2567300', tier: 1, bop_category: 'Cooling_Water', revenue_usd: 1_476_000_000, employee_count: 8000, hq_country: 'Belgium', phone: '+32 4 330 24 44', source: 'apollo_bulk_enrich' },
+    { name: 'Alfa Laval', domain: 'alfalaval.com', apollo_id: '54a12a6869702d8eeb546402', tier: 1, bop_category: 'Cooling_Water', revenue_usd: 7_558_470_000, employee_count: 23000, hq_country: 'Sweden', phone: '+46 46 36 65 00', source: 'apollo_bulk_enrich' },
+];
+
 // Merge all supplier arrays
-const DISCOVERED_SUPPLIERS_ALL = [...DISCOVERED_SUPPLIERS, ...EXHAUST_SUPPLIERS, ...WATER_INJECTION_SUPPLIERS, ...COUPLING_SUPPLIERS, ...ENCLOSURE_SUPPLIERS];
+const DISCOVERED_SUPPLIERS_ALL = [...DISCOVERED_SUPPLIERS, ...EXHAUST_SUPPLIERS, ...WATER_INJECTION_SUPPLIERS, ...COUPLING_SUPPLIERS, ...ENCLOSURE_SUPPLIERS, ...COOLING_WATER_SUPPLIERS];
 
 function createDiscoveryRoutes(db, opts = {}) {
     const router = express.Router();
