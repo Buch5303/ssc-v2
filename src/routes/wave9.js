@@ -37,16 +37,22 @@ function createWave9Routes(db, opts = {}) {
                 counts.with_email = parseInt(r?.with_email || 0);
                 counts.with_title = parseInt(r?.with_title || 0);
 
-                // Try bop_category columns separately — may not exist yet
+                // Try extended columns (added by migration 028 or auto-tag)
                 try {
                     const r2 = await db.prepare(`
                         SELECT
                             COUNT(bop_category) FILTER (WHERE bop_category IS NOT NULL) as tagged,
-                            COUNT(*) FILTER (WHERE bop_category IS NULL) as untagged
+                            COUNT(*) FILTER (WHERE bop_category IS NULL) as untagged,
+                            COUNT(*) FILTER (WHERE seniority = 'c_suite') as c_suite,
+                            COUNT(*) FILTER (WHERE seniority = 'vp') as vp,
+                            COUNT(*) FILTER (WHERE seniority = 'director') as director
                         FROM supplier_contacts
                     `).get();
                     counts.tagged   = parseInt(r2?.tagged   || 0);
                     counts.untagged = parseInt(r2?.untagged || 0);
+                    counts.c_suite  = parseInt(r2?.c_suite  || 0);
+                    counts.vp       = parseInt(r2?.vp       || 0);
+                    counts.director = parseInt(r2?.director || 0);
                 } catch { counts.tagged = 0; counts.untagged = counts.total; }
             } catch (e) { counts.error = e.message; }
         }
@@ -307,8 +313,26 @@ function createWave9Routes(db, opts = {}) {
                     catch {}
                 } else skipped++;
             }
-            res.json({ ok: true, total: contacts.length, tagged, skipped,
-                note: `${tagged} tagged across BOP categories. ${skipped} unmatched (likely GT OEM / HRSG / non-BOP suppliers).` });
+            // ── Seniority pass on all contacts ──────────────────────────────
+            try { await db.prepare(`ALTER TABLE supplier_contacts ADD COLUMN IF NOT EXISTS seniority TEXT`).run(); } catch {}
+            const allContacts2 = await db.prepare(`SELECT id, title FROM supplier_contacts`).all();
+            let senioritySet = 0;
+            for (const c of allContacts2) {
+                const t = (c.title || '').toLowerCase();
+                let seniority = null;
+                if (/\bchief\b|\bceo\b|\bcto\b|\bcoo\b|\bcfo\b|\bchairman\b|\bpresident\b|\bmanaging director\b|\bmd\b/.test(t)) seniority = 'c_suite';
+                else if (/\bvp\b|\bvice president\b|\bsvp\b|\bevp\b/.test(t)) seniority = 'vp';
+                else if (/\bdirector\b/.test(t)) seniority = 'director';
+                else if (/\bmanager\b|\bhead of\b|\blead\b/.test(t)) seniority = 'manager';
+                else if (t.length > 3) seniority = 'staff';
+                if (seniority) {
+                    try { await db.prepare(`UPDATE supplier_contacts SET seniority=$1 WHERE id=$2`).run(seniority, c.id); senioritySet++; }
+                    catch {}
+                }
+            }
+
+            res.json({ ok: true, total: contacts.length, tagged, skipped, seniority_classified: senioritySet,
+                note: `${tagged} tagged across BOP categories. ${senioritySet} contacts classified by seniority. ${skipped} unmatched (likely GT OEM / HRSG / non-BOP suppliers).` });
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
@@ -400,6 +424,23 @@ function createWave9Routes(db, opts = {}) {
                 bop_category: category, rfq: result.content,
                 cost_usd: claude.estimateCost(result.usage), model: result.model
             });
+        } catch (e) { res.status(500).json({ error: e.message }); }
+    });
+
+    // ─── CONTACTS BY SENIORITY ───────────────────────────────────────────────
+    router.get('/contacts/by-seniority', async (req, res) => {
+        if (!db) return res.status(503).json({ error: 'No database' });
+        try {
+            const rows = await db.prepare(`
+                SELECT seniority, COUNT(*) as contacts,
+                       COUNT(email) FILTER (WHERE email IS NOT NULL AND email != '') as with_email,
+                       COUNT(bop_category) FILTER (WHERE bop_category IS NOT NULL) as bop_tagged
+                FROM supplier_contacts
+                WHERE seniority IS NOT NULL
+                GROUP BY seniority ORDER BY contacts DESC
+            `).all();
+            const total = rows.reduce((s,r)=>s+parseInt(r.contacts||0),0);
+            res.json({ ok: true, total_classified: total, by_seniority: rows });
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 

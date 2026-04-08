@@ -50,7 +50,7 @@ function createStatusRoutes(db, opts = {}) {
                 error: null
             },
             platform: 'FlowSeer / SSC V2',
-            head: process.env.BUILD_COMMIT_SHA || 'local',
+            head: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0,7) || process.env.BUILD_COMMIT_SHA?.slice(0,7) || 'local',
             timestamp: ts,
             db: {
                 online: !!db,
