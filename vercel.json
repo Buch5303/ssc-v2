@@ -4,13 +4,8 @@
     { "source": "/(.*)", "destination": "/api/index" }
   ],
   "crons": [
-    {
-      "path": "/api/cron/discovery",
-      "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/discovery",
-      "schedule": "0 14 * * *"
-    }
+    { "path": "/api/cron/discovery",  "schedule": "0 2 * * *"  },
+    { "path": "/api/cron/discovery",  "schedule": "0 14 * * *" },
+    { "path": "/api/integrity/cron",  "schedule": "0 3 * * 1"  }
   ]
 }
