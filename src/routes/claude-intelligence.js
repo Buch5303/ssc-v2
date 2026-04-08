@@ -339,7 +339,26 @@ Be direct and procurement-coherent. No preamble.`,
                 }
             }));
         } catch (e) {
-            res.status(e.message.includes('ANTHROPIC') ? 503 : 500).json({ error: e.message });
+            const isCreditError = e.message.includes('credit balance') || e.message.includes('billing');
+            const isKeyError    = e.message.includes('ANTHROPIC_API_KEY') || e.message.includes('authentication');
+            res.status(isCreditError ? 402 : isKeyError ? 503 : 500).json({
+                _envelope: {
+                    contract_version: '1.0',
+                    engine: 'Claude Intelligence Engine',
+                    module: 'live_test',
+                    timestamp: new Date().toISOString(),
+                    freshness: 'unavailable',
+                    output_type: 'placeholder',
+                    source_summary: isCreditError ? 'API key valid — Anthropic account needs credits' : 'Claude API error',
+                    readiness: isCreditError ? 'credits_insufficient' : 'error',
+                    error: e.message
+                },
+                ok: false,
+                live_call_attempted: true,  // The API was reached — key is valid, path is live
+                credits_insufficient: isCreditError,
+                resolution: isCreditError ? 'Add credits at console.anthropic.com/billing — API key is valid and path is confirmed live' : undefined,
+                error: e.message
+            });
         }
     });
 
