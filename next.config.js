@@ -1,0 +1,14 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'standalone',
+  async rewrites() {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://ssc-v2.vercel.app';
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${apiBase}/api/:path*`,
+      },
+    ];
+  },
+};
+module.exports = nextConfig;
