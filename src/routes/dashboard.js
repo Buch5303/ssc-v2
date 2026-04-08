@@ -1476,6 +1476,80 @@ function createDashboardRoutes(db, opts = {}) {
         }
     });
 
+
+    // GET /api/dashboard/enrich-now — trigger enrichment via GET (for automated runs)
+    router.get('/enrich-now', async (req, res) => {
+        try {
+            const apiKey = process.env.APOLLO_API_KEY || 'AkFiyJXYBR31nKPWSm6c1Q';
+            const tier = req.query.tier || 'Tier 1';
+            const limit = Math.min(parseInt(req.query.limit) || 10, 30);
+
+            const suppliers = await db.prepare(
+                `SELECT supplier_code, name FROM supplier_intelligence
+                 WHERE org_id = 'twp' AND tier = ? ORDER BY name LIMIT ?`
+            ).all(tier, limit);
+
+            if (!suppliers.length) {
+                return res.json({ status: 'ok', message: 'No suppliers in DB yet. Run seed-suppliers first.', results: [] });
+            }
+
+            const results = [];
+            let totalFound = 0, totalSaved = 0;
+
+            for (const sup of suppliers) {
+                try {
+                    const apolloRes = await fetch('https://api.apollo.io/v1/mixed_people/search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
+                        body: JSON.stringify({
+                            api_key: apiKey,
+                            q_organization_name: sup.name,
+                            person_titles: ['VP', 'Director', 'President', 'Head', 'Chief', 'SVP', 'EVP', 'Manager'],
+                            per_page: 5,
+                            page: 1,
+                        }),
+                    });
+                    if (!apolloRes.ok) { results.push({ supplier: sup.name, status: 'api_error', code: apolloRes.status }); continue; }
+                    const data = await apolloRes.json();
+                    const people = data.people || [];
+                    let saved = 0;
+                    for (const person of people) {
+                        const name = [person.first_name, person.last_name].filter(Boolean).join(' ');
+                        if (!name) continue;
+                        try {
+                            const dup = await db.prepare(
+                                `SELECT id FROM supplier_contacts WHERE org_id = ? AND contact_name = ? AND supplier_name = ? LIMIT 1`
+                            ).get('twp', name, sup.name);
+                            if (!dup) {
+                                await db.prepare(
+                                    `INSERT INTO supplier_contacts (org_id, supplier_code, supplier_name, contact_name, title, email, phone, metadata_json, created_at)
+                                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`
+                                ).run('twp', sup.supplier_code, sup.name, name, person.title || '', person.email || '',
+                                    person.phone_numbers?.[0]?.raw_number || '',
+                                    JSON.stringify({ linkedin: person.linkedin_url || '', source: 'apollo', apollo_id: person.id }));
+                                saved++;
+                            }
+                        } catch(dbe) { /* skip */ }
+                    }
+                    totalFound += people.length;
+                    totalSaved += saved;
+                    results.push({ supplier: sup.name, found: people.length, saved });
+                    await new Promise(r => setTimeout(r, 250));
+                } catch(e) {
+                    results.push({ supplier: sup.name, status: 'error', error: e.message.slice(0, 60) });
+                }
+            }
+
+            res.json({
+                status: 'ok', tier, suppliers_processed: suppliers.length,
+                total_found: totalFound, total_saved: totalSaved,
+                results, timestamp: new Date().toISOString()
+            });
+        } catch(err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
     return router;
 }
 
