@@ -250,19 +250,23 @@ function createDiscoveryRoutes(db, opts = {}) {
             }
         } catch {}
 
-        // Seed supplier tiers — spread params (PG adapter: ? -> $N, spread args)
+        // Seed supplier tiers — capabilities as TEXT[] needs actual JS array (pg converts)
+        // Skip capabilities column to avoid TEXT[] type mismatch — insert without it
+        const errors = [];
         for (const s of DISCOVERED_SUPPLIERS_ALL) {
             try {
-                const exists = await db.prepare('SELECT id FROM supplier_tiers WHERE domain = ? LIMIT 1').get(s.domain || '');
+                const exists = await db.prepare('SELECT id FROM supplier_tiers WHERE supplier_name = ? LIMIT 1').get(s.name);
                 if (exists) { suppliersSkipped++; continue; }
-                await db.prepare('INSERT INTO supplier_tiers (supplier_name, domain, apollo_org_id, tier, bop_category, revenue_usd, employee_count, hq_country, phone, capabilities, source, last_enriched_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,NOW())').run(
+                await db.prepare('INSERT INTO supplier_tiers (supplier_name, domain, apollo_org_id, tier, bop_category, revenue_usd, employee_count, hq_country, phone, source, last_enriched_at) VALUES (?,?,?,?,?,?,?,?,?,?,NOW())').run(
                     s.name, s.domain || null, s.apollo_id || null, s.tier, s.bop_category,
                     s.revenue_usd || null, s.employee_count || null, s.hq_country || null, s.phone || null,
-                    Array.isArray(s.capabilities) ? s.capabilities.join(',') : '',
                     s.source || 'web_search'
                 );
                 suppliersInserted++;
-            } catch (e) { suppliersSkipped++; }
+            } catch (e) {
+                suppliersSkipped++;
+                if (errors.length < 3) errors.push({ name: s.name, err: e.message });
+            }
         }
 
         // Seed market pricing
@@ -285,7 +289,8 @@ function createDiscoveryRoutes(db, opts = {}) {
         res.json({
             ok: true, initialized: true,
             suppliers: { inserted: suppliersInserted, skipped: suppliersSkipped, total: DISCOVERED_SUPPLIERS_ALL.length },
-            pricing:   { inserted: pricingInserted,   skipped: pricingSkipped,   total: INDICATIVE_PRICING.length }
+            pricing:   { inserted: pricingInserted,   skipped: pricingSkipped,   total: INDICATIVE_PRICING.length },
+            sample_errors: errors.slice(0, 3)
         });
     });
 
