@@ -87,6 +87,8 @@ function createStatusRoutes(db, opts = {}) {
                 wave9_by_seniority:     'GET /api/wave9/contacts/by-seniority',
                 wave9_by_category:      'GET /api/wave9/contacts/by-category',
                 wave9_outreach:         'GET /api/wave9/outreach-readiness',
+                wave9_pipeline:         'GET /api/wave9/pipeline',
+                wave9_rfq_queue:        'GET /api/wave9/rfq-queue',
             }
         });
     });
