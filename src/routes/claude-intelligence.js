@@ -300,6 +300,113 @@ function createClaudeRoutes(db, opts = {}) {
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
+    // ─── AUTO-RUN PRICING ANALYSIS (GET) ─────────────────────────────────────
+    // Triggers full BOP pricing anomaly analysis without POST body.
+    // Runs on all INDICATIVE_PRICING records in memory.
+    router.get('/run-pricing-analysis', async (req, res) => {
+        if (claudeKeyGuard(res)) return;
+        try {
+            const records = INDICATIVE_PRICING;
+            let result, lastErr;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try { result = await claude.analyzePricingAnomalies(records); break; }
+                catch (e) {
+                    lastErr = e;
+                    if ((e.message.includes('529') || e.message.includes('overload')) && attempt < 3) {
+                        await new Promise(r => setTimeout(r, attempt * 2000)); continue;
+                    }
+                    throw e;
+                }
+            }
+            if (!result) throw lastErr;
+
+            const id = await saveClaudeResult(db, {
+                analysisType: 'pricing_analysis',
+                subjectName: `BOP Pricing Analysis — ${records.length} records — auto-run`,
+                content: result.content,
+                usage: result.usage,
+                model: result.model,
+                triggeredBy: 'auto_get'
+            });
+
+            res.json(claudeEnvelope({
+                mod: 'pricing_anomaly_detection',
+                outputType: OUTPUT_TYPES.GENERATED_ANALYSIS,
+                result,
+                data: {
+                    analysis_id: id,
+                    subject: `BOP Pricing Analysis — ${records.length} records`,
+                    analysis: result.content,
+                    records_analyzed: records.length,
+                    cost_usd: claude.estimateCost(result.usage)
+                }
+            }));
+        } catch (e) {
+            res.status(500).json({ error: e.message });
+        }
+    });
+
+    // ─── AUTO-RUN PROCUREMENT SUMMARY (GET) ──────────────────────────────────
+    // Triggers executive-grade BOP procurement summary without POST body.
+    router.get('/run-procurement-summary', async (req, res) => {
+        if (claudeKeyGuard(res)) return;
+        try {
+            const records  = INDICATIVE_PRICING;
+            const suppliers = DISCOVERED_SUPPLIERS;
+            const totalLow  = records.reduce((s, p) => s + p.price_low_usd,  0);
+            const totalMid  = records.reduce((s, p) => s + p.price_mid_usd,  0);
+            const totalHigh = records.reduce((s, p) => s + p.price_high_usd, 0);
+
+            const t1Count    = suppliers.filter(s => s.tier === 1).length;
+            const t2t3Count  = suppliers.filter(s => s.tier === 2 || s.tier === 3).length;
+            const t4Count    = suppliers.filter(s => s.tier === 4).length;
+
+            let result, lastErr;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    result = await claude.generateProcurementSummary({
+                        pricingRecords: records,
+                        supplierCounts: { total: suppliers.length, t1: t1Count, t2_t3: t2t3Count, t4: t4Count },
+                        totalMid,
+                        totalLow,
+                        totalHigh
+                    });
+                    break;
+                } catch (e) {
+                    lastErr = e;
+                    if ((e.message.includes('529') || e.message.includes('overload')) && attempt < 3) {
+                        await new Promise(r => setTimeout(r, attempt * 2000)); continue;
+                    }
+                    throw e;
+                }
+            }
+            if (!result) throw lastErr;
+
+            const id = await saveClaudeResult(db, {
+                analysisType: 'procurement_summary',
+                subjectName: 'Executive BOP Procurement Summary — TG20B7-8 — auto-run',
+                content: result.content,
+                usage: result.usage,
+                model: result.model,
+                triggeredBy: 'auto_get'
+            });
+
+            res.json(claudeEnvelope({
+                mod: 'procurement_summary',
+                outputType: OUTPUT_TYPES.GENERATED_ANALYSIS,
+                result,
+                data: {
+                    analysis_id: id,
+                    summary: result.content,
+                    bop_totals: { low: totalLow, mid: totalMid, high: totalHigh },
+                    cost_usd: claude.estimateCost(result.usage)
+                }
+            }));
+        } catch (e) {
+            res.status(500).json({ error: e.message });
+        }
+    });
+
     // ─── LIVE TEST — Grok audit endpoint ─────────────────────────────────────
     // GET-accessible. Makes a real Anthropic API call. Persists to DB.
     // Grok: verify _envelope.live_call === true, output_type: generated_analysis
