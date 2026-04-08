@@ -318,7 +318,7 @@ function createDiscoveryRoutes(db, opts = {}) {
 
             try {
                 // Remove stale schema_migrations entry so migration re-runs
-                await db.prepare(`DELETE FROM schema_migrations WHERE filename = $1`).run([file]);
+                await db.prepare(`DELETE FROM schema_migrations WHERE filename = $1`).run(file);
 
                 // Run the migration SQL
                 const sql = fs.readFileSync(filePath, 'utf8');
@@ -626,11 +626,11 @@ function createDiscoveryRoutes(db, opts = {}) {
                             capabilities, source, last_enriched_at
                         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,NOW())
                         ON CONFLICT DO NOTHING
-                    `).run([
+                    `).run(
                         s.name, s.domain, s.apollo_id || null, s.tier, s.bop_category,
                         s.revenue_usd || null, s.employee_count || null, s.hq_country || null, s.phone || null,
                         s.capabilities || [], s.source || 'web_search'
-                    ]);
+                    );
                     inserted++;
                 } catch { skipped++; }
             }
@@ -652,14 +652,14 @@ function createDiscoveryRoutes(db, opts = {}) {
                             currency, price_basis, lead_time_weeks_low, lead_time_weeks_high,
                             source_supplier, source_type, confidence, notes
                         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
-                    `).run([
+                    `).run(
                         p.bop_category, p.sub_category || null, p.part_description,
                         p.price_low_usd, p.price_mid_usd, p.price_high_usd,
                         p.currency || 'USD', p.price_basis || null,
                         p.lead_time_weeks_low || null, p.lead_time_weeks_high || null,
                         p.source_supplier || null, p.source_type || 'web_research',
                         p.confidence || 'indicative', p.notes || null
-                    ]);
+                    );
                     inserted++;
                 } catch { skipped++; }
             }
@@ -678,7 +678,7 @@ function createDiscoveryRoutes(db, opts = {}) {
                     const job = await db.prepare(`
                         INSERT INTO discovery_jobs (job_type, bop_category, status, triggered_by, started_at)
                         VALUES ($1, $2, 'running', 'manual', NOW()) RETURNING id
-                    `).get([job_type, category || null]);
+                    `).get(job_type, category || null);
                     jobId = job?.id;
                 } catch {}
             }
@@ -696,7 +696,7 @@ function createDiscoveryRoutes(db, opts = {}) {
                     await db.prepare(`
                         UPDATE discovery_jobs SET status = 'complete', suppliers_found = $1,
                         prices_updated = $2, completed_at = NOW() WHERE id = $3
-                    `).run([suppliersFound, pricesUpdated, jobId]);
+                    `).run(suppliersFound, pricesUpdated, jobId);
                 } catch {}
             }
 
@@ -740,7 +740,7 @@ function createDiscoveryRoutes(db, opts = {}) {
             const result = { triggered: true, timestamp: new Date().toISOString(), categories: BOP_CATEGORIES.length, suppliers_in_engine: DISCOVERED_SUPPLIERS_ALL.length, pricing_records: INDICATIVE_PRICING.length };
             if (db) {
                 try {
-                    await db.prepare(`INSERT INTO discovery_jobs (job_type, status, triggered_by, suppliers_found, prices_updated, started_at, completed_at) VALUES ('cron_sweep','complete','cron',$1,$2,NOW(),NOW())`).run([DISCOVERED_SUPPLIERS_ALL.length, INDICATIVE_PRICING.length]);
+                    await db.prepare(`INSERT INTO discovery_jobs (job_type, status, triggered_by, suppliers_found, prices_updated, started_at, completed_at) VALUES ('cron_sweep','complete','cron',$1,$2,NOW(),NOW())`).run(DISCOVERED_SUPPLIERS_ALL.length, INDICATIVE_PRICING.length);
                 } catch {}
             }
             res.json({ ok: true, ...result });

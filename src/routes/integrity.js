@@ -54,7 +54,7 @@ async function saveCheck(db, { checkType, subjectName, bopCategory, model, promp
                  triggered_by, status)
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'complete')
             RETURNING id
-        `).get([
+        `).get(
             checkType, subjectName, bopCategory || null, model, promptSummary,
             result.content,
             JSON.stringify(result.citations || []),
@@ -62,7 +62,7 @@ async function saveCheck(db, { checkType, subjectName, bopCategory, model, promp
             (result.usage?.total_tokens || 0),
             cost,
             triggeredBy
-        ]);
+        );
         return row?.id;
     } catch (e) {
         console.error('saveCheck error:', e.message);
@@ -208,7 +208,7 @@ function createIntegrityRoutes(db, opts = {}) {
             try {
                 const cached = await db.prepare(
                     `SELECT * FROM market_briefings WHERE bop_category = $1 AND valid_until > NOW() ORDER BY created_at DESC LIMIT 1`
-                ).get([bop_category]);
+                ).get(bop_category);
                 if (cached) {
                     return res.json({ _envelope: { contract_version: '1.0', engine: 'FlowSeer Integrity Engine', module: 'market_briefing', timestamp: new Date().toISOString(), freshness: FRESHNESS.CACHED, output_type: OUTPUT_TYPES.CACHED, source_summary: 'Cached Perplexity briefing (7-day TTL)', readiness: 'operational', error: null }, ok: true, cached: true, bop_category, briefing: cached.briefing_content, citations: JSON.parse(cached.citations || '[]'), created_at: cached.created_at });
                 }
@@ -224,7 +224,7 @@ function createIntegrityRoutes(db, opts = {}) {
                     await db.prepare(`
                         INSERT INTO market_briefings (bop_category, category_name, briefing_content, citations, perplexity_model, tokens_used, valid_until)
                         VALUES ($1,$2,$3,$4,$5,$6, NOW() + INTERVAL '7 days')
-                    `).run([bop_category, category_name || bop_category, result.content, JSON.stringify(result.citations || []), result.model, result.usage?.total_tokens || 0]);
+                    `).run(bop_category, category_name || bop_category, result.content, JSON.stringify(result.citations || []), result.model, result.usage?.total_tokens || 0);
                 } catch {}
             }
 
@@ -253,7 +253,7 @@ function createIntegrityRoutes(db, opts = {}) {
                     await db.prepare(`
                         INSERT INTO perplexity_discoveries (bop_category, discovery_content, citations, perplexity_model, tokens_used)
                         VALUES ($1,$2,$3,$4,$5)
-                    `).run([bop_category, result.content, JSON.stringify(result.citations || []), result.model, result.usage?.total_tokens || 0]);
+                    `).run(bop_category, result.content, JSON.stringify(result.citations || []), result.model, result.usage?.total_tokens || 0);
                 } catch {}
             }
 

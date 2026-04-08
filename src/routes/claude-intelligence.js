@@ -633,8 +633,8 @@ Be direct and procurement-coherent. No preamble.`,
                            LEFT(content, 400) as preview
                     FROM claude_results ${where}
                     ORDER BY created_at DESC LIMIT $${params.length-1} OFFSET $${params.length}
-                `).all(params);
-            } catch {}
+                `).all(...params);
+            } catch (e) { console.error('claude results query:', e.message); }
         }
 
         res.json({ _envelope: { contract_version: '1.0', engine: 'Claude Intelligence Engine', module: 'analysis_results', timestamp: new Date().toISOString(), freshness: 'cached', output_type: 'derived', source_summary: 'DB Claude analysis history', readiness: 'operational', error: null }, results, page, limit });
