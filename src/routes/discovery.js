@@ -250,21 +250,17 @@ function createDiscoveryRoutes(db, opts = {}) {
             }
         } catch {}
 
-        // Seed supplier tiers
+        // Seed supplier tiers — spread params (PG adapter: ? -> $N, spread args)
         for (const s of DISCOVERED_SUPPLIERS_ALL) {
             try {
-                const exists = await db.prepare('SELECT id FROM supplier_tiers WHERE domain = $1 LIMIT 1').get([s.domain || '']);
+                const exists = await db.prepare('SELECT id FROM supplier_tiers WHERE domain = ? LIMIT 1').get(s.domain || '');
                 if (exists) { suppliersSkipped++; continue; }
-                await db.prepare(`
-                    INSERT INTO supplier_tiers (supplier_name, domain, apollo_org_id, tier, bop_category,
-                        revenue_usd, employee_count, hq_country, phone, capabilities, source, last_enriched_at)
-                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,NOW())
-                `).run([
-                    s.name, s.domain||null, s.apollo_id||null, s.tier, s.bop_category,
-                    s.revenue_usd||null, s.employee_count||null, s.hq_country||null, s.phone||null,
-                    Array.isArray(s.capabilities) ? s.capabilities : [],
-                    s.source||'web_search'
-                ]);
+                await db.prepare('INSERT INTO supplier_tiers (supplier_name, domain, apollo_org_id, tier, bop_category, revenue_usd, employee_count, hq_country, phone, capabilities, source, last_enriched_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,NOW())').run(
+                    s.name, s.domain || null, s.apollo_id || null, s.tier, s.bop_category,
+                    s.revenue_usd || null, s.employee_count || null, s.hq_country || null, s.phone || null,
+                    Array.isArray(s.capabilities) ? s.capabilities.join(',') : '',
+                    s.source || 'web_search'
+                );
                 suppliersInserted++;
             } catch (e) { suppliersSkipped++; }
         }
@@ -272,35 +268,19 @@ function createDiscoveryRoutes(db, opts = {}) {
         // Seed market pricing
         for (const p of INDICATIVE_PRICING) {
             try {
-                const exists = await db.prepare('SELECT id FROM market_pricing WHERE bop_category=$1 AND sub_category=$2 LIMIT 1').get([p.bop_category, p.sub_category||'']);
+                const exists = await db.prepare('SELECT id FROM market_pricing WHERE bop_category=? AND sub_category=? LIMIT 1').get(p.bop_category, p.sub_category || '');
                 if (exists) { pricingSkipped++; continue; }
-                await db.prepare(`
-                    INSERT INTO market_pricing (bop_category, sub_category, part_description,
-                        price_low_usd, price_mid_usd, price_high_usd, currency, price_basis,
-                        lead_time_weeks_low, lead_time_weeks_high, source_supplier, source_type, confidence, notes)
-                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
-                `).run([
-                    p.bop_category, p.sub_category||null, p.part_description,
+                await db.prepare('INSERT INTO market_pricing (bop_category, sub_category, part_description, price_low_usd, price_mid_usd, price_high_usd, currency, price_basis, lead_time_weeks_low, lead_time_weeks_high, source_supplier, source_type, confidence, notes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run(
+                    p.bop_category, p.sub_category || null, p.part_description,
                     p.price_low_usd, p.price_mid_usd, p.price_high_usd,
-                    p.currency||'USD', p.price_basis||null,
-                    p.lead_time_weeks_low||null, p.lead_time_weeks_high||null,
-                    p.source_supplier||null, p.source_type||'web_research',
-                    p.confidence||'indicative', p.notes||null
-                ]);
+                    p.currency || 'USD', p.price_basis || null,
+                    p.lead_time_weeks_low || null, p.lead_time_weeks_high || null,
+                    p.source_supplier || null, p.source_type || 'web_research',
+                    p.confidence || 'indicative', p.notes || null
+                );
                 pricingInserted++;
             } catch (e) { pricingSkipped++; }
         }
-
-        // Update category counts
-        try {
-            await db.prepare(`
-                UPDATE bop_categories bc SET supplier_count = (
-                    SELECT COUNT(*) FROM supplier_tiers st WHERE st.bop_category = bc.category_key
-                ), pricing_record_count = (
-                    SELECT COUNT(*) FROM market_pricing mp WHERE mp.bop_category = bc.category_key
-                )
-            `).run();
-        } catch {}
 
         res.json({
             ok: true, initialized: true,
