@@ -403,7 +403,46 @@ function createWave9Routes(db, opts = {}) {
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
+    // ─── OUTREACH READINESS ───────────────────────────────────────────────────
+    // Returns actionable contacts (have email + BOP category) grouped by category
+    router.get('/outreach-readiness', async (req, res) => {
+        if (!db) return res.status(503).json({ error: 'No database' });
+        try {
+            const data = await getOutreachReadiness(db);
+            const total_actionable = (data?.by_category || []).reduce((s,r) => s + parseInt(r.actionable||0), 0);
+            res.json({
+                ok: true, total_actionable,
+                note: `${total_actionable} contacts have both email + BOP category — ready for Claude RFQ drafting`,
+                by_category: data?.by_category || [],
+                top_contacts: data?.actionable_contacts || []
+            });
+        } catch (e) { res.status(500).json({ error: e.message }); }
+    });
+
     return router;
 }
 
 module.exports = { createWave9Routes };
+
+// ─── OUTREACH READINESS — exported for dashboard / status ────────────────────
+async function getOutreachReadiness(db) {
+    if (!db) return null;
+    try {
+        const byCategory = await db.prepare(`
+            SELECT bop_category,
+                   COUNT(*) as contacts,
+                   COUNT(email) FILTER (WHERE email IS NOT NULL AND email != '') as actionable
+            FROM supplier_contacts
+            WHERE bop_category IS NOT NULL
+            GROUP BY bop_category ORDER BY actionable DESC, contacts DESC
+        `).all();
+        const topContacts = await db.prepare(`
+            SELECT sc.id, sc.supplier_name, sc.contact_name, sc.title, sc.email, sc.bop_category
+            FROM supplier_contacts sc
+            WHERE sc.email IS NOT NULL AND sc.email != '' AND sc.bop_category IS NOT NULL
+            ORDER BY sc.bop_category, sc.supplier_name LIMIT 20
+        `).all();
+        return { by_category: byCategory, actionable_contacts: topContacts };
+    } catch { return null; }
+}
+module.exports.getOutreachReadiness = getOutreachReadiness;

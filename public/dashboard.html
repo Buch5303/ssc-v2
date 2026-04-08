@@ -2165,6 +2165,19 @@ html, body {
         </div>
       </div>
 
+      <!-- ── WAVE 9 CONTACT INTELLIGENCE PANEL ──────────────────────────── -->
+      <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:8px;margin-top:16px">
+        <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+          <span style="font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--text-primary)">WAVE 9 — CONTACT INTELLIGENCE</span>
+          <span id="wave9-status-badge" style="font-family:var(--font-mono);font-size:8px;padding:2px 8px;border-radius:3px;background:rgba(245,158,11,0.1);color:var(--amber)">LOADING</span>
+          <button onclick="loadWave9Panel()" style="margin-left:auto;padding:4px 12px;background:var(--cyan-dim);border:1px solid rgba(6,182,212,0.4);border-radius:5px;color:var(--cyan);font-family:var(--font-mono);font-size:9px;cursor:pointer;font-weight:600">↺ REFRESH</button>
+          <button onclick="runAutoTag()" style="padding:4px 12px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-radius:5px;color:var(--green);font-family:var(--font-mono);font-size:9px;cursor:pointer;font-weight:600">▶ AUTO-TAG</button>
+        </div>
+        <div id="wave9-panel" style="padding:16px 20px">
+          <div style="text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">Loading contact intelligence...</div>
+        </div>
+      </div>
+
     </div><!-- /market-intel-view -->
 
     <!-- Platform Footer -->
@@ -3348,7 +3361,7 @@ function showView(v) {
   const miView = document.getElementById('market-intel-view');
   if (miView) miView.style.display = v === 'market-intel' ? 'block' : 'none';
   if (v === 'governance') loadOperatorQueue();
-  if (v === 'market-intel') { loadMarketIntel(); loadEngineHealth(); loadClaudeHistory(); }
+  if (v === 'market-intel') { loadMarketIntel(); loadEngineHealth(); loadClaudeHistory(); loadWave9Panel(); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -4212,6 +4225,68 @@ async function runClaudeAction() {
   } catch(e) {
     if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--red)">Claude request failed: ${esc(e.message)}</div>`;
   }
+}
+
+async function loadWave9Panel() {
+  const panel = document.getElementById('wave9-panel');
+  const badge = document.getElementById('wave9-status-badge');
+  try {
+    const [status, readiness] = await Promise.all([
+      fetchJSON('/api/wave9/status'),
+      fetchJSON('/api/wave9/outreach-readiness').catch(() => null)
+    ]);
+    const c = status?.contacts || {};
+    if (badge) {
+      badge.textContent = c.total > 0 ? `${c.total} CONTACTS` : 'EMPTY';
+      badge.style.background = c.total > 0 ? 'rgba(16,185,129,0.08)' : 'rgba(245,158,11,0.1)';
+      badge.style.color = c.total > 0 ? 'var(--green)' : 'var(--amber)';
+    }
+    if (!panel) return;
+    const cats = readiness?.by_category || [];
+    const actionable = readiness?.total_actionable || 0;
+    panel.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+        ${[
+          ['Total Contacts', c.total || 0, 'var(--text-primary)'],
+          ['BOP-Tagged', c.tagged || 0, 'var(--cyan)'],
+          ['With Email', c.with_email || 0, 'var(--green)'],
+          ['Actionable', actionable, 'var(--green)'],
+          ['Untagged', c.untagged || 0, 'var(--text-tertiary)'],
+          ['RFQ-Ready', actionable, 'var(--amber)'],
+        ].map(([label, val, color]) => `
+          <div style="background:var(--bg-elevated);border-radius:6px;padding:10px 12px">
+            <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-bottom:4px">${label}</div>
+            <div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:${color}">${val}</div>
+          </div>`).join('')}
+      </div>
+      ${cats.length ? `
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-bottom:8px;font-weight:600">CONTACTS BY BOP CATEGORY</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px">
+        ${cats.slice(0,12).map(cat => `
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg-elevated);border-radius:4px;padding:6px 10px">
+            <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-secondary)">${(cat.bop_category||'').replace(/_/g,' ')}</span>
+            <div style="display:flex;gap:6px">
+              <span style="font-family:var(--font-mono);font-size:9px;color:var(--cyan)">${cat.contacts} total</span>
+              ${parseInt(cat.actionable||0) > 0 ? `<span style="font-family:var(--font-mono);font-size:9px;color:var(--green)">✉ ${cat.actionable}</span>` : ''}
+            </div>
+          </div>`).join('')}
+      </div>` : '<div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">No tagged contacts yet. Click AUTO-TAG to categorize W251 contacts.</div>'}
+      <div style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">
+        Apollo Basic ($49/mo) needed for contact enrichment. ${actionable} contacts ready for RFQ drafting now.
+      </div>`;
+  } catch(e) {
+    if (panel) panel.innerHTML = `<div style="font-family:var(--font-mono);font-size:10px;color:var(--red)">Wave 9 load error: ${esc(e.message)}</div>`;
+  }
+}
+
+async function runAutoTag() {
+  const badge = document.getElementById('wave9-status-badge');
+  if (badge) { badge.textContent = 'TAGGING...'; badge.style.color = 'var(--amber)'; }
+  try {
+    const r = await fetchJSON('/api/wave9/run-auto-tag');
+    showToast(`Tagged ${r.tagged}/${r.total} contacts with BOP categories`);
+    await loadWave9Panel();
+  } catch(e) { showToast('Auto-tag failed: ' + e.message); }
 }
 
 async function loadClaudeHistory() {
