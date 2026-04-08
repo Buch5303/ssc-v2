@@ -66,17 +66,14 @@ function createClaudeRoutes(db, opts = {}) {
 
         if (db) {
             try {
-                const r = await db.prepare(
-                    `SELECT COUNT(*) as cnt, SUM(model_cost_usd) as cost, MAX(created_at) as last FROM claude_results`
-                ).get();
+                const r = await db.prepare(`SELECT COUNT(*) as cnt, MAX(created_at) as last FROM claude_results`).get();
                 dbStats.total_analyses = parseInt(r?.cnt || 0);
-                dbStats.total_cost_usd = parseFloat(r?.cost || 0).toFixed(4);
                 dbStats.last_run = r?.last || null;
-            } catch {}
+            } catch { /* table may not exist yet */ }
         }
 
         res.json({
-            _envelope: { contract_version: '1.0', engine: 'Claude Intelligence Engine', module: 'status', timestamp: new Date().toISOString(), freshness: 'seeded', output_type: 'derived', source_summary: 'Local DB stats + env config', readiness: claudeConfigured ? 'operational' : 'awaiting_key', error: null },
+            _envelope: { contract_version: '1.0', engine: 'Claude Intelligence Engine', module: 'status', timestamp: new Date().toISOString(), freshness: 'seeded', output_type: 'derived', source_summary: 'Local DB stats + env config', readiness: hasKey ? 'operational' : 'awaiting_key', error: null },
             engine: 'FlowSeer Claude Intelligence Engine',
             version: '1.0.0',
             status: hasKey ? 'operational' : 'no_api_key',

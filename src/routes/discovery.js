@@ -301,7 +301,7 @@ function createDiscoveryRoutes(db, opts = {}) {
 
                 // Re-record it
                 const crypto = require('crypto');
-                const checksum = crypto.createHash('md5').update(sql).digest('hex');
+                const checksum = crypto.createHash('sha256').update(sql).digest('hex').slice(0, 32);
                 await db.prepare(`INSERT INTO schema_migrations (filename, checksum) VALUES ($1, $2) ON CONFLICT (filename) DO UPDATE SET checksum=$2`).run([file, checksum]);
 
                 results.push({ file, status: 'applied' });

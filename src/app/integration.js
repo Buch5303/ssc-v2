@@ -116,6 +116,9 @@ function createApp(db, opts = {}) {
         res.sendFile(path.join(__dirname, '../../public/dashboard.html'));
     });
 
+    // Root redirect → dashboard
+    app.get('/', (_req, res) => res.redirect('/dashboard'));
+
     // Wire Redis into token service for distributed revocation
     if (redis) { tokenService.setRedis(redis); }
 
