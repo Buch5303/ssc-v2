@@ -439,8 +439,10 @@ function createWave9Routes(db, opts = {}) {
                 WHERE seniority IS NOT NULL
                 GROUP BY seniority ORDER BY contacts DESC
             `).all();
-            const total = rows.reduce((s,r)=>s+parseInt(r.contacts||0),0);
-            res.json({ ok: true, total_classified: total, by_seniority: rows });
+            const safe = v => parseInt(v||0)||0;
+            const total = rows.reduce((s,r)=>s+safe(r.contacts),0);
+            res.json({ ok: true, total_classified: total,
+                by_seniority: rows.map(r=>({ seniority: r.seniority, contacts: safe(r.contacts), with_email: safe(r.with_email), bop_tagged: safe(r.bop_tagged) })) });
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
