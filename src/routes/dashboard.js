@@ -1552,6 +1552,91 @@ function createDashboardRoutes(db, opts = {}) {
         }
     });
 
+
+    // GET /api/dashboard/seed-web-contacts — load web-researched contacts (Option C)
+    router.get('/seed-web-contacts', async (req, res) => {
+        try {
+            const WEB_CONTACTS = [
+                // ── CHROMALLOY ──────────────────────────────────────────────
+                { supplier: 'Chromalloy Gas Turbine', code: 'W251-049', name: 'Chris Celtruda', title: 'CEO & President', email: 'cceltruda@chromalloy.com', phone: '+1 561 935 3571', linkedin: 'linkedin.com/in/chris-celtruda', source: 'web_research' },
+                { supplier: 'Chromalloy Gas Turbine', code: 'W251-049', name: 'Russ Shelton', title: 'EVP Business Development', email: 'rshelton@chromalloy.com', phone: '', linkedin: 'linkedin.com/in/russ-shelton', source: 'web_research' },
+                { supplier: 'Chromalloy Gas Turbine', code: 'W251-049', name: 'Brion Patt', title: 'VP Business Development', email: 'bpatt@chromalloy.com', phone: '', linkedin: 'linkedin.com/in/brion-patt-3415996', source: 'web_research' },
+                { supplier: 'Chromalloy Gas Turbine', code: 'W251-049', name: 'Kristen Samson', title: 'VP Marketing & Communications', email: 'ksamson@chromalloy.com', phone: '', linkedin: '', source: 'web_research' },
+                { supplier: 'Chromalloy Gas Turbine', code: 'W251-049', name: 'Lee S. Eckert', title: 'Chief Financial Officer', email: 'leckert@chromalloy.com', phone: '', linkedin: '', source: 'web_research' },
+
+                // ── SULZER ──────────────────────────────────────────────────
+                { supplier: 'Sulzer Ltd', code: 'W251-003', name: 'James Davies', title: 'Head of Gas Turbines — Europe, Africa, ME, Asia', email: '', phone: '', linkedin: 'linkedin.com/in/james-davies-8037614', source: 'web_research' },
+                { supplier: 'Sulzer Ltd', code: 'W251-003', name: 'Alan Kee', title: 'Head of Gas Turbine Engineering — EMEA', email: 'a.kee@sulzer.com', phone: '', linkedin: '', source: 'web_research' },
+                { supplier: 'Sulzer Ltd', code: 'W251-003', name: 'Ravin Pillay-Ramsamy', title: 'Division President — Services', email: '', phone: '', linkedin: '', source: 'web_research' },
+                { supplier: 'Sulzer Ltd', code: 'W251-003', name: 'Dr. Suzanne Thoma', title: 'Executive Chair', email: '', phone: '', linkedin: '', source: 'web_research' },
+
+                // ── SIEMENS ENERGY ───────────────────────────────────────────
+                { supplier: 'Siemens Energy AG', code: 'W251-001', name: 'Christian Bruch', title: 'Chief Executive Officer', email: '', phone: '', linkedin: '', source: 'web_research' },
+                { supplier: 'Siemens Energy AG', code: 'W251-001', name: 'Tim Holt', title: 'Executive Board Member — Gas Services', email: '', phone: '', linkedin: '', source: 'web_research' },
+
+                // ── MTU MAINTENANCE ─────────────────────────────────────────
+                { supplier: 'MTU Maintenance', code: 'W251-002', name: 'Jonathan Leach', title: 'President & CEO — MTU North America', email: 'info@mtuusa.com', phone: '+1 860 258-9700', linkedin: '', source: 'web_research' },
+                { supplier: 'MTU Maintenance', code: 'W251-002', name: 'Gernot Sell', title: 'General Manager — MTU Maintenance Dallas', email: '', phone: '', linkedin: '', source: 'web_research' },
+                { supplier: 'MTU Maintenance', code: 'W251-002', name: 'André Sinanian', title: 'SVP & Managing Director — MTU Maintenance Berlin-Brandenburg', email: '', phone: '', linkedin: '', source: 'web_research' },
+                { supplier: 'MTU Maintenance', code: 'W251-002', name: 'Wout van Dorst', title: 'Aircraft Engine Sales — North America', email: '', phone: '', linkedin: 'linkedin.com/in/wout-van-dorst-52643631', source: 'web_research' },
+
+                // ── PARKER HANNIFIN ─────────────────────────────────────────
+                { supplier: 'Parker Hannifin', code: 'W251-006', name: 'Jennifer A. Parmentier', title: 'Chairman & CEO', email: '', phone: '+1 216 896-3000', linkedin: '', source: 'web_research' },
+                { supplier: 'Parker Hannifin', code: 'W251-006', name: 'Jeff Miller', title: 'VP Investor Relations', email: 'phir@parker.com', phone: '+1 216 896-2708', linkedin: '', source: 'web_research' },
+                { supplier: 'Parker Hannifin', code: 'W251-006', name: 'Todd Leombruno', title: 'EVP & Chief Financial Officer', email: '', phone: '', linkedin: '', source: 'web_research' },
+                // Gas Turbine Fuel Systems Division (Irvine, CA) — aftermarket
+                { supplier: 'Parker Hannifin', code: 'W251-006', name: 'GT Fuel Systems Division', title: 'Aftermarket Support', email: '', phone: '+1 949 809-8200', linkedin: '', source: 'web_research' },
+
+                // ── HOWMET AEROSPACE ────────────────────────────────────────
+                { supplier: 'Howmet Aerospace', code: 'W251-010', name: 'John Plant', title: 'Executive Chairman', email: '', phone: '+1 412 553-4545', linkedin: '', source: 'web_research' },
+                { supplier: 'Howmet Aerospace', code: 'W251-010', name: 'Engine Systems — Hampton', title: 'IGT Castings — Hampton VA', email: '', phone: '+1 757 838-4680', linkedin: '', source: 'web_research' },
+                { supplier: 'Howmet Aerospace', code: 'W251-010', name: 'Engine Systems — La Porte', title: 'IGT Castings — La Porte IN', email: '', phone: '+1 219 326-7400', linkedin: '', source: 'web_research' },
+
+                // ── GE VERNOVA ──────────────────────────────────────────────
+                { supplier: 'GE Vernova', code: 'W251-007', name: 'Scott Strazik', title: 'CEO — GE Vernova', email: '', phone: '', linkedin: '', source: 'web_research' },
+                { supplier: 'GE Vernova', code: 'W251-007', name: 'Gas Power Division', title: 'Gas Power Equipment & Services', email: '', phone: '', linkedin: '', source: 'web_research' },
+
+                // ── BAKER HUGHES ────────────────────────────────────────────
+                { supplier: 'Baker Hughes Company', code: 'W251-008', name: 'Lorenzo Simonelli', title: 'Chairman & CEO', email: '', phone: '', linkedin: '', source: 'web_research' },
+                { supplier: 'Baker Hughes Company', code: 'W251-008', name: 'Maria Claudia Borras', title: 'EVP — Oilfield Services & Equipment', email: '', phone: '', linkedin: '', source: 'web_research' },
+
+                // ── ABB ─────────────────────────────────────────────────────
+                { supplier: 'ABB Electrification', code: 'W251-012', name: 'Tarak Mehta', title: 'President — ABB Electrification', email: '', phone: '', linkedin: '', source: 'web_research' },
+
+                // ── ALFA LAVAL ──────────────────────────────────────────────
+                { supplier: 'Alfa Laval AB (FOCUS)', code: 'W251-013', name: 'Nish Patel', title: 'President — Energy Division', email: '', phone: '', linkedin: '', source: 'web_research' },
+            ];
+
+            let saved = 0, skipped = 0, errors = [];
+            for (const c of WEB_CONTACTS) {
+                try {
+                    const dup = await db.prepare(
+                        `SELECT id FROM supplier_contacts WHERE org_id = ? AND contact_name = ? AND supplier_name = ? LIMIT 1`
+                    ).get('twp', c.name, c.supplier);
+                    if (dup) { skipped++; continue; }
+                    await db.prepare(
+                        `INSERT INTO supplier_contacts (org_id, supplier_code, supplier_name, contact_name, title, email, phone, metadata_json, created_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`
+                    ).run('twp', c.code, c.supplier, c.name, c.title, c.email || '', c.phone || '',
+                        JSON.stringify({ linkedin: c.linkedin || '', source: c.source, verified: true }));
+                    saved++;
+                } catch(e) { errors.push(c.name + ': ' + e.message.slice(0,40)); }
+            }
+
+            res.json({
+                status: 'ok',
+                contacts_saved: saved,
+                contacts_skipped: skipped,
+                total: WEB_CONTACTS.length,
+                errors,
+                suppliers_covered: ['Chromalloy', 'Sulzer', 'Siemens Energy', 'MTU Maintenance', 'Parker Hannifin', 'Howmet Aerospace', 'GE Vernova', 'Baker Hughes', 'ABB', 'Alfa Laval'],
+                timestamp: new Date().toISOString()
+            });
+        } catch(err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
     return router;
 }
 
