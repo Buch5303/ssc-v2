@@ -24,20 +24,30 @@ function createWave9Routes(db, opts = {}) {
         const counts = { total: 0, with_email: 0, with_title: 0, tagged: 0, untagged: 0 };
         if (db) {
             try {
+                // Use only columns from migration 024 (guaranteed present)
+                // bop_category/seniority/currency_status added by 028 — check if they exist
                 const r = await db.prepare(`
                     SELECT
                         COUNT(*) as total,
                         COUNT(email) FILTER (WHERE email IS NOT NULL AND email != '') as with_email,
-                        COUNT(title) FILTER (WHERE title IS NOT NULL AND title != '') as with_title,
-                        COUNT(bop_category) FILTER (WHERE bop_category IS NOT NULL) as tagged,
-                        COUNT(*) FILTER (WHERE bop_category IS NULL) as untagged
+                        COUNT(title) FILTER (WHERE title IS NOT NULL AND title != '') as with_title
                     FROM supplier_contacts
                 `).get();
                 counts.total      = parseInt(r?.total     || 0);
-                counts.with_email = parseInt(r?.with_email|| 0);
-                counts.with_title = parseInt(r?.with_title|| 0);
-                counts.tagged     = parseInt(r?.tagged    || 0);
-                counts.untagged   = parseInt(r?.untagged  || 0);
+                counts.with_email = parseInt(r?.with_email || 0);
+                counts.with_title = parseInt(r?.with_title || 0);
+
+                // Try bop_category columns separately — may not exist yet
+                try {
+                    const r2 = await db.prepare(`
+                        SELECT
+                            COUNT(bop_category) FILTER (WHERE bop_category IS NOT NULL) as tagged,
+                            COUNT(*) FILTER (WHERE bop_category IS NULL) as untagged
+                        FROM supplier_contacts
+                    `).get();
+                    counts.tagged   = parseInt(r2?.tagged   || 0);
+                    counts.untagged = parseInt(r2?.untagged || 0);
+                } catch { counts.tagged = 0; counts.untagged = counts.total; }
             } catch (e) { counts.error = e.message; }
         }
 
@@ -90,9 +100,8 @@ function createWave9Routes(db, opts = {}) {
 
                 params.push(limit, offset);
                 contacts = await db.prepare(`
-                    SELECT id, supplier_name, contact_name, title, email, phone,
-                           bop_category, seniority, currency_status, created_at
-                    FROM supplier_contacts ${where}
+                    SELECT id, supplier_name, contact_name, title, email, phone, created_at
+                    FROM supplier_contacts ${where.replace(/bop_category[^,)]*/g, '1=1')}
                     ORDER BY supplier_name, title
                     LIMIT $${params.length-1} OFFSET $${params.length}
                 `).all(...params);
