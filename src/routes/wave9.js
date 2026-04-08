@@ -19,23 +19,7 @@ const { DISCOVERED_SUPPLIERS } = require('./discovery');
 function createWave9Routes(db, opts = {}) {
     const router = express.Router();
 
-    // Ensure Wave 9 tables exist (migration 028 may have partially failed)
-    if (db) {
-        db.prepare(`CREATE TABLE IF NOT EXISTS contact_outreach (
-            id              SERIAL PRIMARY KEY,
-            contact_id      INTEGER,
-            supplier_name   TEXT NOT NULL,
-            outreach_type   TEXT DEFAULT 'rfq',
-            status          TEXT DEFAULT 'draft',
-            rfq_category    TEXT,
-            rfq_content     TEXT,
-            sent_at         TIMESTAMPTZ,
-            replied_at      TIMESTAMPTZ,
-            notes           TEXT,
-            created_at      TIMESTAMPTZ DEFAULT NOW()
-        )`).run().catch(()=>{});
-        db.prepare(`CREATE INDEX IF NOT EXISTS idx_contact_outreach_status ON contact_outreach(status)`).run().catch(()=>{});
-    }
+
 
     // ─── STATUS ──────────────────────────────────────────────────────────────
     router.get('/status', async (req, res) => {
@@ -456,6 +440,7 @@ function createWave9Routes(db, opts = {}) {
             } catch {}
 
             // Store in contact_outreach pipeline
+            await ensureOutreachTable();
             let outreach_id = null;
             try {
                 const outrow = await db.prepare(`
@@ -503,9 +488,25 @@ function createWave9Routes(db, opts = {}) {
 
 
     // ─── OUTREACH PIPELINE ────────────────────────────────────────────────────
+    // Ensure contact_outreach table exists (migration 028 may have failed silently)
+    async function ensureOutreachTable() {
+        if (!db) return;
+        try {
+            await db.prepare(`CREATE TABLE IF NOT EXISTS contact_outreach (
+                id SERIAL PRIMARY KEY, contact_id INTEGER, supplier_name TEXT NOT NULL,
+                outreach_type TEXT DEFAULT 'rfq', status TEXT DEFAULT 'draft',
+                rfq_category TEXT, rfq_content TEXT, sent_at TIMESTAMPTZ,
+                replied_at TIMESTAMPTZ, notes TEXT, created_at TIMESTAMPTZ DEFAULT NOW()
+            )`).run();
+            await db.prepare(`CREATE INDEX IF NOT EXISTS idx_co_status ON contact_outreach(status)`).run();
+            await db.prepare(`CREATE INDEX IF NOT EXISTS idx_co_supplier ON contact_outreach(supplier_name)`).run();
+        } catch {}
+    }
+
     // List all RFQ drafts and outreach records
     router.get('/outreach', async (req, res) => {
         if (!db) return res.status(503).json({ error: 'No database' });
+        await ensureOutreachTable();
         try {
             const status = req.query.status || null;
             const params = [];
@@ -531,6 +532,7 @@ function createWave9Routes(db, opts = {}) {
     // Mark outreach as sent
     router.post('/outreach/:id/send', async (req, res) => {
         if (!db) return res.status(503).json({ error: 'No database' });
+        await ensureOutreachTable();
         try {
             await db.prepare(`UPDATE contact_outreach SET status='sent', sent_at=NOW() WHERE id=$1`)
                 .run(parseInt(req.params.id));
