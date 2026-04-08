@@ -437,12 +437,23 @@ function createWave9Routes(db, opts = {}) {
                     .run('rfq_draft', `RFQ: ${contact.supplier_name} — ${category}`, result.content, result.usage?.input_tokens||0, result.usage?.output_tokens||0, claude.estimateCost(result.usage), result.model, 'wave9_contact_rfq');
             } catch {}
 
+            // Store in contact_outreach pipeline
+            let outreach_id = null;
+            try {
+                const outrow = await db.prepare(`
+                    INSERT INTO contact_outreach (contact_id, supplier_name, outreach_type, status, rfq_category, rfq_content, created_at)
+                    VALUES ($1,$2,'rfq','draft',$3,$4,NOW()) RETURNING id
+                `).get(contact.id, contact.supplier_name, category, result.content);
+                outreach_id = outrow?.id;
+            } catch {}
+
             res.json({
                 _envelope: { contract_version: '1.0', engine: 'Claude Intelligence Engine', module: 'contact_rfq', timestamp: new Date().toISOString(), freshness: 'live', output_type: 'generated_draft', source_summary: `Claude ${result.model} — contact RFQ draft`, readiness: 'operational', error: null },
-                ok: true, contact_id: contact.id,
+                ok: true, contact_id: contact.id, outreach_id,
                 supplier: contact.supplier_name, contact: contact.contact_name, title: contact.title,
                 bop_category: category, rfq: result.content,
-                cost_usd: claude.estimateCost(result.usage), model: result.model
+                cost_usd: claude.estimateCost(result.usage), model: result.model,
+                note: outreach_id ? `RFQ stored in contact_outreach (id: ${outreach_id}). Mark as sent via POST /api/wave9/outreach/${outreach_id}/send` : 'RFQ generated (outreach storage failed)'
             });
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
@@ -469,6 +480,54 @@ function createWave9Routes(db, opts = {}) {
                 note: `${targets.length} C-Suite/VP contacts with verified emails — ready for Claude RFQ. POST /api/wave9/contacts/:id/rfq to draft.`,
                 targets
             });
+        } catch (e) { res.status(500).json({ error: e.message }); }
+    });
+
+
+    // ─── OUTREACH PIPELINE ────────────────────────────────────────────────────
+    // List all RFQ drafts and outreach records
+    router.get('/outreach', async (req, res) => {
+        if (!db) return res.status(503).json({ error: 'No database' });
+        try {
+            const status = req.query.status || null;
+            const params = [];
+            let where = 'WHERE 1=1';
+            if (status) { params.push(status); where += ` AND o.status = $${params.length}::text`; }
+            params.push(parseInt(req.query.limit)||20, (parseInt(req.query.page||1)-1)*(parseInt(req.query.limit)||20));
+            const rows = await db.prepare(`
+                SELECT o.id, o.contact_id, o.supplier_name, o.outreach_type, o.status,
+                       o.rfq_category, LEFT(o.rfq_content, 200) as rfq_preview,
+                       o.sent_at, o.replied_at, o.created_at,
+                       sc.contact_name, sc.title, sc.email
+                FROM contact_outreach o
+                LEFT JOIN supplier_contacts sc ON sc.id = o.contact_id
+                ${where}
+                ORDER BY o.created_at DESC
+                LIMIT $${params.length-1} OFFSET $${params.length}
+            `).all(...params);
+            const countRow = await db.prepare(`SELECT COUNT(*)::int as n FROM contact_outreach ${where}`).get(...params.slice(0,-2));
+            res.json({ ok: true, total: countRow?.n||0, outreach: rows });
+        } catch (e) { res.status(500).json({ error: e.message }); }
+    });
+
+    // Mark outreach as sent
+    router.post('/outreach/:id/send', async (req, res) => {
+        if (!db) return res.status(503).json({ error: 'No database' });
+        try {
+            await db.prepare(`UPDATE contact_outreach SET status='sent', sent_at=NOW() WHERE id=$1`)
+                .run(parseInt(req.params.id));
+            res.json({ ok: true, id: parseInt(req.params.id), status: 'sent', sent_at: new Date().toISOString() });
+        } catch (e) { res.status(500).json({ error: e.message }); }
+    });
+
+    // Mark outreach replied
+    router.post('/outreach/:id/reply', async (req, res) => {
+        if (!db) return res.status(503).json({ error: 'No database' });
+        const { notes } = req.body || {};
+        try {
+            await db.prepare(`UPDATE contact_outreach SET status='replied', replied_at=NOW(), notes=$1 WHERE id=$2`)
+                .run(notes||null, parseInt(req.params.id));
+            res.json({ ok: true, id: parseInt(req.params.id), status: 'replied' });
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 

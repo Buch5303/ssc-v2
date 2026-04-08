@@ -68,10 +68,12 @@ function createStatusRoutes(db, opts = {}) {
                 bop_categories_priced: 19,
             },
             wave9_readiness: {
-                contacts_table_exists:   (counts.supplier_contacts !== undefined),
                 contacts_in_db:          counts.supplier_contacts || 0,
                 outreach_records:        counts.contact_outreach || 0,
                 apollo_upgrade_required: !process.env.APOLLO_API_KEY,
+                top_targets_endpoint:    'GET /api/wave9/top-targets',
+                rfq_endpoint:            'POST /api/wave9/contacts/:id/rfq',
+                outreach_pipeline:       'GET /api/wave9/outreach',
                 activation_path: 'Upgrade Apollo to Basic ($49/mo) → POST /api/wave9/enrich-contacts'
             },
             audit_endpoints: {
