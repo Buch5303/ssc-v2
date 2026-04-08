@@ -1,6 +1,26 @@
 'use strict';
 /**
- * FlowSeer Claude Intelligence Routes
+ * FlowSeer Claude Intelligence Routes — EQS v1.0
+ * All responses use Wave 8 intelligence envelope (contract_version 1.0).
+ * When ANTHROPIC_API_KEY is absent, endpoints return disabledEnvelope.
+ */
+const { successEnvelope, disabledEnvelope, errorEnvelope } = require('../common/intelligence-envelope');
+
+const CLAUDE_ENGINE = 'Claude Intelligence Engine';
+const CLAUDE_KEY_ENV = 'ANTHROPIC_API_KEY';
+
+function claudeKeyGuard(res) {
+    if (!process.env[CLAUDE_KEY_ENV]) {
+        res.status(503).json(disabledEnvelope({
+            engine: CLAUDE_ENGINE, mod: 'claude_sonnet', envVar: CLAUDE_KEY_ENV,
+            hint: 'Add ANTHROPIC_API_KEY to Vercel env vars → vercel.com/gregory-j-buchanans-projects/ssc-v2/settings/environment-variables. Key: sk-ant-...'
+        }));
+        return true;
+    }
+    return false;
+}
+
+/**
  * ─────────────────────────────────────────────────────────────────────────────
  * Routes:
  *   GET  /api/claude/status                 — engine status + model info
@@ -86,6 +106,7 @@ function createClaudeRoutes(db, opts = {}) {
 
     // ─── ANALYZE PRICING ─────────────────────────────────────────────────────
     router.post('/analyze-pricing', async (req, res) => {
+        if (claudeKeyGuard(res)) return;
         try {
             const records = req.body?.records || INDICATIVE_PRICING;
             const result = await claude.analyzePricingAnomalies(records);
@@ -116,6 +137,7 @@ function createClaudeRoutes(db, opts = {}) {
 
     // ─── DRAFT RFQ ────────────────────────────────────────────────────────────
     router.post('/draft-rfq', async (req, res) => {
+        if (claudeKeyGuard(res)) return;
         const { supplier_name, contact_name, contact_title, part_description, bop_category, price_mid_usd, delivery_location, project_name } = req.body || {};
         if (!supplier_name || !part_description) return res.status(400).json({ error: 'supplier_name and part_description required' });
 
@@ -152,6 +174,7 @@ function createClaudeRoutes(db, opts = {}) {
 
     // ─── COMPARE SUPPLIERS ────────────────────────────────────────────────────
     router.post('/compare-suppliers', async (req, res) => {
+        if (claudeKeyGuard(res)) return;
         const { category, supplier_names } = req.body || {};
         if (!category) return res.status(400).json({ error: 'category required' });
 
@@ -187,6 +210,7 @@ function createClaudeRoutes(db, opts = {}) {
 
     // ─── CROSS-VALIDATE (Perplexity ↔ Claude) ────────────────────────────────
     router.post('/cross-validate', async (req, res) => {
+        if (claudeKeyGuard(res)) return;
         const { supplier_name, perplexity_analysis, perplexity_score } = req.body || {};
         if (!supplier_name || !perplexity_analysis) return res.status(400).json({ error: 'supplier_name and perplexity_analysis required' });
 
@@ -218,6 +242,7 @@ function createClaudeRoutes(db, opts = {}) {
 
     // ─── PROCUREMENT SUMMARY ──────────────────────────────────────────────────
     router.post('/procurement-summary', async (req, res) => {
+        if (claudeKeyGuard(res)) return;
         try {
             const records = req.body?.records || INDICATIVE_PRICING;
             const totalMid  = records.reduce((s, p) => s + (p.price_mid_usd  || 0), 0);
@@ -254,6 +279,7 @@ function createClaudeRoutes(db, opts = {}) {
 
     // ─── OUTREACH STRATEGY ────────────────────────────────────────────────────
     router.post('/outreach-strategy', async (req, res) => {
+        if (claudeKeyGuard(res)) return;
         const { category, price_mid_usd } = req.body || {};
         if (!category) return res.status(400).json({ error: 'category required' });
 

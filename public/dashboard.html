@@ -1834,7 +1834,49 @@ html, body {
     <!-- ═══════════════════════════════════════════════════════════════ -->
     <div id="market-intel-view" style="display:none">
 
-      <!-- Engine Status Bar -->
+      <!-- Engine Status Bar — EQS v1.0 — sourced from /api/health/engines -->
+      <div id="mi-engine-bar" style="padding:12px 0 20px;border-bottom:1px solid var(--border);margin-bottom:20px">
+        <!-- Row 1: Engine pills -->
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.05em;margin-right:4px">ENGINES:</span>
+          <span id="eng-discovery-pill"  class="eng-pill" title="FlowSeer Discovery — no API key required">⟳ DISCOVERY</span>
+          <span id="eng-perplexity-pill" class="eng-pill" title="Perplexity Sonar — real-time web validation">◈ PERPLEXITY</span>
+          <span id="eng-claude-pill"     class="eng-pill" title="Claude Intelligence — AI synthesis">✦ CLAUDE</span>
+          <span id="eng-apollo-pill"     class="eng-pill" title="Apollo.io — supplier enrichment">◆ APOLLO</span>
+          <span style="margin-left:auto;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)" id="mi-health-ts"></span>
+        </div>
+        <!-- Row 2: Data source legend -->
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">DATA SOURCES:</span>
+          <span style="font-family:var(--font-mono);font-size:9px"><span style="color:var(--green)">●</span> LIVE DB — Neon PostgreSQL</span>
+          <span style="font-family:var(--font-mono);font-size:9px"><span style="color:var(--cyan)">●</span> PERPLEXITY — Real-time web search + citations</span>
+          <span style="font-family:var(--font-mono);font-size:9px"><span style="color:var(--purple, #a855f7)">●</span> CLAUDE — AI-generated analysis</span>
+          <span style="font-family:var(--font-mono);font-size:9px"><span style="color:var(--amber)">●</span> ESTIMATED — Web-researched ±15% indicative</span>
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)" id="mi-supplier-count"></span>
+        </div>
+      </div>
+
+      <style>
+        .eng-pill {
+          font-family: var(--font-mono);
+          font-size: 9px;
+          font-weight: 700;
+          padding: 3px 10px;
+          border-radius: 100px;
+          border: 1px solid var(--border);
+          background: var(--bg-elevated);
+          color: var(--text-tertiary);
+          letter-spacing: 0.05em;
+          transition: all 0.2s;
+          cursor: default;
+        }
+        .eng-pill.active   { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.4); color: var(--green); }
+        .eng-pill.awaiting { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.4); color: var(--amber); }
+        .eng-pill.offline  { background: rgba(239,68,68,0.12);  border-color: rgba(239,68,68,0.4);  color: var(--red);   }
+      </style>
+
+      <!-- Activation banner — rendered by JS when API keys are missing -->
+      <div id="mi-activation-banner" style="display:none"></div>
       <div id="mi-engine-bar" style="display:flex;align-items:center;gap:16px;padding:12px 0 20px;border-bottom:1px solid var(--border);margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:8px">
           <div style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)"></div>
@@ -3248,7 +3290,7 @@ function showView(v) {
   const miView = document.getElementById('market-intel-view');
   if (miView) miView.style.display = v === 'market-intel' ? 'block' : 'none';
   if (v === 'governance') loadOperatorQueue();
-  if (v === 'market-intel') { loadMarketIntel(); loadIntegrityStatus(); loadClaudeStatus(); }
+  if (v === 'market-intel') { loadMarketIntel(); loadEngineHealth(); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -3594,8 +3636,112 @@ async function seedIntelligence() {
 // Wave 8 utility — uses main fetchJSON above
 
 // ═══════════════════════════════════════════════════════
-// PERPLEXITY INTEGRITY ENGINE — JS Functions
+// UNIFIED ENGINE HEALTH — drives all engine pills
 // ═══════════════════════════════════════════════════════
+
+async function loadEngineHealth() {
+  try {
+    const h = await fetchJSON('/api/health');
+    if (!h) return;
+
+    // Timestamp
+    const tsEl = document.getElementById('mi-health-ts');
+    if (tsEl) tsEl.textContent = 'checked ' + new Date(h.timestamp).toLocaleTimeString();
+
+    // Supplier count
+    const scEl = document.getElementById('mi-supplier-count');
+    if (scEl && h.engines?.discovery) {
+      scEl.textContent = h.engines.discovery.suppliers_in_db + ' suppliers in DB · ' + h.engines.discovery.pricing_in_db + ' pricing records';
+    }
+
+    // Pill updater
+    function pill(id, engine, label) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const status = engine?.status || 'offline';
+      el.className = 'eng-pill ' + (status === 'operational' ? 'active' : status === 'awaiting_key' ? 'awaiting' : 'offline');
+      const icon = status === 'operational' ? '✓' : status === 'awaiting_key' ? '⚠' : '✕';
+      el.textContent = icon + ' ' + label;
+      if (status === 'awaiting_key') {
+        el.title = `${label} — API key required. Add ${engine?.api_key_env || 'key'} to Vercel env vars.`;
+      } else if (status === 'operational') {
+        el.title = `${label} — OPERATIONAL`;
+      }
+    }
+
+    pill('eng-discovery-pill',  h.engines?.discovery,  'DISCOVERY');
+    pill('eng-perplexity-pill', h.engines?.perplexity, 'PERPLEXITY');
+    pill('eng-claude-pill',     h.engines?.claude,     'CLAUDE');
+    pill('eng-apollo-pill',     h.engines?.apollo,     'APOLLO');
+
+    // Also update legacy status elements if present
+    const pxEl = document.getElementById('integrity-api-status');
+    if (pxEl) {
+      const px = h.engines?.perplexity;
+      pxEl.textContent    = px?.status === 'operational' ? 'PERPLEXITY LIVE' : 'API KEY NEEDED';
+      pxEl.style.background = px?.status === 'operational' ? 'var(--green-dim)' : 'var(--amber-dim)';
+      pxEl.style.color      = px?.status === 'operational' ? 'var(--green)' : 'var(--amber)';
+    }
+    const clEl = document.getElementById('claude-api-status');
+    if (clEl) {
+      const cl = h.engines?.claude;
+      clEl.textContent    = cl?.status === 'operational' ? 'CLAUDE LIVE' : 'API KEY NEEDED';
+      clEl.style.background = cl?.status === 'operational' ? 'var(--cyan-dim)' : 'var(--amber-dim)';
+      clEl.style.color      = cl?.status === 'operational' ? 'var(--cyan)' : 'var(--amber)';
+    }
+
+    // Disable action buttons for inactive engines
+    const intBtn  = document.querySelector('button[onclick="runBatchIntegrity()"]');
+    const intBtn2 = document.querySelector('button[onclick="runSingleIntegrityCheck()"]');
+    const claudeBtn = document.querySelector('button[onclick="runClaudeAction()"]');
+    const rfqBtn    = document.querySelector('button[onclick="runClaudeRFQ()"]');
+
+    if (h.engines?.perplexity?.status !== 'operational') {
+      [intBtn, intBtn2].forEach(b => { if (b) { b.style.opacity = '0.4'; b.style.cursor = 'not-allowed'; b.title = 'Add PERPLEXITY_API_KEY to Vercel env vars to activate'; } });
+    }
+    if (h.engines?.claude?.status !== 'operational') {
+      [claudeBtn, rfqBtn].forEach(b => { if (b) { b.style.opacity = '0.4'; b.style.cursor = 'not-allowed'; b.title = 'Add ANTHROPIC_API_KEY to Vercel env vars to activate'; } });
+    }
+
+    // Show activation banner if any keys missing
+    renderActivationBanner(h);
+
+  } catch(e) { console.warn('loadEngineHealth:', e); }
+}
+
+function renderActivationBanner(h) {
+  const container = document.getElementById('mi-activation-banner');
+  if (!container) return;
+
+  const missing = [];
+  if (h.engines?.perplexity?.status !== 'operational') missing.push({ key: 'PERPLEXITY_API_KEY', engine: 'Perplexity Integrity Engine', note: 'Real-time supplier/pricing validation' });
+  if (h.engines?.claude?.status !== 'operational')     missing.push({ key: 'ANTHROPIC_API_KEY',  engine: 'Claude Intelligence Engine',  note: 'Pricing analysis, RFQ drafting, supplier comparison' });
+
+  if (!missing.length) { container.style.display = 'none'; return; }
+
+  container.style.display = 'block';
+  container.innerHTML = `
+    <div style="padding:12px 20px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;margin-bottom:16px">
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--amber);font-weight:700;margin-bottom:8px">⚠ ENGINES AWAITING ACTIVATION</div>
+      ${missing.map(m => `
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-secondary);font-weight:600;min-width:160px">${esc(m.engine)}</span>
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">Add <span style="color:var(--amber)">${esc(m.key)}</span> to Vercel env vars</span>
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">·</span>
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">${esc(m.note)}</span>
+        </div>
+      `).join('')}
+      <div style="margin-top:8px;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">
+        Go to: <a href="https://vercel.com/gregory-j-buchanans-projects/ssc-v2/settings/environment-variables" target="_blank" style="color:var(--cyan);text-decoration:none">vercel.com → ssc-v2 → Settings → Environment Variables</a>
+      </div>
+    </div>
+  `;
+}
+
+// Keep legacy function names working
+async function loadIntegrityStatus() { await loadEngineHealth(); }
+async function loadClaudeStatus()    { /* now handled by loadEngineHealth */ }
+
 
 let integrityRunCost = 0;
 

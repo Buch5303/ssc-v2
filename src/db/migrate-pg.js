@@ -55,14 +55,29 @@ async function runMigrations(pool) {
 
             await client.query('BEGIN');
             try {
-                // Skip SQLite-specific syntax (CREATE TRIGGER IF NOT EXISTS with BEGIN/END)
-                // PostgreSQL migrations use 020-day29-postgresql.sql which has PG-native syntax
-                const pgMigrations = ['day29-postgresql', 'day31', 'day32', '023', '024', '025', '026', '027'];
-                if (pgMigrations.some(p => file.includes(p))) {
+                // Auto-detect PG-compatible migrations by content signature.
+                // SQLite-only migrations contain TRIGGER...BEGIN...END blocks or
+                // SQLite-specific pragmas. PG migrations contain standard DDL/DML.
+                // Legacy explicit list retained as fallback for known-good files.
+                const legacyPgList = ['day29-postgresql', 'day31', 'day32', '023', '024', '025', '026', '027'];
+                const hasPgSignature = (
+                    /CREATE TABLE/i.test(sql) ||
+                    /CREATE INDEX/i.test(sql) ||
+                    /CREATE SEQUENCE/i.test(sql) ||
+                    /INSERT INTO/i.test(sql) ||
+                    /ALTER TABLE/i.test(sql)
+                );
+                const isSqliteOnly = (
+                    /CREATE TRIGGER/i.test(sql) &&
+                    /BEGIN\s+SELECT/i.test(sql)
+                );
+                const shouldRun = legacyPgList.some(p => file.includes(p)) || (hasPgSignature && !isSqliteOnly);
+
+                if (shouldRun) {
                     await client.query(sql);
                 } else {
-                    // For SQLite-origin migrations, skip them on PG (covered by 020)
-                    logger.info('migrate-pg', 'skipping sqlite migration on pg', { file });
+                    // SQLite-only migration — skip on PG (covered by migration 020)
+                    logger.info('migrate-pg', 'skipping sqlite-only migration on pg', { file });
                 }
                 await client.query(
                     'INSERT INTO schema_migrations (filename, checksum) VALUES ($1, $2)',

@@ -1,19 +1,28 @@
 'use strict';
 /**
- * FlowSeer Integrity Engine — Perplexity-powered validation
+ * FlowSeer Integrity Engine — Perplexity-powered validation — EQS v1.0
  * ─────────────────────────────────────────────────────────────────────────────
- * Routes:
- *   GET  /api/integrity/status                  — engine status + API key check
- *   POST /api/integrity/check-supplier          — validate one supplier
- *   POST /api/integrity/check-pricing           — validate one pricing record
- *   POST /api/integrity/check-contact           — verify an executive is in role
- *   POST /api/integrity/market-briefing         — get market intel for a category
- *   POST /api/integrity/discover-suppliers      — find net-new suppliers via Perplexity
- *   GET  /api/integrity/results                 — paginated check history
- *   GET  /api/integrity/scores                  — integrity score summary
- *   POST /api/integrity/sweep                   — run batch integrity sweep
- *   GET  /api/cron/integrity                    — Vercel cron (weekly sweep)
+ * All responses use the Wave 8 intelligence envelope (contract_version 1.0).
+ * When PERPLEXITY_API_KEY is absent, endpoints return disabledEnvelope —
+ * no dead controls, no misleading active state.
  */
+
+const { successEnvelope, disabledEnvelope, errorEnvelope } = require('../common/intelligence-envelope');
+const ENGINE = 'FlowSeer Integrity Engine';
+const KEY_ENV = 'PERPLEXITY_API_KEY';
+
+function keyGuard(res) {
+    if (!process.env[KEY_ENV]) {
+        res.status(503).json(disabledEnvelope({
+            engine: ENGINE, mod: 'perplexity_sonar', envVar: KEY_ENV,
+            hint: 'Add PERPLEXITY_API_KEY to Vercel env vars → vercel.com/gregory-j-buchanans-projects/ssc-v2/settings/environment-variables'
+        }));
+        return true;
+    }
+    return false;
+}
+
+
 
 const express = require('express');
 const perplexity = require('../services/perplexity');
@@ -104,6 +113,7 @@ function createIntegrityRoutes(db, opts = {}) {
 
     // ─── CHECK SUPPLIER ───────────────────────────────────────────────────────
     router.post('/check-supplier', async (req, res) => {
+        if (keyGuard(res)) return;
         const { name, domain, bop_category, revenue_usd, parent, description } = req.body || {};
         if (!name) return res.status(400).json({ error: 'name required' });
 
@@ -136,6 +146,7 @@ function createIntegrityRoutes(db, opts = {}) {
 
     // ─── CHECK PRICING ────────────────────────────────────────────────────────
     router.post('/check-pricing', async (req, res) => {
+        if (keyGuard(res)) return;
         const { part_description, bop_category, price_mid_usd, price_low_usd, price_high_usd, source_supplier } = req.body || {};
         if (!part_description || !price_mid_usd) return res.status(400).json({ error: 'part_description and price_mid_usd required' });
 
@@ -171,6 +182,7 @@ function createIntegrityRoutes(db, opts = {}) {
 
     // ─── CHECK CONTACT ────────────────────────────────────────────────────────
     router.post('/check-contact', async (req, res) => {
+        if (keyGuard(res)) return;
         const { name, title, company, domain } = req.body || {};
         if (!name || !company) return res.status(400).json({ error: 'name and company required' });
 
@@ -199,6 +211,7 @@ function createIntegrityRoutes(db, opts = {}) {
 
     // ─── MARKET BRIEFING ──────────────────────────────────────────────────────
     router.post('/market-briefing', async (req, res) => {
+        if (keyGuard(res)) return;
         const { bop_category, category_name } = req.body || {};
         if (!bop_category) return res.status(400).json({ error: 'bop_category required' });
 
@@ -243,6 +256,7 @@ function createIntegrityRoutes(db, opts = {}) {
 
     // ─── DISCOVER SUPPLIERS ───────────────────────────────────────────────────
     router.post('/discover-suppliers', async (req, res) => {
+        if (keyGuard(res)) return;
         const { bop_category, keywords = [], existing_suppliers = [] } = req.body || {};
         if (!bop_category) return res.status(400).json({ error: 'bop_category required' });
 
@@ -324,6 +338,7 @@ function createIntegrityRoutes(db, opts = {}) {
 
     // ─── BATCH SWEEP — run integrity checks on all seeded suppliers ───────────
     router.post('/sweep', async (req, res) => {
+        if (keyGuard(res)) return;
         const limit = Math.min(10, parseInt(req.body?.limit) || 5); // cap at 10 per sweep to control cost
         const checkType = req.body?.check_type || 'supplier';
 

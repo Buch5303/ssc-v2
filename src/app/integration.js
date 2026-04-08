@@ -16,6 +16,7 @@ const createDashboardRoutes = require('../routes/dashboard');
 const { createDiscoveryRoutes } = require('../routes/discovery');
 const { createIntegrityRoutes } = require('../routes/integrity');
 const { createClaudeRoutes }    = require('../routes/claude-intelligence');
+const { createHealthRoutes }    = require('../routes/health');
 
 function createApp(db, opts = {}) {
     const app = express();
@@ -106,6 +107,7 @@ function createApp(db, opts = {}) {
     app.use('/api/discovery', createDiscoveryRoutes(db, { redis }));
     app.use('/api/integrity', createIntegrityRoutes(db, { redis }));
     app.use('/api/claude',    createClaudeRoutes(db, { redis }));
+    app.use('/api/health',    createHealthRoutes(db, { redis }));
     app.use('/api/cron', createDiscoveryRoutes(db, { redis })); // Vercel cron compatibility
 
     // Serve dashboard UI
