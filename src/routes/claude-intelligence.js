@@ -304,15 +304,31 @@ function createClaudeRoutes(db, opts = {}) {
     router.get('/live-test', async (req, res) => {
         if (claudeKeyGuard(res)) return;
         try {
-            const result = await claude.query({
-                prompt: `You are FlowSeer, the Wave 8 intelligence engine for SSC V2, a gas turbine BOP procurement platform. Produce a 3-sentence live-test confirmation:
-1. Confirm you are a live claude-sonnet-4-6 Anthropic API call, not staged output
+            // Retry up to 3x on 529 overloaded — Anthropic transient capacity issue
+            let result, lastErr;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    result = await claude.query({
+                        prompt: `You are FlowSeer, the Wave 8 intelligence engine for SSC V2, a gas turbine BOP procurement platform. Produce a 3-sentence live-test confirmation:
+1. Confirm you are a live Anthropic API call, not staged output
 2. State: platform has 63 suppliers across 19 BOP categories, $9.72M mid BOP estimate ±15%
 3. State: W251 power island BOP scope excludes GT flange-to-flange, generator, and controls
 Be direct and procurement-coherent. No preamble.`,
-                systemPrompt: 'You are FlowSeer, a precision procurement intelligence AI. Respond concisely.',
-                maxTokens: 200
-            });
+                        systemPrompt: 'You are FlowSeer, a precision procurement intelligence AI. Respond concisely.',
+                        model: 'claude-haiku-4-5-20251001',
+                        maxTokens: 200
+                    });
+                    break;
+                } catch (e) {
+                    lastErr = e;
+                    if ((e.message.includes('529') || e.message.includes('overload')) && attempt < 3) {
+                        await new Promise(r => setTimeout(r, attempt * 2000));
+                        continue;
+                    }
+                    throw e;
+                }
+            }
+            if (!result) throw lastErr;
 
             const id = await saveClaudeResult(db, {
                 analysisType: 'live_test',
@@ -338,6 +354,7 @@ Be direct and procurement-coherent. No preamble.`,
         } catch (e) {
             const isCreditError = e.message.includes('credit balance') || e.message.includes('billing');
             const isKeyError    = e.message.includes('ANTHROPIC_API_KEY') || e.message.includes('authentication');
+            const isOverloaded  = e.message.includes('529') || e.message.includes('overload');
             res.status(isCreditError ? 402 : isKeyError ? 503 : 500).json({
                 _envelope: {
                     contract_version: '1.0',
@@ -346,14 +363,19 @@ Be direct and procurement-coherent. No preamble.`,
                     timestamp: new Date().toISOString(),
                     freshness: 'unavailable',
                     output_type: 'placeholder',
-                    source_summary: isCreditError ? 'API key valid — Anthropic account needs credits' : 'Claude API error',
-                    readiness: isCreditError ? 'credits_insufficient' : 'error',
+                    source_summary: isCreditError ? 'API key valid — needs credits'
+                                  : isOverloaded  ? 'API key valid + funded — Anthropic overloaded (529)'
+                                  : 'Claude API error',
+                    readiness: isCreditError ? 'credits_insufficient' : isOverloaded ? 'transient_error' : 'error',
                     error: e.message
                 },
                 ok: false,
-                live_call_attempted: true,  // The API was reached — key is valid, path is live
+                live_call_attempted: true,
                 credits_insufficient: isCreditError,
-                resolution: isCreditError ? 'Add credits at console.anthropic.com/billing — API key is valid and path is confirmed live' : undefined,
+                anthropic_overloaded: isOverloaded,
+                resolution: isCreditError ? 'Add credits at console.anthropic.com/billing'
+                          : isOverloaded  ? 'Anthropic API overloaded — retry in 60s. Key valid, billing active.'
+                          : undefined,
                 error: e.message
             });
         }
