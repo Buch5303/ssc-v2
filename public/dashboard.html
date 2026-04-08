@@ -1631,6 +1631,84 @@ html, body {
       </div>
 
 
+
+      <!-- W251 Supplier Intelligence Panel -->
+      <div class="panel span-3" id="si-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--cyan)"></div>
+            W251 Supplier Intelligence Database
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)" id="si-count-label">Loading...</span>
+            <button onclick="seedSupplierIntelligence()" id="siSeedBtn" style="padding:4px 12px;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:6px;color:var(--blue);font-family:var(--font-mono);font-size:10px;cursor:pointer">Load 271 Suppliers</button>
+            <span class="panel-tag">271 SUPPLIERS · 203 CONTACTS</span>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:12px 16px">
+          <!-- Tier + Group summary -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px" id="tierGrid">
+            <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--cyan)">79</div>
+              <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);text-transform:uppercase;margin-top:2px">Tier 1 — Core OEM</div>
+            </div>
+            <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--blue)">142</div>
+              <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);text-transform:uppercase;margin-top:2px">Tier 2 — Subsystem</div>
+            </div>
+            <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--purple)">50</div>
+              <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);text-transform:uppercase;margin-top:2px">Tier 3 — Niche / Regional</div>
+            </div>
+          </div>
+
+          <!-- Filter row -->
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+            <input type="text" id="siSearch" placeholder="Search suppliers, scope, tags..."
+              oninput="filterSI()"
+              style="flex:1;min-width:160px;padding:5px 10px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);font-family:var(--font-mono);font-size:11px;outline:none">
+            <select id="siTierFilter" onchange="filterSI()" style="padding:5px 10px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);font-family:var(--font-mono);font-size:10px;outline:none">
+              <option value="">All Tiers</option>
+              <option value="Tier 1">Tier 1 — Core OEM</option>
+              <option value="Tier 2">Tier 2 — Subsystem</option>
+              <option value="Tier 3">Tier 3 — Niche</option>
+            </select>
+            <select id="siGroupFilter" onchange="filterSI()" style="padding:5px 10px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);font-family:var(--font-mono);font-size:10px;outline:none">
+              <option value="">All Systems</option>
+              <option value="Mechanical Auxiliaries">Mechanical Auxiliaries</option>
+              <option value="Electrical BOP">Electrical BOP</option>
+              <option value="Enclosures & Structural">Enclosures & Structural</option>
+              <option value="Fuel Systems">Fuel Systems</option>
+              <option value="Safety & Monitoring">Safety & Monitoring</option>
+              <option value="Pumps / Valves / Piping">Pumps / Valves / Piping</option>
+              <option value="HRSG & Combined Cycle">HRSG & Combined Cycle</option>
+              <option value="Air Inlet / Exhaust / Acoustic">Air Inlet / Exhaust</option>
+            </select>
+            <span id="siFilterCount" style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)"></span>
+          </div>
+
+          <!-- Supplier table -->
+          <div style="overflow-y:auto;max-height:260px;border:1px solid var(--border);border-radius:8px">
+            <table class="data-table" style="font-size:11px">
+              <thead style="position:sticky;top:0;background:var(--bg-surface);z-index:1">
+                <tr>
+                  <th style="width:30px">#</th>
+                  <th>Supplier</th>
+                  <th style="width:60px">Tier</th>
+                  <th style="width:140px">System Group</th>
+                  <th style="width:80px">Country</th>
+                  <th style="width:50px">Status</th>
+                </tr>
+              </thead>
+              <tbody id="siTableBody">
+                <tr><td colspan="6"><div class="empty-state">Click "Load 271 Suppliers" to populate</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:8px;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)" id="siStatus"></div>
+        </div>
+      </div>
+
       <!-- Operator Workstation Panel (span 3) -->
       <div class="panel span-3" id="operator-section" style="display:none">
         <div class="panel-header">
@@ -2059,6 +2137,7 @@ async function refreshAll() {
     loadTimeline(),
     loadFinancial(),
     loadPerf(),
+    loadSI(),
   ]);
 }
 
@@ -2398,6 +2477,99 @@ async function loadPerf() {
       charts.latency.update('none');
     }
   } catch(e) { console.warn('perf:', e); }
+}
+
+
+// ─── SUPPLIER INTELLIGENCE ────────────────────────
+let _siData = [];
+let _siLoaded = false;
+
+async function seedSupplierIntelligence() {
+  const btn = document.getElementById('siSeedBtn');
+  const status = document.getElementById('siStatus');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Loading...'; }
+  if (status) status.textContent = 'Seeding 271 suppliers + 203 contacts...';
+  try {
+    const res = await fetch('/api/dashboard/seed-suppliers', { method: 'POST' });
+    const r = await res.json();
+    if (r.status === 'ok') {
+      if (status) status.textContent = `✅ ${r.seeded.suppliers} suppliers + ${r.seeded.contacts} contacts loaded`;
+      if (btn) { btn.textContent = '✅ Loaded'; btn.style.color = 'var(--green)'; }
+      await loadSI();
+    } else {
+      if (status) status.textContent = '❌ ' + (r.error || 'Failed');
+      if (btn) { btn.disabled = false; btn.textContent = 'Retry'; }
+    }
+  } catch(e) {
+    if (status) status.textContent = '❌ ' + e.message;
+    if (btn) { btn.disabled = false; btn.textContent = 'Retry'; }
+  }
+}
+
+async function loadSI() {
+  try {
+    const r = await fetchJSON('/api/dashboard/supplier-intelligence?limit=300');
+    if (!r?.suppliers) return;
+    _siData = r.suppliers;
+    _siLoaded = true;
+    const countEl = document.getElementById('si-count-label');
+    if (countEl) countEl.textContent = r.count + ' suppliers loaded';
+
+    // Update tier grid from live data
+    if (r.tier_summary?.length) {
+      const t1 = r.tier_summary.find(t => t.tier === 'Tier 1')?.count || 0;
+      const t2 = r.tier_summary.find(t => t.tier === 'Tier 2')?.count || 0;
+      const t3 = r.tier_summary.find(t => t.tier === 'Tier 3')?.count || 0;
+      const grid = document.getElementById('tierGrid');
+      if (grid && (t1 || t2 || t3)) {
+        grid.children[0].querySelector('[style*="font-display"]').textContent = t1;
+        grid.children[1].querySelector('[style*="font-display"]').textContent = t2;
+        grid.children[2].querySelector('[style*="font-display"]').textContent = t3;
+      }
+    }
+
+    renderSI(_siData);
+  } catch(e) { console.warn('si:', e); }
+}
+
+function filterSI() {
+  const search = (document.getElementById('siSearch')?.value || '').toLowerCase();
+  const tier = document.getElementById('siTierFilter')?.value || '';
+  const group = document.getElementById('siGroupFilter')?.value || '';
+
+  let filtered = _siData;
+  if (tier) filtered = filtered.filter(s => s.tier === tier);
+  if (group) filtered = filtered.filter(s => (s.system_group || '').includes(group));
+  if (search) filtered = filtered.filter(s =>
+    (s.name || '').toLowerCase().includes(search) ||
+    (s.system_tags || '').toLowerCase().includes(search) ||
+    (s.supplier_type || '').toLowerCase().includes(search) ||
+    (s.country || '').toLowerCase().includes(search)
+  );
+
+  const countEl = document.getElementById('siFilterCount');
+  if (countEl) countEl.textContent = filtered.length + ' of ' + _siData.length;
+  renderSI(filtered);
+}
+
+function renderSI(suppliers) {
+  const tbody = document.getElementById('siTableBody');
+  if (!tbody) return;
+  if (!suppliers.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No suppliers match filter</div></td></tr>';
+    return;
+  }
+  const tierColor = { 'Tier 1': 'var(--cyan)', 'Tier 2': 'var(--blue)', 'Tier 3': 'var(--purple)' };
+  tbody.innerHTML = suppliers.slice(0, 150).map((s, i) => `
+    <tr>
+      <td class="td-id">${i + 1}</td>
+      <td style="font-weight:500;color:var(--text-primary);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(s.name)}">${esc(s.name)}</td>
+      <td><span style="font-family:var(--font-mono);font-size:9px;color:${tierColor[s.tier] || 'var(--text-tertiary)'}">${esc(s.tier || '—')}</span></td>
+      <td style="font-size:10px;color:var(--text-tertiary);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.system_group || '—')}</td>
+      <td style="font-size:10px;color:var(--text-secondary)">${esc(s.country || '—')}</td>
+      <td><span class="status-badge ${s.status === 'ACTIVE' ? 'badge-ok' : 'badge-warn'}" style="font-size:8px">${esc(s.status || 'ACTIVE')}</span></td>
+    </tr>
+  `).join('');
 }
 
 // ─── DRILL-DOWN MODAL ─────────────────────────────
