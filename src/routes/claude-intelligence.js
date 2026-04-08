@@ -579,6 +579,37 @@ Be direct and procurement-coherent. No preamble.`,
         }
     });
 
+    // GET /api/claude/run-compare-suppliers?category=MV_System — supplier comparison for a category
+    router.get('/run-compare-suppliers', async (req, res) => {
+        if (claudeKeyGuard(res)) return;
+        const category = req.query.category || 'MV_System';
+        try {
+            const suppliers = DISCOVERED_SUPPLIERS.filter(s => s.bop_category === category);
+            if (!suppliers.length) return res.status(400).json({ error: `No suppliers found for category: ${category}` });
+            const result = await withRetry(() => claude.compareSuppliers({ category, suppliers }));
+            const id = await saveClaudeResult(db, {
+                analysisType: 'supplier_comparison',
+                subjectName: `Supplier Comparison — ${category}`,
+                content: result.content,
+                usage: result.usage,
+                model: result.model,
+                triggeredBy: 'get_trigger'
+            });
+            res.json(claudeEnvelope({
+                mod: 'supplier_comparison',
+                outputType: OUTPUT_TYPES.GENERATED_ANALYSIS,
+                result,
+                data: {
+                    analysis_id: id,
+                    category,
+                    comparison: result.content,
+                    suppliers_compared: suppliers.map(s => ({ name: s.name, tier: s.tier, revenue: s.revenue_usd })),
+                    cost_usd: claude.estimateCost(result.usage)
+                }
+            }));
+        } catch (e) { res.status(500).json({ error: e.message }); }
+    });
+
     // GET /api/claude/run-outreach-strategy?category=Reduction_Gearbox — outreach plan for a category
     router.get('/run-outreach-strategy', async (req, res) => {
         if (claudeKeyGuard(res)) return;

@@ -462,6 +462,55 @@ function createWave9Routes(db, opts = {}) {
     });
 
 
+    // ─── PIPELINE SUMMARY ────────────────────────────────────────────────────────
+    // Single-call procurement pipeline state — contacts + outreach + seniority
+    router.get('/pipeline', async (req, res) => {
+        if (!db) return res.status(503).json({ error: 'No database' });
+        await ensureOutreachTable();
+        try {
+            const [contactStats, outreachStats, topTargets] = await Promise.all([
+                db.prepare(`
+                    SELECT
+                        COUNT(*)::int                                                       as total,
+                        COUNT(bop_category) FILTER (WHERE bop_category IS NOT NULL)::int   as bop_tagged,
+                        COUNT(email)        FILTER (WHERE email IS NOT NULL AND email!='')::int as with_email,
+                        COUNT(*) FILTER (WHERE seniority='c_suite')::int                   as c_suite,
+                        COUNT(*) FILTER (WHERE seniority='vp')::int                        as vp,
+                        COUNT(*) FILTER (WHERE seniority IN ('c_suite','vp') AND email IS NOT NULL AND email!='')::int as priority_targets
+                    FROM supplier_contacts
+                `).get(),
+                db.prepare(`
+                    SELECT
+                        COUNT(*)::int                                       as total,
+                        COUNT(*) FILTER (WHERE status='draft')::int        as draft,
+                        COUNT(*) FILTER (WHERE status='sent')::int         as sent,
+                        COUNT(*) FILTER (WHERE status='replied')::int      as replied,
+                        COUNT(*) FILTER (WHERE status='meeting_set')::int  as meeting_set
+                    FROM contact_outreach
+                `).get(),
+                db.prepare(`
+                    SELECT id, supplier_name, contact_name, title, email, bop_category, seniority
+                    FROM supplier_contacts
+                    WHERE seniority IN ('c_suite','vp')
+                      AND email IS NOT NULL AND email!=''
+                      AND bop_category IS NOT NULL
+                    ORDER BY CASE seniority WHEN 'c_suite' THEN 1 ELSE 2 END, supplier_name
+                    LIMIT 10
+                `).all()
+            ]);
+            res.json({
+                ok: true,
+                timestamp: new Date().toISOString(),
+                contacts: contactStats,
+                outreach: outreachStats,
+                priority_rfq_targets: topTargets,
+                next_action: outreachStats?.total === 0
+                    ? 'No RFQs drafted yet. Use POST /api/wave9/contacts/:id/rfq with a priority target contact ID.'
+                    : `${outreachStats?.draft} RFQ drafts ready to send. Use POST /api/wave9/outreach/:id/send to mark as sent.`
+            });
+        } catch (e) { res.status(500).json({ error: e.message }); }
+    });
+
     // ─── TOP TARGETS ─────────────────────────────────────────────────────────────
     // C-Suite + VP contacts with email addresses — highest priority RFQ targets
     router.get('/top-targets', async (req, res) => {

@@ -36,7 +36,7 @@ async function _initPostgres() {
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 5000,
         ssl: process.env.DATABASE_URL?.includes('neon.tech') || process.env.DATABASE_URL?.includes('sslmode=require')
-            ? { rejectUnauthorized: false }
+            ? { rejectUnauthorized: true }  // Neon uses valid CA-signed cert — no warning
             : false,
     });
 
