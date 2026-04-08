@@ -157,6 +157,9 @@ function createWave9Routes(db, opts = {}) {
     router.get('/run-auto-tag', async (req, res) => {
         if (!db) return res.status(503).json({ error: 'No database' });
         try {
+            // Ensure bop_category column exists (migration 028 may have failed silently)
+            try { await db.prepare(`ALTER TABLE supplier_contacts ADD COLUMN IF NOT EXISTS bop_category TEXT`).run(); } catch {}
+            try { await db.prepare(`ALTER TABLE supplier_contacts ADD COLUMN IF NOT EXISTS seniority TEXT`).run(); } catch {}
             const nameMap = {};
             DISCOVERED_SUPPLIERS.forEach(s => {
                 const key = s.name.toLowerCase().replace(/[^a-z0-9]/g, '');
