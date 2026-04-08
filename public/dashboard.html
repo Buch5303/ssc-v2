@@ -1632,6 +1632,76 @@ html, body {
 
 
 
+
+      <!-- Apollo Enrichment Panel -->
+      <div class="panel span-3" id="enrich-section">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--amber)"></div>
+            Apollo.io Enrichment Engine
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)" id="enrich-credit-label">Free: ~95 credits</span>
+            <span class="panel-tag warn">LIVE API</span>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:14px 16px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+            <!-- Batch enrichment -->
+            <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:14px">
+              <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--cyan);margin-bottom:10px">Batch Enrichment</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.6">
+                Query Apollo for contacts at your W251 suppliers. Each supplier costs ~1 credit. Start with Tier 1 (your highest-priority OEMs).
+              </div>
+              <div style="display:flex;gap:8px;margin-bottom:10px">
+                <select id="enrichTier" style="flex:1;padding:5px 8px;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);font-family:var(--font-mono);font-size:10px;outline:none">
+                  <option value="Tier 1">Tier 1 — Core OEM (79 suppliers)</option>
+                  <option value="Tier 2">Tier 2 — Subsystem (142 suppliers)</option>
+                  <option value="Tier 3">Tier 3 — Niche (50 suppliers)</option>
+                </select>
+                <select id="enrichLimit" style="padding:5px 8px;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);font-family:var(--font-mono);font-size:10px;outline:none">
+                  <option value="5">5 suppliers</option>
+                  <option value="10" selected>10 suppliers</option>
+                  <option value="20">20 suppliers</option>
+                  <option value="30">30 suppliers</option>
+                </select>
+              </div>
+              <button onclick="runBatchEnrich()" id="batchEnrichBtn"
+                style="width:100%;padding:8px;background:var(--amber-dim);border:1px solid rgba(245,158,11,0.3);border-radius:6px;color:var(--amber);font-family:var(--font-display);font-size:12px;font-weight:600;cursor:pointer">
+                ⚡ Run Apollo Enrichment
+              </button>
+              <div id="batchEnrichStatus" style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);margin-top:8px;min-height:14px"></div>
+            </div>
+
+            <!-- Single supplier enrichment -->
+            <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:14px">
+              <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--green);margin-bottom:10px">Single Supplier Lookup</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">
+                Search Apollo for contacts at a specific company by name.
+              </div>
+              <input type="text" id="singleSupplierName" placeholder="e.g. Parker Hannifin"
+                style="width:100%;padding:6px 10px;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);font-family:var(--font-mono);font-size:11px;outline:none;margin-bottom:8px">
+              <input type="text" id="singleSupplierCode" placeholder="Supplier code (e.g. W251-006)"
+                style="width:100%;padding:6px 10px;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);font-family:var(--font-mono);font-size:11px;outline:none;margin-bottom:8px">
+              <button onclick="runSingleEnrich()" id="singleEnrichBtn"
+                style="width:100%;padding:8px;background:var(--green-dim);border:1px solid rgba(16,185,129,0.3);border-radius:6px;color:var(--green);font-family:var(--font-display);font-size:12px;font-weight:600;cursor:pointer">
+                🔍 Lookup Contacts
+              </button>
+              <div id="singleEnrichStatus" style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);margin-top:8px;min-height:14px"></div>
+            </div>
+          </div>
+
+          <!-- Results table -->
+          <div style="margin-top:14px;border:1px solid var(--border);border-radius:8px;overflow:hidden;display:none" id="enrichResultsWrap">
+            <div style="padding:8px 14px;background:var(--bg-elevated);border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-tertiary)">
+              Enrichment Results
+            </div>
+            <div style="overflow-y:auto;max-height:200px" id="enrichResultsList"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- W251 Supplier Intelligence Panel -->
       <div class="panel span-3" id="si-section">
         <div class="panel-header">
@@ -2479,6 +2549,81 @@ async function loadPerf() {
   } catch(e) { console.warn('perf:', e); }
 }
 
+
+
+// ─── APOLLO ENRICHMENT ────────────────────────────
+async function runBatchEnrich() {
+  const btn = document.getElementById('batchEnrichBtn');
+  const status = document.getElementById('batchEnrichStatus');
+  const tier = document.getElementById('enrichTier')?.value || 'Tier 1';
+  const limit = parseInt(document.getElementById('enrichLimit')?.value || 10);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Querying Apollo...'; }
+  if (status) status.textContent = `Searching Apollo for ${limit} ${tier} suppliers...`;
+  try {
+    const res = await fetch('/api/dashboard/enrich-batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tier, limit }),
+    });
+    const r = await res.json();
+    if (r.status === 'ok') {
+      if (status) status.textContent = `✅ ${r.suppliers_processed} suppliers queried · ${r.total_contacts_found} found · ${r.total_contacts_saved} saved to DB`;
+      if (btn) { btn.textContent = '✅ Done — Run Again'; btn.disabled = false; }
+      showEnrichResults(r.results);
+      loadSI(); // refresh supplier intelligence panel
+    } else {
+      if (status) status.textContent = '❌ ' + (r.error || 'Failed');
+      if (btn) { btn.disabled = false; btn.textContent = '⚡ Run Apollo Enrichment'; }
+    }
+  } catch(e) {
+    if (status) status.textContent = '❌ ' + e.message;
+    if (btn) { btn.disabled = false; btn.textContent = '⚡ Run Apollo Enrichment'; }
+  }
+}
+
+async function runSingleEnrich() {
+  const btn = document.getElementById('singleEnrichBtn');
+  const status = document.getElementById('singleEnrichStatus');
+  const name = document.getElementById('singleSupplierName')?.value?.trim();
+  const code = document.getElementById('singleSupplierCode')?.value?.trim() || 'APOLLO';
+  if (!name) { if (status) status.textContent = '⚠ Enter a company name'; return; }
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Searching...'; }
+  if (status) status.textContent = `Querying Apollo for "${name}"...`;
+  try {
+    const res = await fetch('/api/dashboard/enrich-supplier', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ supplier_code: code, company_name: name }),
+    });
+    const r = await res.json();
+    if (r.status === 'ok') {
+      if (status) status.textContent = `✅ ${r.apollo_found} contacts found · ${r.saved} saved`;
+      if (btn) { btn.disabled = false; btn.textContent = '🔍 Lookup Contacts'; }
+      showEnrichResults(r.contacts?.map(c => ({ supplier: name, found: 1, saved: 1, contact: c })) || []);
+    } else {
+      if (status) status.textContent = '❌ ' + (r.error || 'Failed');
+      if (btn) { btn.disabled = false; btn.textContent = '🔍 Lookup Contacts'; }
+    }
+  } catch(e) {
+    if (status) status.textContent = '❌ ' + e.message;
+    if (btn) { btn.disabled = false; btn.textContent = '🔍 Lookup Contacts'; }
+  }
+}
+
+function showEnrichResults(results) {
+  const wrap = document.getElementById('enrichResultsWrap');
+  const list = document.getElementById('enrichResultsList');
+  if (!wrap || !list || !results?.length) return;
+  wrap.style.display = 'block';
+  list.innerHTML = results.map(r => `
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 14px;border-bottom:1px solid var(--border)">
+      <span style="font-size:11px;font-weight:500;color:var(--text-primary);flex:1">${esc(r.supplier || r.name || '—')}</span>
+      <span style="font-family:var(--font-mono);font-size:10px;color:var(--cyan)">${r.found ?? '—'} found</span>
+      <span style="font-family:var(--font-mono);font-size:10px;color:var(--green)">${r.saved ?? '—'} saved</span>
+      ${r.status === 'error' ? '<span style="font-size:10px;color:var(--red)">error</span>' : ''}
+    </div>
+  `).join('');
+}
 
 // ─── SUPPLIER INTELLIGENCE ────────────────────────
 let _siData = [];

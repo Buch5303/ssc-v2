@@ -1317,6 +1317,166 @@ function createDashboardRoutes(db, opts = {}) {
         }
     });
 
+
+    // POST /api/dashboard/enrich-supplier — query Apollo for one supplier's contacts
+    router.post('/enrich-supplier', async (req, res) => {
+        try {
+            const { supplier_code, company_name, domain } = req.body;
+            const apiKey = process.env.APOLLO_API_KEY;
+            if (!apiKey) return res.status(500).json({ error: 'APOLLO_API_KEY not set' });
+            if (!company_name) return res.status(400).json({ error: 'company_name required' });
+
+            // Search Apollo for people at this company
+            const searchPayload = {
+                api_key: apiKey,
+                q_organization_name: company_name,
+                person_titles: ['VP', 'Director', 'President', 'Manager', 'Head', 'Chief', 'SVP', 'EVP'],
+                per_page: 10,
+                page: 1,
+            };
+
+            const apolloRes = await fetch('https://api.apollo.io/v1/mixed_people/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
+                body: JSON.stringify(searchPayload),
+            });
+
+            if (!apolloRes.ok) {
+                const err = await apolloRes.text();
+                return res.status(apolloRes.status).json({ error: 'Apollo API error', detail: err });
+            }
+
+            const data = await apolloRes.json();
+            const people = data.people || [];
+            const saved = [];
+
+            for (const person of people) {
+                const name = [person.first_name, person.last_name].filter(Boolean).join(' ');
+                const title = person.title || '';
+                const email = person.email || '';
+                const phone = person.phone_numbers?.[0]?.raw_number || '';
+                const linkedin = person.linkedin_url || '';
+                if (!name) continue;
+
+                try {
+                    await db.prepare(
+                        `INSERT INTO supplier_contacts
+                         (org_id, supplier_code, supplier_name, contact_name, title, email, phone, metadata_json, created_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                         ON CONFLICT DO NOTHING`
+                    ).run('twp', supplier_code || 'APOLLO', company_name, name, title, email, phone,
+                        JSON.stringify({ linkedin, source: 'apollo', apollo_id: person.id }));
+                    saved.push({ name, title, email: email ? '✓' : '—' });
+                } catch(dbErr) {
+                    // ignore duplicate
+                }
+            }
+
+            res.json({
+                status: 'ok',
+                company: company_name,
+                apollo_found: people.length,
+                saved: saved.length,
+                contacts: saved,
+                credits_used: data.pagination?.total_entries ? 1 : 0,
+                timestamp: new Date().toISOString(),
+            });
+        } catch(err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    // POST /api/dashboard/enrich-batch — run Apollo enrichment on multiple suppliers
+    router.post('/enrich-batch', async (req, res) => {
+        try {
+            const apiKey = process.env.APOLLO_API_KEY;
+            if (!apiKey) return res.status(500).json({ error: 'APOLLO_API_KEY not configured in Vercel env' });
+
+            // Load Tier 1 suppliers from DB (highest priority)
+            const tier = req.body.tier || 'Tier 1';
+            const limit = Math.min(parseInt(req.body.limit) || 10, 30);
+            const suppliers = await db.prepare(
+                `SELECT supplier_code, name FROM supplier_intelligence
+                 WHERE org_id = 'twp' AND tier = ? ORDER BY name LIMIT ?`
+            ).all(tier, limit);
+
+            if (!suppliers.length) {
+                return res.json({ status: 'ok', message: 'No suppliers found. Run seed-suppliers first.', results: [] });
+            }
+
+            const results = [];
+            let totalFound = 0;
+            let totalSaved = 0;
+
+            for (const sup of suppliers) {
+                try {
+                    const searchPayload = {
+                        api_key: apiKey,
+                        q_organization_name: sup.name,
+                        person_titles: ['VP Sales', 'VP Business Development', 'Director', 'President',
+                                        'Head of Sales', 'Commercial Director', 'Account Manager', 'Chief'],
+                        per_page: 5,
+                        page: 1,
+                    };
+
+                    const apolloRes = await fetch('https://api.apollo.io/v1/mixed_people/search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
+                        body: JSON.stringify(searchPayload),
+                    });
+
+                    if (!apolloRes.ok) {
+                        results.push({ supplier: sup.name, status: 'api_error', found: 0 });
+                        continue;
+                    }
+
+                    const data = await apolloRes.json();
+                    const people = data.people || [];
+                    let saved = 0;
+
+                    for (const person of people) {
+                        const name = [person.first_name, person.last_name].filter(Boolean).join(' ');
+                        if (!name) continue;
+                        try {
+                            await db.prepare(
+                                `INSERT INTO supplier_contacts
+                                 (org_id, supplier_code, supplier_name, contact_name, title, email, phone, metadata_json, created_at)
+                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                                 ON CONFLICT DO NOTHING`
+                            ).run('twp', sup.supplier_code, sup.name,
+                                name, person.title || '', person.email || '',
+                                person.phone_numbers?.[0]?.raw_number || '',
+                                JSON.stringify({ linkedin: person.linkedin_url || '', source: 'apollo', apollo_id: person.id }));
+                            saved++;
+                        } catch { /* duplicate */ }
+                    }
+
+                    totalFound += people.length;
+                    totalSaved += saved;
+                    results.push({ supplier: sup.name, found: people.length, saved });
+
+                    // Small delay to respect rate limits
+                    await new Promise(r => setTimeout(r, 300));
+
+                } catch(supErr) {
+                    results.push({ supplier: sup.name, status: 'error', error: supErr.message.slice(0, 60) });
+                }
+            }
+
+            res.json({
+                status: 'ok',
+                tier_queried: tier,
+                suppliers_processed: suppliers.length,
+                total_contacts_found: totalFound,
+                total_contacts_saved: totalSaved,
+                results,
+                timestamp: new Date().toISOString(),
+            });
+        } catch(err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
     return router;
 }
 
@@ -1330,3 +1490,7 @@ function _humanUptime(seconds) {
 }
 
 module.exports = createDashboardRoutes;
+
+// ── APOLLO ENRICHMENT ENGINE ──────────────────────────────────────────────────
+// Queries Apollo.io for contacts at W251 suppliers
+// Budget-aware: tracks credits used, prioritizes Tier 1 suppliers
