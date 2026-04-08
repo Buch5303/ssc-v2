@@ -87,12 +87,14 @@ function createWave9Routes(db, opts = {}) {
         let contacts = [], total = 0;
         if (db) {
             try {
+                // Build type-cast where clause — PG requires explicit casts for ILIKE
                 let where = 'WHERE 1=1';
                 const params = [];
-                if (category) { params.push(category); where += ` AND bop_category = $${params.length}`; }
+                if (category) { params.push(category); where += ` AND bop_category = $${params.length}::text`; }
                 if (search) {
                     params.push(`%${search}%`);
-                    where += ` AND (supplier_name ILIKE $${params.length} OR contact_name ILIKE $${params.length} OR title ILIKE $${params.length})`;
+                    const si = params.length;
+                    where += ` AND (supplier_name ILIKE $${si}::text OR contact_name ILIKE $${si}::text OR title ILIKE $${si}::text)`;
                 }
 
                 const countRow = await db.prepare(`SELECT COUNT(*) as n FROM supplier_contacts ${where}`).get(...params);
@@ -101,7 +103,7 @@ function createWave9Routes(db, opts = {}) {
                 params.push(limit, offset);
                 contacts = await db.prepare(`
                     SELECT id, supplier_name, contact_name, title, email, phone, created_at
-                    FROM supplier_contacts ${where.replace(/bop_category[^,)]*/g, '1=1')}
+                    FROM supplier_contacts ${where}
                     ORDER BY supplier_name, title
                     LIMIT $${params.length-1} OFFSET $${params.length}
                 `).all(...params);
@@ -122,6 +124,25 @@ function createWave9Routes(db, opts = {}) {
             pagination: { page, limit, total, pages: Math.ceil(total / limit) },
             filters: { category, search }
         });
+    });
+
+    // ─── CONTACTS BY CATEGORY ────────────────────────────────────────────────
+    router.get('/contacts/by-category', async (req, res) => {
+        if (!db) return res.status(503).json({ error: 'No database' });
+        try {
+            const rows = await db.prepare(`
+                SELECT bop_category, COUNT(*) as contacts,
+                       COUNT(email) FILTER (WHERE email IS NOT NULL AND email != '') as with_email
+                FROM supplier_contacts
+                WHERE bop_category IS NOT NULL
+                GROUP BY bop_category
+                ORDER BY contacts DESC
+            `).all();
+            res.json({
+                ok: true, total_tagged: rows.reduce((s,r)=>s+parseInt(r.contacts),0),
+                categories: rows.map(r => ({ category: r.bop_category, contacts: parseInt(r.contacts), with_email: parseInt(r.with_email||0) }))
+            });
+        } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
     // ─── SINGLE CONTACT ───────────────────────────────────────────────────────
