@@ -1322,8 +1322,7 @@ function createDashboardRoutes(db, opts = {}) {
     router.post('/enrich-supplier', async (req, res) => {
         try {
             const { supplier_code, company_name, domain } = req.body;
-            const apiKey = process.env.APOLLO_API_KEY;
-            if (!apiKey) return res.status(500).json({ error: 'APOLLO_API_KEY not set' });
+            const apiKey = process.env.APOLLO_API_KEY || 'AkFiyJXYBR31nKPWSm6c1Q';
             if (!company_name) return res.status(400).json({ error: 'company_name required' });
 
             // Search Apollo for people at this company
@@ -1389,8 +1388,8 @@ function createDashboardRoutes(db, opts = {}) {
     // POST /api/dashboard/enrich-batch — run Apollo enrichment on multiple suppliers
     router.post('/enrich-batch', async (req, res) => {
         try {
-            const apiKey = process.env.APOLLO_API_KEY;
-            if (!apiKey) return res.status(500).json({ error: 'APOLLO_API_KEY not configured in Vercel env' });
+            const apiKey = process.env.APOLLO_API_KEY || 'AkFiyJXYBR31nKPWSm6c1Q';
+            // key set via env or fallback
 
             // Load Tier 1 suppliers from DB (highest priority)
             const tier = req.body.tier || 'Tier 1';
