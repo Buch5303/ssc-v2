@@ -83,7 +83,7 @@ function createHealthRoutes(db, opts = {}) {
                 activated: anthropicKey,
                 api_key_env: 'ANTHROPIC_API_KEY',
                 api_key_present: anthropicKey,
-                model:     'claude-sonnet-4-6',
+                model:     'claude-haiku-4-5-20251001',
                 analyses_run: dbSeeds.claude_results,
                 audit_endpoint: 'GET /api/claude/live-test',
                 note: dbSeeds.claude_results === 0 && anthropicKey ? 'Key is set and path is confirmed live (real Anthropic API calls succeed). If analyses_run = 0, add credits at console.anthropic.com/billing' : undefined,

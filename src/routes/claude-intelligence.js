@@ -62,6 +62,23 @@ async function saveClaudeResult(db, { analysisType, subjectName, content, usage,
 function createClaudeRoutes(db, opts = {}) {
     const router = express.Router();
 
+    // Retry wrapper for Anthropic 529 overloaded responses
+    async function withRetry(fn, attempts = 3) {
+        let lastErr;
+        for (let i = 1; i <= attempts; i++) {
+            try { return await fn(); }
+            catch (e) {
+                lastErr = e;
+                if ((e.message.includes('529') || e.message.includes('overload')) && i < attempts) {
+                    await new Promise(r => setTimeout(r, i * 2000));
+                    continue;
+                }
+                throw e;
+            }
+        }
+        throw lastErr;
+    }
+
     // ─── STATUS ───────────────────────────────────────────────────────────────
     router.get('/status', async (req, res) => {
         const hasKey = !!process.env.ANTHROPIC_API_KEY;
@@ -499,7 +516,7 @@ Be direct and procurement-coherent. No preamble.`,
     router.get('/run-pricing-analysis', async (req, res) => {
         if (claudeKeyGuard(res)) return;
         try {
-            const result = await claude.analyzePricingAnomalies(INDICATIVE_PRICING);
+            const result = await withRetry(() => claude.analyzePricingAnomalies(INDICATIVE_PRICING));
             const id = await saveClaudeResult(db, {
                 analysisType: 'pricing_analysis',
                 subjectName: `BOP Pricing Analysis — ${INDICATIVE_PRICING.length} records`,
@@ -532,11 +549,11 @@ Be direct and procurement-coherent. No preamble.`,
             const totalLow  = INDICATIVE_PRICING.reduce((s, p) => s + p.price_low_usd, 0);
             const totalMid  = INDICATIVE_PRICING.reduce((s, p) => s + p.price_mid_usd, 0);
             const totalHigh = INDICATIVE_PRICING.reduce((s, p) => s + p.price_high_usd, 0);
-            const result = await claude.generateProcurementSummary({
+            const result = await withRetry(() => claude.generateProcurementSummary({
                 pricingRecords: INDICATIVE_PRICING,
                 supplierCounts: { total: DISCOVERED_SUPPLIERS.length, categories: 19 },
                 totalMid, totalLow, totalHigh
-            });
+            }));
             const id = await saveClaudeResult(db, {
                 analysisType: 'procurement_summary',
                 subjectName: 'W251 BOP Executive Procurement Summary',
@@ -570,7 +587,7 @@ Be direct and procurement-coherent. No preamble.`,
             const suppliers = DISCOVERED_SUPPLIERS.filter(s => s.bop_category === category);
             if (!suppliers.length) return res.status(400).json({ error: `No suppliers found for category: ${category}` });
             const priceMid = INDICATIVE_PRICING.filter(p => p.bop_category === category).reduce((s,p) => s + p.price_mid_usd, 0);
-            const result = await claude.draftOutreachStrategy({ category, suppliers, priceMid });
+            const result = await withRetry(() => claude.draftOutreachStrategy({ category, suppliers, priceMid }));
             const id = await saveClaudeResult(db, {
                 analysisType: 'outreach_strategy',
                 subjectName: `Outreach Strategy — ${category}`,
