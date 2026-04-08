@@ -491,6 +491,111 @@ Be direct and procurement-coherent. No preamble.`,
         }
     });
 
+    // ─── GET TRIGGER ENDPOINTS — browser-callable wrappers for POST intelligence routes ─
+    // Allows triggering from dashboard buttons and browser URL bar without a POST client.
+    // All use sensible defaults. Results persisted to claude_results table.
+
+    // GET /api/claude/run-pricing-analysis — analyze all 38 BOP pricing records
+    router.get('/run-pricing-analysis', async (req, res) => {
+        if (claudeKeyGuard(res)) return;
+        try {
+            const result = await claude.analyzePricingAnomalies(INDICATIVE_PRICING);
+            const id = await saveClaudeResult(db, {
+                analysisType: 'pricing_analysis',
+                subjectName: `BOP Pricing Analysis — ${INDICATIVE_PRICING.length} records`,
+                content: result.content,
+                usage: result.usage,
+                model: result.model,
+                triggeredBy: 'get_trigger'
+            });
+            res.json(claudeEnvelope({
+                mod: 'pricing_anomaly_detection',
+                outputType: OUTPUT_TYPES.GENERATED_ANALYSIS,
+                result,
+                data: {
+                    analysis_id: id,
+                    subject: `BOP Pricing Analysis — ${INDICATIVE_PRICING.length} records`,
+                    analysis: result.content,
+                    records_analyzed: INDICATIVE_PRICING.length,
+                    cost_usd: claude.estimateCost(result.usage)
+                }
+            }));
+        } catch (e) {
+            res.status(500).json({ error: e.message });
+        }
+    });
+
+    // GET /api/claude/run-procurement-summary — executive BOP procurement summary
+    router.get('/run-procurement-summary', async (req, res) => {
+        if (claudeKeyGuard(res)) return;
+        try {
+            const totalLow  = INDICATIVE_PRICING.reduce((s, p) => s + p.price_low_usd, 0);
+            const totalMid  = INDICATIVE_PRICING.reduce((s, p) => s + p.price_mid_usd, 0);
+            const totalHigh = INDICATIVE_PRICING.reduce((s, p) => s + p.price_high_usd, 0);
+            const result = await claude.generateProcurementSummary({
+                pricingRecords: INDICATIVE_PRICING,
+                supplierCounts: { total: DISCOVERED_SUPPLIERS.length, categories: 19 },
+                totalMid, totalLow, totalHigh
+            });
+            const id = await saveClaudeResult(db, {
+                analysisType: 'procurement_summary',
+                subjectName: 'W251 BOP Executive Procurement Summary',
+                content: result.content,
+                usage: result.usage,
+                model: result.model,
+                triggeredBy: 'get_trigger'
+            });
+            res.json(claudeEnvelope({
+                mod: 'procurement_summary',
+                outputType: OUTPUT_TYPES.GENERATED_ANALYSIS,
+                result,
+                data: {
+                    analysis_id: id,
+                    subject: 'W251 BOP Executive Procurement Summary',
+                    summary: result.content,
+                    bop_totals: { low: totalLow, mid: totalMid, high: totalHigh },
+                    cost_usd: claude.estimateCost(result.usage)
+                }
+            }));
+        } catch (e) {
+            res.status(500).json({ error: e.message });
+        }
+    });
+
+    // GET /api/claude/run-outreach-strategy?category=Reduction_Gearbox — outreach plan for a category
+    router.get('/run-outreach-strategy', async (req, res) => {
+        if (claudeKeyGuard(res)) return;
+        const category = req.query.category || 'Reduction_Gearbox';
+        try {
+            const suppliers = DISCOVERED_SUPPLIERS.filter(s => s.bop_category === category);
+            if (!suppliers.length) return res.status(400).json({ error: `No suppliers found for category: ${category}` });
+            const priceMid = INDICATIVE_PRICING.filter(p => p.bop_category === category).reduce((s,p) => s + p.price_mid_usd, 0);
+            const result = await claude.draftOutreachStrategy({ category, suppliers, priceMid });
+            const id = await saveClaudeResult(db, {
+                analysisType: 'outreach_strategy',
+                subjectName: `Outreach Strategy — ${category}`,
+                content: result.content,
+                usage: result.usage,
+                model: result.model,
+                triggeredBy: 'get_trigger'
+            });
+            res.json(claudeEnvelope({
+                mod: 'outreach_strategy',
+                outputType: OUTPUT_TYPES.GENERATED_RECOMMENDATION,
+                result,
+                data: {
+                    analysis_id: id,
+                    category,
+                    strategy: result.content,
+                    suppliers_included: suppliers.map(s => s.name),
+                    cost_usd: claude.estimateCost(result.usage)
+                }
+            }));
+        } catch (e) {
+            res.status(500).json({ error: e.message });
+        }
+    });
+
     // ─── RESULTS HISTORY ──────────────────────────────────────────────────────
     router.get('/results', async (req, res) => {
         const page   = Math.max(1, parseInt(req.query.page) || 1);
