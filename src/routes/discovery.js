@@ -195,6 +195,48 @@ const DISCOVERED_SUPPLIERS_ALL = [...DISCOVERED_SUPPLIERS, ...EXHAUST_SUPPLIERS,
 function createDiscoveryRoutes(db, opts = {}) {
     const router = express.Router();
 
+    // ─── MIGRATE — force-apply migrations 025-027 (no-auth, idempotent) ──────────
+    router.get('/migrate', async (req, res) => {
+        if (!db) return res.json({ ok: false, reason: 'no_db' });
+        const fs = require('fs');
+        const path = require('path');
+        const results = [];
+        const migrationsDir = path.join(__dirname, '../db/migrations');
+        const targets = ['025-flowseer-intelligence-engine.sql', '026-perplexity-integrity.sql', '027-claude-results.sql'];
+
+        for (const file of targets) {
+            const filePath = path.join(migrationsDir, file);
+            if (!fs.existsSync(filePath)) { results.push({ file, status: 'file_not_found' }); continue; }
+
+            try {
+                // Remove stale schema_migrations entry so migration re-runs
+                await db.prepare(`DELETE FROM schema_migrations WHERE filename = $1`).run([file]);
+
+                // Run the migration SQL
+                const sql = fs.readFileSync(filePath, 'utf8');
+                await db.prepare(sql).run();
+
+                // Re-record it
+                const crypto = require('crypto');
+                const checksum = crypto.createHash('md5').update(sql).digest('hex');
+                await db.prepare(`INSERT INTO schema_migrations (filename, checksum) VALUES ($1, $2) ON CONFLICT (filename) DO UPDATE SET checksum=$2`).run([file, checksum]);
+
+                results.push({ file, status: 'applied' });
+            } catch (e) {
+                results.push({ file, status: 'error', error: e.message });
+            }
+        }
+
+        // Verify tables now exist
+        let tablesOk = false;
+        try {
+            const t = await db.prepare(`SELECT COUNT(*) as cnt FROM pg_tables WHERE schemaname='public' AND tablename IN ('supplier_tiers','market_pricing','integrity_checks','claude_results')`).get();
+            tablesOk = parseInt(t?.cnt || 0) >= 4;
+        } catch {}
+
+        res.json({ ok: true, migrations: results, tables_verified: tablesOk });
+    });
+
     // ─── INIT — seed all data on GET (no auth needed, idempotent) ─────────────
     router.get('/init', async (req, res) => {
         if (!db) return res.json({ ok: false, reason: 'no_db' });
