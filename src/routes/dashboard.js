@@ -1334,7 +1334,7 @@ function createDashboardRoutes(db, opts = {}) {
                 page: 1,
             };
 
-            const apolloRes = await fetch('https://api.apollo.io/v1/mixed_people/search', {
+            const apolloRes = await fetch('https://api.apollo.io/api/v1/mixed_people/search', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
                 body: JSON.stringify(searchPayload),
@@ -1418,7 +1418,7 @@ function createDashboardRoutes(db, opts = {}) {
                         page: 1,
                     };
 
-                    const apolloRes = await fetch('https://api.apollo.io/v1/mixed_people/search', {
+                    const apolloRes = await fetch('https://api.apollo.io/api/v1/mixed_people/search', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
                         body: JSON.stringify(searchPayload),
@@ -1498,13 +1498,15 @@ function createDashboardRoutes(db, opts = {}) {
 
             for (const sup of suppliers) {
                 try {
-                    const apolloRes = await fetch('https://api.apollo.io/v1/mixed_people/search', {
+                    const apolloRes = await fetch('https://api.apollo.io/api/v1/mixed_people/search', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Cache-Control': 'no-cache',
+                            'x-api-key': apiKey,
+                        },
                         body: JSON.stringify({
-                            api_key: apiKey,
                             q_organization_name: sup.name,
-                            person_titles: ['VP', 'Director', 'President', 'Head', 'Chief', 'SVP', 'EVP', 'Manager'],
                             per_page: 5,
                             page: 1,
                         }),
