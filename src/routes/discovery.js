@@ -268,11 +268,36 @@ const LV_MCC_SUPPLIERS = [
     { name: 'Emerson (Control Techniques)', domain: 'emerson.com', apollo_id: '54a129c469702d8b19d64302', tier: 1, bop_category: 'LV_MCC_System', revenue_usd: 18_016_000_000, employee_count: 73000, hq_country: 'United States', phone: '+1 314-553-2000', source: 'apollo_bulk_enrich' },
 ];
 
+// ─── ADDITIONAL SUPPLIERS — Batch 6: Thin category depth ────────────────────
+const BATCH6_SUPPLIERS = [
+    // Fire Fighting — add Marioff (HI-FOG water mist) and Fike (clean agent)
+    { name: 'Marioff (HI-FOG)', domain: 'marioff.com', apollo_id: '5d0aacfcf651254246bbde2c', tier: 2, bop_category: 'Fire_Fighting', revenue_usd: null, employee_count: 300, hq_country: 'Finland', phone: '+358 10 6880000', source: 'apollo_bulk_enrich' },
+    { name: 'Fike Corporation', domain: 'fike.com', apollo_id: '54a1347169702d3e833a2700', tier: 2, bop_category: 'Fire_Fighting', revenue_usd: 300_000_000, employee_count: 690, hq_country: 'United States', phone: '+1 816-229-3405', source: 'apollo_bulk_enrich' },
+
+    // DC Battery System — add Saft (industrial batteries, TotalEnergies)
+    { name: 'Saft (TotalEnergies)', domain: 'saft.com', apollo_id: '5d0a716cf65125b7b76430d3', tier: 1, bop_category: 'DC_Battery_System', revenue_usd: 901_308_000, employee_count: 4300, hq_country: 'France', phone: '+33 1 58 63 16 00', source: 'apollo_bulk_enrich' },
+    { name: 'NorthStar Battery (EnerSys)', domain: 'northstarbattery.com', apollo_id: '5d33d614a3ae61c0e2cee672', tier: 2, bop_category: 'DC_Battery_System', revenue_usd: 57_900_000, employee_count: 550, hq_country: 'United States', phone: '+46 8 410 102 00', source: 'apollo_bulk_enrich' },
+
+    // Starting Package — add Piller Power Systems (SFC / frequency converters for GT starting)
+    { name: 'Piller Power Systems', domain: 'piller.com', apollo_id: '54a11d2369702d9d7e79f600', tier: 2, bop_category: 'Starting_Package', revenue_usd: 74_758_000, employee_count: 1000, hq_country: 'Germany', phone: '+49 18 456956600', source: 'apollo_bulk_enrich' },
+
+    // LV MCC System — add Schneider Electric and Siemens
+    { name: 'Schneider Electric', domain: 'schneider-electric.com', apollo_id: '5fc87d086311ca0001501395', tier: 1, bop_category: 'LV_MCC_System', revenue_usd: 44_384_274_000, employee_count: 230, hq_country: 'France', phone: '+33 1 41 29 70 00', source: 'apollo_bulk_enrich' },
+    { name: 'Siemens', domain: 'siemens.com', apollo_id: '5d94972b957e2f00993590b0', tier: 1, bop_category: 'LV_MCC_System', revenue_usd: 92_768_077_000, employee_count: 313000, hq_country: 'Germany', phone: '+49 89 38035491', source: 'apollo_bulk_enrich' },
+
+    // Compressor Washing — add Voith (GT washing systems) + Turbotect additional category
+    { name: 'Voith Group', domain: 'voith.com', apollo_id: '6035cde82d08ba013cb4c0d7', tier: 1, bop_category: 'Compressor_Washing', revenue_usd: 1_177_000_000, employee_count: 5000, hq_country: 'Germany', phone: '+49 7321 370', source: 'apollo_bulk_enrich' },
+
+    // Gas Detection — add Siemens (fire & gas detection systems)
+    { name: 'Siemens (Fire & Gas)', domain: 'siemens.com', apollo_id: '5d94972b957e2f00993590b0', tier: 1, bop_category: 'Gas_Detection', revenue_usd: 92_768_077_000, employee_count: 313000, hq_country: 'Germany', phone: '+49 89 38035491', source: 'apollo_bulk_enrich' },
+];
+
 // Merge all supplier arrays
 const DISCOVERED_SUPPLIERS_ALL = [
     ...DISCOVERED_SUPPLIERS, ...EXHAUST_SUPPLIERS, ...WATER_INJECTION_SUPPLIERS,
     ...COUPLING_SUPPLIERS, ...ENCLOSURE_SUPPLIERS, ...COOLING_WATER_SUPPLIERS,
-    ...SAFETY_SUPPLIERS, ...VIBRATION_SUPPLIERS, ...PIPING_VALVES_SUPPLIERS, ...LV_MCC_SUPPLIERS
+    ...SAFETY_SUPPLIERS, ...VIBRATION_SUPPLIERS, ...PIPING_VALVES_SUPPLIERS,
+    ...LV_MCC_SUPPLIERS, ...BATCH6_SUPPLIERS
 ];
 
 function createDiscoveryRoutes(db, opts = {}) {

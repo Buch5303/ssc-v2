@@ -136,7 +136,9 @@ function createHealthRoutes(db, opts = {}) {
                 suppliers_memory_vs_db_gap: (engines.discovery?.suppliers_in_memory || 0) - dbSeeds.supplier_tiers,
                 gap_reason: 'Multi-category suppliers (e.g. Alfa Laval, Emerson, ABB) enriched across categories in memory, stored once by name in DB',
                 pricing_accuracy: '±15% from mid — indicative, web-researched, not RFQ',
-                bop_total_mid_usd: null // populated by /api/discovery/pricing/summary
+                bop_total_mid_usd: INDICATIVE_PRICING.reduce((s, p) => s + p.price_mid_usd, 0),
+                bop_categories_priced: [...new Set(INDICATIVE_PRICING.map(p => p.bop_category))].length,
+                pricing_records_in_memory: INDICATIVE_PRICING.length
             },
             contact_intelligence: {
                 status: 'deferred',
