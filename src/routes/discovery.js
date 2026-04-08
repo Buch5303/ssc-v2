@@ -177,6 +177,19 @@ const INDICATIVE_PRICING = [
     // COOLING WATER SYSTEM
     { bop_category: 'Cooling_Water', sub_category: 'Mechanical Draft Cooling Tower — GT Auxiliary Systems', part_description: 'Induced draft cooling tower for GT lube oil / intercooler heat rejection — FRP or steel, 5-15 MWth duty', price_low_usd: 170_000, price_mid_usd: 200_000, price_high_usd: 230_000, source_supplier: 'Baltimore Aircoil / EVAPCO / Kelvion', source_type: 'web_research', confidence: 'indicative', lead_time_weeks_low: 12, lead_time_weeks_high: 22, price_basis: 'Per cooling tower cell, factory-assembled, CTI-certified. 5-15 MWth heat rejection. ±15% from mid.', notes: 'Simple cycle GT BOP — primarily for lube oil and auxiliary cooling. Not a full CCGT condenser tower.' },
     { bop_category: 'Cooling_Water', sub_category: 'Plate Heat Exchanger — Lube Oil / Auxiliary Cooling', part_description: 'Gasketed plate heat exchanger — auxiliary cooling circuit, GT auxiliary systems interface', price_low_usd: 42_500, price_mid_usd: 50_000, price_high_usd: 57_500, source_supplier: 'Alfa Laval / Kelvion', source_type: 'web_research', confidence: 'indicative', lead_time_weeks_low: 6, lead_time_weeks_high: 14, price_basis: 'Per PHE unit, stainless plates, gaskets, frame. GT lube oil / intercooler duty. ±15% from mid.', notes: 'Alfa Laval dominant in plate HX. Add water treatment system separately — typically $15-30K additional.' },
+
+    // GAS DETECTION — additional pricing
+    { bop_category: 'Gas_Detection', sub_category: 'Fixed Catalytic / IR Gas Detection System — Full Plant', part_description: 'Fixed gas detection system — multi-zone, catalytic + IR sensors, addressable control panel, ATEX Zone 1, GT plant scope', price_low_usd: 40_800, price_mid_usd: 48_000, price_high_usd: 55_200, source_supplier: 'MSA Safety / Dräger / Honeywell', source_type: 'web_research', confidence: 'indicative', lead_time_weeks_low: 6, lead_time_weeks_high: 14, price_basis: 'Per GT plant scope. 8-12 fixed sensors, control panel, SCADA integration, ATEX Zone 1. ±15% from mid.', notes: 'MSA Ultima X5000 series standard for O&G. Dräger Polytron premium tier. Add H2S / CO sensors +$5K each.' },
+
+    // VIBRATION MONITORING — additional pricing
+    { bop_category: 'Vibration_Monitoring', sub_category: 'API 670 Protection System — Full GT Train (Bently 3500 / SKF)', part_description: 'API 670 vibration protection — proximity probes, accelerometers, 3500 rack, keyphasor, radial + thrust + speed on GT + gearbox + generator', price_low_usd: 170_000, price_mid_usd: 200_000, price_high_usd: 230_000, source_supplier: 'Baker Hughes Bently Nevada / SKF / Emerson AMS', source_type: 'web_research', confidence: 'indicative', lead_time_weeks_low: 14, lead_time_weeks_high: 24, price_basis: 'Full train protection per single GT unit. Rack, probes, cables, junction boxes, System 1 software. ±15% from mid.', notes: 'Bently Nevada 3500 is the W251 standard. SKF Multilog is 20-25% lower cost. API 670 mandatory for rotating trains.' },
+
+    // PIPING & VALVES
+    { bop_category: 'Piping_Valves', sub_category: 'BOP Piping Package — CS / SS Process Piping', part_description: 'Carbon steel and stainless piping supply package — BOP interconnect piping, fittings, flanges, gaskets, bolts for 50MW GT plant', price_low_usd: 297_500, price_mid_usd: 350_000, price_high_usd: 402_500, source_supplier: 'Flowserve / Velan / CIRCOR / Trillium', source_type: 'estimated', confidence: 'indicative', lead_time_weeks_low: 16, lead_time_weeks_high: 30, price_basis: 'Bulk piping + valves package. CS A106 Gr B + SS 316L. Includes isolation, control, check valves. ±15% from mid.', notes: 'Highly site-specific. Estimate covers main BOP interconnect piping excluding GT OEM supply. Add pipe supports/hangers.' },
+    { bop_category: 'Piping_Valves', sub_category: 'Critical GT Isolation & Control Valves', part_description: 'High-integrity isolation and control valves for critical GT systems — lube oil, fuel gas, cooling water, fire protection headers', price_low_usd: 127_500, price_mid_usd: 150_000, price_high_usd: 172_500, source_supplier: 'Emerson Fisher / Flowserve / Velan', source_type: 'web_research', confidence: 'indicative', lead_time_weeks_low: 10, lead_time_weeks_high: 20, price_basis: 'Critical valve package — API 6D gate/ball/check, 2-8" bore range, Class 300-600. ±15% from mid.', notes: 'Emergency shutdown (ESD) valves are in this package. Fisher and Flowserve dominate power generation valve supply.' },
+
+    // LV MCC SYSTEM — additional pricing
+    { bop_category: 'LV_MCC_System', sub_category: 'Variable Frequency Drives (VFD) Package — BOP Pumps', part_description: 'VFD package for BOP auxiliary pumps — lube oil pumps, cooling water pumps, HVAC fans. 5-100kW range', price_low_usd: 76_500, price_mid_usd: 90_000, price_high_usd: 103_500, source_supplier: 'ABB / Emerson / Schneider Electric', source_type: 'web_research', confidence: 'indicative', lead_time_weeks_low: 8, lead_time_weeks_high: 16, price_basis: 'Per VFD package set — 8-12 drives, 5-100kW range, IP55, integrated with MCC. ±15% from mid.', notes: 'ABB ACS880 or Emerson PowerFlex typical. Reduces starting current + enables speed control on cooling pumps.' },
 ];
 
 // ─── ADDITIONAL SUPPLIERS — Exhaust System (Apollo-enriched, batch 2) ─────────
@@ -225,8 +238,41 @@ const COOLING_WATER_SUPPLIERS = [
     { name: 'Alfa Laval', domain: 'alfalaval.com', apollo_id: '54a12a6869702d8eeb546402', tier: 1, bop_category: 'Cooling_Water', revenue_usd: 7_558_470_000, employee_count: 23000, hq_country: 'Sweden', phone: '+46 46 36 65 00', source: 'apollo_bulk_enrich' },
 ];
 
+// ─── ADDITIONAL SUPPLIERS — Gas Detection / Fire Fighting (batch 5) ──────────
+const SAFETY_SUPPLIERS = [
+    { name: 'MSA Safety', domain: 'msasafety.com', apollo_id: '54a12a9369702dc841fcdc01', tier: 1, bop_category: 'Gas_Detection', revenue_usd: 1_874_814_000, employee_count: 5000, hq_country: 'United States', phone: '+1 800-672-2222', source: 'apollo_bulk_enrich' },
+    { name: 'Dräger', domain: 'draeger.com', apollo_id: '5592390b736964185f89dc00', tier: 1, bop_category: 'Gas_Detection', revenue_usd: 3_945_000_000, employee_count: 17000, hq_country: 'Germany', phone: '+49 451 8820', source: 'apollo_bulk_enrich' },
+    { name: 'MSA Safety', domain: 'msasafety.com', apollo_id: '54a12a9369702dc841fcdc01', tier: 1, bop_category: 'Fire_Fighting', revenue_usd: 1_874_814_000, employee_count: 5000, hq_country: 'United States', phone: '+1 800-672-2222', source: 'apollo_bulk_enrich' },
+];
+
+// ─── ADDITIONAL SUPPLIERS — Vibration Monitoring (batch 5) ───────────────────
+const VIBRATION_SUPPLIERS = [
+    { name: 'Baker Hughes (Bently Nevada)', domain: 'bakerhughes.com', apollo_id: null, tier: 1, bop_category: 'Vibration_Monitoring', revenue_usd: 25_000_000_000, employee_count: 55000, hq_country: 'United States', phone: '+1 713-439-8600', source: 'web_research' },
+    { name: 'SKF Group', domain: 'skf.com', apollo_id: '5f57f197a00565011de1537b', tier: 1, bop_category: 'Vibration_Monitoring', revenue_usd: 9_109_398_000, employee_count: 38000, hq_country: 'Sweden', phone: '+46 31 337 10 00', source: 'apollo_bulk_enrich' },
+    { name: 'Emerson (AMS / CSI)', domain: 'emerson.com', apollo_id: '54a129c469702d8b19d64302', tier: 1, bop_category: 'Vibration_Monitoring', revenue_usd: 18_016_000_000, employee_count: 73000, hq_country: 'United States', phone: '+1 314-553-2000', source: 'apollo_bulk_enrich' },
+];
+
+// ─── ADDITIONAL SUPPLIERS — Piping & Valves (batch 5) ────────────────────────
+const PIPING_VALVES_SUPPLIERS = [
+    { name: 'Flowserve', domain: 'flowserve.com', apollo_id: '6287dca6685dbc00d961f49f', tier: 1, bop_category: 'Piping_Valves', revenue_usd: 4_729_260_000, employee_count: 16000, hq_country: 'United States', phone: '+1 972-443-6500', source: 'apollo_bulk_enrich' },
+    { name: 'Velan Inc', domain: 'velan.com', apollo_id: '54a1271169702db878ed0a00', tier: 2, bop_category: 'Piping_Valves', revenue_usd: 295_196_000, employee_count: 1700, hq_country: 'Canada', phone: '+1 514-748-7743', source: 'apollo_bulk_enrich' },
+    { name: 'CIRCOR International', domain: 'circor.com', apollo_id: '54a11df169702d9a8b8c4601', tier: 2, bop_category: 'Piping_Valves', revenue_usd: 821_794_000, employee_count: 4900, hq_country: 'United States', phone: '+1 781-270-1200', source: 'apollo_bulk_enrich' },
+    { name: 'Trillium Flow Technologies', domain: 'trilliumflow.com', apollo_id: '5e9d42550c8221008c09a5d5', tier: 2, bop_category: 'Piping_Valves', revenue_usd: 37_099_000, employee_count: 2200, hq_country: 'United Kingdom', phone: '+1 832-200-6220', source: 'apollo_bulk_enrich' },
+    { name: 'Emerson (Fisher / Keystone)', domain: 'emerson.com', apollo_id: '54a129c469702d8b19d64302', tier: 1, bop_category: 'Piping_Valves', revenue_usd: 18_016_000_000, employee_count: 73000, hq_country: 'United States', phone: '+1 314-553-2000', source: 'apollo_bulk_enrich' },
+];
+
+// ─── ADDITIONAL SUPPLIERS — LV MCC System (batch 5) ──────────────────────────
+const LV_MCC_SUPPLIERS = [
+    { name: 'ABB', domain: 'abb.com', apollo_id: '5f17ca92833e7c008c11f27c', tier: 1, bop_category: 'LV_MCC_System', revenue_usd: 32_915_000_000, employee_count: 820, hq_country: 'Switzerland', phone: '+1 800-752-0696', source: 'apollo_bulk_enrich' },
+    { name: 'Emerson (Control Techniques)', domain: 'emerson.com', apollo_id: '54a129c469702d8b19d64302', tier: 1, bop_category: 'LV_MCC_System', revenue_usd: 18_016_000_000, employee_count: 73000, hq_country: 'United States', phone: '+1 314-553-2000', source: 'apollo_bulk_enrich' },
+];
+
 // Merge all supplier arrays
-const DISCOVERED_SUPPLIERS_ALL = [...DISCOVERED_SUPPLIERS, ...EXHAUST_SUPPLIERS, ...WATER_INJECTION_SUPPLIERS, ...COUPLING_SUPPLIERS, ...ENCLOSURE_SUPPLIERS, ...COOLING_WATER_SUPPLIERS];
+const DISCOVERED_SUPPLIERS_ALL = [
+    ...DISCOVERED_SUPPLIERS, ...EXHAUST_SUPPLIERS, ...WATER_INJECTION_SUPPLIERS,
+    ...COUPLING_SUPPLIERS, ...ENCLOSURE_SUPPLIERS, ...COOLING_WATER_SUPPLIERS,
+    ...SAFETY_SUPPLIERS, ...VIBRATION_SUPPLIERS, ...PIPING_VALVES_SUPPLIERS, ...LV_MCC_SUPPLIERS
+];
 
 function createDiscoveryRoutes(db, opts = {}) {
     const router = express.Router();
