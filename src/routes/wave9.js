@@ -149,6 +149,100 @@ function createWave9Routes(db, opts = {}) {
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
+
+    // ─── AUTO-TAG CONTACTS ────────────────────────────────────────────────────
+    // Matches W251 supplier_contacts to BOP categories via supplier name lookup
+    router.post('/auto-tag', async (req, res) => {
+        if (!db) return res.status(503).json({ error: 'No database' });
+        try {
+            // Build supplier name → bop_category map from in-memory discovery data
+            const nameMap = {};
+            DISCOVERED_SUPPLIERS.forEach(s => {
+                const key = s.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                nameMap[key] = s.bop_category;
+                // Also map by domain keyword
+                if (s.domain) {
+                    const domain = s.domain.split('.')[0].toLowerCase();
+                    if (!nameMap[domain]) nameMap[domain] = s.bop_category;
+                }
+            });
+
+            // Fetch all untagged contacts
+            const contacts = await db.prepare(
+                `SELECT id, supplier_name FROM supplier_contacts`
+            ).all();
+
+            let tagged = 0, skipped = 0;
+            for (const c of contacts) {
+                const key = (c.supplier_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                // Try full name match first
+                let category = nameMap[key];
+                // Try partial match — check if any BOP supplier name appears in the contact's supplier name
+                if (!category) {
+                    for (const [k, cat] of Object.entries(nameMap)) {
+                        if (k.length > 4 && key.includes(k)) { category = cat; break; }
+                    }
+                }
+                if (category) {
+                    try {
+                        await db.prepare(`UPDATE supplier_contacts SET bop_category=$1 WHERE id=$2`)
+                            .run(category, c.id);
+                        tagged++;
+                    } catch {}
+                } else skipped++;
+            }
+
+            res.json({
+                ok: true, total: contacts.length, tagged, skipped,
+                note: `Tagged ${tagged} contacts with BOP categories from in-memory discovery data. ${skipped} could not be matched.`
+            });
+        } catch (e) { res.status(500).json({ error: e.message }); }
+    });
+
+    // ─── RFQ PER CONTACT ─────────────────────────────────────────────────────
+    // Drafts a Claude RFQ email for a specific contact
+    router.post('/contacts/:id/rfq', async (req, res) => {
+        if (!db) return res.status(503).json({ error: 'No database' });
+        const hasClaudeKey = !!process.env.ANTHROPIC_API_KEY;
+        if (!hasClaudeKey) return res.status(503).json({ error: 'ANTHROPIC_API_KEY required', hint: 'Add key to Vercel env vars' });
+
+        try {
+            const contact = await db.prepare(`SELECT * FROM supplier_contacts WHERE id=$1`).get(parseInt(req.params.id));
+            if (!contact) return res.status(404).json({ error: 'Contact not found' });
+
+            const { project_name = 'Project Jupiter — TG20B7-8 W251 Power Island', delivery_location = 'Santa Teresa, New Mexico, USA' } = req.body || {};
+            const category = contact.bop_category || req.body?.bop_category || 'BOP Equipment';
+            const pricingRecord = await db.prepare(`SELECT * FROM market_pricing WHERE bop_category=$1 ORDER BY price_mid_usd DESC LIMIT 1`).get(category).catch(() => null);
+
+            const claude = require('../services/claude');
+            const result = await claude.draftRFQ({
+                supplierName: contact.supplier_name,
+                contactName: contact.contact_name,
+                contactTitle: contact.title,
+                partDescription: category.replace(/_/g, ' '),
+                bopCategory: category,
+                priceMid: pricingRecord?.price_mid_usd || null,
+                deliveryLocation: delivery_location,
+                projectName: project_name
+            });
+
+            const { createClaudeRoutes } = require('./claude-intelligence');
+            // Persist via direct DB insert
+            try {
+                await db.prepare(`INSERT INTO claude_results (analysis_type,subject_name,content,input_tokens,output_tokens,model_cost_usd,model,triggered_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW())`)
+                    .run('rfq_draft', `RFQ: ${contact.supplier_name} — ${category}`, result.content, result.usage?.input_tokens||0, result.usage?.output_tokens||0, claude.estimateCost(result.usage), result.model, 'wave9_contact_rfq');
+            } catch {}
+
+            res.json({
+                _envelope: { contract_version: '1.0', engine: 'Claude Intelligence Engine', module: 'contact_rfq', timestamp: new Date().toISOString(), freshness: 'live', output_type: 'generated_draft', source_summary: `Claude ${result.model} — contact RFQ draft`, readiness: 'operational', error: null },
+                ok: true, contact_id: contact.id,
+                supplier: contact.supplier_name, contact: contact.contact_name, title: contact.title,
+                bop_category: category, rfq: result.content,
+                cost_usd: claude.estimateCost(result.usage), model: result.model
+            });
+        } catch (e) { res.status(500).json({ error: e.message }); }
+    });
+
     return router;
 }
 
