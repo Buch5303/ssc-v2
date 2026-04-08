@@ -2008,6 +2008,47 @@ html, body {
         </div>
       </div>
 
+      <!-- Claude Intelligence Panel -->
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--cyan)"></div>
+            Claude Intelligence Engine
+          </div>
+          <div class="panel-actions" style="display:flex;align-items:center;gap:8px">
+            <span id="claude-api-status" class="panel-tag" style="background:var(--bg-elevated);color:var(--text-tertiary)">Checking...</span>
+            <select id="claude-action-select" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-family:var(--font-mono);font-size:9px;color:var(--text-secondary)">
+              <option value="analyze-pricing">Analyze All Pricing</option>
+              <option value="procurement-summary">Executive Summary</option>
+              <option value="compare-suppliers">Compare Suppliers</option>
+              <option value="outreach-strategy">Outreach Strategy</option>
+            </select>
+            <button onclick="runClaudeAction()" style="padding:4px 12px;background:var(--cyan-dim);border:1px solid rgba(6,182,212,0.4);border-radius:5px;color:var(--cyan);font-family:var(--font-mono);font-size:9px;cursor:pointer;font-weight:600">▶ RUN</button>
+          </div>
+        </div>
+        <div style="padding:8px 20px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">
+          Claude Sonnet · Deep reasoning + synthesis · RFQ drafting · Pricing anomaly detection · Supplier ranking · Complements Perplexity real-time search
+        </div>
+        <!-- Quick RFQ generator -->
+        <div style="padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg-elevated)">
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-bottom:6px">QUICK RFQ DRAFT — Enter supplier + equipment to generate professional RFQ</div>
+          <div style="display:flex;gap:8px">
+            <input id="rfq-supplier" type="text" placeholder="Supplier name (e.g. Flender)..." style="flex:1;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:var(--font-mono);font-size:11px;color:var(--text-primary);outline:none">
+            <input id="rfq-equipment" type="text" placeholder="Equipment description..." style="flex:2;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:var(--font-mono);font-size:11px;color:var(--text-primary);outline:none">
+            <button onclick="runClaudeRFQ()" style="padding:6px 16px;background:var(--cyan-dim);border:1px solid rgba(6,182,212,0.4);border-radius:6px;color:var(--cyan);font-family:var(--font-mono);font-size:10px;cursor:pointer;font-weight:600;white-space:nowrap">DRAFT RFQ</button>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0;max-height:400px;overflow-y:auto" id="claude-results">
+          <div style="padding:24px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">
+            Claude Sonnet is ready. Select an analysis type above or use the RFQ generator.
+          </div>
+        </div>
+        <div style="padding:8px 20px;border-top:1px solid var(--border);font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);display:flex;justify-content:space-between">
+          <span id="claude-last-run">No analyses run yet</span>
+          <span id="claude-cost-display">Session cost: $0.0000</span>
+        </div>
+      </div>
+
       <!-- Discovery Log -->
       <div class="panel">
         <div class="panel-header">
@@ -3207,7 +3248,7 @@ function showView(v) {
   const miView = document.getElementById('market-intel-view');
   if (miView) miView.style.display = v === 'market-intel' ? 'block' : 'none';
   if (v === 'governance') loadOperatorQueue();
-  if (v === 'market-intel') { loadMarketIntel(); loadIntegrityStatus(); }
+  if (v === 'market-intel') { loadMarketIntel(); loadIntegrityStatus(); loadClaudeStatus(); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -3789,6 +3830,119 @@ async function loadOperatorQueue() {
       </div>
     `).join('');
   } catch(e) { console.warn('operator queue:', e); }
+}
+
+// ═══════════════════════════════════════════════════════
+// CLAUDE INTELLIGENCE ENGINE — JS Functions
+// ═══════════════════════════════════════════════════════
+
+let claudeSessionCost = 0;
+
+async function loadClaudeStatus() {
+  try {
+    const s = await fetchJSON('/api/claude/status');
+    if (!s) return;
+    const el = document.getElementById('claude-api-status');
+    if (el) {
+      el.textContent    = s.claude_configured ? 'CLAUDE LIVE' : 'API KEY NEEDED';
+      el.style.background = s.claude_configured ? 'var(--cyan-dim)' : 'var(--amber-dim)';
+      el.style.color      = s.claude_configured ? 'var(--cyan)' : 'var(--amber)';
+    }
+    const lastEl = document.getElementById('claude-last-run');
+    if (lastEl && s.db_stats?.last_run) lastEl.textContent = 'Last run: ' + formatDate(s.db_stats.last_run);
+  } catch(e) {}
+}
+
+function showClaudeResult(title, content, costUsd, model) {
+  const el = document.getElementById('claude-results');
+  if (!el) return;
+  claudeSessionCost += costUsd || 0;
+  const costEl = document.getElementById('claude-cost-display');
+  if (costEl) costEl.textContent = 'Session cost: $' + claudeSessionCost.toFixed(4);
+
+  const newDiv = document.createElement('div');
+  newDiv.style.cssText = 'padding:16px 20px;border-bottom:1px solid var(--border)';
+  newDiv.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="font-family:var(--font-mono);font-size:9px;padding:2px 8px;background:var(--cyan-dim);border:1px solid rgba(6,182,212,0.4);border-radius:3px;color:var(--cyan);font-weight:600">${esc(title)}</span>
+      <span style="margin-left:auto;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">${model || 'claude-sonnet-4-6'} · $${(costUsd||0).toFixed(4)}</span>
+    </div>
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);line-height:1.6;white-space:pre-wrap;background:var(--bg-elevated);border-radius:6px;padding:12px;max-height:300px;overflow-y:auto">${esc(content || '')}</div>
+  `;
+
+  // Clear loading state on first result
+  if (el.querySelector('[style*="Loading"]') || el.innerHTML.includes('is ready')) el.innerHTML = '';
+  el.insertBefore(newDiv, el.firstChild);
+}
+
+async function runClaudeAction() {
+  const action = document.getElementById('claude-action-select')?.value;
+  const el = document.getElementById('claude-results');
+  if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--cyan)">Running Claude ${action}...</div>`;
+
+  try {
+    let result, title;
+
+    if (action === 'analyze-pricing') {
+      result = await fetchJSON('/api/claude/analyze-pricing', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' });
+      title  = 'PRICING ANOMALY ANALYSIS';
+      if (result?.analysis) showClaudeResult(title, result.analysis, result.cost_usd, result.model);
+
+    } else if (action === 'procurement-summary') {
+      result = await fetchJSON('/api/claude/procurement-summary', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' });
+      title  = 'EXECUTIVE PROCUREMENT SUMMARY';
+      if (result?.summary) showClaudeResult(title, result.summary, result.cost_usd, result.model);
+
+    } else if (action === 'compare-suppliers') {
+      const category = document.getElementById('pricing-category-filter')?.value || 'Lube_Oil_System';
+      result = await fetchJSON('/api/claude/compare-suppliers', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ category }) });
+      title  = 'SUPPLIER COMPARISON: ' + category.replace(/_/g,' ');
+      if (result?.comparison) showClaudeResult(title, result.comparison, result.cost_usd, result.model);
+
+    } else if (action === 'outreach-strategy') {
+      const category = document.getElementById('pricing-category-filter')?.value || 'Lube_Oil_System';
+      result = await fetchJSON('/api/claude/outreach-strategy', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ category }) });
+      title  = 'OUTREACH STRATEGY: ' + category.replace(/_/g,' ');
+      if (result?.strategy) showClaudeResult(title, result.strategy, result.cost_usd, result.model);
+    }
+
+    if (result?.error) {
+      if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--red)">Error: ${esc(result.error)}${result.hint ? '<br><span style="color:var(--amber)">' + esc(result.hint) + '</span>' : ''}</div>`;
+    }
+  } catch(e) {
+    if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--red)">Claude request failed: ${esc(e.message)}</div>`;
+  }
+}
+
+async function runClaudeRFQ() {
+  const supplier  = document.getElementById('rfq-supplier')?.value?.trim();
+  const equipment = document.getElementById('rfq-equipment')?.value?.trim();
+  if (!supplier || !equipment) { showToast('Enter supplier name and equipment description'); return; }
+
+  const el = document.getElementById('claude-results');
+  if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--cyan)">Drafting RFQ for ${esc(supplier)}...</div>`;
+
+  try {
+    const result = await fetchJSON('/api/claude/draft-rfq', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        supplier_name: supplier,
+        part_description: equipment,
+        delivery_location: 'Santa Teresa, New Mexico, USA',
+        project_name: 'Project Jupiter — TG20B7-8 W251 Power Island'
+      })
+    });
+
+    if (result?.rfq) {
+      showClaudeResult(`RFQ DRAFT: ${supplier.toUpperCase()}`, result.rfq, result.cost_usd, result.model);
+      showToast('RFQ drafted — copy from panel below');
+    } else if (result?.error) {
+      if (el) el.innerHTML = `<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--red)">Error: ${esc(result.error)}${result.hint ? ' — ' + esc(result.hint) : ''}</div>`;
+    }
+  } catch(e) {
+    showToast('RFQ draft failed: ' + e.message);
+  }
 }
 </script>
 </body>
