@@ -189,8 +189,23 @@ const WATER_INJECTION_SUPPLIERS = [
     { name: 'FAIST Anlagenbau', domain: 'faistgroup.com', apollo_id: '5fc8e5ec932e16000187b1f6', tier: 2, bop_category: 'Enclosures', revenue_usd: 232_731_000, employee_count: 2000, hq_country: 'Germany', phone: '+44 20 7484 0522', capabilities: ['GT acoustic enclosures', 'noise control enclosures', 'ventilation systems', '1978 founded', 'global manufacturing', 'power generation focus'], source: 'apollo_bulk_enrich' },
 ];
 
+// ─── ADDITIONAL SUPPLIERS — Couplings (Apollo-enriched, batch 3) ──────────────
+const COUPLING_SUPPLIERS = [
+    { name: 'Regal Rexnord (Kop-Flex)', domain: 'regalrexnord.com', apollo_id: '61bb7db47510af00f6307499', tier: 1, bop_category: 'Coupling_Joints', revenue_usd: 5_934_500_000, employee_count: 30_000, hq_country: 'United States', phone: '+1 608-364-8800', source: 'apollo_bulk_enrich' },
+    { name: 'VULKAN Group', domain: 'vulkan.com', apollo_id: '5eb2e7e73db530008cedb412', tier: 2, bop_category: 'Coupling_Joints', revenue_usd: 100_000_000, employee_count: 280, hq_country: 'Germany', phone: '+49 2325 9220', source: 'apollo_bulk_enrich' },
+    { name: 'Ameridrives', domain: 'ameridrives.com', apollo_id: '60d9ff98f0597200a4593db8', tier: 3, bop_category: 'Coupling_Joints', revenue_usd: 9_717_000, employee_count: 25, hq_country: 'United States', phone: '+1 814-480-5000', source: 'apollo_bulk_enrich' },
+    { name: 'RINGFEDER Power Transmission', domain: 'ringfeder.com', apollo_id: '5500c04b73696417894b3700', tier: 3, bop_category: 'Coupling_Joints', revenue_usd: 24_000_000, employee_count: 710, hq_country: 'Germany', phone: '+49 60 7893850', source: 'apollo_bulk_enrich' },
+];
+
+// ─── ADDITIONAL SUPPLIERS — Acoustic Enclosures (Apollo-enriched, batch 3) ───
+const ENCLOSURE_SUPPLIERS = [
+    { name: 'IAC Acoustics', domain: 'iacacoustics.com', apollo_id: '5d339fbd80f93ea2c2606f31', tier: 2, bop_category: 'Enclosures', revenue_usd: 22_300_000, employee_count: 120, hq_country: 'United States', phone: '+1 630-270-1790', source: 'apollo_bulk_enrich' },
+    { name: 'FAIST Anlagenbau', domain: 'faist.de', apollo_id: '5569dc7e7369642571cea200', tier: 2, bop_category: 'Enclosures', revenue_usd: 117_000_000, employee_count: 250, hq_country: 'Germany', phone: '+49 8282 88800', source: 'apollo_bulk_enrich' },
+    { name: 'MEDAS GmbH', domain: 'medasgmbh.com', apollo_id: '60af33f9873e33000162599e', tier: 4, bop_category: 'Enclosures', revenue_usd: null, employee_count: 8, hq_country: 'Germany', phone: '+49 231 91296010', source: 'apollo_bulk_enrich' },
+];
+
 // Merge all supplier arrays
-const DISCOVERED_SUPPLIERS_ALL = [...DISCOVERED_SUPPLIERS, ...EXHAUST_SUPPLIERS, ...WATER_INJECTION_SUPPLIERS];
+const DISCOVERED_SUPPLIERS_ALL = [...DISCOVERED_SUPPLIERS, ...EXHAUST_SUPPLIERS, ...WATER_INJECTION_SUPPLIERS, ...COUPLING_SUPPLIERS, ...ENCLOSURE_SUPPLIERS];
 
 function createDiscoveryRoutes(db, opts = {}) {
     const router = express.Router();
