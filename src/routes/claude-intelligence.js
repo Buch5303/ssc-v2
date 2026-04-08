@@ -4,7 +4,7 @@
  * All responses use Wave 8 intelligence envelope (contract_version 1.0).
  * When ANTHROPIC_API_KEY is absent, endpoints return disabledEnvelope.
  */
-const { successEnvelope, disabledEnvelope, errorEnvelope } = require('../common/intelligence-envelope');
+const { disabledEnvelope, claudeEnvelope, OUTPUT_TYPES, FRESHNESS } = require('../common/intelligence-envelope');
 
 const CLAUDE_ENGINE = 'Claude Intelligence Engine';
 const CLAUDE_KEY_ENV = 'ANTHROPIC_API_KEY';
@@ -119,16 +119,12 @@ function createClaudeRoutes(db, opts = {}) {
                 triggeredBy: req.body?.triggered_by || 'api'
             });
 
-            res.json({
-                ok: true, analysis_id: id,
-                subject: `BOP Pricing Analysis — ${records.length} records`,
-                analysis: result.content,
-                records_analyzed: records.length,
-                input_tokens: result.usage?.input_tokens,
-                output_tokens: result.usage?.output_tokens,
-                cost_usd: claude.estimateCost(result.usage),
-                model: result.model
-            });
+            res.json(claudeEnvelope({
+                mod: 'pricing_anomaly_detection',
+                outputType: OUTPUT_TYPES.GENERATED_ANALYSIS,
+                result,
+                data: { analysis_id: id, subject: `BOP Pricing Analysis — ${records.length} records`, analysis: result.content, records_analyzed: records.length, cost_usd: claude.estimateCost(result.usage) }
+            }));
         } catch (e) {
             res.status(e.message.includes('ANTHROPIC_API_KEY') ? 503 : 500)
                .json({ error: e.message, hint: e.message.includes('API_KEY') ? 'Add ANTHROPIC_API_KEY to Vercel env vars' : undefined });
@@ -162,13 +158,12 @@ function createClaudeRoutes(db, opts = {}) {
                 triggeredBy: req.body?.triggered_by || 'api'
             });
 
-            res.json({
-                ok: true, analysis_id: id,
-                supplier: supplier_name,
-                rfq: result.content,
-                cost_usd: claude.estimateCost(result.usage),
-                model: result.model
-            });
+            res.json(claudeEnvelope({
+                mod: 'rfq_draft_generator',
+                outputType: OUTPUT_TYPES.GENERATED_DRAFT,
+                result,
+                data: { analysis_id: id, supplier: supplier_name, rfq: result.content, cost_usd: claude.estimateCost(result.usage) }
+            }));
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
@@ -198,13 +193,12 @@ function createClaudeRoutes(db, opts = {}) {
                 model: result.model
             });
 
-            res.json({
-                ok: true, analysis_id: id, category,
-                suppliers_compared: suppliers.length,
-                comparison: result.content,
-                cost_usd: claude.estimateCost(result.usage),
-                model: result.model
-            });
+            res.json(claudeEnvelope({
+                mod: 'supplier_comparison',
+                outputType: OUTPUT_TYPES.GENERATED_RECOMMENDATION,
+                result,
+                data: { analysis_id: id, category, suppliers_compared: suppliers.length, comparison: result.content, cost_usd: claude.estimateCost(result.usage) }
+            }));
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
@@ -229,14 +223,12 @@ function createClaudeRoutes(db, opts = {}) {
                 model: result.model
             });
 
-            res.json({
-                ok: true, analysis_id: id,
-                supplier: supplier_name,
-                perplexity_score,
-                claude_verdict: result.content,
-                cost_usd: claude.estimateCost(result.usage),
-                model: result.model
-            });
+            res.json(claudeEnvelope({
+                mod: 'cross_validation',
+                outputType: OUTPUT_TYPES.GENERATED_ANALYSIS,
+                result,
+                data: { analysis_id: id, supplier: supplier_name, perplexity_score, claude_verdict: result.content, cost_usd: claude.estimateCost(result.usage) }
+            }));
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
@@ -267,13 +259,12 @@ function createClaudeRoutes(db, opts = {}) {
                 model: result.model
             });
 
-            res.json({
-                ok: true, analysis_id: id,
-                summary: result.content,
-                bop_totals: { low: totalLow, mid: totalMid, high: totalHigh },
-                cost_usd: claude.estimateCost(result.usage),
-                model: result.model
-            });
+            res.json(claudeEnvelope({
+                mod: 'procurement_summary',
+                outputType: OUTPUT_TYPES.GENERATED_ANALYSIS,
+                result,
+                data: { analysis_id: id, summary: result.content, bop_totals: { low: totalLow, mid: totalMid, high: totalHigh }, cost_usd: claude.estimateCost(result.usage) }
+            }));
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
@@ -299,13 +290,12 @@ function createClaudeRoutes(db, opts = {}) {
                 model: result.model
             });
 
-            res.json({
-                ok: true, analysis_id: id, category,
-                strategy: result.content,
-                suppliers_included: suppliers.map(s => s.name),
-                cost_usd: claude.estimateCost(result.usage),
-                model: result.model
-            });
+            res.json(claudeEnvelope({
+                mod: 'outreach_strategy',
+                outputType: OUTPUT_TYPES.GENERATED_RECOMMENDATION,
+                result,
+                data: { analysis_id: id, category, strategy: result.content, suppliers_included: suppliers.map(s => s.name), cost_usd: claude.estimateCost(result.usage) }
+            }));
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 

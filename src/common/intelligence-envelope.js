@@ -123,3 +123,89 @@ function errorEnvelope({ engine, mod, error, readiness = 'degraded' }) {
 }
 
 module.exports = { envelope, keyReadiness, disabledEnvelope, successEnvelope, errorEnvelope, CONTRACT_VERSION };
+
+// ─── OUTPUT TYPE CONSTANTS ────────────────────────────────────────────────────
+// Use these everywhere — no freehand strings. Enforces semantic discipline.
+const OUTPUT_TYPES = {
+    VERIFIED:           'verified',       // External source confirmed with citations
+    DERIVED:            'derived',        // Computed from verified/seeded data
+    GENERATED_ANALYSIS: 'generated_analysis',      // Claude: anomaly detect, exec summary
+    GENERATED_RECOMMENDATION: 'generated_recommendation', // Claude: compare, outreach
+    GENERATED_DRAFT:    'generated_draft', // Claude: RFQ email, language output
+    ESTIMATED:          'estimated',      // Web-researched ±15% pricing bands
+    SEEDED:             'seeded',         // From static in-memory dataset
+    CACHED:             'cached',         // Previously live-fetched, served from DB
+    PLACEHOLDER:        'placeholder',    // Engine not active
+};
+
+const FRESHNESS = {
+    LIVE:        'live',        // Fetched this request from external API
+    CACHED:      'cached',      // Served from DB within TTL
+    SEEDED:      'seeded',      // From static in-memory seeded data
+    STALE:       'stale',       // Served from DB, TTL expired
+    UNAVAILABLE: 'unavailable', // Engine not configured or down
+};
+
+/**
+ * Perplexity-specific: wrap result with verified or derived typing
+ * based on whether citations are present.
+ */
+function perplexityEnvelope({ mod, result, data, cached = false }) {
+    const hasCitations = Array.isArray(result?.citations) && result.citations.length > 0;
+    return successEnvelope({
+        engine: 'FlowSeer Integrity Engine',
+        mod: mod || 'perplexity_sonar',
+        outputType: hasCitations ? OUTPUT_TYPES.VERIFIED : OUTPUT_TYPES.DERIVED,
+        freshness: cached ? FRESHNESS.CACHED : FRESHNESS.LIVE,
+        sourceSummary: hasCitations
+            ? `Perplexity Sonar — ${result.citations.length} web citation(s)`
+            : `Perplexity Sonar — no citations returned`,
+        data: {
+            ...data,
+            citations: result?.citations || [],
+            tokens_used: result?.usage?.total_tokens,
+            cost_usd: result?.usage ? undefined : undefined,
+            model: result?.model,
+        }
+    });
+}
+
+/**
+ * Claude-specific: wrap result with appropriate generated typing.
+ */
+function claudeEnvelope({ mod, outputType, result, data }) {
+    return successEnvelope({
+        engine: 'Claude Intelligence Engine',
+        mod: mod || 'claude_sonnet',
+        outputType: outputType || OUTPUT_TYPES.GENERATED_ANALYSIS,
+        freshness: FRESHNESS.LIVE,
+        sourceSummary: `Claude ${result?.model || 'claude-sonnet-4-6'} — AI-generated`,
+        data: {
+            ...data,
+            input_tokens:  result?.usage?.input_tokens,
+            output_tokens: result?.usage?.output_tokens,
+            model:         result?.model,
+        }
+    });
+}
+
+/**
+ * Discovery-specific: wrap seeded or derived data.
+ */
+function discoveryEnvelope({ mod, outputType, freshness, sourceSummary, data }) {
+    return successEnvelope({
+        engine: 'FlowSeer Discovery Engine',
+        mod: mod || 'discovery',
+        outputType: outputType || OUTPUT_TYPES.SEEDED,
+        freshness: freshness || FRESHNESS.SEEDED,
+        sourceSummary: sourceSummary || 'FlowSeer seeded supplier + pricing database',
+        data
+    });
+}
+
+module.exports = {
+    envelope, keyReadiness, disabledEnvelope, successEnvelope, errorEnvelope,
+    perplexityEnvelope, claudeEnvelope, discoveryEnvelope,
+    OUTPUT_TYPES, FRESHNESS,
+    CONTRACT_VERSION
+};

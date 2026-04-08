@@ -1,4 +1,5 @@
 'use strict';
+const { discoveryEnvelope, OUTPUT_TYPES, FRESHNESS } = require('../common/intelligence-envelope');
 /**
  * FlowSeer Discovery Engine
  * ─────────────────────────────────────────────────────────────────────────────
@@ -549,7 +550,12 @@ function createDiscoveryRoutes(db, opts = {}) {
                 groups[c.group].categories.push(c.category_name);
             });
 
-            res.json({
+            res.json(discoveryEnvelope({
+                mod: 'bop_pricing_rollup',
+                outputType: OUTPUT_TYPES.ESTIMATED,
+                freshness: FRESHNESS.SEEDED,
+                sourceSummary: `${INDICATIVE_PRICING.length} indicative records — web research ±15% · not RFQ`,
+                data: {
                 summary: {
                     bop_total_low_usd:  bop_total_low,
                     bop_total_mid_usd:  bop_total_mid,
@@ -572,7 +578,8 @@ function createDiscoveryRoutes(db, opts = {}) {
                     total_high_usd: c.total_high,
                     item_count:     c.items.length
                 }))
-            });
+                }
+            }));
         } catch (e) {
             res.status(500).json({ error: e.message });
         }

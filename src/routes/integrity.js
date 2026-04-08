@@ -7,7 +7,7 @@
  * no dead controls, no misleading active state.
  */
 
-const { successEnvelope, disabledEnvelope, errorEnvelope } = require('../common/intelligence-envelope');
+const { successEnvelope, disabledEnvelope, errorEnvelope, perplexityEnvelope, OUTPUT_TYPES, FRESHNESS } = require('../common/intelligence-envelope');
 const ENGINE = 'FlowSeer Integrity Engine';
 const KEY_ENV = 'PERPLEXITY_API_KEY';
 
@@ -87,6 +87,7 @@ function createIntegrityRoutes(db, opts = {}) {
         }
 
         res.json({
+            _envelope: { contract_version: '1.0', engine: 'FlowSeer Integrity Engine', module: 'status', timestamp: new Date().toISOString(), freshness: FRESHNESS.SEEDED, output_type: OUTPUT_TYPES.DERIVED, source_summary: 'Local DB state + env config', readiness: hasKey ? 'operational' : 'awaiting_key' },
             engine: 'FlowSeer Integrity Engine',
             version: '1.0.0',
             status: hasKey ? 'operational' : 'no_api_key',
@@ -129,15 +130,11 @@ function createIntegrityRoutes(db, opts = {}) {
                 result, triggeredBy: req.body.triggered_by || 'api'
             });
 
-            res.json({
-                ok: true, check_id: checkId, supplier: name,
-                integrity_score: score,
-                analysis: result.content,
-                citations: result.citations,
-                tokens_used: result.usage?.total_tokens,
-                cost_usd: estimateCost(result.model, result.usage),
-                model: result.model
-            });
+            res.json(perplexityEnvelope({
+                mod: 'supplier_integrity',
+                result,
+                data: { check_id: checkId, supplier: name, integrity_score: score, analysis: result.content, cost_usd: estimateCost(result.model, result.usage) }
+            }));
         } catch (e) {
             res.status(e.message.includes('PERPLEXITY_API_KEY') ? 503 : 500)
                .json({ error: e.message, hint: e.message.includes('API_KEY') ? 'Add PERPLEXITY_API_KEY to Vercel environment variables' : undefined });
@@ -165,16 +162,11 @@ function createIntegrityRoutes(db, opts = {}) {
                 result, triggeredBy: req.body.triggered_by || 'api'
             });
 
-            res.json({
-                ok: true, check_id: checkId,
-                part: part_description, bop_category,
-                price_mid_usd, integrity_score: score,
-                analysis: result.content,
-                citations: result.citations,
-                tokens_used: result.usage?.total_tokens,
-                cost_usd: estimateCost(result.model, result.usage),
-                model: result.model
-            });
+            res.json(perplexityEnvelope({
+                mod: 'pricing_validation',
+                result,
+                data: { check_id: checkId, part: part_description, bop_category, price_mid_usd, integrity_score: score, analysis: result.content, cost_usd: estimateCost(result.model, result.usage) }
+            }));
         } catch (e) {
             res.status(500).json({ error: e.message });
         }
@@ -195,15 +187,11 @@ function createIntegrityRoutes(db, opts = {}) {
                 result, triggeredBy: req.body.triggered_by || 'api'
             });
 
-            res.json({
-                ok: true, check_id: checkId,
-                contact: name, title, company,
-                currency_status: score,
-                analysis: result.content,
-                citations: result.citations,
-                tokens_used: result.usage?.total_tokens,
-                cost_usd: estimateCost(result.model, result.usage)
-            });
+            res.json(perplexityEnvelope({
+                mod: 'contact_currency',
+                result,
+                data: { check_id: checkId, contact: name, title, company, currency_status: score, analysis: result.content, cost_usd: estimateCost(result.model, result.usage) }
+            }));
         } catch (e) {
             res.status(500).json({ error: e.message });
         }
@@ -240,15 +228,12 @@ function createIntegrityRoutes(db, opts = {}) {
                 } catch {}
             }
 
-            res.json({
-                ok: true, cached: false, bop_category, category_name,
-                briefing: result.content,
-                citations: result.citations,
-                tokens_used: result.usage?.total_tokens,
-                cost_usd: estimateCost(result.model, result.usage),
-                model: result.model,
-                valid_for: '7 days'
-            });
+            res.json(perplexityEnvelope({
+                mod: 'market_briefing',
+                result,
+                cached: false,
+                data: { bop_category, category_name, briefing: result.content, cost_usd: estimateCost(result.model, result.usage), valid_for: '7 days' }
+            }));
         } catch (e) {
             res.status(500).json({ error: e.message });
         }
@@ -272,14 +257,11 @@ function createIntegrityRoutes(db, opts = {}) {
                 } catch {}
             }
 
-            res.json({
-                ok: true, bop_category,
-                discovery: result.content,
-                citations: result.citations,
-                tokens_used: result.usage?.total_tokens,
-                cost_usd: estimateCost(result.model, result.usage),
-                model: result.model
-            });
+            res.json(perplexityEnvelope({
+                mod: 'supplier_discovery',
+                result,
+                data: { bop_category, discovery: result.content, cost_usd: estimateCost(result.model, result.usage) }
+            }));
         } catch (e) {
             res.status(500).json({ error: e.message });
         }

@@ -126,6 +126,28 @@ function createHealthRoutes(db, opts = {}) {
                 apollo_key:     apolloKey     ? '✅ set' : '⚠️ optional for org enrichment',
                 db_seeded:      seedComplete  ? '✅ complete' : '⚠️ incomplete — hit GET /api/discovery/init',
                 db_online:      dbOnline      ? '✅ online' : '❌ offline'
+            },
+            data_state: {
+                note: 'suppliers_in_memory > suppliers_in_db is expected — some suppliers appear in multiple BOP categories in memory (multi-category enrichment). DB stores one record per unique supplier name. Gap is by design, not data loss.',
+                suppliers_memory_vs_db_gap: (engines.discovery?.suppliers_in_memory || 0) - dbSeeds.supplier_tiers,
+                gap_reason: 'Multi-category suppliers (e.g. Alfa Laval, Emerson, ABB) enriched across categories in memory, stored once by name in DB',
+                pricing_accuracy: '±15% from mid — indicative, web-researched, not RFQ',
+                bop_total_mid_usd: null // populated by /api/discovery/pricing/summary
+            },
+            contact_intelligence: {
+                status: 'deferred',
+                phase: 'Wave 9 — pending Apollo Basic upgrade',
+                deferred_reason: 'Apollo Basic plan ($49/mo) required to unlock people search API',
+                table_ready: 'supplier_contacts',
+                apollo_org_ids_captured: true,
+                apollo_people_search_ready: apolloKey && false, // needs paid plan
+                activation_path: [
+                    '1. Upgrade Apollo to Basic ($49/mo)',
+                    '2. Run /api/dashboard/enrich-now to populate supplier_contacts',
+                    '3. Enable contact currency checks via /api/integrity/check-contact',
+                    '4. Link verified contacts to RFQ workflow'
+                ],
+                existing_contacts_in_db: dbSeeds.supplier_tiers > 0 ? 'check supplier_contacts table' : 'none seeded'
             }
         });
     });

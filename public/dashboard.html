@@ -1877,44 +1877,82 @@ html, body {
 
       <!-- Activation banner — rendered by JS when API keys are missing -->
       <div id="mi-activation-banner" style="display:none"></div>
-      <div id="mi-engine-bar" style="display:flex;align-items:center;gap:16px;padding:12px 0 20px;border-bottom:1px solid var(--border);margin-bottom:20px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)"></div>
-          <span style="font-family:var(--font-mono);font-size:11px;color:var(--green);font-weight:600">INTELLIGENCE ENGINE ACTIVE</span>
+
+      <!-- Live Intelligence State Bar — sourced from /api/health -->
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px">
+        <div style="background:var(--bg-card);padding:12px;text-align:center">
+          <div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--cyan)" id="ks-suppliers-db">—</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:2px">SUPPLIERS DB</div>
+          <div style="font-family:var(--font-mono);font-size:8px;color:var(--green);margin-top:1px">● LIVE DB</div>
         </div>
-        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)" id="mi-last-run">Loading...</span>
-        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">·</span>
-        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)" id="mi-supplier-count">— suppliers tracked</span>
-        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">·</span>
-        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)" id="mi-pricing-count">— pricing records</span>
-        <div style="margin-left:auto;display:flex;gap:8px">
-          <button onclick="runDiscovery()" style="padding:5px 14px;background:var(--cyan-dim);border:1px solid rgba(6,182,212,0.3);border-radius:6px;color:var(--cyan);font-family:var(--font-mono);font-size:10px;cursor:pointer;font-weight:600">▶ RUN DISCOVERY</button>
-          <button onclick="seedIntelligence()" style="padding:5px 14px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);font-family:var(--font-mono);font-size:10px;cursor:pointer">SEED DATABASE</button>
+        <div style="background:var(--bg-card);padding:12px;text-align:center">
+          <div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--text-secondary)" id="ks-suppliers-mem">—</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:2px">SUPPLIERS MEM</div>
+          <div style="font-family:var(--font-mono);font-size:8px;color:var(--amber);margin-top:1px">● SEEDED</div>
+        </div>
+        <div style="background:var(--bg-card);padding:12px;text-align:center">
+          <div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--cyan)" id="ks-pricing-db">—</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:2px">PRICING RECORDS</div>
+          <div style="font-family:var(--font-mono);font-size:8px;color:var(--green);margin-top:1px">● LIVE DB</div>
+        </div>
+        <div style="background:var(--bg-card);padding:12px;text-align:center">
+          <div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--purple, #a855f7)" id="ks-categories">—</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:2px">BOP CATEGORIES</div>
+          <div style="font-family:var(--font-mono);font-size:8px;color:var(--green);margin-top:1px">● LIVE DB</div>
+        </div>
+        <div style="background:var(--bg-card);padding:12px;text-align:center">
+          <div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--green)" id="ks-claude-runs">—</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:2px">CLAUDE RUNS</div>
+          <div style="font-family:var(--font-mono);font-size:8px;color:var(--cyan);margin-top:1px">● AI GENERATED</div>
+        </div>
+        <div style="background:var(--bg-card);padding:12px;text-align:center">
+          <div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--text-tertiary)" id="ks-px-checks">—</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:2px">INTEGRITY CHECKS</div>
+          <div style="font-family:var(--font-mono);font-size:8px;color:var(--amber);margin-top:1px" id="ks-px-label">● AWAITING KEY</div>
         </div>
       </div>
 
-      <!-- BOP Cost Rollup KPIs -->
+      <!-- BOP Cost Rollup KPIs — ESTIMATED output type -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
         <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px">
-          <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px">BOP Total — Low</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);text-transform:uppercase">BOP Total — Low</span>
+            <span style="font-family:var(--font-mono);font-size:8px;padding:1px 5px;background:rgba(245,158,11,0.1);border-radius:3px;color:var(--amber)">ESTIMATED</span>
+          </div>
           <div id="mi-bop-low" style="font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--green)">—</div>
-          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:4px">Conservative estimate</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:4px">Mid −15% · web research ±15%</div>
         </div>
         <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px">
-          <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px">BOP Total — Mid</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);text-transform:uppercase">BOP Total — Mid</span>
+            <span style="font-family:var(--font-mono);font-size:8px;padding:1px 5px;background:rgba(245,158,11,0.1);border-radius:3px;color:var(--amber)">ESTIMATED</span>
+          </div>
           <div id="mi-bop-mid" style="font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--cyan)">—</div>
-          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:4px">Most likely scenario</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:4px">Planning number · not RFQ</div>
         </div>
         <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px">
-          <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px">BOP Total — High</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);text-transform:uppercase">BOP Total — High</span>
+            <span style="font-family:var(--font-mono);font-size:8px;padding:1px 5px;background:rgba(245,158,11,0.1);border-radius:3px;color:var(--amber)">ESTIMATED</span>
+          </div>
           <div id="mi-bop-high" style="font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--amber)">—</div>
-          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:4px">Conservative high</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:4px">Mid +15% · contingency band</div>
         </div>
         <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px">
-          <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px">Categories Priced</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);text-transform:uppercase">Categories Priced</span>
+            <span style="font-family:var(--font-mono);font-size:8px;padding:1px 5px;background:rgba(16,185,129,0.1);border-radius:3px;color:var(--green)">LIVE DB</span>
+          </div>
           <div id="mi-categories-count" style="font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--purple, #a855f7)">—</div>
           <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:4px">of <span id="mi-total-cats">36</span> BOP systems</div>
         </div>
+      </div>
+
+      <!-- Contact Intelligence — Deferred Marker -->
+      <div style="padding:10px 16px;background:rgba(100,116,139,0.06);border:1px solid rgba(100,116,139,0.2);border-radius:8px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+        <span style="font-family:var(--font-mono);font-size:9px;padding:2px 8px;background:rgba(100,116,139,0.12);border-radius:3px;color:var(--text-tertiary);font-weight:700;white-space:nowrap">DEFERRED</span>
+        <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)"><strong style="color:var(--text-secondary)">Contact Intelligence</strong> — Apollo Basic upgrade required ($49/mo). supplier_contacts table ready. Exec contact enrichment + contact currency verification available in Wave 9.</span>
+        <span style="margin-left:auto;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);white-space:nowrap">Next: /api/health → contact_intelligence</span>
       </div>
 
       <!-- Main 2-column layout -->
@@ -3648,7 +3686,26 @@ async function loadEngineHealth() {
     const tsEl = document.getElementById('mi-health-ts');
     if (tsEl) tsEl.textContent = 'checked ' + new Date(h.timestamp).toLocaleTimeString();
 
-    // Supplier count
+    // Live Intelligence State Bar
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    if (h.db?.seeds) {
+      set('ks-suppliers-db',  h.db.seeds.supplier_tiers || 0);
+      set('ks-pricing-db',    h.db.seeds.market_pricing || 0);
+      set('ks-categories',    h.db.seeds.bop_categories || 0);
+      set('ks-claude-runs',   h.db.seeds.claude_results || 0);
+      set('ks-px-checks',     h.db.seeds.integrity_checks || 0);
+    }
+    if (h.engines?.discovery) {
+      set('ks-suppliers-mem', h.engines.discovery.suppliers_in_memory || 0);
+    }
+    const pxLabel = document.getElementById('ks-px-label');
+    if (pxLabel) {
+      const px = h.engines?.perplexity;
+      pxLabel.textContent = px?.status === 'operational' ? '● LIVE SEARCH' : '● AWAITING KEY';
+      pxLabel.style.color = px?.status === 'operational' ? 'var(--cyan)' : 'var(--amber)';
+    }
+
+    // Supplier count in legend
     const scEl = document.getElementById('mi-supplier-count');
     if (scEl && h.engines?.discovery) {
       scEl.textContent = h.engines.discovery.suppliers_in_db + ' suppliers in DB · ' + h.engines.discovery.pricing_in_db + ' pricing records';
@@ -3674,7 +3731,7 @@ async function loadEngineHealth() {
     pill('eng-claude-pill',     h.engines?.claude,     'CLAUDE');
     pill('eng-apollo-pill',     h.engines?.apollo,     'APOLLO');
 
-    // Also update legacy status elements if present
+    // Legacy status elements
     const pxEl = document.getElementById('integrity-api-status');
     if (pxEl) {
       const px = h.engines?.perplexity;
@@ -3698,12 +3755,15 @@ async function loadEngineHealth() {
 
     if (h.engines?.perplexity?.status !== 'operational') {
       [intBtn, intBtn2].forEach(b => { if (b) { b.style.opacity = '0.4'; b.style.cursor = 'not-allowed'; b.title = 'Add PERPLEXITY_API_KEY to Vercel env vars to activate'; } });
+    } else {
+      [intBtn, intBtn2].forEach(b => { if (b) { b.style.opacity = '1'; b.style.cursor = 'pointer'; b.title = ''; } });
     }
     if (h.engines?.claude?.status !== 'operational') {
       [claudeBtn, rfqBtn].forEach(b => { if (b) { b.style.opacity = '0.4'; b.style.cursor = 'not-allowed'; b.title = 'Add ANTHROPIC_API_KEY to Vercel env vars to activate'; } });
+    } else {
+      [claudeBtn, rfqBtn].forEach(b => { if (b) { b.style.opacity = '1'; b.style.cursor = 'pointer'; b.title = ''; } });
     }
 
-    // Show activation banner if any keys missing
     renderActivationBanner(h);
 
   } catch(e) { console.warn('loadEngineHealth:', e); }
