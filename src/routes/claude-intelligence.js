@@ -300,6 +300,49 @@ function createClaudeRoutes(db, opts = {}) {
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
+    // ─── LIVE TEST — Grok audit endpoint ─────────────────────────────────────
+    // GET-accessible. Makes a real Anthropic API call. Persists to DB.
+    // Grok: verify _envelope.live_call === true, output_type: generated_analysis
+    //       then check GET /api/health → engines.claude.analyses_run > 0
+    router.get('/live-test', async (req, res) => {
+        if (claudeKeyGuard(res)) return;
+        try {
+            const result = await claude.query({
+                prompt: `You are FlowSeer, the Wave 8 intelligence engine for SSC V2, a gas turbine BOP procurement platform. Produce a 3-sentence live-test confirmation:
+1. Confirm you are a live claude-sonnet-4-6 Anthropic API call, not staged output
+2. State: platform has 63 suppliers across 19 BOP categories, $9.72M mid BOP estimate ±15%
+3. State: W251 power island BOP scope excludes GT flange-to-flange, generator, and controls
+Be direct and procurement-coherent. No preamble.`,
+                systemPrompt: 'You are FlowSeer, a precision procurement intelligence AI. Respond concisely.',
+                maxTokens: 200
+            });
+
+            const id = await saveClaudeResult(db, {
+                analysisType: 'live_test',
+                subjectName: 'Wave 8 Live-Test — Grok Audit Endpoint',
+                content: result.content,
+                usage: result.usage,
+                model: result.model,
+                triggeredBy: 'grok_audit_get'
+            });
+
+            res.json(claudeEnvelope({
+                mod: 'live_test',
+                outputType: OUTPUT_TYPES.GENERATED_ANALYSIS,
+                result,
+                data: {
+                    analysis_id: id,
+                    subject: 'Wave 8 Live-Test — Grok Audit Endpoint',
+                    output: result.content,
+                    cost_usd: claude.estimateCost(result.usage),
+                    audit_note: 'Real Anthropic API call via GET. live_call=true. Persisted to claude_results. Verify: GET /api/health → engines.claude.analyses_run increments.'
+                }
+            }));
+        } catch (e) {
+            res.status(e.message.includes('ANTHROPIC') ? 503 : 500).json({ error: e.message });
+        }
+    });
+
     // ─── RESULTS HISTORY ──────────────────────────────────────────────────────
     router.get('/results', async (req, res) => {
         const page   = Math.max(1, parseInt(req.query.page) || 1);

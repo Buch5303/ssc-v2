@@ -267,6 +267,43 @@ function createIntegrityRoutes(db, opts = {}) {
         }
     });
 
+    // ─── LIVE TEST — Grok audit endpoint ─────────────────────────────────────
+    // GET-accessible. Confirms Perplexity absent-key behavior (503 + disabledEnvelope)
+    // or live operational path when PERPLEXITY_API_KEY is set.
+    // Grok: without key → 503, _envelope.readiness: awaiting_key, output_type: placeholder
+    //       with key    → 200, _envelope.output_type: verified or derived, live_call: true
+    router.get('/live-test', async (req, res) => {
+        const hasKey = !!process.env.PERPLEXITY_API_KEY;
+        if (!hasKey) {
+            return res.status(503).json(disabledEnvelope({
+                engine: ENGINE,
+                mod: 'live_test',
+                envVar: KEY_ENV,
+                hint: 'Add PERPLEXITY_API_KEY to Vercel env vars → perplexity.ai/settings/api. Engine is awaiting_key — all POST endpoints also return 503.'
+            }));
+        }
+        // Key is present — run a minimal real Perplexity call
+        try {
+            const { callPerplexity } = require('../services/perplexity');
+            const result = await callPerplexity({
+                prompt: 'Confirm: Is Flowserve Corporation (flowserve.com) currently an active industrial valve manufacturer serving power generation? One sentence answer with source.',
+                model: 'sonar',
+                maxTokens: 100
+            });
+            res.json(perplexityEnvelope({
+                mod: 'live_test',
+                result,
+                data: {
+                    subject: 'Wave 8 Live-Test — Perplexity Grok Audit',
+                    output: result.content,
+                    audit_note: 'Real Perplexity Sonar API call via GET. live_call=true. Verify _envelope.output_type is verified (with citations) or derived (without).'
+                }
+            }));
+        } catch (e) {
+            res.status(500).json({ error: e.message });
+        }
+    });
+
     // ─── RESULTS — paginated check history ────────────────────────────────────
     router.get('/results', async (req, res) => {
         const page  = Math.max(1, parseInt(req.query.page) || 1);

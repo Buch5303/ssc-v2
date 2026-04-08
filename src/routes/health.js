@@ -73,6 +73,8 @@ function createHealthRoutes(db, opts = {}) {
                 models:    ['sonar', 'sonar-pro'],
                 checks_run: dbSeeds.integrity_checks,
                 cron:      '03:00 UTC every Monday',
+                audit_endpoint: 'GET /api/integrity/live-test',
+                absent_key_behavior: 'HTTP 503 + disabledEnvelope on all POST + GET /live-test',
                 activation_url: perplexityKey ? null : 'https://vercel.com/gregory-j-buchanans-projects/ssc-v2/settings/environment-variables'
             },
             claude: {
@@ -83,6 +85,7 @@ function createHealthRoutes(db, opts = {}) {
                 api_key_present: anthropicKey,
                 model:     'claude-sonnet-4-6',
                 analyses_run: dbSeeds.claude_results,
+                audit_endpoint: 'GET /api/claude/live-test',
                 activation_url: anthropicKey ? null : 'https://vercel.com/gregory-j-buchanans-projects/ssc-v2/settings/environment-variables'
             },
             apollo: {
