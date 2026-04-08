@@ -157,24 +157,137 @@ function createWave9Routes(db, opts = {}) {
     router.get('/run-auto-tag', async (req, res) => {
         if (!db) return res.status(503).json({ error: 'No database' });
         try {
-            // Ensure bop_category column exists (migration 028 may have failed silently)
+            // Ensure columns exist (migration 028 may have failed silently)
             try { await db.prepare(`ALTER TABLE supplier_contacts ADD COLUMN IF NOT EXISTS bop_category TEXT`).run(); } catch {}
             try { await db.prepare(`ALTER TABLE supplier_contacts ADD COLUMN IF NOT EXISTS seniority TEXT`).run(); } catch {}
+
+            // ── Tier-1: exact/near-exact from discovery data ──────────────────
             const nameMap = {};
             DISCOVERED_SUPPLIERS.forEach(s => {
                 const key = s.name.toLowerCase().replace(/[^a-z0-9]/g, '');
                 nameMap[key] = s.bop_category;
                 if (s.domain) { const d = s.domain.split('.')[0].toLowerCase(); if (!nameMap[d]) nameMap[d] = s.bop_category; }
             });
+
+            // ── Tier-2: keyword→category map for W251 supplier name formats ──
+            // W251 contacts use sub-brand names (e.g. "ABB — Electrification Division")
+            // This map catches them by brand keyword present in supplier_name
+            const keywordMap = [
+                // Reduction Gearbox
+                ['flender',         'Reduction_Gearbox'],
+                ['renk',            'Reduction_Gearbox'],
+                ['rexnord',         'Reduction_Gearbox'],
+                ['kopflex',         'Reduction_Gearbox'],
+                // Starting Package
+                ['voith',           'Starting_Package'],
+                ['piller',          'Starting_Package'],
+                // Lube Oil System
+                ['alfa laval',      'Lube_Oil_System'],
+                ['alfalaval',       'Lube_Oil_System'],
+                ['mds',             'Lube_Oil_System'],
+                // Fuel Gas System
+                ['krohne',          'Fuel_Gas_System'],
+                ['emerson fisher',  'Fuel_Gas_System'],
+                ['fisher controls', 'Fuel_Gas_System'],
+                // Compressor Washing
+                ['turbotect',       'Compressor_Washing'],
+                // Inlet Air Filtering
+                ['donaldson',       'Inlet_Air_Filtering'],
+                ['camfil',          'Inlet_Air_Filtering'],
+                ['aaf',             'Inlet_Air_Filtering'],
+                // Exhaust System
+                ['g+h',             'Exhaust_System'],
+                ['svi',             'Exhaust_System'],
+                ['bremco',          'Exhaust_System'],
+                // Water Injection
+                ['veolia',          'Water_Injection'],
+                ['petrotech',       'Water_Injection'],
+                // Black Start
+                ['caterpillar',     'Black_Start_Equipment'],
+                ['cat power',       'Black_Start_Equipment'],
+                ['cummins',         'Black_Start_Equipment'],
+                // MV System
+                ['abb',             'MV_System'],
+                ['schneider electric','MV_System'],
+                ['eaton',           'MV_System'],
+                // DC Battery
+                ['saft',            'DC_Battery_System'],
+                ['enersys',         'DC_Battery_System'],
+                ['northstar battery','DC_Battery_System'],
+                ['exide',           'DC_Battery_System'],
+                // LV MCC System
+                ['siemens',         'LV_MCC_System'],
+                ['schneider',       'LV_MCC_System'],
+                // Fire Fighting
+                ['marioff',         'Fire_Fighting'],
+                ['fike',            'Fire_Fighting'],
+                ['ansul',           'Fire_Fighting'],
+                ['amerex',          'Fire_Fighting'],
+                ['kidde',           'Fire_Fighting'],
+                ['tyco',            'Fire_Fighting'],
+                ['protectowire',    'Fire_Fighting'],
+                ['hochiki',         'Fire_Fighting'],
+                // Gas Detection
+                ['msa safety',      'Gas_Detection'],
+                ['msa ',            'Gas_Detection'],
+                ['dräger',          'Gas_Detection'],
+                ['drager',          'Gas_Detection'],
+                ['draeger',         'Gas_Detection'],
+                ['honeywell analytics','Gas_Detection'],
+                ['gas detection',   'Gas_Detection'],
+                // Vibration Monitoring
+                ['bently nevada',   'Vibration_Monitoring'],
+                ['bently',          'Vibration_Monitoring'],
+                ['baker hughes',    'Vibration_Monitoring'],
+                ['skf',             'Vibration_Monitoring'],
+                // Coupling Joints
+                ['vulkan',          'Coupling_Joints'],
+                ['ringfeder',       'Coupling_Joints'],
+                ['ameridrives',     'Coupling_Joints'],
+                ['jaure',           'Coupling_Joints'],
+                // Enclosures
+                ['faist',           'Enclosures'],
+                ['iac acoustics',   'Enclosures'],
+                ['acoustic',        'Enclosures'],
+                // Cooling Water
+                ['kelvion',         'Cooling_Water'],
+                ['cockerill',       'Cooling_Water'],
+                ['harsco',          'Cooling_Water'],
+                // Piping Valves
+                ['flowserve',       'Piping_Valves'],
+                ['velan',           'Piping_Valves'],
+                ['circor',          'Piping_Valves'],
+                ['trillium',        'Piping_Valves'],
+            ];
+
             const contacts = await db.prepare(`SELECT id, supplier_name FROM supplier_contacts`).all();
-            let tagged = 0, skipped = 0;
+            let tagged = 0, skipped = 0, alreadyTagged = 0;
             for (const c of contacts) {
-                const key = (c.supplier_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                const raw  = (c.supplier_name || '').toLowerCase();
+                const key  = raw.replace(/[^a-z0-9]/g, '');
                 let category = nameMap[key];
-                if (!category) { for (const [k, cat] of Object.entries(nameMap)) { if (k.length > 4 && key.includes(k)) { category = cat; break; } } }
-                if (category) { try { await db.prepare(`UPDATE supplier_contacts SET bop_category=$1 WHERE id=$2`).run(category, c.id); tagged++; } catch {} } else skipped++;
+
+                // Tier-1 partial match on discovery names
+                if (!category) {
+                    for (const [k, cat] of Object.entries(nameMap)) {
+                        if (k.length > 4 && key.includes(k)) { category = cat; break; }
+                    }
+                }
+
+                // Tier-2 keyword map on raw name
+                if (!category) {
+                    for (const [kw, cat] of keywordMap) {
+                        if (raw.includes(kw.toLowerCase())) { category = cat; break; }
+                    }
+                }
+
+                if (category) {
+                    try { await db.prepare(`UPDATE supplier_contacts SET bop_category=$1 WHERE id=$2`).run(category, c.id); tagged++; }
+                    catch {}
+                } else skipped++;
             }
-            res.json({ ok: true, total: contacts.length, tagged, skipped });
+            res.json({ ok: true, total: contacts.length, tagged, skipped,
+                note: `${tagged} tagged across BOP categories. ${skipped} unmatched (likely GT OEM / HRSG / non-BOP suppliers).` });
         } catch (e) { res.status(500).json({ error: e.message }); }
     });
 
