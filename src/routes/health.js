@@ -27,7 +27,7 @@ function createHealthRoutes(db, opts = {}) {
         const apolloKey     = !!process.env.APOLLO_API_KEY;
 
         // DB seed state
-        let dbSeeds = { supplier_tiers: 0, market_pricing: 0, bop_categories: 0, integrity_checks: 0, claude_results: 0 };
+        let dbSeeds = { supplier_tiers: 0, market_pricing: 0, bop_categories: 0, integrity_checks: 0, claude_results: 0, supplier_contacts: 0 };
         let dbOnline = false;
         if (db) {
             try {
@@ -39,6 +39,7 @@ function createHealthRoutes(db, opts = {}) {
                     ['bop_categories',  'SELECT COUNT(*) as cnt FROM bop_categories'],
                     ['integrity_checks','SELECT COUNT(*) as cnt FROM integrity_checks'],
                     ['claude_results',  'SELECT COUNT(*) as cnt FROM claude_results'],
+                    ['supplier_contacts','SELECT COUNT(*) as cnt FROM supplier_contacts'],
                 ];
                 for (const [key, sql] of checks) {
                     try {
@@ -141,19 +142,17 @@ function createHealthRoutes(db, opts = {}) {
                 pricing_records_in_memory: INDICATIVE_PRICING.length
             },
             contact_intelligence: {
-                status: 'deferred',
-                phase: 'Wave 9 — pending Apollo Basic upgrade',
-                deferred_reason: 'Apollo Basic plan ($49/mo) required to unlock people search API',
-                table_ready: 'supplier_contacts',
-                apollo_org_ids_captured: true,
-                apollo_people_search_ready: apolloKey && false, // needs paid plan
+                status: dbSeeds.supplier_contacts > 0 ? 'available' : 'deferred',
+                contacts_in_db: dbSeeds.supplier_contacts,
+                phase: 'Wave 9',
+                note: dbSeeds.supplier_contacts > 0 ? `${dbSeeds.supplier_contacts} contacts available from W251 session. Apollo Basic needed for enrichment.` : 'Awaiting Apollo Basic upgrade',
+                apollo_upgrade_required: !apolloKey,
                 activation_path: [
                     '1. Upgrade Apollo to Basic ($49/mo)',
-                    '2. Run /api/dashboard/enrich-now to populate supplier_contacts',
-                    '3. Enable contact currency checks via /api/integrity/check-contact',
-                    '4. Link verified contacts to RFQ workflow'
-                ],
-                existing_contacts_in_db: dbSeeds.supplier_tiers > 0 ? 'check supplier_contacts table' : 'none seeded'
+                    '2. POST /api/wave9/enrich — Apollo people search across T1 suppliers',
+                    '3. GET /api/wave9/contacts — browse exec contacts by BOP category',
+                    '4. POST /api/wave9/contacts/:id/rfq — Claude RFQ draft per contact'
+                ]
             }
         });
     });

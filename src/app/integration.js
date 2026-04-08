@@ -18,6 +18,7 @@ const { createIntegrityRoutes } = require('../routes/integrity');
 const { createClaudeRoutes }    = require('../routes/claude-intelligence');
 const { createHealthRoutes }    = require('../routes/health');
 const { createStatusRoutes }    = require('../routes/status');
+const { createWave9Routes }     = require('../routes/wave9');
 
 function createApp(db, opts = {}) {
     const app = express();
@@ -110,6 +111,7 @@ function createApp(db, opts = {}) {
     app.use('/api/claude',    createClaudeRoutes(db, { redis }));
     app.use('/api/health',    createHealthRoutes(db, { redis }));
     app.use('/api/status',    createStatusRoutes(db, { redis }));
+    app.use('/api/wave9',     createWave9Routes(db, { redis }));
     app.use('/api/cron', createDiscoveryRoutes(db, { redis })); // Vercel cron compatibility
 
     // Serve dashboard UI
