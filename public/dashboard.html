@@ -958,6 +958,7 @@ html, body {
       <button class="nav-tab active" onclick="showView('executive')">Executive</button>
       <button class="nav-tab" onclick="showView('governance')">Governance</button>
       <button class="nav-tab" onclick="showView('supply-chain')">Supply Chain</button>
+      <button class="nav-tab" onclick="showView('market-intel')">Market Intel</button>
       <button class="nav-tab" onclick="showView('system')">System</button>
     </nav>
 
@@ -1827,6 +1828,166 @@ html, body {
       </div>
 
     </div><!-- /dashboard-grid -->
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- WAVE 8 — FlowSeer Market Intelligence View                     -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div id="market-intel-view" style="display:none">
+
+      <!-- Engine Status Bar -->
+      <div id="mi-engine-bar" style="display:flex;align-items:center;gap:16px;padding:12px 0 20px;border-bottom:1px solid var(--border);margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)"></div>
+          <span style="font-family:var(--font-mono);font-size:11px;color:var(--green);font-weight:600">INTELLIGENCE ENGINE ACTIVE</span>
+        </div>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)" id="mi-last-run">Loading...</span>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">·</span>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)" id="mi-supplier-count">— suppliers tracked</span>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">·</span>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)" id="mi-pricing-count">— pricing records</span>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button onclick="runDiscovery()" style="padding:5px 14px;background:var(--cyan-dim);border:1px solid rgba(6,182,212,0.3);border-radius:6px;color:var(--cyan);font-family:var(--font-mono);font-size:10px;cursor:pointer;font-weight:600">▶ RUN DISCOVERY</button>
+          <button onclick="seedIntelligence()" style="padding:5px 14px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);font-family:var(--font-mono);font-size:10px;cursor:pointer">SEED DATABASE</button>
+        </div>
+      </div>
+
+      <!-- BOP Cost Rollup KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px">BOP Total — Low</div>
+          <div id="mi-bop-low" style="font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--green)">—</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:4px">Conservative estimate</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px">BOP Total — Mid</div>
+          <div id="mi-bop-mid" style="font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--cyan)">—</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:4px">Most likely scenario</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px">BOP Total — High</div>
+          <div id="mi-bop-high" style="font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--amber)">—</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:4px">Conservative high</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px">Categories Priced</div>
+          <div id="mi-categories-count" style="font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--purple, #a855f7)">—</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:4px">of <span id="mi-total-cats">36</span> BOP systems</div>
+        </div>
+      </div>
+
+      <!-- Main 2-column layout -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+
+        <!-- Left: Supplier Tier Matrix -->
+        <div class="panel" style="grid-column:1">
+          <div class="panel-header">
+            <div class="panel-title">
+              <div class="panel-title-dot" style="background:var(--cyan)"></div>
+              Supplier Tier Matrix
+            </div>
+            <div class="panel-actions">
+              <!-- Tier filter buttons -->
+              <button onclick="filterSupplierTier(null)" id="tier-all-btn" style="padding:3px 8px;background:var(--cyan-dim);border:1px solid rgba(6,182,212,0.4);border-radius:4px;color:var(--cyan);font-family:var(--font-mono);font-size:9px;cursor:pointer;margin-right:3px">ALL</button>
+              <button onclick="filterSupplierTier(1)" id="tier-1-btn" style="padding:3px 8px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text-tertiary);font-family:var(--font-mono);font-size:9px;cursor:pointer;margin-right:3px">T1</button>
+              <button onclick="filterSupplierTier(2)" id="tier-2-btn" style="padding:3px 8px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text-tertiary);font-family:var(--font-mono);font-size:9px;cursor:pointer;margin-right:3px">T2</button>
+              <button onclick="filterSupplierTier(3)" id="tier-3-btn" style="padding:3px 8px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text-tertiary);font-family:var(--font-mono);font-size:9px;cursor:pointer;margin-right:3px">T3</button>
+              <button onclick="filterSupplierTier(4)" id="tier-4-btn" style="padding:3px 8px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text-tertiary);font-family:var(--font-mono);font-size:9px;cursor:pointer">T4</button>
+            </div>
+          </div>
+          <!-- Tier legend -->
+          <div style="display:flex;gap:12px;padding:8px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap">
+            <span style="font-family:var(--font-mono);font-size:9px"><span style="color:var(--green)">●</span> T1 OEM/Major (&gt;$500M)</span>
+            <span style="font-family:var(--font-mono);font-size:9px"><span style="color:var(--cyan)">●</span> T2 Major Indep ($50-500M)</span>
+            <span style="font-family:var(--font-mono);font-size:9px"><span style="color:var(--amber)">●</span> T3 Specialty ($5-50M)</span>
+            <span style="font-family:var(--font-mono);font-size:9px"><span style="color:var(--red)">●</span> T4 Small/Trader</span>
+          </div>
+          <!-- Search bar -->
+          <div style="padding:8px 20px;border-bottom:1px solid var(--border)">
+            <input id="supplier-search" type="text" placeholder="Search suppliers, domains, categories..." oninput="filterSupplierSearch(this.value)" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:var(--font-mono);font-size:11px;color:var(--text-primary);outline:none;box-sizing:border-box">
+          </div>
+          <div class="panel-body" style="padding:0;max-height:520px;overflow-y:auto" id="supplier-tier-list">
+            <div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">Loading supplier intelligence...</div>
+          </div>
+          <div style="padding:10px 20px;border-top:1px solid var(--border);font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">
+            Showing <span id="supplier-shown">—</span> of <span id="supplier-total">—</span> suppliers · Auto-updates daily via FlowSeer engine
+          </div>
+        </div>
+
+        <!-- Right: Indicative Pricing Panel -->
+        <div class="panel" style="grid-column:2">
+          <div class="panel-header">
+            <div class="panel-title">
+              <div class="panel-title-dot" style="background:var(--amber)"></div>
+              Indicative Pricing Intelligence
+            </div>
+            <div class="panel-actions">
+              <select id="pricing-category-filter" onchange="filterPricingCategory(this.value)" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-family:var(--font-mono);font-size:9px;color:var(--text-secondary);cursor:pointer">
+                <option value="">ALL CATEGORIES</option>
+              </select>
+            </div>
+          </div>
+          <div style="padding:6px 20px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:9px;color:var(--amber)">
+            ⚠ Indicative only · Web research / estimated · ±30-40% · Not RFQ · For budgeting reference
+          </div>
+          <div class="panel-body" style="padding:0;max-height:520px;overflow-y:auto" id="pricing-list">
+            <div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">Loading pricing intelligence...</div>
+          </div>
+          <div style="padding:10px 20px;border-top:1px solid var(--border);font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">
+            <span id="pricing-shown">—</span> pricing records · Excludes GT flange-to-flange, generator & controls
+          </div>
+        </div>
+
+      </div><!-- /2-col -->
+
+      <!-- Full-width: BOP Cost Breakdown by Group -->
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--green)"></div>
+            BOP Cost Breakdown by System Group
+          </div>
+          <div class="panel-actions">
+            <span class="panel-tag">INDICATIVE</span>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0">
+          <div id="bop-cost-breakdown" style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">Loading BOP cost summary...</div>
+        </div>
+      </div>
+
+      <!-- Full-width: BOP Category Coverage -->
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--purple, #a855f7)"></div>
+            BOP Category Coverage — Suppliers &amp; Pricing Status
+          </div>
+          <div class="panel-actions">
+            <span id="mi-coverage-pct" class="panel-tag live">—% covered</span>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0">
+          <div id="bop-category-coverage" style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">Loading coverage matrix...</div>
+        </div>
+      </div>
+
+      <!-- Discovery Engine Log -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <div class="panel-title-dot" style="background:var(--text-tertiary)"></div>
+            Discovery Engine Activity Log
+          </div>
+          <div class="panel-actions">
+            <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">Runs daily at 02:00 UTC &amp; 14:00 UTC</span>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:0" id="discovery-log">
+          <div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">No discovery runs recorded yet.</div>
+        </div>
+      </div>
+
+    </div><!-- /market-intel-view -->
 
     <!-- Platform Footer -->
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);margin-top:4px">
@@ -2928,9 +3089,10 @@ function updateSidebarHealth(dbMode, redisStatus, uptimeHuman) {
 }
 
 // ─── UTILITY ─────────────────────────────────────
-async function fetchJSON(path) {
+async function fetchJSON(path, opts) {
   try {
-    const res = await fetch(API + path);
+    const url = path.startsWith('http') ? path : (API + path);
+    const res = await fetch(url, opts || {});
     if (!res.ok) return null;
     return await res.json();
   } catch { return null; }
@@ -3005,8 +3167,353 @@ function showView(v) {
   event.target.classList.add('active');
   const opPanel = document.getElementById('operator-section');
   if (opPanel) opPanel.style.display = v === 'governance' ? 'flex' : 'none';
+  const miView = document.getElementById('market-intel-view');
+  if (miView) miView.style.display = v === 'market-intel' ? 'block' : 'none';
   if (v === 'governance') loadOperatorQueue();
+  if (v === 'market-intel') loadMarketIntel();
 }
+
+// ═══════════════════════════════════════════════════════
+// WAVE 8 — FlowSeer Market Intelligence Functions
+// ═══════════════════════════════════════════════════════
+
+let allSuppliers = [];
+let allPricing = [];
+let currentTierFilter = null;
+let currentCategoryFilter = '';
+
+function fmt$(n) {
+  if (!n && n !== 0) return '—';
+  if (n >= 1e9) return '$' + (n/1e9).toFixed(1) + 'B';
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return '$' + (n/1e3).toFixed(0) + 'K';
+  return '$' + n.toLocaleString();
+}
+
+function tierColor(t) {
+  return { 1:'var(--green)', 2:'var(--cyan)', 3:'var(--amber)', 4:'var(--red)' }[t] || 'var(--text-tertiary)';
+}
+
+function tierLabel(t) {
+  return { 1:'T1 OEM', 2:'T2 Major', 3:'T3 Specialty', 4:'T4 SME' }[t] || `T${t}`;
+}
+
+async function loadMarketIntel() {
+  try {
+    // Load engine status
+    const status = await fetchJSON('/api/discovery/status');
+    if (status) {
+      const el = document.getElementById('mi-last-run');
+      if (el) el.textContent = status.db_stats?.last_run ? 'Last run: ' + formatDate(status.db_stats.last_run) : 'Engine ready · First run pending';
+      const sc = document.getElementById('mi-supplier-count');
+      if (sc) sc.textContent = (status.seeded_suppliers || 0) + ' suppliers tracked';
+      const pc = document.getElementById('mi-pricing-count');
+      if (pc) pc.textContent = (status.seeded_pricing || 0) + ' pricing records';
+    }
+  } catch(e) {}
+
+  // Load all 3 panels in parallel
+  await Promise.all([
+    loadSupplierTiers(),
+    loadPricingIntelligence(),
+    loadBOPCostSummary(),
+    loadCoverageMatrix(),
+    loadDiscoveryLog()
+  ]);
+}
+
+async function loadSupplierTiers(tier, search) {
+  const list = document.getElementById('supplier-tier-list');
+  if (!list) return;
+  try {
+    let url = '/api/discovery/suppliers?limit=100';
+    if (tier) url += '&tier=' + tier;
+    if (search) url += '&q=' + encodeURIComponent(search);
+    const r = await fetchJSON(url);
+    const suppliers = r?.suppliers || [];
+    allSuppliers = suppliers;
+
+    const shown = document.getElementById('supplier-shown');
+    const total = document.getElementById('supplier-total');
+    if (shown) shown.textContent = suppliers.length;
+    if (total) total.textContent = r?.pagination?.total || suppliers.length;
+
+    if (!suppliers.length) {
+      list.innerHTML = '<div style="padding:24px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">No suppliers found</div>';
+      return;
+    }
+
+    list.innerHTML = suppliers.map(s => `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid var(--border);transition:background 0.1s" onmouseover="this.style.background='var(--bg-elevated)'" onmouseout="this.style.background='transparent'">
+        <div style="width:32px;height:22px;border-radius:4px;background:${tierColor(s.tier)}22;border:1px solid ${tierColor(s.tier)}44;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <span style="font-family:var(--font-mono);font-size:9px;font-weight:700;color:${tierColor(s.tier)}">${tierLabel(s.tier)}</span>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.name || s.supplier_name || '')}</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            ${esc(s.bop_category?.replace(/_/g,' ') || '')} · ${esc(s.hq_country || '')} ${s.phone ? '· ' + esc(s.phone) : ''}
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-family:var(--font-mono);font-size:11px;color:${tierColor(s.tier)};font-weight:600">${fmt$(s.revenue_usd)}</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">${s.employee_count ? s.employee_count.toLocaleString() + ' emp' : ''}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--red)">Failed to load suppliers</div>';
+  }
+}
+
+function filterSupplierTier(tier) {
+  currentTierFilter = tier;
+  // Update button styles
+  ['all','1','2','3','4'].forEach(t => {
+    const btn = document.getElementById('tier-' + t + '-btn');
+    if (!btn) return;
+    const active = (tier === null && t === 'all') || (String(tier) === t);
+    btn.style.background = active ? 'var(--cyan-dim)' : 'transparent';
+    btn.style.color = active ? 'var(--cyan)' : 'var(--text-tertiary)';
+    btn.style.borderColor = active ? 'rgba(6,182,212,0.4)' : 'var(--border)';
+  });
+  const search = document.getElementById('supplier-search')?.value || '';
+  loadSupplierTiers(tier, search);
+}
+
+function filterSupplierSearch(val) {
+  loadSupplierTiers(currentTierFilter, val);
+}
+
+async function loadPricingIntelligence(category) {
+  const list = document.getElementById('pricing-list');
+  const sel = document.getElementById('pricing-category-filter');
+  if (!list) return;
+  try {
+    let url = '/api/discovery/pricing?limit=100';
+    if (category) url += '&category=' + encodeURIComponent(category);
+    const r = await fetchJSON(url);
+    const pricing = r?.pricing || [];
+    allPricing = pricing;
+
+    const shown = document.getElementById('pricing-shown');
+    if (shown) shown.textContent = r?.pagination?.total || pricing.length;
+
+    // Populate category filter
+    if (sel && sel.options.length <= 1) {
+      const cats = [...new Set(allPricing.map(p => p.bop_category).filter(Boolean))].sort();
+      cats.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c.replace(/_/g, ' ');
+        sel.appendChild(opt);
+      });
+    }
+
+    if (!pricing.length) {
+      list.innerHTML = '<div style="padding:24px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">No pricing records found</div>';
+      return;
+    }
+
+    list.innerHTML = pricing.map(p => {
+      const conf = p.confidence || 'indicative';
+      const confColor = conf === 'quoted' ? 'var(--green)' : conf === 'published' ? 'var(--cyan)' : 'var(--amber)';
+      return `
+      <div style="padding:12px 20px;border-bottom:1px solid var(--border);transition:background 0.1s" onmouseover="this.style.background='var(--bg-elevated)'" onmouseout="this.style.background='transparent'">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:6px">
+          <span style="font-family:var(--font-mono);font-size:9px;padding:2px 6px;border-radius:3px;background:var(--bg-elevated);border:1px solid var(--border);color:var(--cyan);white-space:nowrap;flex-shrink:0">${esc(p.bop_category?.replace(/_/g,' ') || '')}</span>
+          <span style="font-size:11px;font-weight:500;color:var(--text-primary);flex:1">${esc(p.part_description || '')}</span>
+          <span style="font-family:var(--font-mono);font-size:9px;padding:2px 6px;border-radius:3px;background:transparent;border:1px solid ${confColor}44;color:${confColor};white-space:nowrap;flex-shrink:0">${conf.toUpperCase()}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;margin-left:0">
+          <div>
+            <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">LOW </span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--green);font-weight:600">${fmt$(p.price_low_usd)}</span>
+          </div>
+          <div>
+            <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">MID </span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--cyan);font-weight:600">${fmt$(p.price_mid_usd)}</span>
+          </div>
+          <div>
+            <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">HIGH </span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--amber);font-weight:600">${fmt$(p.price_high_usd)}</span>
+          </div>
+          ${p.lead_time_weeks_low ? `<div style="margin-left:auto;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">${p.lead_time_weeks_low}-${p.lead_time_weeks_high} wks lead</div>` : ''}
+        </div>
+        ${p.source_supplier ? `<div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:4px">Source: ${esc(p.source_supplier)}</div>` : ''}
+      </div>
+    `}).join('');
+  } catch(e) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--red)">Failed to load pricing</div>';
+  }
+}
+
+function filterPricingCategory(val) {
+  currentCategoryFilter = val;
+  loadPricingIntelligence(val || null);
+}
+
+async function loadBOPCostSummary() {
+  const el = document.getElementById('bop-cost-breakdown');
+  if (!el) return;
+  try {
+    const r = await fetchJSON('/api/discovery/pricing/summary');
+    if (!r) return;
+
+    const s = r.summary;
+    const low = document.getElementById('mi-bop-low');
+    const mid = document.getElementById('mi-bop-mid');
+    const high = document.getElementById('mi-bop-high');
+    const cats = document.getElementById('mi-categories-count');
+    if (low)  low.textContent  = fmt$(s.bop_total_low_usd);
+    if (mid)  mid.textContent  = fmt$(s.bop_total_mid_usd);
+    if (high) high.textContent = fmt$(s.bop_total_high_usd);
+    if (cats) cats.textContent = s.categories_priced || 0;
+
+    // Build group breakdown bars
+    const groups = r.by_group || [];
+    const maxMid = Math.max(...groups.map(g => g.total_mid));
+
+    el.innerHTML = `
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:10px;color:var(--amber)">
+        ⚠ ${esc(s.basis || 'Indicative pricing — web research basis')}
+      </div>
+      <div style="padding:0">
+        ${groups.map(g => {
+          const pct = maxMid > 0 ? Math.round((g.total_mid / maxMid) * 100) : 0;
+          return `
+          <div style="display:flex;align-items:center;gap:16px;padding:10px 20px;border-bottom:1px solid var(--border);transition:background 0.1s" onmouseover="this.style.background='var(--bg-elevated)'" onmouseout="this.style.background='transparent'">
+            <div style="width:110px;flex-shrink:0;font-family:var(--font-mono);font-size:10px;color:var(--text-secondary)">${esc(g.group)}</div>
+            <div style="flex:1;background:var(--bg-elevated);border-radius:3px;height:8px;overflow:hidden">
+              <div style="width:${pct}%;height:100%;background:var(--cyan);border-radius:3px;transition:width 0.5s"></div>
+            </div>
+            <div style="width:100px;text-align:right;font-family:var(--font-mono);font-size:11px;color:var(--cyan);font-weight:600">${fmt$(g.total_mid)}</div>
+            <div style="width:160px;text-align:right;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">${fmt$(g.total_low)} – ${fmt$(g.total_high)}</div>
+          </div>
+        `}).join('')}
+        <div style="display:flex;align-items:center;gap:16px;padding:12px 20px;background:var(--bg-elevated)">
+          <div style="width:110px;flex-shrink:0;font-family:var(--font-mono);font-size:10px;color:var(--text-primary);font-weight:600">TOTAL BOP</div>
+          <div style="flex:1"></div>
+          <div style="width:100px;text-align:right;font-family:var(--font-mono);font-size:13px;color:var(--cyan);font-weight:700">${fmt$(s.bop_total_mid_usd)}</div>
+          <div style="width:160px;text-align:right;font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">${fmt$(s.bop_total_low_usd)} – ${fmt$(s.bop_total_high_usd)}</div>
+        </div>
+      </div>
+    `;
+  } catch(e) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--red);font-family:var(--font-mono);font-size:11px">Failed to load cost summary</div>';
+  }
+}
+
+async function loadCoverageMatrix() {
+  const el = document.getElementById('bop-category-coverage');
+  const pctEl = document.getElementById('mi-coverage-pct');
+  if (!el) return;
+  try {
+    const [cats, tiers] = await Promise.all([
+      fetchJSON('/api/discovery/categories'),
+      fetchJSON('/api/discovery/tier-stats')
+    ]);
+
+    const categories = cats?.categories || [];
+    const byCategory = tiers?.by_category || {};
+    const pricedCats = new Set(allPricing.map(p => p.bop_category));
+
+    const covered = categories.filter(c => {
+      const key = c.category_key || c.key;
+      return (byCategory[key]?.total || 0) > 0 || pricedCats.has(key);
+    }).length;
+
+    const pct = categories.length > 0 ? Math.round(covered / categories.length * 100) : 0;
+    if (pctEl) pctEl.textContent = pct + '% covered';
+    if (document.getElementById('mi-total-cats')) document.getElementById('mi-total-cats').textContent = categories.length;
+
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)">
+        ${categories.map(c => {
+          const key = c.category_key || c.key;
+          const name = c.category_name || c.name || key;
+          const group = c.category_group || c.group || '';
+          const supplierCount = byCategory[key]?.total || 0;
+          const hasPricing = pricedCats.has(key);
+          const hasSups = supplierCount > 0;
+          const status = hasSups && hasPricing ? 'full' : hasSups || hasPricing ? 'partial' : 'empty';
+          const statusColor = status === 'full' ? 'var(--green)' : status === 'partial' ? 'var(--amber)' : 'var(--border)';
+          const bgColor = status === 'full' ? 'rgba(16,185,129,0.06)' : status === 'partial' ? 'rgba(245,158,11,0.05)' : 'transparent';
+          return `
+          <div style="padding:10px 14px;background:${bgColor};transition:background 0.1s" onmouseover="this.style.background='var(--bg-elevated)'" onmouseout="this.style.background='${bgColor}'">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+              <div style="width:6px;height:6px;border-radius:50%;background:${statusColor};flex-shrink:0"></div>
+              <span style="font-size:10px;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(name)}">${esc(name)}</span>
+            </div>
+            <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">
+              ${supplierCount} suppliers${hasPricing ? ' · ✓ pricing' : ' · — pricing'}
+            </div>
+          </div>
+        `}).join('')}
+      </div>
+      <div style="padding:10px 16px;border-top:1px solid var(--border);font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)">
+        <span style="color:var(--green)">● Full</span> = suppliers + pricing &nbsp;&nbsp;
+        <span style="color:var(--amber)">● Partial</span> = one or other &nbsp;&nbsp;
+        <span style="color:var(--border)">● Gap</span> = needs discovery
+      </div>
+    `;
+  } catch(e) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--red);font-family:var(--font-mono);font-size:11px">Failed to load coverage</div>';
+  }
+}
+
+async function loadDiscoveryLog() {
+  const el = document.getElementById('discovery-log');
+  if (!el) return;
+  try {
+    const r = await fetchJSON('/api/discovery/jobs');
+    const jobs = r?.jobs || [];
+    if (!jobs.length) {
+      el.innerHTML = '<div style="padding:20px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">No discovery jobs run yet. Click RUN DISCOVERY to start.</div>';
+      return;
+    }
+    el.innerHTML = jobs.slice(0, 10).map(j => {
+      const statusColor = j.status === 'complete' ? 'var(--green)' : j.status === 'failed' ? 'var(--red)' : 'var(--amber)';
+      return `
+      <div style="display:flex;align-items:center;gap:16px;padding:10px 20px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:10px">
+        <span style="color:${statusColor};font-weight:600">${(j.status || '').toUpperCase()}</span>
+        <span style="color:var(--text-secondary)">${esc(j.job_type || '')}</span>
+        <span style="color:var(--text-tertiary)">${j.bop_category ? esc(j.bop_category) : 'all categories'}</span>
+        <span style="color:var(--cyan)">${j.suppliers_found || 0} suppliers</span>
+        <span style="color:var(--amber)">${j.prices_updated || 0} prices</span>
+        <span style="margin-left:auto;color:var(--text-tertiary)">${formatDate(j.created_at)}</span>
+        <span style="color:var(--text-tertiary)">${esc(j.triggered_by || 'manual')}</span>
+      </div>
+      `;
+    }).join('');
+  } catch(e) {}
+}
+
+async function runDiscovery() {
+  showToast('FlowSeer Discovery Engine running...');
+  try {
+    await fetchJSON('/api/discovery/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ job_type: 'full_sweep' }) });
+    showToast('Discovery run complete. Refreshing data...');
+    await loadMarketIntel();
+  } catch(e) {
+    showToast('Discovery run failed: ' + e.message);
+  }
+}
+
+async function seedIntelligence() {
+  showToast('Seeding supplier tiers and pricing to database...');
+  try {
+    const [s, p] = await Promise.all([
+      fetch('/api/discovery/seed-tiers', { method: 'POST' }).then(r => r.json()),
+      fetch('/api/discovery/seed-pricing', { method: 'POST' }).then(r => r.json())
+    ]);
+    showToast(`Seeded: ${s.inserted} suppliers · ${p.inserted} pricing records`);
+    await loadMarketIntel();
+  } catch(e) {
+    showToast('Seed failed: ' + e.message);
+  }
+}
+
+// Wave 8 utility — uses main fetchJSON above
 
 function openSearch() {
   const modal = document.getElementById('searchModal');
