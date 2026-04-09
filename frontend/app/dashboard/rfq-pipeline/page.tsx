@@ -10,6 +10,9 @@ import type { RfqQueueResponse, RfqQueueItem } from '../../../lib/api/wave9';
 import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { RfqDraftCard } from '../../../components/cards/RfqDraftCard';
+import { RfqDetailPanel } from '../../../components/cards/RfqDetailPanel';
+import { AnalysisDetailCard } from '../../../components/cards/AnalysisDetailCard';
+import { ExecutiveActionQueue } from '../../../components/queue/ExecutiveActionQueue';
 
 function fmtK(n: number) { return n >= 1_000_000 ? `$${(n/1_000_000).toFixed(2)}M` : `$${(n/1_000).toFixed(0)}K`; }
 
@@ -73,7 +76,7 @@ export default function RfqPipelinePage() {
     queryFn: () => apiFetch<RfqQueueResponse>('/wave9/rfq-queue'),
     refetchInterval: 30_000,
   });
-  const analysesQ = useQuery<DataState<{ results: Array<{ id:number; analysis_type:string; subject_name:string; model:string; model_cost_usd:string; preview:string }> }>>({
+  const analysesQ = useQuery<DataState<{ results: Array<{ id:number; analysis_type:string; subject_name:string; model:string; model_cost_usd:string; preview:string; created_at:string }> }>>({
     queryKey: ['claude-results-rfq'],
     queryFn: () => apiFetch('/claude/results?limit=10'),
     refetchInterval: 30_000,
@@ -117,10 +120,48 @@ export default function RfqPipelinePage() {
             <KpiCard label="Sent"                value={queue?.sent ?? 0}    sub="Outreach initiated" accent="var(--green)" />
           </div>
 
+          {/* ── EXECUTIVE ACTION QUEUE — Directive 21C ── */}
+          <ExecutiveActionQueue
+            rfqQueue={queue ?? undefined}
+            analysesRun={comparisons.length}
+            totalContacts={231}
+            withEmail={64}
+            uiState={uiState}
+          />
+
           {/* ── DRAFTED RFQ SURFACE — Block C ── */}
           {(queue?.drafted ?? 0) > 0 && (
             <RfqDraftCard items={queue?.queue ?? []} />
           )}
+
+          {/* ── RFQ DETAIL PANELS — Directive 21A ── */}
+          {(queue?.drafted ?? 0) > 0 && (() => {
+            const drafted = (queue?.queue ?? []).filter(i => i.rfq_status === 'draft' || i.rfq_status === 'sent');
+            const rfqAnalyses = (analyses?.results ?? []).filter(r => r.analysis_type === 'rfq_draft');
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{
+                  fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase',
+                  letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 4,
+                }}>
+                  Draft Review — Click to expand
+                </div>
+                {drafted.map(item => {
+                  const match = rfqAnalyses.find(r =>
+                    r.subject_name.toLowerCase().includes(item.supplier_name.split('/')[0].trim().toLowerCase()) ||
+                    r.subject_name.toLowerCase().includes(item.bop_category.toLowerCase())
+                  );
+                  return (
+                    <RfqDetailPanel
+                      key={item.id}
+                      item={item}
+                      draftPreview={match?.preview}
+                    />
+                  );
+                })}
+              </div>
+            );
+          })()}
 
           {/* ── NEXT ACTION BANNER ── */}
           {queue?.next && (
@@ -167,7 +208,7 @@ export default function RfqPipelinePage() {
               </div>
             </div>
 
-            {/* Claude supplier comparisons */}
+            {/* Analysis detail cards — Directive 21B */}
             <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
               <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>
@@ -179,33 +220,15 @@ export default function RfqPipelinePage() {
               {analysesQ.data?.uiState === 'loading' && <div style={{ padding: 20 }}><LoadingSkeleton rows={3} height="h-16" /></div>}
               {analysesQ.data?.uiState === 'error'   && <div style={{ padding: 20 }}><ErrorCard error={analysesQ.data.error ?? 'server_error'} /></div>}
 
-              <div style={{ maxHeight: 480, overflowY: 'auto' }}>
+              <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 600, overflowY: 'auto' }}>
                 {comparisons.map(r => (
-                  <div key={r.id} style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 7, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 3, backgroundColor: 'var(--purple-dim)', border: '1px solid var(--purple-border)', color: 'var(--purple)' }}>
-                        AI COMPARISON
-                      </span>
-                      <span style={{ fontSize: 9, fontFamily: 'monospace', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                        {r.subject_name.replace('Supplier Comparison — ','').replace('Supplier Comparison: ','')}
-                      </span>
-                      <span style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>
-                        ${parseFloat(r.model_cost_usd).toFixed(4)}
-                      </span>
-                    </div>
-                    <p style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', lineHeight: 1.6, margin: 0,
-                      display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {r.preview}
-                    </p>
-                  </div>
+                  <AnalysisDetailCard key={r.id} result={r} />
                 ))}
                 {!comparisons.length && (
-                  <div style={{ padding: 20 }}>
-                    <EmptyState
-                      title="No comparisons yet"
-                      description="Trigger via: GET /api/claude/run-compare-suppliers?category=MV_System"
-                    />
-                  </div>
+                  <EmptyState
+                    title="No comparisons yet"
+                    description="Trigger via: GET /api/claude/run-compare-suppliers?category=MV_System"
+                  />
                 )}
               </div>
             </div>
