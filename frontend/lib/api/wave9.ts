@@ -1,19 +1,3 @@
-import { apiFetch } from './client';
-
-export interface Wave9Status {
-  status: string;
-  contacts: {
-    total: number;
-    with_email: number;
-    with_title: number;
-    tagged: number;
-    untagged: number;
-    c_suite?: number;
-    vp?: number;
-  };
-  apollo_upgrade_required: boolean;
-}
-
 export interface RfqQueueItem {
   id: number;
   supplier_name: string;
@@ -25,6 +9,7 @@ export interface RfqQueueItem {
   category_mid_usd: number;
   rfq_status: string;
   action: string;
+  outreach_id: number | null;
 }
 
 export interface RfqQueueResponse {
@@ -49,7 +34,10 @@ export interface SeniorityStat {
   bop_tagged: number;
 }
 
-export const fetchWave9Status  = () => apiFetch<Wave9Status>('/wave9/status');
-export const fetchRfqQueue     = () => apiFetch<RfqQueueResponse>('/wave9/rfq-queue');
-export const fetchByCategory   = () => apiFetch<{ categories: CategoryStat[] }>('/wave9/contacts/by-category');
-export const fetchBySeniority  = () => apiFetch<{ by_seniority: SeniorityStat[] }>('/wave9/contacts/by-seniority');
+export interface Wave9ContactsByCategory {
+  categories: CategoryStat[];
+}
+
+export interface Wave9ContactsBySeniority {
+  by_seniority: SeniorityStat[];
+}

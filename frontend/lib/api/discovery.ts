@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import type { DataState } from '../types/ui';
 
 export interface PricingCategory {
   category: string;
@@ -19,13 +19,13 @@ export interface PricingGroup {
 }
 
 export interface PricingSummary {
-  _envelope: { output_type: string; freshness: string };
   summary: {
     bop_total_low_usd: number;
     bop_total_mid_usd: number;
     bop_total_high_usd: number;
     pricing_records: number;
     categories_priced: number;
+    basis: string;
   };
   by_category: PricingCategory[];
   by_group: PricingGroup[];
@@ -41,5 +41,5 @@ export interface TierStats {
   total: number;
 }
 
-export const fetchPricingSummary = () => apiFetch<PricingSummary>('/discovery/pricing/summary');
-export const fetchTierStats     = () => apiFetch<TierStats>('/discovery/tier-stats');
+// Type-safe query fn — used by supplier-network
+export type TierStatsState = DataState<TierStats>;
