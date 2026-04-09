@@ -1,43 +1,40 @@
 'use client';
+/**
+ * Dashboard B — BOP Cost Intelligence
+ * EQS v1.0. No raw Recharts. All charts via governed wrappers.
+ * Zero-training labels. Estimated badges on all pricing.
+ */
 import { useQuery } from '@tanstack/react-query';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { apiFetch } from '../../../lib/api/client';
 import type { DataState } from '../../../lib/types/ui';
 import type { PricingSummary, PricingCategory, PricingGroup } from '../../../lib/api/discovery';
 import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
+import { CostRollupChart } from '../../../components/charts/CostRollupChart';
 
-function fmtK(n: number) { return `$${(n/1000).toFixed(0)}K`; }
 function fmtM(n: number) { return `$${(n/1_000_000).toFixed(3)}M`; }
+function fmtK(n: number) { return `$${(n/1_000).toFixed(0)}K`; }
 
 const GROUP_COLORS: Record<string, string> = {
   Mechanical:'#06b6d4', Electrical:'#10b981', Fuel:'#f59e0b',
   Safety:'#ef4444', Instrumentation:'#8b5cf6', Unknown:'#64748b',
 };
 
-const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{value: number; payload: {name: string; low: number; mid: number; high: number; items: number}}>}) => {
-  if (!active || !payload?.length) return null;
-  const d = payload[0].payload;
+function RangeKpi({ label, low, mid, high, sub }: { label: string; low: string; mid: string; high: string; sub: string }) {
   return (
-    <div className="bg-[#1a2236] border border-white/10 rounded-lg p-3 text-[10px] font-mono space-y-0.5">
-      <div className="text-slate-300 font-semibold mb-1">{d.name}</div>
-      <div className="text-amber-400">Low: {fmtK(d.low)}</div>
-      <div className="text-cyan-400 font-bold">Mid: {fmtK(d.mid)}</div>
-      <div className="text-emerald-400">High: {fmtK(d.high)}</div>
-      <div className="text-slate-500 mt-1">{d.items} line items</div>
-    </div>
-  );
-};
-
-function KpiCard({ label, value, sub, badge }: { label: string; value: string; sub: string; badge?: string }) {
-  return (
-    <div className="rounded-lg p-4 flex flex-col gap-1" style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
-      <div className="flex items-center justify-between">
-        <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>{label}</span>
-        {badge && <span className="text-[7px] font-mono px-2 py-0.5 rounded border" style={{ backgroundColor: 'var(--badge-estimated-bg)', borderColor: 'var(--badge-estimated-border)', color: 'var(--badge-estimated-text)' }}>{badge}</span>}
+    <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <span style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)' }}>{label}</span>
+        <span style={{ fontSize: 7, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 3, border: '1px solid var(--badge-estimated-border)', backgroundColor: 'var(--badge-estimated-bg)', color: 'var(--badge-estimated-text)' }}>
+          ESTIMATED · ±15%
+        </span>
       </div>
-      <div className="text-xl font-mono font-bold" style={{ color: 'var(--cyan)' }}>{value}</div>
-      <div className="text-[9px] font-mono" style={{ color: 'var(--text-tertiary)' }}>{sub}</div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, marginBottom: 4 }}>
+        <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--amber)' }}>↓ {low}</span>
+        <span style={{ fontSize: 20, fontFamily: 'monospace', fontWeight: 700, color: 'var(--cyan)', lineHeight: 1 }}>{mid}</span>
+        <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--green)' }}>↑ {high}</span>
+      </div>
+      <div style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>{sub}</div>
     </div>
   );
 }
@@ -50,14 +47,17 @@ export default function CostIntelPage() {
   });
 
   const uiState = stateQ.data?.uiState ?? 'loading';
-  const data = stateQ.data?.data;
-  const s = data?.summary;
+  const data    = stateQ.data?.data;
+  const s       = data?.summary;
 
   const chartData = (data?.by_category ?? [])
     .map((c: PricingCategory) => ({
-      name: c.category_name.replace(' System','').replace(' Package','').replace(' Equipment',''),
-      low: c.total_low_usd, mid: c.total_mid_usd, high: c.total_high_usd,
-      items: c.item_count, group: c.group,
+      name:  c.category_name.replace(' System','').replace(' Package','').replace(' Equipment',''),
+      low:   c.total_low_usd,
+      mid:   c.total_mid_usd,
+      high:  c.total_high_usd,
+      items: c.item_count,
+      group: c.group,
     }))
     .sort((a, b) => b.mid - a.mid);
 
@@ -66,114 +66,103 @@ export default function CostIntelPage() {
     .sort((a: PricingGroup, b: PricingGroup) => b.total_mid - a.total_mid);
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b" style={{ borderColor: 'var(--border)' }}>
+    <div style={{ padding: 24, maxWidth: 1200, display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+      {/* ── COMMAND BAR ── */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
         <div>
-          <h1 className="text-sm font-mono font-bold uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>
+          <h1 style={{ fontSize: 13, fontFamily: 'monospace', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-primary)', margin: 0 }}>
             BOP Cost Intelligence
           </h1>
-          <p className="text-[9px] font-mono mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
-            W251 Power Island · Indicative pricing ±15% · Web research · Not RFQ · For budgeting reference only
+          <p style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', margin: '4px 0 0' }}>
+            W251 Power Island (Balance of Plant) · Web-researched pricing · Not RFQ · For budgeting reference only
           </p>
         </div>
         <OutputBadge outputType="estimated" freshness={stateQ.data?.freshness} />
       </div>
 
-      {/* Full-page states */}
-      {uiState === 'loading' && (
-        <div className="space-y-4">
-          <LoadingSkeleton rows={1} height="h-24" />
-          <LoadingSkeleton rows={4} height="h-6" />
-          <LoadingSkeleton rows={6} height="h-4" />
-        </div>
-      )}
-      {uiState === 'error' && (
-        <ErrorCard error={stateQ.data?.error ?? 'server_error'} retryCount={stateQ.data?.retryCount} />
-      )}
-      {uiState === 'awaiting_key' && (
-        <DeferredCard capability="BOP Pricing Intelligence" activationRequirement="Discovery engine operational with seeded market pricing data" />
-      )}
-      {uiState === 'empty' && (
-        <EmptyState title="No pricing data" description="Market pricing records have not been seeded. Run discovery seeding to populate." />
-      )}
+      {/* ── FULL-PAGE STATES ── */}
+      {uiState === 'loading'      && <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}><LoadingSkeleton rows={1} height="h-24" /><LoadingSkeleton rows={5} height="h-5" /></div>}
+      {uiState === 'error'        && <ErrorCard error={stateQ.data?.error ?? 'server_error'} retryCount={stateQ.data?.retryCount} />}
+      {uiState === 'awaiting_key' && <DeferredCard capability="BOP Pricing Intelligence" activationRequirement="Discovery engine with seeded market pricing data" />}
+      {uiState === 'empty'        && <EmptyState title="No pricing records" description="Market pricing records have not been seeded. Run the discovery seeding process to populate BOP cost intelligence." />}
 
-      {/* Data views — operational and stale both render data */}
+      {/* ── DATA VIEWS ── */}
       {(uiState === 'operational' || uiState === 'stale') && (
         <>
-          {/* KPI band */}
-          <div className="grid grid-cols-3 gap-3">
-            <KpiCard label="Budget Floor" value={s ? fmtM(s.bop_total_low_usd) : '—'} sub="-15% from mid" badge="ESTIMATED" />
-            <KpiCard label="Planning Case" value={s ? fmtM(s.bop_total_mid_usd) : '—'} sub={`${s?.pricing_records ?? 0} records · ${s?.categories_priced ?? 0} categories`} badge="ESTIMATED" />
-            <KpiCard label="Budget Ceiling" value={s ? fmtM(s.bop_total_high_usd) : '—'} sub="+15% from mid" badge="ESTIMATED" />
+          {/* 5-second KPI band — budget floor / planning case / ceiling */}
+          <div>
+            <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 10 }}>
+              Program Budget Range · {s?.pricing_records ?? 0} pricing records across {s?.categories_priced ?? 0} BOP categories
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+              <RangeKpi label="Budget Floor"    low="—" mid={s ? fmtM(s.bop_total_low_usd) : '—'}  high="—" sub="-15% downside from planning case" />
+              <RangeKpi label="Planning Case"   low={s ? fmtM(s.bop_total_low_usd) : '—'} mid={s ? fmtM(s.bop_total_mid_usd) : '—'} high={s ? fmtM(s.bop_total_high_usd) : '—'} sub="Mid-case estimate · Use for initial budgeting" />
+              <RangeKpi label="Budget Ceiling"  low="—" mid={s ? fmtM(s.bop_total_high_usd) : '—'} high="—" sub="+15% upside from planning case" />
+            </div>
           </div>
 
           {/* Group tiles */}
           {groupData.length > 0 && (
             <div>
-              <div className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>By System Group</div>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 10 }}>
+                Cost by System Group (Balance of Plant scope only — excludes GT, generator, OEM control system)
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
                 {groupData.map((g: PricingGroup) => (
-                  <div key={g.group} className="rounded-lg p-3" style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: GROUP_COLORS[g.group] ?? '#64748b' }} />
-                      <span className="text-[9px] font-mono" style={{ color: 'var(--text-tertiary)' }}>{g.group}</span>
+                  <div key={g.group} style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: GROUP_COLORS[g.group] ?? '#64748b' }} />
+                      <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>{g.group}</span>
                     </div>
-                    <div className="text-[15px] font-mono font-bold" style={{ color: GROUP_COLORS[g.group] ?? '#64748b' }}>{fmtK(g.total_mid)}</div>
-                    <div className="text-[8px] font-mono mt-0.5" style={{ color: 'var(--text-tertiary)' }}>{g.categories.length} cats</div>
+                    <div style={{ fontSize: 16, fontFamily: 'monospace', fontWeight: 700, color: GROUP_COLORS[g.group] ?? '#64748b' }}>{fmtK(g.total_mid)}</div>
+                    <div style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)', marginTop: 2 }}>{g.categories.length} categories</div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Bar chart */}
-          <div className="rounded-lg p-5" style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] font-mono font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Mid Estimate by Category</span>
-              <span className="text-[7px] font-mono" style={{ color: 'var(--text-tertiary)' }}>ESTIMATED · WEB RESEARCH · ±15%</span>
-            </div>
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={chartData} margin={{ top: 4, right: 8, left: 8, bottom: 70 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="name" tick={{ fontSize: 8, fontFamily: 'monospace', fill: '#64748b' }} angle={-45} textAnchor="end" interval={0} />
-                <YAxis tickFormatter={fmtK} tick={{ fontSize: 8, fontFamily: 'monospace', fill: '#64748b' }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="mid" radius={[2, 2, 0, 0]}>
-                  {chartData.map((entry, i) => (
-                    <Cell key={i} fill={GROUP_COLORS[entry.group] ?? '#64748b'} fillOpacity={uiState === 'stale' ? 0.5 : 0.85} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {/* Governed chart wrapper — no raw recharts */}
+          <CostRollupChart
+            data={chartData}
+            title="Mid Estimate by Category"
+            uiState={uiState}
+            outputType="estimated"
+            freshness={stateQ.data?.freshness}
+            colorByGroup={GROUP_COLORS}
+          />
 
           {/* Detail table */}
-          <div className="rounded-lg overflow-hidden" style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
-            <div className="px-5 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
-              <span className="text-[10px] font-mono font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Category Detail</span>
-              <span className="text-[8px] font-mono" style={{ color: 'var(--text-tertiary)' }}>{chartData.length} categories</span>
+          <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+            <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Line-Item Detail
+              </span>
+              <span style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>
+                {chartData.length} categories · All values indicative · Web research · Not RFQ
+              </span>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr className="border-b" style={{ borderColor: 'var(--border)' }}>
-                    {['Category','Group','Low','Mid','High','Items'].map(h => (
-                      <th key={h} className="px-4 py-2 text-left text-[8px] font-mono uppercase" style={{ color: 'var(--text-tertiary)' }}>{h}</th>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    {['Category','System Group','Low (−15%)','Mid (Planning)','High (+15%)','Items'].map(h => (
+                      <th key={h} style={{ padding: '8px 16px', textAlign: 'left', fontSize: 8, fontFamily: 'monospace', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {chartData.map((r, i) => (
-                    <tr key={i} className="border-b hover:bg-white/[0.01]" style={{ borderColor: 'rgba(255,255,255,0.03)' }}>
-                      <td className="px-4 py-2 text-[9px] font-mono" style={{ color: 'var(--text-primary)' }}>{r.name}</td>
-                      <td className="px-4 py-2">
-                        <span className="text-[7px] font-mono px-1.5 py-0.5 rounded" style={{ backgroundColor: (GROUP_COLORS[r.group] ?? '#64748b') + '20', color: GROUP_COLORS[r.group] ?? '#64748b' }}>{r.group}</span>
+                    <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                      <td style={{ padding: '8px 16px', fontSize: 9, fontFamily: 'monospace', color: 'var(--text-primary)' }}>{r.name}</td>
+                      <td style={{ padding: '8px 16px' }}>
+                        <span style={{ fontSize: 7, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 3, backgroundColor: (GROUP_COLORS[r.group] ?? '#64748b') + '20', color: GROUP_COLORS[r.group] ?? '#64748b' }}>{r.group}</span>
                       </td>
-                      <td className="px-4 py-2 text-[9px] font-mono text-amber-400">{fmtK(r.low)}</td>
-                      <td className="px-4 py-2 text-[9px] font-mono text-cyan-400 font-bold">{fmtK(r.mid)}</td>
-                      <td className="px-4 py-2 text-[9px] font-mono text-emerald-400">{fmtK(r.high)}</td>
-                      <td className="px-4 py-2 text-[9px] font-mono" style={{ color: 'var(--text-tertiary)' }}>{r.items}</td>
+                      <td style={{ padding: '8px 16px', fontSize: 9, fontFamily: 'monospace', color: 'var(--amber)' }}>{fmtK(r.low)}</td>
+                      <td style={{ padding: '8px 16px', fontSize: 9, fontFamily: 'monospace', color: 'var(--cyan)', fontWeight: 700 }}>{fmtK(r.mid)}</td>
+                      <td style={{ padding: '8px 16px', fontSize: 9, fontFamily: 'monospace', color: 'var(--green)' }}>{fmtK(r.high)}</td>
+                      <td style={{ padding: '8px 16px', fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>{r.items}</td>
                     </tr>
                   ))}
                 </tbody>
