@@ -32,6 +32,30 @@ function createApp(db, opts = {}) {
 
     app.use(express.json({ limit: '10mb' }));
     app.use(express.urlencoded({ extended: true }));
+    // CORS — allow FlowSeer dashboard (canonical + all preview URLs)
+    const ALLOWED_ORIGINS = [
+        'https://flowseer-dashboard.vercel.app',
+        'https://flowseer-dashboard-gregory-j-buchanans-projects.vercel.app',
+        /^https:\/\/flowseer-dashboard-[a-z0-9]+-gregory-j-buchanans-projects\.vercel\.app$/,
+        /^https:\/\/flowseer-dashboard-git-[a-z0-9-]+-gregory-j-buchanans-projects\.vercel\.app$/,
+        'http://localhost:3000',
+    ];
+    app.use((req, res, next) => {
+        const origin = req.headers.origin;
+        if (origin) {
+            const allowed = ALLOWED_ORIGINS.some(o =>
+                typeof o === 'string' ? o === origin : o.test(origin)
+            );
+            if (allowed) {
+                res.setHeader('Access-Control-Allow-Origin', origin);
+                res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+                res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Tenant-ID');
+                res.setHeader('Access-Control-Allow-Credentials', 'true');
+            }
+        }
+        if (req.method === 'OPTIONS') return res.sendStatus(204);
+        next();
+    });
 
     // Request logging + metrics
     app.use((req, res, next) => {
