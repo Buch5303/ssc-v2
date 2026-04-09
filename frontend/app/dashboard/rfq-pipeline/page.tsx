@@ -1,8 +1,10 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
-import { fetchRfqQueue } from '../../../lib/api/wave9';
-import { fetchClaudeResults } from '../../../lib/api/claude';
+import { apiFetch } from '../../../lib/api/client';
+import type { DataState } from '../../../lib/types/ui';
+
 import { KpiCard } from '../../../components/cards/KpiCard';
+import type { RfqQueueResponse, CategoryStat } from '../../../lib/api/wave9';
 
 function fmtK(n: number) { return n >= 1e6 ? `$${(n/1e6).toFixed(2)}M` : `$${(n/1000).toFixed(0)}K`; }
 
@@ -20,10 +22,12 @@ const statusBadge: Record<string, { bg: string; text: string }> = {
 };
 
 export default function RfqPipelinePage() {
-  const { data: queue } = useQuery({ queryKey: ['rfq-queue'], queryFn: fetchRfqQueue, refetchInterval: 30_000 });
-  const { data: analyses } = useQuery({ queryKey: ['claude-results-rfq'], queryFn: () => fetchClaudeResults(10), refetchInterval: 30_000 });
+  const queueQ = useQuery<DataState<RfqQueueResponse>>({ queryKey: ['rfq-queue'], queryFn: () => apiFetch<RfqQueueResponse>('/wave9/rfq-queue'), refetchInterval: 30_000 });
+  const queue = queueQ.data?.data;
+  const analysesQ = useQuery<DataState<{results: Array<{id:number;analysis_type:string;subject_name:string;model:string;model_cost_usd:string;preview:string}>}>>({ queryKey: ['claude-results-rfq'], queryFn: () => apiFetch('/claude/results?limit=10'), refetchInterval: 30_000 });
+  const analyses = analysesQ.data?.data;
 
-  const comparisons = analyses?.results.filter(r => r.analysis_type === 'supplier_comparison') || [];
+  const comparisons = (analyses?.results ?? []).filter(r => r.analysis_type === 'supplier_comparison') || [];
   const totalValue = (queue?.queue || []).reduce((s, q) => s + q.category_mid_usd, 0);
 
   return (

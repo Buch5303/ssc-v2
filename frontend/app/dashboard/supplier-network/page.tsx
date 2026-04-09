@@ -1,9 +1,10 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { fetchStatus } from '../../../lib/api/status';
-import { fetchTierStats } from '../../../lib/api/discovery';
-import { fetchByCategory, fetchBySeniority } from '../../../lib/api/wave9';
+import { apiFetch } from '../../../lib/api/client';
+import type { DataState } from '../../../lib/types/ui';
+
+
 import { KpiCard } from '../../../components/cards/KpiCard';
 
 const TIER_COLORS = { 1: '#06b6d4', 2: '#10b981', 3: '#f59e0b', 4: '#ef4444' };
@@ -21,21 +22,25 @@ const CustomPieTooltip = ({ active, payload }: any) => {
 };
 
 export default function SupplierNetworkPage() {
-  const { data: status } = useQuery({ queryKey: ['status'], queryFn: fetchStatus, refetchInterval: 60_000 });
-  const { data: tiers } = useQuery({ queryKey: ['tier-stats'], queryFn: fetchTierStats, refetchInterval: 120_000 });
-  const { data: byCategory } = useQuery({ queryKey: ['wave9-by-category'], queryFn: fetchByCategory, refetchInterval: 120_000 });
-  const { data: bySeniority } = useQuery({ queryKey: ['wave9-by-seniority'], queryFn: fetchBySeniority, refetchInterval: 120_000 });
+  const statusQ = useQuery({ queryKey: ['status'], queryFn: () => apiFetch<any>('/status'), refetchInterval: 60_000 });
+  const status = statusQ.data?.data;
+  const tiersQ = useQuery({ queryKey: ['tier-stats'], queryFn: () => apiFetch<any>('/discovery/tier-stats'), refetchInterval: 120_000 });
+  const tiers = tiersQ.data?.data;
+  const byCategoryQ = useQuery({ queryKey: ['wave9-by-category'], queryFn: () => apiFetch<any>('/wave9/contacts/by-category'), refetchInterval: 120_000 });
+  const byCategory = byCategoryQ.data?.data;
+  const bySeniorityQ = useQuery({ queryKey: ['wave9-by-seniority'], queryFn: () => apiFetch<any>('/wave9/contacts/by-seniority'), refetchInterval: 120_000 });
+  const bySeniority = bySeniorityQ.data?.data;
 
   const bop = status?.bop_intelligence;
 
-  const pieData = (tiers?.tier_distribution || []).map((t: any) => ({
+  const pieData = (tiers?.tier_distribution || []).map((t:{tier:number;count:number}) => ({
     tier: t.tier,
     count: t.count,
     label: TIER_LABELS[t.tier as keyof typeof TIER_LABELS] || `Tier ${t.tier}`,
     fill: TIER_COLORS[t.tier as keyof typeof TIER_COLORS] || '#64748b',
   }));
 
-  const catData = (byCategory?.categories || []).slice(0, 12).map((c) => ({
+  const catData = (byCategory?.categories || []).slice(0, 12).map((c: {category:string;contacts:number;with_email:number}) => ({
     name: c.category.replace(/_/g,' ').replace('System','Sys').replace('Equipment','Eq').replace('Monitoring','Mon'),
     contacts: c.contacts,
     email: c.with_email,
@@ -53,7 +58,7 @@ export default function SupplierNetworkPage() {
         <KpiCard label="Total Suppliers" value={bop?.suppliers_in_db ?? '—'} sub="73 in Neon DB" accent="cyan" />
         <KpiCard label="In Memory" value={81} sub="Across 19 BOP categories" accent="green" />
         <KpiCard label="BOP Categories" value={bop?.bop_categories_priced ?? '—'} sub="All priced" accent="cyan" />
-        <KpiCard label="Tier 1 OEM" value={pieData.find(p=>p.tier===1)?.count ?? '—'} sub="Global industrial leaders" accent="amber" />
+        <KpiCard label="Tier 1 OEM" value={pieData.find((p:{tier:number;count:number;label:string;fill:string})=>p.tier===1)?.count ?? '—'} sub="Global industrial leaders" accent="amber" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -63,7 +68,7 @@ export default function SupplierNetworkPage() {
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie data={pieData} dataKey="count" nameKey="label" cx="50%" cy="50%" outerRadius={80} innerRadius={40}>
-                {pieData.map((entry, i) => (
+                {pieData.map((entry:{tier:number;count:number;label:string;fill:string}, i:number) => (
                   <Cell key={i} fill={entry.fill} fillOpacity={0.85} />
                 ))}
               </Pie>
@@ -71,7 +76,7 @@ export default function SupplierNetworkPage() {
             </PieChart>
           </ResponsiveContainer>
           <div className="flex flex-wrap gap-3 mt-2">
-            {pieData.map((entry) => (
+            {pieData.map((entry:{tier:number;count:number;label:string;fill:string}) => (
               <div key={entry.tier} className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.fill }} />
                 <span className="text-[8px] font-mono text-slate-400">{entry.label} ({entry.count})</span>
@@ -84,7 +89,7 @@ export default function SupplierNetworkPage() {
         <div className="bg-[#0f1524] border border-white/[0.06] rounded-lg p-5">
           <h2 className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-4">Contact Seniority · 231 Total</h2>
           <div className="space-y-2 mt-4">
-            {(bySeniority?.by_seniority || []).map((s) => {
+            {(bySeniority?.by_seniority || []).map((s: {seniority:string;contacts:number;with_email:number;bop_tagged:number}) => {
               const pct = Math.round((s.contacts / 231) * 100);
               const color = s.seniority === 'c_suite' ? '#06b6d4' : s.seniority === 'vp' ? '#10b981' : s.seniority === 'director' ? '#f59e0b' : '#64748b';
               return (

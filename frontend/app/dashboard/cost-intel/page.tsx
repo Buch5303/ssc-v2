@@ -1,7 +1,9 @@
 'use client';
+import { apiFetch } from '../../../lib/api/client';
+import type { PricingSummary } from '../../../lib/api/discovery';
+import type { DataState } from '../../../lib/types/ui';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { fetchPricingSummary } from '../../../lib/api/discovery';
 import { KpiCard } from '../../../components/cards/KpiCard';
 
 function fmtK(n: number) { return `$${(n/1000).toFixed(0)}K`; }
@@ -27,15 +29,17 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 export default function CostIntelPage() {
-  const { data, isLoading } = useQuery({
-    queryKey:['pricing-summary'], queryFn:fetchPricingSummary, refetchInterval:60_000,
+  const stateQ = useQuery<DataState<PricingSummary>>({
+    queryKey:['pricing-summary'], queryFn:() => apiFetch<PricingSummary>('/discovery/pricing/summary'), refetchInterval:60_000,
   });
+  const data = stateQ.data?.data;
+  const isLoading = stateQ.data?.uiState === 'loading' || stateQ.isLoading;
   const s = data?.summary;
   const chartData = (data?.by_category||[])
-    .map(c=>({ name:c.category_name.replace(' System','').replace(' Package','').replace(' Equipment',''),
+    .map((c:import('../../../lib/api/discovery').PricingCategory)=>({ name:c.category_name.replace(' System','').replace(' Package','').replace(' Equipment',''),
       low:c.total_low_usd, mid:c.total_mid_usd, high:c.total_high_usd, items:c.item_count, group:c.group }))
     .sort((a,b)=>b.mid-a.mid);
-  const groupData = (data?.by_group||[]).filter(g=>g.group!=='Unknown').sort((a,b)=>b.total_mid-a.total_mid);
+  const groupData = (data?.by_group||[]).filter((g:import('../../../lib/api/discovery').PricingGroup)=>g.group!=='Unknown').sort((a:import('../../../lib/api/discovery').PricingGroup,b:import('../../../lib/api/discovery').PricingGroup)=>b.total_mid-a.total_mid);
 
   return (
     <div className="p-6 space-y-6 max-w-7xl">

@@ -1,0 +1,127 @@
+/**
+ * FlowSeer Design Tokens — EQS v1.0
+ * Single source of truth. No ad-hoc color or spacing in components.
+ * All semantic meanings are encoded here, not in component files.
+ */
+
+:root {
+  /* ── Background layers ── */
+  --bg-base:     #0a0e1a;   /* page background */
+  --bg-panel:    #0f1524;   /* panels, cards */
+  --bg-elevated: #151c2e;   /* elevated surfaces */
+  --bg-card:     #1a2236;   /* inner cards */
+  --bg-overlay:  rgba(10, 14, 26, 0.85);
+
+  /* ── Borders ── */
+  --border:         rgba(255,255,255,0.06);
+  --border-hover:   rgba(255,255,255,0.12);
+  --border-focus:   rgba(6,182,212,0.4);
+
+  /* ── Text ── */
+  --text-primary:   #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-tertiary:  #4a5568;
+  --text-disabled:  #2d3748;
+
+  /* ── Engine / status colors ── */
+  --green:   #10b981;
+  --green-dim: rgba(16,185,129,0.08);
+  --green-border: rgba(16,185,129,0.2);
+
+  --cyan:    #06b6d4;
+  --cyan-dim: rgba(6,182,212,0.08);
+  --cyan-border: rgba(6,182,212,0.2);
+
+  --amber:   #f59e0b;
+  --amber-dim: rgba(245,158,11,0.08);
+  --amber-border: rgba(245,158,11,0.2);
+
+  --red:     #ef4444;
+  --red-dim: rgba(239,68,68,0.08);
+  --red-border: rgba(239,68,68,0.2);
+
+  --purple:  #8b5cf6;
+  --purple-dim: rgba(139,92,246,0.08);
+  --purple-border: rgba(139,92,246,0.2);
+
+  --slate:   #64748b;
+  --slate-dim: rgba(100,116,139,0.08);
+  --slate-border: rgba(100,116,139,0.2);
+
+  /* ── Badge colors by output type (EQS v1.0) ── */
+  /* ESTIMATED — web-researched pricing, not RFQ */
+  --badge-estimated-bg:     rgba(245,158,11,0.08);
+  --badge-estimated-border: rgba(245,158,11,0.25);
+  --badge-estimated-text:   #f59e0b;
+
+  /* VERIFIED — Perplexity-confirmed or RFQ-returned */
+  --badge-verified-bg:      rgba(16,185,129,0.08);
+  --badge-verified-border:  rgba(16,185,129,0.25);
+  --badge-verified-text:    #10b981;
+
+  /* GENERATED — Claude AI output */
+  --badge-generated-bg:     rgba(139,92,246,0.08);
+  --badge-generated-border: rgba(139,92,246,0.25);
+  --badge-generated-text:   #8b5cf6;
+
+  /* SEEDED — approved DB data */
+  --badge-seeded-bg:        rgba(6,182,212,0.08);
+  --badge-seeded-border:    rgba(6,182,212,0.25);
+  --badge-seeded-text:      #06b6d4;
+
+  /* LIVE — real-time API call */
+  --badge-live-bg:          rgba(16,185,129,0.08);
+  --badge-live-border:      rgba(16,185,129,0.25);
+  --badge-live-text:        #10b981;
+
+  /* STALE — beyond freshness window */
+  --badge-stale-bg:         rgba(100,116,139,0.08);
+  --badge-stale-border:     rgba(100,116,139,0.25);
+  --badge-stale-text:       #64748b;
+
+  /* DEFERRED — capability not yet active */
+  --badge-deferred-bg:      rgba(100,116,139,0.06);
+  --badge-deferred-border:  rgba(100,116,139,0.15);
+  --badge-deferred-text:    #4a5568;
+
+  /* ── Spacing scale ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* ── Typography ── */
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --font-size-2xs: 7px;
+  --font-size-xs:  9px;
+  --font-size-sm:  10px;
+  --font-size-md:  11px;
+  --font-size-lg:  13px;
+
+  /* ── Layout slots (5-second clarity zones) ── */
+  --command-bar-height: 36px;
+  --global-state-height: 40px;
+  --kpi-band-height: 100px;
+  /* Total 5-second zone: 176px */
+
+  /* ── Chart colors — procurement palette ── */
+  --chart-1: #06b6d4;
+  --chart-2: #10b981;
+  --chart-3: #f59e0b;
+  --chart-4: #8b5cf6;
+  --chart-5: #ef4444;
+  --chart-6: #3b82f6;
+  --chart-7: #ec4899;
+  --chart-8: #14b8a6;
+
+  /* ── Group colors for BOP system groups ── */
+  --group-mechanical:      #06b6d4;
+  --group-electrical:      #10b981;
+  --group-fuel:            #f59e0b;
+  --group-safety:          #ef4444;
+  --group-instrumentation: #8b5cf6;
+  --group-unknown:         #64748b;
+}
