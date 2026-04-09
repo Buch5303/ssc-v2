@@ -36,28 +36,31 @@ export function RfqDraftCard({ items }: RfqDraftCardProps) {
     }}>
       {/* Header */}
       <div style={{
-        padding: '12px 20px',
-        borderBottom: '1px solid var(--border)',
+        padding: '14px 20px',
+        borderBottom: '1px solid var(--purple-border)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: 'var(--purple-dim)',
+        backgroundColor: 'rgba(139,92,246,0.06)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{
+            width: 8, height: 8, borderRadius: '50%',
+            backgroundColor: 'var(--purple)', flexShrink: 0,
+            boxShadow: '0 0 6px var(--purple)',
+          }} />
           <span style={{
-            fontSize: 7, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 3,
-            backgroundColor: 'var(--purple-dim)', border: '1px solid var(--purple-border)', color: 'var(--purple)',
-          }}>
-            AI GENERATED
-          </span>
-          <span style={{
-            fontSize: 10, fontFamily: 'monospace', fontWeight: 600,
-            textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)',
+            fontSize: 11, fontFamily: 'monospace', fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--purple)',
           }}>
             Drafted RFQ Outreach
           </span>
-          <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>
-            {drafted.length} draft{drafted.length > 1 ? 's' : ''} ready
+          <span style={{
+            fontSize: 7, fontFamily: 'monospace', padding: '2px 8px', borderRadius: 3,
+            backgroundColor: 'var(--purple-dim)', border: '1px solid var(--purple-border)',
+            color: 'var(--purple)',
+          }}>
+            {drafted.length} DRAFT{drafted.length > 1 ? 'S' : ''} READY
           </span>
         </div>
         <OutputBadge outputType="generated" freshness="live" />
@@ -71,8 +74,8 @@ export function RfqDraftCard({ items }: RfqDraftCardProps) {
 
         return (
           <div key={item.id} style={{
-            padding: '16px 20px',
-            borderBottom: '1px solid rgba(255,255,255,0.03)',
+            padding: '14px 20px',
+            borderBottom: '1px solid rgba(139,92,246,0.08)',
           }}>
             {/* Contact line */}
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
