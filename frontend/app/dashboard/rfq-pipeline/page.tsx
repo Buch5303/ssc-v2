@@ -9,6 +9,7 @@ import type { DataState } from '../../../lib/types/ui';
 import type { RfqQueueResponse, RfqQueueItem } from '../../../lib/api/wave9';
 import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
+import { RfqDraftCard } from '../../../components/cards/RfqDraftCard';
 
 function fmtK(n: number) { return n >= 1_000_000 ? `$${(n/1_000_000).toFixed(2)}M` : `$${(n/1_000).toFixed(0)}K`; }
 
@@ -115,6 +116,11 @@ export default function RfqPipelinePage() {
             <KpiCard label="RFQs Drafted"        value={queue?.drafted ?? 0} sub="Claude AI-generated outreach" accent="var(--purple)" />
             <KpiCard label="Sent"                value={queue?.sent ?? 0}    sub="Outreach initiated" accent="var(--green)" />
           </div>
+
+          {/* ── DRAFTED RFQ SURFACE — Block C ── */}
+          {(queue?.drafted ?? 0) > 0 && (
+            <RfqDraftCard items={queue?.queue ?? []} />
+          )}
 
           {/* ── NEXT ACTION BANNER ── */}
           {queue?.next && (

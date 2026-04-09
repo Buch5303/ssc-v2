@@ -11,6 +11,7 @@ import type { TierStats, TierStat } from '../../../lib/api/discovery';
 import type { Wave9ContactsByCategory, Wave9ContactsBySeniority, CategoryStat, SeniorityStat } from '../../../lib/api/wave9';
 import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard, AwaitingKeyCard } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
+import { EnrichmentStatusBadge } from '../../../components/badges/EnrichmentStatusBadge';
 import { TierPieChart, type TierSlice } from '../../../components/charts/TierPieChart';
 import { ContactCoverageChart, type CategoryBar } from '../../../components/charts/ContactCoverageChart';
 
@@ -180,6 +181,13 @@ export default function SupplierNetworkPage() {
               <ContactCoverageChart data={catData} uiState={catQ.data?.uiState ?? 'empty'} />
             </div>
           )}
+
+          {/* ── ENRICHMENT STATUS — Block D ── */}
+          <EnrichmentStatusBadge
+            totalContacts={bySen?.by_seniority.reduce((acc: number, x: SeniorityStat) => acc + x.contacts, 0) ?? 0}
+            withEmail={bySen?.by_seniority.reduce((acc: number, x: SeniorityStat) => acc + x.with_email, 0) ?? 0}
+            uiState={senQ.data?.uiState ?? 'loading'}
+          />
 
           {/* Apollo upgrade deferred capability */}
           {(catQ.data?.uiState === 'awaiting_key' || catQ.data?.uiState === 'empty') && catData.length === 0 && (
