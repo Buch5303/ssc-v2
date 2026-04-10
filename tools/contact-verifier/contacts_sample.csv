@@ -1,0 +1,9 @@
+first_name,last_name,full_name,company,company_domain,title,priority,category,rfq_status,email
+Lorenzo,Simonelli,Lorenzo Simonelli,Baker Hughes,bakerhughes.com,Chairman & CEO,ACTIVE_RFQ,Vibration_Monitoring,DRAFT_READY,l.simonelli@bakerhughes.com
+Rod,Christie,Rod Christie,Baker Hughes,bakerhughes.com,EVP Turbomachinery,TIER1,Vibration_Monitoring,NOT_STARTED,r.christie@bakerhughes.com
+Tod,Carpenter,Tod Carpenter,Donaldson Company,donaldson.com,Chairman President & CEO,HIGH_VALUE,Inlet_Air_Filtering,NOT_STARTED,t.carpenter@donaldson.com
+Michael,Wynblatt,Michael Wynblatt,Donaldson Company,donaldson.com,Chief Technology Officer,HIGH_VALUE,Inlet_Air_Filtering,NOT_STARTED,m.wynblatt@donaldson.com
+Bob,Yeager,Bob Yeager,Emerson,emerson.com,President Power & Water,HIGH_VALUE,Fuel_Gas_System,NOT_STARTED,bob.yeager@emerson.com
+Lalit,Tejwani,Lalit Tejwani,Emerson,emerson.com,VP Sales Power & Water,HIGH_VALUE,Fuel_Gas_System,NOT_STARTED,lalit.tejwani@emerson.com
+Harrison,K.,Harrison K.,Amerex Corporation,amerex-fire.com,VP of Sales,NORMAL,Fire_Fighting,NOT_STARTED,h.k@amerex-fire.com
+Neil,Ashford,Neil Ashford,Turbotect Ltd.,turbotect.com,UK Representative,NORMAL,Compressor_Washing,NOT_STARTED,neil.ashford@turbotect.com
