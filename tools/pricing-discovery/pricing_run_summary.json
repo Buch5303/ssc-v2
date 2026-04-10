@@ -1,0 +1,13 @@
+{
+  "run_timestamp": "2026-04-10T14:28:44.634511+00:00",
+  "dry_run": true,
+  "total_categories": 19,
+  "total_bop_low": 7882899.0,
+  "total_bop_mid": 9274000.0,
+  "total_bop_high": 11128800.0,
+  "confidence_distribution": {
+    "COMPONENT_BUILDUPS": 19
+  },
+  "providers": {},
+  "warnings": []
+}
