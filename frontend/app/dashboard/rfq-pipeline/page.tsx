@@ -103,7 +103,7 @@ export default function RfqPipelinePage() {
             RFQ Pipeline
           </h1>
           <p style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', margin: '4px 0 0' }}>
-            Contact outreach · Claude-drafted RFQs · Supplier intelligence · W251
+            W251 BOP outreach pipeline · Claude-drafted RFQs · Supplier contacts
           </p>
         </div>
         <OutputBadge outputType="seeded" freshness={queueQ.data?.freshness} />
@@ -123,7 +123,7 @@ export default function RfqPipelinePage() {
             signals={[
               {
                 state: (queue?.drafted ?? 0) > 0 ? 'do-now' : 'watch',
-                label: (queue?.drafted ?? 0) > 0 ? `${queue!.drafted} Draft Ready to Send` : 'No Drafts Yet',
+                label: (queue?.drafted ?? 0) > 0 ? `${queue!.drafted} RFQ Ready — Send Now` : 'No Drafts Yet',
                 sublabel: (queue?.drafted ?? 0) > 0 ? 'Baker Hughes · $340K · send now' : 'Draft first RFQ to activate pipeline',
                 primary: true,
               },

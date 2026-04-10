@@ -145,9 +145,9 @@ export default function OverviewPage() {
               sublabel: '19 categories · Claude live',
             },
             {
-              state: engines.perplexity.status === 'awaiting_key' ? 'at-risk' : 'healthy',
-              label: engines.perplexity.status === 'awaiting_key' ? 'Pricing Unverified' : 'Pricing Verified',
-              sublabel: engines.perplexity.status === 'awaiting_key' ? 'Add Perplexity key' : 'Perplexity active',
+              state: engines.perplexity.status === 'awaiting_key' ? 'blocked' : 'healthy',
+              label: engines.perplexity.status === 'awaiting_key' ? 'Verification Blocked' : 'Pricing Verified',
+              sublabel: engines.perplexity.status === 'awaiting_key' ? 'Add Perplexity key to unblock' : 'Perplexity active',
             },
           ]}
         />
@@ -182,7 +182,7 @@ export default function OverviewPage() {
           uiState={statusQ.data?.uiState ?? 'loading'}
           routes={[
             {
-              title: 'Send RFQ draft to Baker Hughes',
+              title: 'Send Baker Hughes RFQ — Draft Ready',
               whyItMatters: '$340K · Baker Hughes CEO · Draft complete. Send now or the slot goes cold.',
               readiness: 'READY TO SEND',
               executionPath: 'Send the draft',
@@ -191,7 +191,7 @@ export default function OverviewPage() {
               outputType: 'generated',
             },
             {
-              title: 'Add Perplexity API key to unlock VERIFIED badge tier',
+              title: 'Unblock Pricing Verification — Add Perplexity Key',
               whyItMatters: '41 pricing records are ESTIMATED. Perplexity upgrades to VERIFIED — improves sourcing confidence.',
               readiness: engines.perplexity.status === 'awaiting_key' ? 'BLOCKED' : 'COMPLETE',
               blocker: engines.perplexity.status === 'awaiting_key' ? 'Missing PERPLEXITY_API_KEY in Vercel environment variables' : undefined,
@@ -200,7 +200,7 @@ export default function OverviewPage() {
               outputType: 'estimated',
             },
             {
-              title: 'Draft RFQ — Tod Carpenter, Donaldson CEO',
+              title: 'Draft RFQ — Tod Carpenter, Donaldson ($480K)',
               whyItMatters: '$480K Inlet Air Filtering — highest-value undrafted target.',
               readiness: 'NOT STARTED',
               executionPath: 'Fire RFQ draft — 30 seconds',

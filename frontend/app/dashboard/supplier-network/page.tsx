@@ -102,7 +102,7 @@ export default function SupplierNetworkPage() {
             Supplier Network
           </h1>
           <p style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', margin: '4px 0 0' }}>
-            Supplier coverage · Tier distribution · Contact intelligence <span style={{ fontSize: 7, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>· BOP = Balance of Plant</span>
+            W251 supplier coverage · Tier depth · Contact readiness <span style={{ fontSize: 7, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>· BOP = Balance of Plant</span>
           </p>
         </div>
         <OutputBadge outputType="seeded" freshness={tiersQ.data?.freshness} />
@@ -126,13 +126,13 @@ export default function SupplierNetworkPage() {
               },
               {
                 state: 'at-risk',
-                label: '231 Contacts',
-                sublabel: '64 verified · 167 unverified · needs enrichment',
+                label: '167 Contacts Unverified',
+                sublabel: 'Missing emails — enrichment required',
               },
               {
-                state: (pieData.find((p: import('../../../components/charts/TierPieChart').TierSlice) => p.tier === 1)?.count ?? 0) > 0 ? 'healthy' : 'watch',
-                label: `${pieData.find((p: import('../../../components/charts/TierPieChart').TierSlice) => p.tier === 1)?.count ?? 0} Tier 1 Suppliers`,
-                sublabel: 'Strategic direct suppliers',
+                state: (pieData.find((p: import('../../../components/charts/TierPieChart').TierSlice) => p.tier === 1)?.count ?? 0) >= 5 ? 'healthy' : 'watch',
+                label: `${pieData.find((p: import('../../../components/charts/TierPieChart').TierSlice) => p.tier === 1)?.count ?? 0} Strategic Tier 1`,
+                sublabel: 'Direct OEM relationships active',
               },
             ]}
           />

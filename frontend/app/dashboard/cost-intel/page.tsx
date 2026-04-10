@@ -73,7 +73,7 @@ export default function CostIntelPage() {
             BOP Cost Intelligence
           </h1>
           <p style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', margin: '4px 0 0' }}>
-            W251 Power Island · Web-researched pricing · Not RFQ · Budget reference only
+            W251 Power Island · BOP procurement cost model · not yet RFQ-verified
           </p>
         </div>
         <OutputBadge outputType="estimated" freshness={stateQ.data?.freshness} />
@@ -94,8 +94,8 @@ export default function CostIntelPage() {
             signals={[
               {
                 state: 'do-now',
-                label: 'Trillium: CRITICAL AVOID',
-                sublabel: 'Piping & Valves · $37M revenue risk · review before RFQ',
+                label: 'Trillium Flow: AVOID',
+                sublabel: 'Piping & Valves supplier · $37M revenue · too small to risk',
                 primary: true,
               },
               {
