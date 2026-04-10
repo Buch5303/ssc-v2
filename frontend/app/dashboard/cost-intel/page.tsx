@@ -12,6 +12,7 @@ import type { PricingSummary, PricingCategory, PricingGroup } from '../../../lib
 import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { CostRollupChart } from '../../../components/charts/CostRollupChart';
+import { RangeKpiCard } from '../../../components/cards/RangeKpiCard';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
@@ -25,25 +26,6 @@ const GROUP_COLORS: Record<string, string> = {
   Mechanical:'#06b6d4', Electrical:'#10b981', Fuel:'#f59e0b',
   Safety:'#ef4444', Instrumentation:'#8b5cf6', Unknown:'#64748b',
 };
-
-function RangeKpi({ label, low, mid, high, sub }: { label: string; low: string; mid: string; high: string; sub: string }) {
-  return (
-    <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <span style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)' }}>{label}</span>
-        <span style={{ fontSize: 7, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 3, border: '1px solid var(--badge-estimated-border)', backgroundColor: 'var(--badge-estimated-bg)', color: 'var(--badge-estimated-text)' }}>
-          ESTIMATED · ±15%
-        </span>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, marginBottom: 4 }}>
-        <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--amber)' }}>↓ {low}</span>
-        <span style={{ fontSize: 22, fontFamily: 'monospace', fontWeight: 700, color: 'var(--cyan)', lineHeight: 1 }}>{mid}</span>
-        <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--green)' }}>↑ {high}</span>
-      </div>
-      <div style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>{sub}</div>
-    </div>
-  );
-}
 
 export default function CostIntelPage() {
   const stateQ = useQuery<DataState<PricingSummary>>({
@@ -151,9 +133,9 @@ export default function CostIntelPage() {
               Program Budget Range · {s?.pricing_records ?? 0} pricing records across {s?.categories_priced ?? 0} BOP categories
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-              <RangeKpi label="Budget Floor"    low="—" mid={s ? fmtM(s.bop_total_low_usd) : '—'}  high="—" sub="-15% downside · floor scenario" />
-              <RangeKpi label="Planning Case"   low={s ? fmtM(s.bop_total_low_usd) : '—'} mid={s ? fmtM(s.bop_total_mid_usd) : '—'} high={s ? fmtM(s.bop_total_high_usd) : '—'} sub="Mid-case · use for initial budgeting" />
-              <RangeKpi label="Budget Ceiling"  low="—" mid={s ? fmtM(s.bop_total_high_usd) : '—'} high="—" sub="+15% upside · ceiling scenario" />
+              <RangeKpiCard label="Budget Floor"    mid={s ? fmtM(s.bop_total_low_usd) : '—'} low="—" high="—" showRange={false} sub="-15% downside · floor scenario" badge="ESTIMATED · ±15%" />
+              <RangeKpiCard label="Planning Case"   low={s ? fmtM(s.bop_total_low_usd) : '—'} mid={s ? fmtM(s.bop_total_mid_usd) : '—'} high={s ? fmtM(s.bop_total_high_usd) : '—'} sub="Mid-case · use for initial budgeting" />
+              <RangeKpiCard label="Budget Ceiling"  mid={s ? fmtM(s.bop_total_high_usd) : '—'} low="—" high="—" showRange={false} sub="+15% upside · ceiling scenario" badge="ESTIMATED · ±15%" />
             </div>
           </div>
 
