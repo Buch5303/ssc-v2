@@ -7,7 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '../../../lib/api/client';
 import type { DataState } from '../../../lib/types/ui';
-import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard } from '../../../components/states';
+import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard, PartialState } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
@@ -251,10 +251,12 @@ export default function OverviewPage() {
 
         {claudeQ.data?.uiState === 'loading' && <LoadingSkeleton rows={3} height="h-16" />}
         {claudeQ.data?.uiState === 'error'   && <ErrorCard error={claudeQ.data.error ?? 'server_error'} />}
-        {claudeQ.data?.uiState === 'empty'   && (
+        {claudeQ.data?.uiState === 'empty' && (
           <EmptyState
-            title="No analyses yet"
-            description="Trigger via GET /api/claude/run-procurement-summary or /api/claude/run-compare-suppliers?category=MV_System"
+            title="No AI analyses run yet"
+            description="Claude intelligence is operational but no supplier comparisons or RFQ drafts have been triggered. All 19 BOP categories are awaiting analysis."
+            action="GET /api/claude/run-compare-suppliers?category=MV_System"
+            readiness="NOT STARTED"
           />
         )}
 

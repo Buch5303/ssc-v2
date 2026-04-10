@@ -38,6 +38,7 @@ const VALUE: React.CSSProperties = {
 
 export function RfqDetailPanel({ item, draftPreview }: RfqDetailPanelProps) {
   const [expanded, setExpanded] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const isDraft = item.rfq_status === 'draft';
 
   return (
@@ -50,9 +51,11 @@ export function RfqDetailPanel({ item, draftPreview }: RfqDetailPanelProps) {
       {/* ── Collapsed header — always visible ── */}
       <button
         onClick={() => setExpanded(e => !e)}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         style={{
           width: '100%', padding: '14px 20px', cursor: 'pointer',
-          backgroundColor: expanded ? 'rgba(139,92,246,0.08)' : 'transparent',
+          backgroundColor: expanded ? 'rgba(139,92,246,0.08)' : hovered ? 'rgba(139,92,246,0.04)' : 'transparent',
           border: 'none', textAlign: 'left', display: 'flex',
           alignItems: 'center', justifyContent: 'space-between', gap: 12,
           borderBottom: expanded ? '1px solid var(--purple-border)' : 'none',

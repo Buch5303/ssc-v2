@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ExecutionContextStore } from '../../lib/context/ExecutionContextStore';
 /**
@@ -30,6 +31,7 @@ interface ActionRouteCardProps {
 
 export function ActionRouteCard({ routes, uiState = 'operational', compact = false }: ActionRouteCardProps) {
   const router = useRouter();
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   function navigate(href: string | undefined) {
     if (!href) return;
@@ -78,13 +80,16 @@ export function ActionRouteCard({ routes, uiState = 'operational', compact = fal
     return (
       <div
         onClick={() => navigate(r.href)}
+        onMouseEnter={() => setHoveredIndex(0)}
+        onMouseLeave={() => setHoveredIndex(null)}
         style={{
           display: 'flex', alignItems: 'center', gap: 12,
           padding: '10px 16px', borderRadius: 6,
           backgroundColor: isBlocked ? 'var(--amber-dim)' : 'var(--cyan-dim)',
           border: `1px solid ${isBlocked ? 'var(--amber-border)' : 'var(--cyan-border)'}`,
           cursor: r.href ? 'pointer' : 'default',
-          transition: 'opacity 0.15s ease',
+          transition: 'opacity 0.15s ease, background-color 0.15s ease',
+          opacity: hoveredIndex === 0 && r.href ? 0.85 : 1,
         }}>
         <ReadinessSignal state={r.readiness} compact />
         <span style={{
@@ -205,13 +210,17 @@ export function ActionRouteCard({ routes, uiState = 'operational', compact = fal
             {/* Execution path + endpoint */}
             <div
               onClick={() => navigate(r.href)}
+              onMouseEnter={() => setHoveredIndex(i)}
+              onMouseLeave={() => setHoveredIndex(null)}
               style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               gap: 10, padding: '8px 12px', borderRadius: 5,
-              backgroundColor: isBlocked ? 'rgba(245,158,11,0.04)' : 'rgba(6,182,212,0.04)',
+              backgroundColor: hoveredIndex === i && r.href
+                ? (isBlocked ? 'rgba(245,158,11,0.10)' : 'rgba(6,182,212,0.10)')
+                : (isBlocked ? 'rgba(245,158,11,0.04)' : 'rgba(6,182,212,0.04)'),
               border: `1px solid ${isBlocked ? 'var(--amber-border)' : 'var(--cyan-border)'}`,
               cursor: r.href ? 'pointer' : 'default',
-              transition: 'opacity 0.15s ease',
+              transition: 'background-color 0.15s ease',
             }}>
               <span style={{
                 fontSize: 9, fontFamily: 'monospace', fontWeight: 600,

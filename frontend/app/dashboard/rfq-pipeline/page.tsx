@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '../../../lib/api/client';
 import type { DataState } from '../../../lib/types/ui';
 import type { RfqQueueResponse, RfqQueueItem } from '../../../lib/api/wave9';
-import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard } from '../../../components/states';
+import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard, PartialState } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { RfqDraftCard } from '../../../components/cards/RfqDraftCard';
 import { RfqDetailPanel } from '../../../components/cards/RfqDetailPanel';
@@ -124,7 +124,7 @@ export default function RfqPipelinePage() {
       {uiState === 'loading'      && <LoadingSkeleton rows={4} height="h-20" />}
       {uiState === 'error'        && <ErrorCard error={queueQ.data?.error ?? 'server_error'} retryCount={queueQ.data?.retryCount} />}
       {uiState === 'awaiting_key' && <DeferredCard capability="RFQ Contact Intelligence" activationRequirement="Wave 9 contact migration and BOP tagging" activatedBy="Run: GET /api/wave9/run-auto-tag then retry" />}
-      {uiState === 'empty'        && <EmptyState title="No RFQ targets found" description="No C-Suite or VP contacts with email addresses and BOP category tags have been identified yet." action="Run GET /api/wave9/run-auto-tag to tag contacts" />}
+      {uiState === 'empty' && <EmptyState title="No RFQ targets in pipeline" description="No C-Suite or VP contacts with verified emails and BOP category tags have been identified. Wave 9 contact tagging must run first." action="Run GET /api/wave9/run-auto-tag to tag contacts" readiness="NOT STARTED" />}
 
       {(uiState === 'operational' || uiState === 'stale') && (
         <>
@@ -135,6 +135,16 @@ export default function RfqPipelinePage() {
             <KpiCard label="RFQs Drafted"        value={queue?.drafted ?? 0} sub="Claude AI-generated outreach" accent="var(--purple)" />
             <KpiCard label="Sent"                value={queue?.sent ?? 0}    sub="Outreach initiated" accent="var(--green)" />
           </div>
+
+          {/* ── PARTIAL STATE — edge case: contacts loaded but none drafted ── */}
+          {(queue?.drafted ?? 0) === 0 && (queue?.total ?? 0) > 0 && (
+            <PartialState
+              availableLabel={`${queue?.total ?? 0} contacts loaded and ready for outreach`}
+              missingLabel="No RFQ drafts generated yet — pipeline has not been activated"
+              canProceed={true}
+              nextStep={queue?.next ? `Fire first draft: POST /api/wave9/contacts/${queue.next.id}/rfq` : 'Check contact queue for available targets'}
+            />
+          )}
 
           {/* ── DECISION STATE SUMMARY — Directive 22A ── */}
           {(() => {

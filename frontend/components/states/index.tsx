@@ -12,13 +12,153 @@ export function LoadingSkeleton({ rows = 3, height = 'h-4' }: { rows?: number; h
   );
 }
 
-// ── Empty state — always explains what populates this ─────────────────────
-export function EmptyState({ title, description, action }: { title: string; description: string; action?: string }) {
+// ── Empty state — Directive 28B: always explains what, why, and what unlocks it ──
+export function EmptyState({
+  title,
+  description,
+  action,
+  blocker,
+  readiness = 'NOT STARTED',
+}: {
+  title: string;
+  description: string;
+  action?: string;
+  blocker?: string;        // plain-English blocker if applicable
+  readiness?: 'NOT STARTED' | 'AWAITING ENRICHMENT' | 'AWAITING KEY' | 'BLOCKED';
+}) {
+  const READINESS_STYLE = {
+    'NOT STARTED':        { color: 'var(--slate)',  bg: 'var(--slate-dim)',  border: 'var(--slate-border)'  },
+    'AWAITING ENRICHMENT':{ color: 'var(--amber)',  bg: 'var(--amber-dim)',  border: 'var(--amber-border)'  },
+    'AWAITING KEY':       { color: 'var(--amber)',  bg: 'var(--amber-dim)',  border: 'var(--amber-border)'  },
+    'BLOCKED':            { color: 'var(--red)',    bg: 'var(--red-dim)',    border: 'var(--red-border)'    },
+  };
+  const rs = READINESS_STYLE[readiness];
+
   return (
-    <div className="flex flex-col items-center justify-center py-10 text-center">
-      <div className="text-[10px] font-mono text-slate-400 font-semibold mb-1">{title}</div>
-      <div className="text-[9px] font-mono text-slate-600 max-w-xs">{description}</div>
-      {action && <div className="text-[8px] font-mono text-cyan-400 mt-3 border border-cyan-500/20 bg-cyan-500/5 px-3 py-1.5 rounded">{action}</div>}
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', padding: '32px 24px', textAlign: 'center',
+      gap: 8,
+    }}>
+      <span style={{
+        fontSize: 7, fontFamily: 'monospace', padding: '2px 8px', borderRadius: 3,
+        backgroundColor: rs.bg, border: `1px solid ${rs.border}`, color: rs.color,
+        letterSpacing: '0.05em', marginBottom: 4,
+      }}>
+        {readiness}
+      </span>
+      <div style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 600, color: 'var(--text-secondary)' }}>
+        {title}
+      </div>
+      <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', maxWidth: 320, lineHeight: 1.6 }}>
+        {description}
+      </div>
+      {blocker && (
+        <div style={{
+          fontSize: 8, fontFamily: 'monospace', padding: '6px 12px', borderRadius: 5,
+          backgroundColor: 'var(--amber-dim)', border: '1px solid var(--amber-border)',
+          color: 'var(--amber)', marginTop: 4,
+        }}>
+          Blocked by: {blocker}
+        </div>
+      )}
+      {action && (
+        <div style={{
+          fontSize: 8, fontFamily: 'monospace', padding: '6px 12px', borderRadius: 5,
+          backgroundColor: 'var(--cyan-dim)', border: '1px solid var(--cyan-border)',
+          color: 'var(--cyan)', marginTop: 4,
+        }}>
+          → {action}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Partial state — Directive 28C: what is usable, what is missing ────────
+export function PartialState({
+  availableLabel,
+  missingLabel,
+  canProceed,
+  nextStep,
+}: {
+  availableLabel: string;
+  missingLabel: string;
+  canProceed: boolean;
+  nextStep?: string;
+}) {
+  return (
+    <div style={{
+      padding: '14px 16px', borderRadius: 6,
+      backgroundColor: 'var(--amber-dim)', border: '1px solid var(--amber-border)',
+      display: 'flex', flexDirection: 'column', gap: 6,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{
+          fontSize: 7, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 3,
+          backgroundColor: 'var(--amber-dim)', border: '1px solid var(--amber-border)',
+          color: 'var(--amber)',
+        }}>
+          PARTIAL DATA
+        </span>
+        <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--amber)', fontWeight: 600 }}>
+          {availableLabel}
+        </span>
+      </div>
+      <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>
+        Missing: <span style={{ color: 'var(--text-secondary)' }}>{missingLabel}</span>
+      </div>
+      <div style={{ fontSize: 8, fontFamily: 'monospace', color: canProceed ? 'var(--green)' : 'var(--amber)' }}>
+        {canProceed ? '✓ Action can proceed with available data' : '⚠ Action requires missing data — resolve blocker first'}
+      </div>
+      {nextStep && (
+        <div style={{
+          fontSize: 8, fontFamily: 'monospace', color: 'var(--cyan)',
+          paddingTop: 4, borderTop: '1px solid var(--border)',
+        }}>
+          → {nextStep}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Degraded state — Directive 28C: what is still usable, what to do ──────
+export function DegradedState({
+  what,
+  stillUsable,
+  nextStep,
+}: {
+  what: string;
+  stillUsable: string;
+  nextStep?: string;
+}) {
+  return (
+    <div style={{
+      padding: '14px 16px', borderRadius: 6,
+      backgroundColor: 'var(--red-dim)', border: '1px solid var(--red-border)',
+      display: 'flex', flexDirection: 'column', gap: 6,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{
+          fontSize: 7, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 3,
+          backgroundColor: 'var(--red-dim)', border: '1px solid var(--red-border)',
+          color: 'var(--red)',
+        }}>
+          DEGRADED
+        </span>
+        <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--red)', fontWeight: 600 }}>
+          {what}
+        </span>
+      </div>
+      <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-secondary)' }}>
+        Still usable: <span style={{ color: 'var(--green)' }}>{stillUsable}</span>
+      </div>
+      {nextStep && (
+        <div style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--cyan)' }}>
+          → {nextStep}
+        </div>
+      )}
     </div>
   );
 }

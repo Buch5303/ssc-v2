@@ -74,6 +74,7 @@ function hasRedFlag(preview: string): boolean {
 
 export function AnalysisDetailCard({ result, targetValueUsd }: AnalysisDetailCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const category  = extractCategory(result.subject_name);
   const winner    = extractWinner(result.preview);
@@ -92,9 +93,11 @@ export function AnalysisDetailCard({ result, targetValueUsd }: AnalysisDetailCar
       {/* ── Collapsed header ── */}
       <button
         onClick={() => setExpanded(e => !e)}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         style={{
           width: '100%', padding: '14px 20px', cursor: 'pointer',
-          backgroundColor: expanded ? 'var(--bg-elevated)' : 'transparent',
+          backgroundColor: expanded ? 'var(--bg-elevated)' : hovered ? 'rgba(255,255,255,0.02)' : 'transparent',
           border: 'none', textAlign: 'left', display: 'flex',
           alignItems: 'flex-start', justifyContent: 'space-between', gap: 12,
           borderBottom: expanded ? '1px solid var(--border)' : 'none',

@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '../../../lib/api/client';
 import type { DataState } from '../../../lib/types/ui';
 import type { PricingSummary, PricingCategory, PricingGroup } from '../../../lib/api/discovery';
-import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard } from '../../../components/states';
+import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard, PartialState } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { CostRollupChart } from '../../../components/charts/CostRollupChart';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
@@ -99,7 +99,7 @@ export default function CostIntelPage() {
       {uiState === 'loading'      && <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}><LoadingSkeleton rows={1} height="h-24" /><LoadingSkeleton rows={5} height="h-5" /></div>}
       {uiState === 'error'        && <ErrorCard error={stateQ.data?.error ?? 'server_error'} retryCount={stateQ.data?.retryCount} />}
       {uiState === 'awaiting_key' && <DeferredCard capability="BOP Pricing Intelligence" activationRequirement="Discovery engine with seeded market pricing data" />}
-      {uiState === 'empty'        && <EmptyState title="No pricing records" description="Market pricing records have not been seeded. Run the discovery seeding process to populate BOP cost intelligence." />}
+      {uiState === 'empty' && <EmptyState title="No BOP pricing records loaded" description="Market pricing records have not been seeded. The discovery engine requires initialisation before cost intelligence is available." readiness="NOT STARTED" action="Run discovery seeding process to populate BOP cost intelligence" />}
 
       {/* ── DATA VIEWS ── */}
       {(uiState === 'operational' || uiState === 'stale') && (
@@ -114,6 +114,14 @@ export default function CostIntelPage() {
               nextAction: 'Issue RFQs to convert estimated pricing to verified — start with Vibration Monitoring ($340K) and Piping & Valves ($500K)',
               nextActionEndpoint: 'POST /api/wave9/contacts/4/rfq',
             }}
+          />
+
+          {/* ── PARTIAL STATE — all pricing is estimated, none verified ── */}
+          <PartialState
+            availableLabel={`${s?.pricing_records ?? 0} pricing records loaded across ${s?.categories_priced ?? 0} BOP categories`}
+            missingLabel="All records are ESTIMATED only (±15%) — no RFQ-verified pricing received yet"
+            canProceed={true}
+            nextStep="Send Simonelli RFQ → Donaldson RFQ → pricing converts from ESTIMATED to VERIFIED on response"
           />
 
           {/* ── ACTION ROUTES — Directive 24B ── */}
