@@ -12,6 +12,7 @@ import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { KpiCard } from '../../../components/cards/KpiCard';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
+import { SectionLabel } from '../../../components/layout/SectionLabel';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
 
 interface StatusData {
@@ -185,10 +186,8 @@ export default function OverviewPage() {
       )}
 
       {/* ── KPI BAND — BOP program metrics ── */}
-      <div>
-        <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 10 }}>
-          BOP Program Summary — excludes GT, generator, OEM controls
-        </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+        <SectionLabel>BOP Program Summary — excludes GT, generator, OEM controls</SectionLabel>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
           <KpiCard label="BOP Planning Case"   value={bop ? fmtM(bop.bop_total_mid_usd) : undefined} sub="±15% · web research · not RFQ" outputType="estimated" accent="var(--cyan)" />
           <KpiCard label="Suppliers in DB"     value={bop?.suppliers_in_db}        sub={`${bop?.bop_categories_priced ?? 0} categories · all priced`} accent="var(--green)" />
@@ -199,9 +198,7 @@ export default function OverviewPage() {
 
       {/* ── KPI BAND — Contact intelligence ── */}
       <div>
-        <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 10 }}>
-          Wave 9 Contact Intelligence
-        </div>
+        <SectionLabel>Wave 9 Contact Intelligence</SectionLabel>
         {wave9Q.data?.uiState === 'loading' && <LoadingSkeleton rows={1} height="h-24" />}
         {(wave9Q.data?.uiState === 'operational' || wave9Q.data?.uiState === 'stale') && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>

@@ -17,6 +17,7 @@ import { AnalysisDetailCard } from '../../../components/cards/AnalysisDetailCard
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal, type ReadinessState } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
+import { SectionLabel } from '../../../components/layout/SectionLabel';
 import { useRouteHighlight } from '../../../lib/hooks/useRouteHighlight';
 import { ExecutionContextStore } from '../../../lib/context/ExecutionContextStore';
 
@@ -159,12 +160,7 @@ export default function RfqPipelinePage() {
             const rfqAnalyses = (analyses?.results ?? []).filter(r => r.analysis_type === 'rfq_draft');
             return (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{
-                  fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase',
-                  letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 4,
-                }}>
-                  Draft Ready — Click to review
-                </div>
+                <SectionLabel mb={6}>Draft Ready — Click to review</SectionLabel>
                 {drafted.map(item => {
                   const match = rfqAnalyses.find(r =>
                     r.subject_name.toLowerCase().includes(item.supplier_name.split('/')[0].trim().toLowerCase()) ||
@@ -212,9 +208,7 @@ export default function RfqPipelinePage() {
             {/* Contact queue */}
             <div ref={rfqQueueRef} id="rfq-queue" style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
               <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>
-                  Priority Contact Queue
-                </span>
+                <SectionLabel variant="card" mb={0}>Priority Contact Queue</SectionLabel>
                 <span style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>{queue?.total ?? 0} targets</span>
               </div>
               <div>
@@ -230,9 +224,7 @@ export default function RfqPipelinePage() {
             {/* Analysis detail cards — Directive 21B */}
             <div ref={analysisRef} id="ai-analysis" style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
               <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>
-                  AI Supplier Intelligence
-                </span>
+                <SectionLabel variant="card" mb={0}>AI Supplier Intelligence</SectionLabel>
                 <OutputBadge outputType="generated" freshness={analysesQ.data?.freshness} />
               </div>
 

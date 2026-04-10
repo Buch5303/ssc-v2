@@ -17,6 +17,7 @@ import { EnrichmentStatusBadge } from '../../../components/badges/EnrichmentStat
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
+import { SectionLabel } from '../../../components/layout/SectionLabel';
 import { useRouteHighlight } from '../../../lib/hooks/useRouteHighlight';
 import { ExecutionContextStore } from '../../../lib/context/ExecutionContextStore';
 import { TierPieChart, type TierSlice } from '../../../components/charts/TierPieChart';
@@ -151,9 +152,7 @@ export default function SupplierNetworkPage() {
 
           {/* ── KPI BAND ── */}
           <div>
-            <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 10 }}>
-              Coverage Summary
-            </div>
+            <SectionLabel>Coverage Summary</SectionLabel>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
               <KpiCard label="Suppliers in DB"     value={bop?.suppliers_in_db}       sub="PostgreSQL · W251 program" />
               <KpiCard label="BOP Categories"      value={bop?.bop_categories_priced} sub="Balance of Plant · all priced" />
@@ -167,20 +166,13 @@ export default function SupplierNetworkPage() {
 
             {/* Tier distribution — governed wrapper */}
             <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 20 }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: 16 }}>
-                Supplier Tier Distribution
-              </div>
+              <SectionLabel variant="card">Supplier Tier Distribution</SectionLabel>
               <TierPieChart data={pieData} uiState={tiersQ.data?.uiState ?? 'loading'} />
             </div>
 
             {/* Contact seniority breakdown */}
             <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                <span style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>
-                  Contact Seniority
-                </span>
-                <OutputBadge outputType="seeded" freshness={senQ.data?.freshness} />
-              </div>
+              <SectionLabel variant="card" right={<OutputBadge outputType="seeded" freshness={senQ.data?.freshness} />}>Contact Seniority</SectionLabel>
 
               {senQ.data?.uiState === 'loading'      && <LoadingSkeleton rows={4} height="h-5" />}
               {senQ.data?.uiState === 'awaiting_key' && <AwaitingKeyCard engine="Wave 9 Contact Intelligence" requirement="Apollo enrichment or manual contact upload" />}
@@ -216,9 +208,7 @@ export default function SupplierNetworkPage() {
           {/* Contacts by BOP category — governed wrapper */}
           {catData.length > 0 && (
             <div ref={contactsRef} id="contact-coverage" style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 20 }}>
-              <div style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: 16 }}>
-                Contact Coverage by BOP Category
-              </div>
+              <SectionLabel variant="card">Contact Coverage by BOP Category</SectionLabel>
               <ContactCoverageChart data={catData} uiState={catQ.data?.uiState ?? 'empty'} />
             </div>
           )}

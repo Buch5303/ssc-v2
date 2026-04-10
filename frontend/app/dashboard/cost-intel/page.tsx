@@ -13,6 +13,7 @@ import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard } from '../../../c
 import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { CostRollupChart } from '../../../components/charts/CostRollupChart';
 import { RangeKpiCard } from '../../../components/cards/RangeKpiCard';
+import { SectionLabel } from '../../../components/layout/SectionLabel';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
@@ -129,9 +130,7 @@ export default function CostIntelPage() {
 
           {/* 5-second KPI band — budget floor / planning case / ceiling */}
           <div ref={verificationRef} id="cost-verification">
-            <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 10 }}>
-              Program Budget Range · {s?.pricing_records ?? 0} pricing records across {s?.categories_priced ?? 0} BOP categories
-            </div>
+            <SectionLabel>Program Budget Range · {s?.pricing_records ?? 0} records across {s?.categories_priced ?? 0} BOP categories</SectionLabel>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
               <RangeKpiCard label="Budget Floor"    mid={s ? fmtM(s.bop_total_low_usd) : '—'} low="—" high="—" showRange={false} sub="-15% downside · floor scenario" badge="ESTIMATED · ±15%" />
               <RangeKpiCard label="Planning Case"   low={s ? fmtM(s.bop_total_low_usd) : '—'} mid={s ? fmtM(s.bop_total_mid_usd) : '—'} high={s ? fmtM(s.bop_total_high_usd) : '—'} sub="Mid-case · use for initial budgeting" />
