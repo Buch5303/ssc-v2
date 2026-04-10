@@ -31,12 +31,12 @@ function Pill({ count, label, color, bg, border }: PillProps) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 8,
-      padding: '10px 14px', borderRadius: 6,
+      padding: '9px 12px', borderRadius: 6,
       backgroundColor: bg, border: `1px solid ${border}`,
       flex: 1, minWidth: 0,
     }}>
       <span style={{
-        fontSize: 20, fontFamily: 'monospace', fontWeight: 700,
+        fontSize: 18, fontFamily: 'monospace', fontWeight: 700,
         color, lineHeight: 1,
       }}>
         {count}
@@ -110,7 +110,7 @@ export function DecisionStateSummary({ buckets, uiState = 'operational' }: Decis
         {/* Next action cell */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '10px 14px', borderRadius: 6,
+          padding: '9px 12px', borderRadius: 6,
           backgroundColor: 'var(--cyan-dim)', border: '1px solid var(--cyan-border)',
           gap: 10,
         }}>

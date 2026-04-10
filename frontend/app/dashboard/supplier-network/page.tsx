@@ -10,7 +10,7 @@ import { apiFetch } from '../../../lib/api/client';
 import type { DataState } from '../../../lib/types/ui';
 import type { TierStats, TierStat } from '../../../lib/api/discovery';
 import type { Wave9ContactsByCategory, Wave9ContactsBySeniority, CategoryStat, SeniorityStat } from '../../../lib/api/wave9';
-import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard, AwaitingKeyCard, PartialState } from '../../../components/states';
+import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard, AwaitingKeyCard } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { EnrichmentStatusBadge } from '../../../components/badges/EnrichmentStatusBadge';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
@@ -233,16 +233,6 @@ export default function SupplierNetworkPage() {
               },
             ]}
           />
-
-          {/* ── PARTIAL COVERAGE SIGNAL — Directive 28D ── */}
-          {!isLoading && !hasError && (bySen?.by_seniority.reduce((a: number, x: import('../../../lib/api/wave9').SeniorityStat) => a + x.with_email, 0) ?? 0) < 100 && (
-            <PartialState
-              availableLabel={`${bySen?.by_seniority.reduce((a: number, x: import('../../../lib/api/wave9').SeniorityStat) => a + x.with_email, 0) ?? 0} contacts have verified emails`}
-              missingLabel={`${(bySen?.by_seniority.reduce((a: number, x: import('../../../lib/api/wave9').SeniorityStat) => a + x.contacts, 0) ?? 0) - (bySen?.by_seniority.reduce((a: number, x: import('../../../lib/api/wave9').SeniorityStat) => a + x.with_email, 0) ?? 0)} contacts lack verified emails — limiting outreach pipeline`}
-              canProceed={true}
-              nextStep="Upgrade Apollo Basic ($49/mo) → POST /api/wave9/enrich-contacts → all contacts verified"
-            />
-          )}
 
           {/* ── ENRICHMENT STATUS — Block D ── */}
           <div ref={enrichmentRef} id="enrichment-status">

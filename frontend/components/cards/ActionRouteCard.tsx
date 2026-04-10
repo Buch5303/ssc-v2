@@ -154,7 +154,7 @@ export function ActionRouteCard({ routes, uiState = 'operational', compact = fal
         const borderColor = isBlocked ? 'var(--amber-border)' : 'rgba(255,255,255,0.03)';
         return (
           <div key={i} style={{
-            padding: '14px 20px',
+            padding: '12px 20px',
             borderBottom: i < routes.length - 1 ? `1px solid ${borderColor}` : 'none',
             backgroundColor: isBlocked ? 'rgba(245,158,11,0.02)' : 'transparent',
           }}>

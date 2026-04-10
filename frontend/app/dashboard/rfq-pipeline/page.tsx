@@ -8,14 +8,12 @@ import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '../../../lib/api/client';
 import type { DataState } from '../../../lib/types/ui';
 import type { RfqQueueResponse, RfqQueueItem } from '../../../lib/api/wave9';
-import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard, PartialState } from '../../../components/states';
+import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { RfqDraftCard } from '../../../components/cards/RfqDraftCard';
 import { RfqDetailPanel } from '../../../components/cards/RfqDetailPanel';
 import { AnalysisDetailCard } from '../../../components/cards/AnalysisDetailCard';
-import { ExecutiveActionQueue } from '../../../components/queue/ExecutiveActionQueue';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
-import { ExecutiveDecisionCard, type DecisionItem } from '../../../components/cards/ExecutiveDecisionCard';
 import { ReadinessSignal, type ReadinessState } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
 import { useRouteHighlight } from '../../../lib/hooks/useRouteHighlight';
@@ -136,16 +134,6 @@ export default function RfqPipelinePage() {
             <KpiCard label="Sent"                value={queue?.sent ?? 0}    sub="Outreach initiated" accent="var(--green)" />
           </div>
 
-          {/* ── PARTIAL STATE — edge case: contacts loaded but none drafted ── */}
-          {(queue?.drafted ?? 0) === 0 && (queue?.total ?? 0) > 0 && (
-            <PartialState
-              availableLabel={`${queue?.total ?? 0} contacts loaded and ready for outreach`}
-              missingLabel="No RFQ drafts generated yet — pipeline has not been activated"
-              canProceed={true}
-              nextStep={queue?.next ? `Fire first draft: POST /api/wave9/contacts/${queue.next.id}/rfq` : 'Check contact queue for available targets'}
-            />
-          )}
-
           {/* ── DECISION STATE SUMMARY — Directive 22A ── */}
           {(() => {
             const drafted = queue?.drafted ?? 0;
@@ -169,73 +157,7 @@ export default function RfqPipelinePage() {
             );
           })()}
 
-          {/* ── EXECUTIVE DECISION CARDS — Directive 22C ── */}
-          {(() => {
-            const rfqItems = (queue?.queue ?? [])
-              .filter(i => i.rfq_status === 'draft' || i.rfq_status === 'not_started')
-              .slice(0, 3)
-              .map(i => ({
-                id: i.id,
-                name: i.contact_name,
-                category: i.bop_category,
-                valueUsd: i.category_mid_usd,
-                readiness: (i.rfq_status === 'draft' ? 'READY TO SEND' : 'NOT STARTED') as import('../../../components/badges/ReadinessSignal').ReadinessState,
-                whyItMatters: i.rfq_status === 'draft'
-                  ? `Draft ready for ${i.title} at ${i.supplier_name.split('/')[0].trim()}. Every day unsent delays procurement timeline.`
-                  : `${i.title} at ${i.supplier_name.split('/')[0].trim()} — highest available contact for this BOP category.`,
-                recommendedMove: i.rfq_status === 'draft'
-                  ? 'Review draft and execute send endpoint immediately.'
-                  : 'Fire Claude RFQ draft. Takes under 30 seconds.',
-                endpoint: i.rfq_status === 'draft' && i.outreach_id
-                  ? `POST /api/wave9/outreach/${i.outreach_id}/send`
-                  : `POST /api/wave9/contacts/${i.id}/rfq`,
-                outputType: (i.rfq_status === 'draft' ? 'generated' : 'seeded') as 'generated' | 'seeded',
-              } satisfies import('../../../components/cards/ExecutiveDecisionCard').DecisionItem));
-            if (rfqItems.length === 0) return null;
-            return <ExecutiveDecisionCard title="RFQ Decision Queue" items={rfqItems} uiState={uiState} />;
-          })()}
-
-          {/* ── EXECUTIVE ACTION QUEUE — Directive 21C / 22D tightened ── */}
-          <ExecutiveActionQueue
-            rfqQueue={queue ?? undefined}
-            analysesRun={comparisons.length}
-            totalContacts={231}
-            withEmail={64}
-            uiState={uiState}
-          />
-
-          {/* ── ACTION ROUTES — Directive 24B ── */}
-          {queue?.next && (
-            <ActionRouteCard
-              uiState={uiState}
-              compact
-              routes={[{
-                title: `Draft RFQ — ${queue.next.contact_name}, ${queue.next.supplier_name.split('/')[0].trim()}`,
-                whyItMatters: `${queue.next.title} · $${(queue.next.category_mid_usd/1000).toFixed(0)}K ${queue.next.bop_category.replace(/_/g,' ')} · Next highest-value uncontacted target`,
-                readiness: 'NOT STARTED',
-                executionPath: 'Fire Claude RFQ draft — 30 seconds',
-                endpoint: `POST /api/wave9/contacts/${queue.next.id}/rfq`,
-                href: `/dashboard/rfq-pipeline#rfq-queue`,
-              }]}
-            />
-          )}
-          {(queue?.drafted ?? 0) > 0 && (
-            <ActionRouteCard
-              uiState={uiState}
-              compact
-              routes={[{
-                title: 'Send Lorenzo Simonelli RFQ — Baker Hughes CEO',
-                whyItMatters: '$340K Vibration Monitoring draft complete. Every day unsent delays Project Jupiter sourcing timeline.',
-                readiness: 'READY TO SEND',
-                executionPath: 'Execute send — draft reviewed and approved',
-                endpoint: 'POST /api/wave9/outreach/1/send',
-                href: '/dashboard/rfq-pipeline#rfq-drafts',
-                outputType: 'generated',
-              }]}
-            />
-          )}
-
-          {/* ── DRAFTED RFQ SURFACE — Block C ── */}
+                    {/* ── DRAFTED RFQ SURFACE — Block C ── */}
           {(queue?.drafted ?? 0) > 0 && (
             <div ref={rfqDraftsRef} id="rfq-drafts">
               <RfqDraftCard items={queue?.queue ?? []} />

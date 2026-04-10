@@ -89,35 +89,27 @@ export function PartialState({
 }) {
   return (
     <div style={{
-      padding: '14px 16px', borderRadius: 6,
+      padding: '10px 16px', borderRadius: 6,
       backgroundColor: 'var(--amber-dim)', border: '1px solid var(--amber-border)',
-      display: 'flex', flexDirection: 'column', gap: 6,
+      display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{
-          fontSize: 7, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 3,
-          backgroundColor: 'var(--amber-dim)', border: '1px solid var(--amber-border)',
-          color: 'var(--amber)',
-        }}>
-          PARTIAL DATA
-        </span>
-        <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--amber)', fontWeight: 600 }}>
-          {availableLabel}
-        </span>
-      </div>
-      <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>
-        Missing: <span style={{ color: 'var(--text-secondary)' }}>{missingLabel}</span>
-      </div>
-      <div style={{ fontSize: 8, fontFamily: 'monospace', color: canProceed ? 'var(--green)' : 'var(--amber)' }}>
-        {canProceed ? '✓ Action can proceed with available data' : '⚠ Action requires missing data — resolve blocker first'}
-      </div>
+      <span style={{
+        fontSize: 7, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 3,
+        backgroundColor: 'var(--amber-dim)', border: '1px solid var(--amber-border)',
+        color: 'var(--amber)', flexShrink: 0,
+      }}>
+        PARTIAL
+      </span>
+      <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--amber)', fontWeight: 600, flex: 1, minWidth: 0 }}>
+        {availableLabel}
+      </span>
+      <span style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)', flexShrink: 0 }}>
+        Missing: {missingLabel.length > 60 ? missingLabel.slice(0, 57) + '…' : missingLabel}
+      </span>
       {nextStep && (
-        <div style={{
-          fontSize: 8, fontFamily: 'monospace', color: 'var(--cyan)',
-          paddingTop: 4, borderTop: '1px solid var(--border)',
-        }}>
-          → {nextStep}
-        </div>
+        <span style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--cyan)', flexShrink: 0 }}>
+          → {nextStep.length > 50 ? nextStep.slice(0, 47) + '…' : nextStep}
+        </span>
       )}
     </div>
   );

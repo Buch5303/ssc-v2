@@ -159,7 +159,7 @@ export default function OverviewPage() {
             },
             {
               title: 'Add Perplexity API key to unlock VERIFIED badge tier',
-              whyItMatters: 'All 41 pricing records are ESTIMATED only. Perplexity integration upgrades them to VERIFIED — increases sourcing confidence before RFQ conversion.',
+              whyItMatters: '41 pricing records are ESTIMATED. Perplexity upgrades to VERIFIED — improves sourcing confidence.',
               readiness: engines.perplexity.status === 'awaiting_key' ? 'BLOCKED' : 'COMPLETE',
               blocker: engines.perplexity.status === 'awaiting_key' ? 'Missing PERPLEXITY_API_KEY in Vercel environment variables' : undefined,
               executionPath: 'Add PERPLEXITY_API_KEY in Vercel project settings → min $50 credit',
@@ -168,7 +168,7 @@ export default function OverviewPage() {
             },
             {
               title: 'Draft RFQ — Tod Carpenter, Donaldson CEO',
-              whyItMatters: '$480K Inlet Air Filtering — highest-value undrafted target. Second in queue after Simonelli.',
+              whyItMatters: '$480K Inlet Air Filtering — highest-value undrafted target.',
               readiness: 'NOT STARTED',
               executionPath: 'Fire Claude RFQ draft — takes under 30 seconds',
               endpoint: 'POST /api/wave9/contacts/10/rfq',
