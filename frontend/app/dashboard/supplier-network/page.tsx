@@ -169,7 +169,7 @@ export default function SupplierNetworkPage() {
 
               {senQ.data?.uiState === 'loading'      && <LoadingSkeleton rows={4} height="h-5" />}
               {senQ.data?.uiState === 'awaiting_key' && <AwaitingKeyCard engine="Wave 9 Contact Intelligence" requirement="Apollo enrichment or manual contact upload" />}
-              {senQ.data?.uiState === 'empty'        && <EmptyState title="No contacts" description="Wave 9 contact intelligence not yet loaded." />}
+              {senQ.data?.uiState === 'empty'        && <EmptyState title="No contact intelligence" description="Wave 9 migration not run yet." />}
               {senQ.data?.uiState === 'error'        && <ErrorCard error={senQ.data.error ?? 'server_error'} />}
 
               {(senQ.data?.uiState === 'operational' || senQ.data?.uiState === 'stale') && (
@@ -214,19 +214,19 @@ export default function SupplierNetworkPage() {
             routes={[
               {
                 title: 'Upgrade Apollo Basic to verify all 231 contacts',
-                whyItMatters: 'Only 64 of 231 contacts have verified emails (28%). Apollo Basic ($49/mo) pushes verification to ~95%, unlocking the full 7-target RFQ pipeline.',
+                whyItMatters: '64 of 231 contacts verified. Apollo Basic ($49/mo) → 95% coverage → full pipeline unlocked.',
                 readiness: 'AWAITING ENRICHMENT',
-                blocker: 'Apollo Basic plan not yet activated — contact emails unverified',
-                executionPath: 'Upgrade Apollo → run enrich-contacts → all 231 contacts verified',
+                blocker: 'Apollo Basic not activated',
+                executionPath: 'Upgrade Apollo → enrich contacts',
                 endpoint: 'POST /api/wave9/enrich-contacts',
                 href: '/dashboard/supplier-network#enrichment-status',
                 outputType: 'seeded',
               },
               {
                 title: 'Draft remaining 6 RFQ targets in queue',
-                whyItMatters: '6 of 7 priority contacts still at NOT STARTED. Total uncontacted pipeline value: ~$1.8M across Donaldson, Emerson, Amerex, Baker Hughes EVP.',
+                whyItMatters: '6 of 7 contacts undrafted. ~$1.8M uncontacted pipeline — Donaldson, Emerson, Amerex, BH EVP.',
                 readiness: 'NOT STARTED',
-                executionPath: 'Fire Claude RFQ drafts sequentially — 30 seconds each',
+                executionPath: 'Fire drafts — 30 sec each',
                 endpoint: 'POST /api/wave9/contacts/:id/rfq',
                 href: '/dashboard/rfq-pipeline#rfq-queue',
                 outputType: 'seeded',
@@ -247,8 +247,8 @@ export default function SupplierNetworkPage() {
           {(catQ.data?.uiState === 'awaiting_key' || catQ.data?.uiState === 'empty') && catData.length === 0 && (
             <DeferredCard
               capability="Apollo Contact Enrichment"
-              activationRequirement="Apollo Basic plan ($49/mo)"
-              activatedBy="Upgrade Apollo → POST /api/wave9/enrich-contacts → contacts enriched with verified emails"
+              activationRequirement="Apollo Basic ($49/mo)"
+              activatedBy="Upgrade Apollo → POST /api/wave9/enrich-contacts"
             />
           )}
         </>

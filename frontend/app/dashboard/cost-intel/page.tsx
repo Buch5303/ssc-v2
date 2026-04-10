@@ -99,7 +99,7 @@ export default function CostIntelPage() {
       {uiState === 'loading'      && <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}><LoadingSkeleton rows={1} height="h-24" /><LoadingSkeleton rows={5} height="h-5" /></div>}
       {uiState === 'error'        && <ErrorCard error={stateQ.data?.error ?? 'server_error'} retryCount={stateQ.data?.retryCount} />}
       {uiState === 'awaiting_key' && <DeferredCard capability="BOP Pricing Intelligence" activationRequirement="Discovery engine with seeded market pricing data" />}
-      {uiState === 'empty' && <EmptyState title="No BOP pricing records loaded" description="Market pricing records have not been seeded. The discovery engine requires initialisation before cost intelligence is available." readiness="NOT STARTED" action="Run discovery seeding process to populate BOP cost intelligence" />}
+      {uiState === 'empty' && <EmptyState title="No pricing records" description="Discovery engine not yet seeded. BOP cost intelligence unavailable." readiness="NOT STARTED" action="Run discovery seeding" />}
 
       {/* ── DATA VIEWS ── */}
       {(uiState === 'operational' || uiState === 'stale') && (
@@ -122,24 +122,24 @@ export default function CostIntelPage() {
             routes={[
               {
                 title: 'Review estimated pricing before RFQ conversion',
-                whyItMatters: 'All 41 pricing records are web-research estimates (±15%). Confirm category mid-points before issuing RFQs — prevents anchoring suppliers at wrong price.',
+                whyItMatters: '41 records are ESTIMATED ±15%. Validate mid-points before RFQ — anchoring risk.',
                 readiness: 'READY FOR REVIEW',
-                executionPath: 'Review by-category table below — validate mid-case vs known market rates',
+                executionPath: 'Review category table below',
                 outputType: 'estimated',
               },
               {
                 title: 'Convert Vibration Monitoring ($340K) to RFQ pricing',
-                whyItMatters: 'Baker Hughes RFQ draft is ready to send. Once returned, estimate converts from ESTIMATED to VERIFIED — highest-value near-term verification opportunity.',
+                whyItMatters: 'BH RFQ draft ready. Response converts Vibration Monitoring from ESTIMATED → VERIFIED.',
                 readiness: 'READY TO SEND',
-                executionPath: 'Send Simonelli RFQ → await response → update pricing record to VERIFIED',
+                executionPath: 'Send RFQ → pricing converts on response',
                 endpoint: 'POST /api/wave9/outreach/1/send',
                 outputType: 'estimated',
               },
               {
                 title: 'Validate comparison output before sourcing Piping & Valves ($500K)',
-                whyItMatters: 'AI analysis flagged Trillium as CRITICAL AVOID. Review Flowserve vs CIRCOR before issuing RFQ — sourcing error risk is high without review.',
+                whyItMatters: 'Trillium flagged CRITICAL AVOID. Confirm Flowserve vs CIRCOR before sourcing.',
                 readiness: 'NEEDS REVIEW' as import('../../../components/badges/ReadinessSignal').ReadinessState,
-                executionPath: 'Open RFQ Pipeline → expand Piping & Valves analysis card → review red flags',
+                executionPath: 'RFQ Pipeline → Piping & Valves card → review flags',
                 outputType: 'generated',
               },
             ]}

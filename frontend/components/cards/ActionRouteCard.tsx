@@ -164,13 +164,7 @@ export function ActionRouteCard({ routes, uiState = 'operational', compact = fal
               justifyContent: 'space-between', gap: 12, marginBottom: 8,
             }}>
               <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                  <span style={{
-                    fontSize: 9, fontFamily: 'monospace', fontWeight: 400,
-                    color: 'var(--text-tertiary)',
-                  }}>
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
+                <div style={{ marginBottom: 4 }}>
                   <span style={{
                     fontSize: 11, fontFamily: 'monospace', fontWeight: 700,
                     color: 'var(--text-primary)',

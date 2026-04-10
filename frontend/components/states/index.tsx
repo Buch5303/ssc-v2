@@ -47,10 +47,10 @@ export function EmptyState({
       }}>
         {readiness}
       </span>
-      <div style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 600, color: 'var(--text-secondary)' }}>
+      <div style={{ fontSize: 11, fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-secondary)' }}>
         {title}
       </div>
-      <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', maxWidth: 320, lineHeight: 1.6 }}>
+      <div style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)', maxWidth: 280, lineHeight: 1.6 }}>
         {description}
       </div>
       {blocker && (

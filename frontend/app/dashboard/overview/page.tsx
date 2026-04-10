@@ -150,9 +150,9 @@ export default function OverviewPage() {
           routes={[
             {
               title: 'Send RFQ draft to Baker Hughes',
-              whyItMatters: '$340K Vibration Monitoring — Claude-drafted RFQ is sitting unsent. Lorenzo Simonelli (Chairman & CEO) is primed. Pipeline stalls until this fires.',
+              whyItMatters: '$340K · Baker Hughes CEO · Draft complete. Send now or the slot goes cold.',
               readiness: 'READY TO SEND',
-              executionPath: 'Execute send endpoint — draft reviewed and ready',
+              executionPath: 'Send the draft',
               endpoint: 'POST /api/wave9/outreach/1/send',
               href: '/dashboard/rfq-pipeline#rfq-drafts',
               outputType: 'generated',
@@ -162,7 +162,7 @@ export default function OverviewPage() {
               whyItMatters: '41 pricing records are ESTIMATED. Perplexity upgrades to VERIFIED — improves sourcing confidence.',
               readiness: engines.perplexity.status === 'awaiting_key' ? 'BLOCKED' : 'COMPLETE',
               blocker: engines.perplexity.status === 'awaiting_key' ? 'Missing PERPLEXITY_API_KEY in Vercel environment variables' : undefined,
-              executionPath: 'Add PERPLEXITY_API_KEY in Vercel project settings → min $50 credit',
+              executionPath: 'Add PERPLEXITY_API_KEY to Vercel env — min $50 credit',
               href: '/dashboard/cost-intel#cost-verification',
               outputType: 'estimated',
             },
@@ -170,7 +170,7 @@ export default function OverviewPage() {
               title: 'Draft RFQ — Tod Carpenter, Donaldson CEO',
               whyItMatters: '$480K Inlet Air Filtering — highest-value undrafted target.',
               readiness: 'NOT STARTED',
-              executionPath: 'Fire Claude RFQ draft — takes under 30 seconds',
+              executionPath: 'Fire RFQ draft — 30 seconds',
               endpoint: 'POST /api/wave9/contacts/10/rfq',
               href: '/dashboard/rfq-pipeline#rfq-queue',
               outputType: 'seeded',
@@ -228,7 +228,7 @@ export default function OverviewPage() {
             <KpiCard label="C-Suite"         value={wave9?.contacts.c_suite}    sub="CEO / CTO / COO / President" accent="var(--amber)" />
           </div>
         )}
-        {wave9Q.data?.uiState === 'empty' && <EmptyState title="No contacts loaded" description="Wave 9 contact migration has not run." />}
+        {wave9Q.data?.uiState === 'empty' && <EmptyState title="No contact intelligence" description="Wave 9 migration not yet run." readiness="NOT STARTED" />}
       </div>
 
       {/* ── Perplexity deferred capability ── */}
@@ -236,7 +236,7 @@ export default function OverviewPage() {
         <DeferredCard
           capability="Perplexity Integrity Engine — External Market Verification"
           activationRequirement="PERPLEXITY_API_KEY in Vercel environment variables"
-          activatedBy="Add PERPLEXITY_API_KEY in Vercel project settings · Min $50 credit · Unlocks VERIFIED badge tier"
+          activatedBy="Add PERPLEXITY_API_KEY to Vercel env · min $50 credit · unlocks VERIFIED tier"
         />
       )}
 
@@ -254,8 +254,8 @@ export default function OverviewPage() {
         {claudeQ.data?.uiState === 'empty' && (
           <EmptyState
             title="No AI analyses run yet"
-            description="Claude intelligence is operational but no supplier comparisons or RFQ drafts have been triggered. All 19 BOP categories are awaiting analysis."
-            action="GET /api/claude/run-compare-suppliers?category=MV_System"
+            description="No analyses triggered. Claude is live — all 19 BOP categories await comparison."
+            action="Trigger: GET /api/claude/run-compare-suppliers?category=MV_System"
             readiness="NOT STARTED"
           />
         )}

@@ -117,9 +117,9 @@ export function DecisionStateSummary({ buckets, uiState = 'operational' }: Decis
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
               fontSize: 7, fontFamily: 'monospace', textTransform: 'uppercase',
-              letterSpacing: '0.06em', color: 'var(--cyan)', marginBottom: 3,
+              letterSpacing: '0.06em', color: 'var(--cyan)', marginBottom: 2,
             }}>
-              Execute Next
+              DO NOW
             </div>
             <div style={{
               fontSize: 9, fontFamily: 'monospace', color: 'var(--text-primary)',

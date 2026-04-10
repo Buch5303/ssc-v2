@@ -121,8 +121,8 @@ export default function RfqPipelinePage() {
       {/* ── FULL-PAGE STATES ── */}
       {uiState === 'loading'      && <LoadingSkeleton rows={4} height="h-20" />}
       {uiState === 'error'        && <ErrorCard error={queueQ.data?.error ?? 'server_error'} retryCount={queueQ.data?.retryCount} />}
-      {uiState === 'awaiting_key' && <DeferredCard capability="RFQ Contact Intelligence" activationRequirement="Wave 9 contact migration and BOP tagging" activatedBy="Run: GET /api/wave9/run-auto-tag then retry" />}
-      {uiState === 'empty' && <EmptyState title="No RFQ targets in pipeline" description="No C-Suite or VP contacts with verified emails and BOP category tags have been identified. Wave 9 contact tagging must run first." action="Run GET /api/wave9/run-auto-tag to tag contacts" readiness="NOT STARTED" />}
+      {uiState === 'awaiting_key' && <DeferredCard capability="RFQ Contact Intelligence" activationRequirement="Wave 9 contacts tagged to BOP categories" activatedBy="GET /api/wave9/run-auto-tag" />}
+      {uiState === 'empty' && <EmptyState title="No targets in pipeline" description="No C-Suite or VP contacts with email and BOP category found." action="GET /api/wave9/run-auto-tag" readiness="NOT STARTED" />}
 
       {(uiState === 'operational' || uiState === 'stale') && (
         <>
@@ -174,7 +174,7 @@ export default function RfqPipelinePage() {
                   fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase',
                   letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 4,
                 }}>
-                  Draft Review — Click to expand
+                  Draft Ready — Click to review
                 </div>
                 {drafted.map(item => {
                   const match = rfqAnalyses.find(r =>
@@ -232,7 +232,7 @@ export default function RfqPipelinePage() {
                 {(queue?.queue ?? []).map(item => <ContactRow key={item.id} item={item} />)}
                 {!queue?.queue.length && (
                   <div style={{ padding: '32px 20px', textAlign: 'center' }}>
-                    <EmptyState title="No contacts in queue" description="No C-Suite or VP contacts with email and BOP category have been identified." />
+                    <EmptyState title="Queue empty" description="No C-Suite or VP contacts with email and BOP tag found." />
                   </div>
                 )}
               </div>
@@ -256,8 +256,8 @@ export default function RfqPipelinePage() {
                 ))}
                 {!comparisons.length && (
                   <EmptyState
-                    title="No comparisons yet"
-                    description="Trigger via: GET /api/claude/run-compare-suppliers?category=MV_System"
+                    title="No analyses yet"
+                    description="Trigger: GET /api/claude/run-compare-suppliers?category=MV_System"
                   />
                 )}
               </div>
