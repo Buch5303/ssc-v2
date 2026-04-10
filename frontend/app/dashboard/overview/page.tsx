@@ -11,6 +11,7 @@ import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard } from '../../../c
 import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
+import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
 
 interface StatusData {
   platform: string;
@@ -140,6 +141,39 @@ export default function OverviewPage() {
           <EngineStatusPill label="Claude AI"        status={engines.claude.status}    detail={`${engines.claude.analyses_run} analyses run`} />
           <EngineStatusPill label="Perplexity"       status={engines.perplexity.status} />
         </div>
+      )}
+
+      {/* ── ACTION ROUTES — Directive 24B ── */}
+      {engines && (
+        <ActionRouteCard
+          uiState={statusQ.data?.uiState ?? 'loading'}
+          routes={[
+            {
+              title: 'Send RFQ draft to Baker Hughes',
+              whyItMatters: '$340K Vibration Monitoring — Claude-drafted RFQ is sitting unsent. Lorenzo Simonelli (Chairman & CEO) is primed. Pipeline stalls until this fires.',
+              readiness: 'READY TO SEND',
+              executionPath: 'Execute send endpoint — draft reviewed and ready',
+              endpoint: 'POST /api/wave9/outreach/1/send',
+              outputType: 'generated',
+            },
+            {
+              title: 'Add Perplexity API key to unlock VERIFIED badge tier',
+              whyItMatters: 'All 41 pricing records are ESTIMATED only. Perplexity integration upgrades them to VERIFIED — increases sourcing confidence before RFQ conversion.',
+              readiness: engines.perplexity.status === 'awaiting_key' ? 'BLOCKED' : 'COMPLETE',
+              blocker: engines.perplexity.status === 'awaiting_key' ? 'Missing PERPLEXITY_API_KEY in Vercel environment variables' : undefined,
+              executionPath: 'Add PERPLEXITY_API_KEY in Vercel project settings → min $50 credit',
+              outputType: 'estimated',
+            },
+            {
+              title: 'Draft RFQ — Tod Carpenter, Donaldson CEO',
+              whyItMatters: '$480K Inlet Air Filtering — highest-value undrafted target. Second in queue after Simonelli.',
+              readiness: 'NOT STARTED',
+              executionPath: 'Fire Claude RFQ draft — takes under 30 seconds',
+              endpoint: 'POST /api/wave9/contacts/10/rfq',
+              outputType: 'seeded',
+            },
+          ]}
+        />
       )}
 
       {/* ── DECISION STATE SUMMARY — Directive 23 ── */}

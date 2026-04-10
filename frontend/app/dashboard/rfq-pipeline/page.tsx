@@ -16,6 +16,7 @@ import { ExecutiveActionQueue } from '../../../components/queue/ExecutiveActionQ
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ExecutiveDecisionCard, type DecisionItem } from '../../../components/cards/ExecutiveDecisionCard';
 import { ReadinessSignal, type ReadinessState } from '../../../components/badges/ReadinessSignal';
+import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
 
 function fmtK(n: number) { return n >= 1_000_000 ? `$${(n/1_000_000).toFixed(2)}M` : `$${(n/1_000).toFixed(0)}K`; }
 
@@ -180,6 +181,35 @@ export default function RfqPipelinePage() {
             withEmail={64}
             uiState={uiState}
           />
+
+          {/* ── ACTION ROUTES — Directive 24B ── */}
+          {queue?.next && (
+            <ActionRouteCard
+              uiState={uiState}
+              compact
+              routes={[{
+                title: `Draft RFQ — ${queue.next.contact_name}, ${queue.next.supplier_name.split('/')[0].trim()}`,
+                whyItMatters: `${queue.next.title} · $${(queue.next.category_mid_usd/1000).toFixed(0)}K ${queue.next.bop_category.replace(/_/g,' ')} · Next highest-value uncontacted target`,
+                readiness: 'NOT STARTED',
+                executionPath: 'Fire Claude RFQ draft — 30 seconds',
+                endpoint: `POST /api/wave9/contacts/${queue.next.id}/rfq`,
+              }]}
+            />
+          )}
+          {(queue?.drafted ?? 0) > 0 && (
+            <ActionRouteCard
+              uiState={uiState}
+              compact
+              routes={[{
+                title: 'Send Lorenzo Simonelli RFQ — Baker Hughes CEO',
+                whyItMatters: '$340K Vibration Monitoring draft complete. Every day unsent delays Project Jupiter sourcing timeline.',
+                readiness: 'READY TO SEND',
+                executionPath: 'Execute send — draft reviewed and approved',
+                endpoint: 'POST /api/wave9/outreach/1/send',
+                outputType: 'generated',
+              }]}
+            />
+          )}
 
           {/* ── DRAFTED RFQ SURFACE — Block C ── */}
           {(queue?.drafted ?? 0) > 0 && (

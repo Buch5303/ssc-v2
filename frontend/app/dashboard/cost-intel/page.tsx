@@ -13,6 +13,7 @@ import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { CostRollupChart } from '../../../components/charts/CostRollupChart';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
+import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
 
 function fmtM(n: number) { return `$${(n/1_000_000).toFixed(3)}M`; }
 function fmtK(n: number) { return `$${(n/1_000).toFixed(0)}K`; }
@@ -102,6 +103,35 @@ export default function CostIntelPage() {
               nextAction: 'Issue RFQs to convert estimated pricing to verified — start with Vibration Monitoring ($340K) and Piping & Valves ($500K)',
               nextActionEndpoint: 'POST /api/wave9/contacts/4/rfq',
             }}
+          />
+
+          {/* ── ACTION ROUTES — Directive 24B ── */}
+          <ActionRouteCard
+            uiState={uiState}
+            routes={[
+              {
+                title: 'Review estimated pricing before RFQ conversion',
+                whyItMatters: 'All 41 pricing records are web-research estimates (±15%). Confirm category mid-points before issuing RFQs — prevents anchoring suppliers at wrong price.',
+                readiness: 'READY FOR REVIEW',
+                executionPath: 'Review by-category table below — validate mid-case vs known market rates',
+                outputType: 'estimated',
+              },
+              {
+                title: 'Convert Vibration Monitoring ($340K) to RFQ pricing',
+                whyItMatters: 'Baker Hughes RFQ draft is ready to send. Once returned, estimate converts from ESTIMATED to VERIFIED — highest-value near-term verification opportunity.',
+                readiness: 'READY TO SEND',
+                executionPath: 'Send Simonelli RFQ → await response → update pricing record to VERIFIED',
+                endpoint: 'POST /api/wave9/outreach/1/send',
+                outputType: 'estimated',
+              },
+              {
+                title: 'Validate comparison output before sourcing Piping & Valves ($500K)',
+                whyItMatters: 'AI analysis flagged Trillium as CRITICAL AVOID. Review Flowserve vs CIRCOR before issuing RFQ — sourcing error risk is high without review.',
+                readiness: 'NEEDS REVIEW' as import('../../../components/badges/ReadinessSignal').ReadinessState,
+                executionPath: 'Open RFQ Pipeline → expand Piping & Valves analysis card → review red flags',
+                outputType: 'generated',
+              },
+            ]}
           />
 
           {/* 5-second KPI band — budget floor / planning case / ceiling */}

@@ -14,6 +14,7 @@ import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { EnrichmentStatusBadge } from '../../../components/badges/EnrichmentStatusBadge';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
+import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
 import { TierPieChart, type TierSlice } from '../../../components/charts/TierPieChart';
 import { ContactCoverageChart, type CategoryBar } from '../../../components/charts/ContactCoverageChart';
 
@@ -195,6 +196,30 @@ export default function SupplierNetworkPage() {
               <ContactCoverageChart data={catData} uiState={catQ.data?.uiState ?? 'empty'} />
             </div>
           )}
+
+          {/* ── ACTION ROUTES — Directive 24B ── */}
+          <ActionRouteCard
+            uiState={isLoading ? 'loading' : hasError ? 'error' : 'operational'}
+            routes={[
+              {
+                title: 'Upgrade Apollo Basic to verify all 231 contacts',
+                whyItMatters: 'Only 64 of 231 contacts have verified emails (28%). Apollo Basic ($49/mo) pushes verification to ~95%, unlocking the full 7-target RFQ pipeline.',
+                readiness: 'AWAITING ENRICHMENT',
+                blocker: 'Apollo Basic plan not yet activated — contact emails unverified',
+                executionPath: 'Upgrade Apollo → run enrich-contacts → all 231 contacts verified',
+                endpoint: 'POST /api/wave9/enrich-contacts',
+                outputType: 'seeded',
+              },
+              {
+                title: 'Draft remaining 6 RFQ targets in queue',
+                whyItMatters: '6 of 7 priority contacts still at NOT STARTED. Total uncontacted pipeline value: ~$1.8M across Donaldson, Emerson, Amerex, Baker Hughes EVP.',
+                readiness: 'NOT STARTED',
+                executionPath: 'Fire Claude RFQ drafts sequentially — 30 seconds each',
+                endpoint: 'POST /api/wave9/contacts/:id/rfq',
+                outputType: 'seeded',
+              },
+            ]}
+          />
 
           {/* ── ENRICHMENT STATUS — Block D ── */}
           <EnrichmentStatusBadge
