@@ -1,0 +1,25 @@
+{
+  "run_timestamp": "2026-04-10T20:23:36.167942+00:00",
+  "dry_run": true,
+  "total_categories": 19,
+  "total_bop_low": 7882899.0,
+  "total_bop_mid": 9274000.0,
+  "total_bop_high": 10665098.0,
+  "confidence_distribution": {
+    "COMPONENT_BUILDUPS": 19
+  },
+  "contradictions_total": 0,
+  "contradictions_high": 0,
+  "synthesis_is_first_pass": false,
+  "providers": {},
+  "output_paths": {
+    "pricing_csv": "outputs/pricing_updated.csv",
+    "summary_md": "outputs/pricing_summary.md",
+    "summary_json": "outputs/pricing_summary.json",
+    "contradictions_csv": "outputs/pricing_contradictions.csv",
+    "trace_csv": "outputs/pricing_normalization_trace.csv",
+    "strategy_csv": "outputs/pricing_procurement_strategy.csv",
+    "deltas_csv": "outputs/pricing_learning_deltas.csv"
+  },
+  "warnings": []
+}
