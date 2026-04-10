@@ -120,18 +120,18 @@ export default function SupplierNetworkPage() {
               {
                 state: bop && bop.suppliers_in_db > 0 ? 'healthy' : 'watch',
                 label: `${bop?.suppliers_in_db ?? 0} Suppliers Mapped`,
-                sublabel: `${bop?.bop_categories_priced ?? 0} BOP categories · all priced`,
+                sublabel: `${bop?.bop_categories_priced ?? 0} categories · all priced`,
                 primary: true,
               },
               {
                 state: 'at-risk',
                 label: '231 Contacts',
-                sublabel: '64 verified · 167 unverified · Apollo needed',
+                sublabel: '64 verified · 167 unverified · needs enrichment',
               },
               {
                 state: (pieData.find((p: import('../../../components/charts/TierPieChart').TierSlice) => p.tier === 1)?.count ?? 0) > 0 ? 'healthy' : 'watch',
                 label: `${pieData.find((p: import('../../../components/charts/TierPieChart').TierSlice) => p.tier === 1)?.count ?? 0} Tier 1 Suppliers`,
-                sublabel: 'Global OEM / strategic direct',
+                sublabel: 'Strategic direct suppliers',
               },
             ]}
           />

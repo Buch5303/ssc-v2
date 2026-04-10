@@ -124,18 +124,18 @@ export default function RfqPipelinePage() {
               {
                 state: (queue?.drafted ?? 0) > 0 ? 'do-now' : 'watch',
                 label: (queue?.drafted ?? 0) > 0 ? `${queue!.drafted} Draft Ready to Send` : 'No Drafts Yet',
-                sublabel: (queue?.drafted ?? 0) > 0 ? 'Lorenzo Simonelli · Baker Hughes · $340K' : 'Fire first RFQ draft to activate pipeline',
+                sublabel: (queue?.drafted ?? 0) > 0 ? 'Baker Hughes · $340K · send now' : 'Draft first RFQ to activate pipeline',
                 primary: true,
               },
               {
                 state: (queue?.not_started ?? 0) > 0 ? 'at-risk' : 'healthy',
                 label: `${queue?.not_started ?? 0} Not Started`,
-                sublabel: `of ${queue?.total ?? 0} priority targets`,
+                sublabel: `of ${queue?.total ?? 0} targets`,
               },
               {
                 state: (queue?.sent ?? 0) > 0 ? 'healthy' : 'watch',
                 label: `${queue?.sent ?? 0} Sent`,
-                sublabel: 'Outreach initiated',
+                sublabel: 'Outreach sent',
               },
             ]}
           />

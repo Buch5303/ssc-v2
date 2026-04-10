@@ -42,7 +42,7 @@ function Pill({ count, label, color, bg, border }: PillProps) {
         {count}
       </span>
       <span style={{
-        fontSize: 8, fontFamily: 'monospace', textTransform: 'uppercase',
+        fontSize: 7, fontFamily: 'monospace', textTransform: 'uppercase',
         letterSpacing: '0.06em', color, lineHeight: 1.3,
       }}>
         {label}

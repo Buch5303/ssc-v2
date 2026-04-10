@@ -95,18 +95,18 @@ export default function CostIntelPage() {
               {
                 state: 'watch',
                 label: s ? `$${(s.bop_total_mid_usd / 1_000_000).toFixed(2)}M Planning Case` : 'Loading…',
-                sublabel: 'Balance of Plant · mid-case estimate · ±15%',
+                sublabel: 'BOP mid-case · ±15% · not RFQ',
                 primary: true,
               },
               {
                 state: 'at-risk',
                 label: 'All Pricing ESTIMATED',
-                sublabel: 'No RFQ responses received yet · ±15% accuracy',
+                sublabel: 'No RFQ responses yet · ±15% accuracy',
               },
               {
                 state: 'do-now',
                 label: 'Trillium: CRITICAL AVOID',
-                sublabel: 'Piping & Valves · $37M revenue risk · review before RFQ',
+                sublabel: 'Piping & Valves · $37M · review before RFQ',
               },
             ]}
           />

@@ -62,10 +62,10 @@ function EngineStatusPill({ label, status, detail }: { label: string; status: st
   const bg     = isOk ? 'var(--green-dim)' : isWait ? 'var(--amber-dim)' : 'var(--red-dim)';
   const border = isOk ? 'var(--green-border)' : isWait ? 'var(--amber-border)' : 'var(--red-border)';
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderRadius: 6, border: `1px solid ${border}`, backgroundColor: bg }}>
-      <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }} />
-      <span style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>{label}</span>
-      <span style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', fontWeight: 600, color }}>{status.replace(/_/g,' ')}</span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px', borderRadius: 6, border: `1px solid ${border}`, backgroundColor: bg }}>
+      <span style={{ width: 5, height: 5, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }} />
+      <span style={{ fontSize: 8, fontFamily: 'monospace', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>{label}</span>
+      <span style={{ fontSize: 8, fontFamily: 'monospace', textTransform: 'uppercase', fontWeight: 600, color }}>{status.replace(/_/g,' ')}</span>
       {detail && <span style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>· {detail}</span>}
     </div>
   );
@@ -136,18 +136,18 @@ export default function OverviewPage() {
             {
               state: (engines.claude.analyses_run > 0 && engines.discovery.status === 'operational') ? 'healthy' : 'watch',
               label: `${engines.claude.analyses_run} Analyses Complete`,
-              sublabel: 'All 19 BOP categories · Claude AI intelligence active',
+              sublabel: '19 BOP categories · Claude live',
               primary: true,
             },
             {
               state: engines.perplexity.status === 'awaiting_key' ? 'blocked' : 'healthy',
               label: engines.perplexity.status === 'awaiting_key' ? 'Pricing Unverified' : 'Pricing Verified',
-              sublabel: engines.perplexity.status === 'awaiting_key' ? 'ESTIMATED only · add Perplexity key' : 'Perplexity active',
+              sublabel: engines.perplexity.status === 'awaiting_key' ? 'Add Perplexity key to verify' : 'Perplexity active',
             },
             {
               state: 'do-now',
               label: '1 RFQ Draft Ready',
-              sublabel: 'Baker Hughes CEO · $340K · send now',
+              sublabel: 'Baker Hughes · $340K · send now',
             },
           ]}
         />

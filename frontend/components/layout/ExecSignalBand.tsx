@@ -55,6 +55,7 @@ export function ExecSignalBand({ signals, uiState = 'operational' }: ExecSignalB
     <div style={{
       display: 'flex', gap: 8, flexWrap: 'wrap',
       padding: '2px 0',
+      alignItems: 'stretch',
     }}>
       {signals.map((sig, i) => {
         const s = STATE_STYLE[sig.state];
@@ -62,8 +63,8 @@ export function ExecSignalBand({ signals, uiState = 'operational' }: ExecSignalB
 
         return (
           <div key={i} style={{
-            flex: isPrimary ? 2 : 1,
-            minWidth: isPrimary ? 200 : 120,
+            flex: isPrimary ? '2 1 160px' : '1 1 90px',
+            minWidth: 0,
             padding: isPrimary ? '12px 16px' : '10px 14px',
             borderRadius: 6,
             backgroundColor: s.bg,
@@ -109,6 +110,8 @@ export function ExecSignalBand({ signals, uiState = 'operational' }: ExecSignalB
               <div style={{
                 fontSize: 8, fontFamily: 'monospace',
                 color: 'var(--text-tertiary)', lineHeight: 1.4,
+                overflow: 'hidden', textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap', maxWidth: '100%',
               }}>
                 {sig.sublabel}
               </div>
