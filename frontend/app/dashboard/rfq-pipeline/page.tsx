@@ -17,6 +17,7 @@ import { DecisionStateSummary } from '../../../components/summary/DecisionStateS
 import { ExecutiveDecisionCard, type DecisionItem } from '../../../components/cards/ExecutiveDecisionCard';
 import { ReadinessSignal, type ReadinessState } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
+import { useRouteHighlight } from '../../../lib/hooks/useRouteHighlight';
 
 function fmtK(n: number) { return n >= 1_000_000 ? `$${(n/1_000_000).toFixed(2)}M` : `$${(n/1_000).toFixed(0)}K`; }
 
@@ -85,6 +86,10 @@ export default function RfqPipelinePage() {
     queryFn: () => apiFetch('/claude/results?limit=10'),
     refetchInterval: 30_000,
   });
+
+  const rfqDraftsRef = useRouteHighlight('rfq-drafts');
+  const rfqQueueRef  = useRouteHighlight('rfq-queue');
+  const analysisRef  = useRouteHighlight('ai-analysis');
 
   const queue    = queueQ.data?.data;
   const analyses = analysesQ.data?.data;
@@ -193,6 +198,7 @@ export default function RfqPipelinePage() {
                 readiness: 'NOT STARTED',
                 executionPath: 'Fire Claude RFQ draft — 30 seconds',
                 endpoint: `POST /api/wave9/contacts/${queue.next.id}/rfq`,
+                href: `/dashboard/rfq-pipeline#rfq-queue`,
               }]}
             />
           )}
@@ -206,6 +212,7 @@ export default function RfqPipelinePage() {
                 readiness: 'READY TO SEND',
                 executionPath: 'Execute send — draft reviewed and approved',
                 endpoint: 'POST /api/wave9/outreach/1/send',
+                href: '/dashboard/rfq-pipeline#rfq-drafts',
                 outputType: 'generated',
               }]}
             />
@@ -213,7 +220,9 @@ export default function RfqPipelinePage() {
 
           {/* ── DRAFTED RFQ SURFACE — Block C ── */}
           {(queue?.drafted ?? 0) > 0 && (
-            <RfqDraftCard items={queue?.queue ?? []} />
+            <div ref={rfqDraftsRef} id="rfq-drafts">
+              <RfqDraftCard items={queue?.queue ?? []} />
+            </div>
           )}
 
           {/* ── RFQ DETAIL PANELS — Directive 21A ── */}
@@ -273,7 +282,7 @@ export default function RfqPipelinePage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
 
             {/* Contact queue */}
-            <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+            <div ref={rfqQueueRef} id="rfq-queue" style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
               <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>
                   Priority Contact Queue
@@ -291,7 +300,7 @@ export default function RfqPipelinePage() {
             </div>
 
             {/* Analysis detail cards — Directive 21B */}
-            <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+            <div ref={analysisRef} id="ai-analysis" style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
               <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>
                   AI Supplier Intelligence

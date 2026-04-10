@@ -14,6 +14,7 @@ import { CostRollupChart } from '../../../components/charts/CostRollupChart';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
+import { useRouteHighlight } from '../../../lib/hooks/useRouteHighlight';
 
 function fmtM(n: number) { return `$${(n/1_000_000).toFixed(3)}M`; }
 function fmtK(n: number) { return `$${(n/1_000).toFixed(0)}K`; }
@@ -48,6 +49,9 @@ export default function CostIntelPage() {
     queryFn: () => apiFetch<PricingSummary>('/discovery/pricing/summary'),
     refetchInterval: 60_000,
   });
+
+  const verificationRef = useRouteHighlight('cost-verification');
+  const categoryRef     = useRouteHighlight('category-table');
 
   const uiState = stateQ.data?.uiState ?? 'loading';
   const data    = stateQ.data?.data;
@@ -135,7 +139,7 @@ export default function CostIntelPage() {
           />
 
           {/* 5-second KPI band — budget floor / planning case / ceiling */}
-          <div>
+          <div ref={verificationRef} id="cost-verification">
             <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 10 }}>
               Program Budget Range · {s?.pricing_records ?? 0} pricing records across {s?.categories_priced ?? 0} BOP categories
             </div>

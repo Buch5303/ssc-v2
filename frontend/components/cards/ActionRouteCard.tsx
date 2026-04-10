@@ -1,4 +1,5 @@
 'use client';
+import { useRouter } from 'next/navigation';
 /**
  * ActionRouteCard — EQS v1.0 / Directive 24A
  * Reusable executive action-routing surface.
@@ -17,6 +18,7 @@ export interface ActionRoute {
   executionPath: string;       // human-readable next step
   endpoint?: string;           // API endpoint if directly executable
   outputType?: 'estimated' | 'verified' | 'generated' | 'seeded' | 'live';
+  href?: string;               // internal nav target (page + hash anchor)
 }
 
 interface ActionRouteCardProps {
@@ -26,6 +28,12 @@ interface ActionRouteCardProps {
 }
 
 export function ActionRouteCard({ routes, uiState = 'operational', compact = false }: ActionRouteCardProps) {
+  const router = useRouter();
+
+  function navigate(href: string | undefined) {
+    if (!href) return;
+    router.push(href);
+  }
   if (uiState === 'loading') {
     return (
       <div style={{
@@ -59,12 +67,16 @@ export function ActionRouteCard({ routes, uiState = 'operational', compact = fal
     const r = routes[0];
     const isBlocked = r.readiness === 'BLOCKED' || r.readiness === 'AWAITING ENRICHMENT';
     return (
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 12,
-        padding: '10px 16px', borderRadius: 6,
-        backgroundColor: isBlocked ? 'var(--amber-dim)' : 'var(--cyan-dim)',
-        border: `1px solid ${isBlocked ? 'var(--amber-border)' : 'var(--cyan-border)'}`,
-      }}>
+      <div
+        onClick={() => navigate(r.href)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12,
+          padding: '10px 16px', borderRadius: 6,
+          backgroundColor: isBlocked ? 'var(--amber-dim)' : 'var(--cyan-dim)',
+          border: `1px solid ${isBlocked ? 'var(--amber-border)' : 'var(--cyan-border)'}`,
+          cursor: r.href ? 'pointer' : 'default',
+          transition: 'opacity 0.15s ease',
+        }}>
         <ReadinessSignal state={r.readiness} compact />
         <span style={{
           fontSize: 9, fontFamily: 'monospace', fontWeight: 600,
@@ -182,11 +194,15 @@ export function ActionRouteCard({ routes, uiState = 'operational', compact = fal
             )}
 
             {/* Execution path + endpoint */}
-            <div style={{
+            <div
+              onClick={() => navigate(r.href)}
+              style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               gap: 10, padding: '8px 12px', borderRadius: 5,
               backgroundColor: isBlocked ? 'rgba(245,158,11,0.04)' : 'rgba(6,182,212,0.04)',
               border: `1px solid ${isBlocked ? 'var(--amber-border)' : 'var(--cyan-border)'}`,
+              cursor: r.href ? 'pointer' : 'default',
+              transition: 'opacity 0.15s ease',
             }}>
               <span style={{
                 fontSize: 9, fontFamily: 'monospace', fontWeight: 600,

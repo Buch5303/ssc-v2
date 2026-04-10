@@ -15,6 +15,7 @@ import { EnrichmentStatusBadge } from '../../../components/badges/EnrichmentStat
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
+import { useRouteHighlight } from '../../../lib/hooks/useRouteHighlight';
 import { TierPieChart, type TierSlice } from '../../../components/charts/TierPieChart';
 import { ContactCoverageChart, type CategoryBar } from '../../../components/charts/ContactCoverageChart';
 
@@ -67,6 +68,9 @@ export default function SupplierNetworkPage() {
     queryFn: () => apiFetch<Wave9ContactsBySeniority>('/wave9/contacts/by-seniority'),
     refetchInterval: 120_000,
   });
+
+  const enrichmentRef = useRouteHighlight('enrichment-status');
+  const contactsRef   = useRouteHighlight('contact-coverage');
 
   const bop     = statusQ.data?.data?.bop_intelligence;
   const tiers   = tiersQ.data?.data;
@@ -189,7 +193,7 @@ export default function SupplierNetworkPage() {
 
           {/* Contacts by BOP category — governed wrapper */}
           {catData.length > 0 && (
-            <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 20 }}>
+            <div ref={contactsRef} id="contact-coverage" style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 20 }}>
               <div style={{ fontSize: 10, fontFamily: 'monospace', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: 16 }}>
                 Contact Coverage by BOP Category
               </div>
@@ -208,6 +212,7 @@ export default function SupplierNetworkPage() {
                 blocker: 'Apollo Basic plan not yet activated — contact emails unverified',
                 executionPath: 'Upgrade Apollo → run enrich-contacts → all 231 contacts verified',
                 endpoint: 'POST /api/wave9/enrich-contacts',
+                href: '/dashboard/supplier-network#enrichment-status',
                 outputType: 'seeded',
               },
               {
@@ -216,17 +221,20 @@ export default function SupplierNetworkPage() {
                 readiness: 'NOT STARTED',
                 executionPath: 'Fire Claude RFQ drafts sequentially — 30 seconds each',
                 endpoint: 'POST /api/wave9/contacts/:id/rfq',
+                href: '/dashboard/rfq-pipeline#rfq-queue',
                 outputType: 'seeded',
               },
             ]}
           />
 
           {/* ── ENRICHMENT STATUS — Block D ── */}
+          <div ref={enrichmentRef} id="enrichment-status">
           <EnrichmentStatusBadge
             totalContacts={bySen?.by_seniority.reduce((acc: number, x: SeniorityStat) => acc + x.contacts, 0) ?? 0}
             withEmail={bySen?.by_seniority.reduce((acc: number, x: SeniorityStat) => acc + x.with_email, 0) ?? 0}
             uiState={senQ.data?.uiState ?? 'loading'}
           />
+          </div>
 
           {/* Apollo upgrade deferred capability */}
           {(catQ.data?.uiState === 'awaiting_key' || catQ.data?.uiState === 'empty') && catData.length === 0 && (

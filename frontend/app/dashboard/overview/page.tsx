@@ -154,6 +154,7 @@ export default function OverviewPage() {
               readiness: 'READY TO SEND',
               executionPath: 'Execute send endpoint — draft reviewed and ready',
               endpoint: 'POST /api/wave9/outreach/1/send',
+              href: '/dashboard/rfq-pipeline#rfq-drafts',
               outputType: 'generated',
             },
             {
@@ -162,6 +163,7 @@ export default function OverviewPage() {
               readiness: engines.perplexity.status === 'awaiting_key' ? 'BLOCKED' : 'COMPLETE',
               blocker: engines.perplexity.status === 'awaiting_key' ? 'Missing PERPLEXITY_API_KEY in Vercel environment variables' : undefined,
               executionPath: 'Add PERPLEXITY_API_KEY in Vercel project settings → min $50 credit',
+              href: '/dashboard/cost-intel#cost-verification',
               outputType: 'estimated',
             },
             {
@@ -170,6 +172,7 @@ export default function OverviewPage() {
               readiness: 'NOT STARTED',
               executionPath: 'Fire Claude RFQ draft — takes under 30 seconds',
               endpoint: 'POST /api/wave9/contacts/10/rfq',
+              href: '/dashboard/rfq-pipeline#rfq-queue',
               outputType: 'seeded',
             },
           ]}
