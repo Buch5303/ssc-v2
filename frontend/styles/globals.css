@@ -10,3 +10,49 @@ body { background-color: var(--bg-base); color: var(--text-primary); font-family
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 2px; }
+
+/* ── Directive 27C — Mobile refinement ───────────────────────────────────── */
+/* Narrow-viewport breathing room — preserves executive-command pattern      */
+
+/* Action route cards — tighter on mobile */
+@media (max-width: 640px) {
+  /* Dashboard pages — reduce outer padding on small screens */
+  [style*="padding: 24"] {
+    padding: 16px !important;
+  }
+
+  /* DecisionStateSummary grid — stack to 2-column on mobile */
+  [style*="gridTemplateColumns: 'repeat(3, 1fr) 2fr'"] {
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto !important;
+  }
+
+  /* KPI grids — 2 columns on mobile */
+  [style*="gridTemplateColumns: 'repeat(4, 1fr)'"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Two-column analysis/contact split — stack on mobile */
+  [style*="gridTemplateColumns: '1fr 1fr'"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Action route card execution path — allow wrap on mobile */
+  code[style*="whiteSpace: 'nowrap'"] {
+    white-space: normal !important;
+    word-break: break-all !important;
+    font-size: 6px !important;
+  }
+}
+
+/* ── Deep-link anchor offset — Directive 27B ─────────────────────────────── */
+/* Ensures section anchors have top breathing room on scroll-to              */
+[id="rfq-drafts"],
+[id="rfq-queue"],
+[id="ai-analysis"],
+[id="enrichment-status"],
+[id="contact-coverage"],
+[id="cost-verification"],
+[id="category-table"] {
+  scroll-margin-top: 72px; /* matches SCROLL_OFFSET in useRouteHighlight */
+}

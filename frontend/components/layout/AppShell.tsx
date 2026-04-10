@@ -1,6 +1,8 @@
 'use client';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ExecutionContextStore } from '../../lib/context/ExecutionContextStore';
 
 const navItems = [
   { href: '/dashboard/overview',        label: 'Overview',          icon: '◈' },
@@ -11,6 +13,11 @@ const navItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
+
+  // Directive 27D — sanitize invalid hash targets on every route change
+  useEffect(() => {
+    ExecutionContextStore.sanitizeHash();
+  }, [path]);
   return (
     <div className="flex h-screen overflow-hidden bg-[#0a0e1a]">
       {/* Sidebar */}
