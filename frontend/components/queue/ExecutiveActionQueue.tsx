@@ -49,7 +49,7 @@ export function ExecutiveActionQueue({
       priorityColor: 'var(--green)',
       priorityBg: 'var(--green-dim)',
       priorityBorder: 'var(--green-border)',
-      title: 'Send the Lorenzo Simonelli RFQ',
+      title: 'Send RFQ — Lorenzo Simonelli, Baker Hughes CEO',
       why: `A Claude-drafted RFQ is ready for Baker Hughes CEO Lorenzo Simonelli ($340K Vibration Monitoring). Every day the draft sits unsent is pipeline delay.`,
       doThis: 'Execute the send endpoint to initiate outreach. Review draft excerpt above before sending.',
       endpoint: 'POST /api/wave9/outreach/1/send',

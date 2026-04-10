@@ -13,6 +13,9 @@ import { RfqDraftCard } from '../../../components/cards/RfqDraftCard';
 import { RfqDetailPanel } from '../../../components/cards/RfqDetailPanel';
 import { AnalysisDetailCard } from '../../../components/cards/AnalysisDetailCard';
 import { ExecutiveActionQueue } from '../../../components/queue/ExecutiveActionQueue';
+import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
+import { ExecutiveDecisionCard, type DecisionItem } from '../../../components/cards/ExecutiveDecisionCard';
+import { ReadinessSignal, type ReadinessState } from '../../../components/badges/ReadinessSignal';
 
 function fmtK(n: number) { return n >= 1_000_000 ? `$${(n/1_000_000).toFixed(2)}M` : `$${(n/1_000).toFixed(0)}K`; }
 
@@ -120,7 +123,56 @@ export default function RfqPipelinePage() {
             <KpiCard label="Sent"                value={queue?.sent ?? 0}    sub="Outreach initiated" accent="var(--green)" />
           </div>
 
-          {/* ── EXECUTIVE ACTION QUEUE — Directive 21C ── */}
+          {/* ── DECISION STATE SUMMARY — Directive 22A ── */}
+          {(() => {
+            const drafted = queue?.drafted ?? 0;
+            const notStarted = queue?.not_started ?? 0;
+            const analysesReady = comparisons.length;
+            return (
+              <DecisionStateSummary
+                uiState={uiState}
+                buckets={{
+                  ready: drafted,
+                  needsReview: analysesReady,
+                  blocked: notStarted > 0 && drafted === 0 ? 1 : 0,
+                  nextAction: queue?.next
+                    ? `Draft RFQ — ${queue.next.contact_name}, ${queue.next.supplier_name.split('/')[0].trim()}`
+                    : drafted > 0 ? 'Send Lorenzo Simonelli RFQ' : 'All actions complete',
+                  nextActionEndpoint: queue?.next
+                    ? `POST /api/wave9/contacts/${queue.next.id}/rfq`
+                    : drafted > 0 ? 'POST /api/wave9/outreach/1/send' : undefined,
+                }}
+              />
+            );
+          })()}
+
+          {/* ── EXECUTIVE DECISION CARDS — Directive 22C ── */}
+          {(() => {
+            const rfqItems = (queue?.queue ?? [])
+              .filter(i => i.rfq_status === 'draft' || i.rfq_status === 'not_started')
+              .slice(0, 3)
+              .map(i => ({
+                id: i.id,
+                name: i.contact_name,
+                category: i.bop_category,
+                valueUsd: i.category_mid_usd,
+                readiness: (i.rfq_status === 'draft' ? 'READY TO SEND' : 'NOT STARTED') as import('../../../components/badges/ReadinessSignal').ReadinessState,
+                whyItMatters: i.rfq_status === 'draft'
+                  ? `Draft ready for ${i.title} at ${i.supplier_name.split('/')[0].trim()}. Every day unsent delays procurement timeline.`
+                  : `${i.title} at ${i.supplier_name.split('/')[0].trim()} — highest available contact for this BOP category.`,
+                recommendedMove: i.rfq_status === 'draft'
+                  ? 'Review draft and execute send endpoint immediately.'
+                  : 'Fire Claude RFQ draft. Takes under 30 seconds.',
+                endpoint: i.rfq_status === 'draft' && i.outreach_id
+                  ? `POST /api/wave9/outreach/${i.outreach_id}/send`
+                  : `POST /api/wave9/contacts/${i.id}/rfq`,
+                outputType: (i.rfq_status === 'draft' ? 'generated' : 'seeded') as 'generated' | 'seeded',
+              } satisfies import('../../../components/cards/ExecutiveDecisionCard').DecisionItem));
+            if (rfqItems.length === 0) return null;
+            return <ExecutiveDecisionCard title="RFQ Decision Queue" items={rfqItems} uiState={uiState} />;
+          })()}
+
+          {/* ── EXECUTIVE ACTION QUEUE — Directive 21C / 22D tightened ── */}
           <ExecutiveActionQueue
             rfqQueue={queue ?? undefined}
             analysesRun={comparisons.length}
