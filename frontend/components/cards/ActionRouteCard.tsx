@@ -1,5 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
+import { ExecutionContextStore } from '../../lib/context/ExecutionContextStore';
 /**
  * ActionRouteCard — EQS v1.0 / Directive 24A
  * Reusable executive action-routing surface.
@@ -32,6 +33,14 @@ export function ActionRouteCard({ routes, uiState = 'operational', compact = fal
 
   function navigate(href: string | undefined) {
     if (!href) return;
+    // Parse page + anchor from href and persist context before navigating
+    try {
+      const [pagePart, anchor] = href.split('#');
+      const page = pagePart.replace('/dashboard/', '').replace('/', '') || 'overview';
+      if (anchor) {
+        ExecutionContextStore.save({ page, section: anchor });
+      }
+    } catch { /* noop — persistence is non-critical */ }
     router.push(href);
   }
   if (uiState === 'loading') {

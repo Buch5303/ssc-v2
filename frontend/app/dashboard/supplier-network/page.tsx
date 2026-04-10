@@ -4,6 +4,7 @@
  * EQS v1.0. No raw Recharts. All charts via governed wrappers.
  * Zero-training labels. Explicit types throughout.
  */
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '../../../lib/api/client';
 import type { DataState } from '../../../lib/types/ui';
@@ -16,6 +17,7 @@ import { DecisionStateSummary } from '../../../components/summary/DecisionStateS
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
 import { useRouteHighlight } from '../../../lib/hooks/useRouteHighlight';
+import { ExecutionContextStore } from '../../../lib/context/ExecutionContextStore';
 import { TierPieChart, type TierSlice } from '../../../components/charts/TierPieChart';
 import { ContactCoverageChart, type CategoryBar } from '../../../components/charts/ContactCoverageChart';
 
@@ -69,8 +71,13 @@ export default function SupplierNetworkPage() {
     refetchInterval: 120_000,
   });
 
-  const enrichmentRef = useRouteHighlight('enrichment-status');
-  const contactsRef   = useRouteHighlight('contact-coverage');
+  // Directive 26D — clear stale context on page mount
+  useEffect(() => {
+    ExecutionContextStore.clearIfStale('supplier-network');
+  }, []);
+
+    const enrichmentRef = useRouteHighlight('enrichment-status', 'supplier-network');
+  const contactsRef   = useRouteHighlight('contact-coverage', 'supplier-network');
 
   const bop     = statusQ.data?.data?.bop_intelligence;
   const tiers   = tiersQ.data?.data;

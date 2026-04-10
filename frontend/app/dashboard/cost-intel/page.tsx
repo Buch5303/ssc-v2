@@ -4,6 +4,7 @@
  * EQS v1.0. No raw Recharts. All charts via governed wrappers.
  * Zero-training labels. Estimated badges on all pricing.
  */
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '../../../lib/api/client';
 import type { DataState } from '../../../lib/types/ui';
@@ -15,6 +16,7 @@ import { DecisionStateSummary } from '../../../components/summary/DecisionStateS
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
 import { useRouteHighlight } from '../../../lib/hooks/useRouteHighlight';
+import { ExecutionContextStore } from '../../../lib/context/ExecutionContextStore';
 
 function fmtM(n: number) { return `$${(n/1_000_000).toFixed(3)}M`; }
 function fmtK(n: number) { return `$${(n/1_000).toFixed(0)}K`; }
@@ -50,8 +52,13 @@ export default function CostIntelPage() {
     refetchInterval: 60_000,
   });
 
-  const verificationRef = useRouteHighlight('cost-verification');
-  const categoryRef     = useRouteHighlight('category-table');
+  // Directive 26D — clear stale context on page mount
+  useEffect(() => {
+    ExecutionContextStore.clearIfStale('cost-intel');
+  }, []);
+
+    const verificationRef = useRouteHighlight('cost-verification', 'cost-intel');
+  const categoryRef     = useRouteHighlight('category-table', 'cost-intel');
 
   const uiState = stateQ.data?.uiState ?? 'loading';
   const data    = stateQ.data?.data;

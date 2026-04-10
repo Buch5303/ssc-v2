@@ -3,6 +3,7 @@
  * Dashboard D — RFQ Pipeline
  * EQS v1.0. Design tokens throughout. DataState<T> pattern. All 7 UI states handled.
  */
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '../../../lib/api/client';
 import type { DataState } from '../../../lib/types/ui';
@@ -18,6 +19,7 @@ import { ExecutiveDecisionCard, type DecisionItem } from '../../../components/ca
 import { ReadinessSignal, type ReadinessState } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
 import { useRouteHighlight } from '../../../lib/hooks/useRouteHighlight';
+import { ExecutionContextStore } from '../../../lib/context/ExecutionContextStore';
 
 function fmtK(n: number) { return n >= 1_000_000 ? `$${(n/1_000_000).toFixed(2)}M` : `$${(n/1_000).toFixed(0)}K`; }
 
@@ -87,9 +89,14 @@ export default function RfqPipelinePage() {
     refetchInterval: 30_000,
   });
 
-  const rfqDraftsRef = useRouteHighlight('rfq-drafts');
-  const rfqQueueRef  = useRouteHighlight('rfq-queue');
-  const analysisRef  = useRouteHighlight('ai-analysis');
+  // Directive 26D — clear stale context on page mount
+  useEffect(() => {
+    ExecutionContextStore.clearIfStale('rfq-pipeline');
+  }, []);
+
+    const rfqDraftsRef = useRouteHighlight('rfq-drafts', 'rfq-pipeline');
+  const rfqQueueRef  = useRouteHighlight('rfq-queue', 'rfq-pipeline');
+  const analysisRef  = useRouteHighlight('ai-analysis', 'rfq-pipeline');
 
   const queue    = queueQ.data?.data;
   const analyses = analysesQ.data?.data;
