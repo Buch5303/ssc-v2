@@ -83,7 +83,7 @@ export function ActionRouteCard({ routes, uiState = 'operational', compact = fal
         onMouseEnter={() => setHoveredIndex(0)}
         onMouseLeave={() => setHoveredIndex(null)}
         style={{
-          display: 'flex', alignItems: 'center', gap: 12,
+          display: 'flex', alignItems: 'center', gap: 10,
           padding: '10px 16px', borderRadius: 6,
           backgroundColor: isBlocked ? 'var(--amber-dim)' : 'var(--cyan-dim)',
           border: `1px solid ${isBlocked ? 'var(--amber-border)' : 'var(--cyan-border)'}`,
@@ -129,7 +129,7 @@ export function ActionRouteCard({ routes, uiState = 'operational', compact = fal
     }}>
       {/* Header */}
       <div style={{
-        padding: '11px 20px', borderBottom: '1px solid var(--border)',
+        padding: '12px 20px', borderBottom: '1px solid var(--border)',
         backgroundColor: 'var(--bg-elevated)',
         display: 'flex', alignItems: 'center', gap: 10,
       }}>

@@ -241,13 +241,13 @@ export default function OverviewPage() {
         )}
 
         {(claudeQ.data?.uiState === 'operational' || claudeQ.data?.uiState === 'stale') && analyses.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {analyses.map(r => {
               const isComp = r.analysis_type === 'supplier_comparison';
               const isRfq  = r.analysis_type === 'rfq_draft';
               const readiness = isRfq ? 'READY TO SEND' : isComp ? 'READY FOR REVIEW' : 'COMPLETE';
               return (
-                <div key={r.id} style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
+                <div key={r.id} style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: '16px 20px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
                     <OutputBadge outputType="generated" />
                     <span style={{ fontSize: 9, fontFamily: 'monospace', fontWeight: 600, color: 'var(--text-secondary)' }}>

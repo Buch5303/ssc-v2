@@ -180,7 +180,7 @@ export default function SupplierNetworkPage() {
               {senQ.data?.uiState === 'error'        && <ErrorCard error={senQ.data.error ?? 'server_error'} />}
 
               {(senQ.data?.uiState === 'operational' || senQ.data?.uiState === 'stale') && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 6 }}>
                   {(bySen?.by_seniority ?? []).map((s: SeniorityStat) => {
                     const pct = Math.round((s.contacts / totalContacts) * 100);
                     const color = SENIORITY_COLORS[s.seniority] ?? '#64748b';

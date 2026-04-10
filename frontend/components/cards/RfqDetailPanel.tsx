@@ -106,7 +106,7 @@ export function RfqDetailPanel({ item, draftPreview }: RfqDetailPanelProps) {
 
       {/* ── Expanded detail panel ── */}
       {expanded && (
-        <div style={{ padding: '20px' }}>
+        <div style={{ padding: '16px 20px' }}>
 
           {/* Contact + value grid */}
           <div style={{

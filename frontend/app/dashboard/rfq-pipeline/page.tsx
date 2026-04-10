@@ -180,7 +180,7 @@ export default function RfqPipelinePage() {
 
           {/* ── NEXT ACTION BANNER ── */}
           {queue?.next && (
-            <div style={{ backgroundColor: 'var(--cyan-dim)', border: '1px solid var(--cyan-border)', borderRadius: 8, padding: 16 }}>
+            <div style={{ backgroundColor: 'var(--cyan-dim)', border: '1px solid var(--cyan-border)', borderRadius: 8, padding: '16px 20px' }}>
               <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--cyan)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
                 ▶ NEXT TARGET
               </div>
@@ -228,10 +228,10 @@ export default function RfqPipelinePage() {
                 <OutputBadge outputType="generated" freshness={analysesQ.data?.freshness} />
               </div>
 
-              {analysesQ.data?.uiState === 'loading' && <div style={{ padding: 20 }}><LoadingSkeleton rows={3} height="h-16" /></div>}
-              {analysesQ.data?.uiState === 'error'   && <div style={{ padding: 20 }}><ErrorCard error={analysesQ.data.error ?? 'server_error'} /></div>}
+              {analysesQ.data?.uiState === 'loading' && <div style={{ padding: '16px 20px' }}><LoadingSkeleton rows={3} height="h-16" /></div>}
+              {analysesQ.data?.uiState === 'error'   && <div style={{ padding: '16px 20px' }}><ErrorCard error={analysesQ.data.error ?? 'server_error'} /></div>}
 
-              <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 600, overflowY: 'auto' }}>
+              <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 600, overflowY: 'auto' }}>
                 {comparisons.map(r => (
                   <AnalysisDetailCard key={r.id} result={r} />
                 ))}
