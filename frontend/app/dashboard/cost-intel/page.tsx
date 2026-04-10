@@ -37,7 +37,7 @@ function RangeKpi({ label, low, mid, high, sub }: { label: string; low: string; 
       </div>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, marginBottom: 4 }}>
         <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--amber)' }}>↓ {low}</span>
-        <span style={{ fontSize: 20, fontFamily: 'monospace', fontWeight: 700, color: 'var(--cyan)', lineHeight: 1 }}>{mid}</span>
+        <span style={{ fontSize: 22, fontFamily: 'monospace', fontWeight: 700, color: 'var(--cyan)', lineHeight: 1 }}>{mid}</span>
         <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--green)' }}>↑ {high}</span>
       </div>
       <div style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>{sub}</div>
@@ -151,9 +151,9 @@ export default function CostIntelPage() {
               Program Budget Range · {s?.pricing_records ?? 0} pricing records across {s?.categories_priced ?? 0} BOP categories
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-              <RangeKpi label="Budget Floor"    low="—" mid={s ? fmtM(s.bop_total_low_usd) : '—'}  high="—" sub="-15% downside from planning case" />
-              <RangeKpi label="Planning Case"   low={s ? fmtM(s.bop_total_low_usd) : '—'} mid={s ? fmtM(s.bop_total_mid_usd) : '—'} high={s ? fmtM(s.bop_total_high_usd) : '—'} sub="Mid-case estimate · Use for initial budgeting" />
-              <RangeKpi label="Budget Ceiling"  low="—" mid={s ? fmtM(s.bop_total_high_usd) : '—'} high="—" sub="+15% upside from planning case" />
+              <RangeKpi label="Budget Floor"    low="—" mid={s ? fmtM(s.bop_total_low_usd) : '—'}  high="—" sub="-15% downside · floor scenario" />
+              <RangeKpi label="Planning Case"   low={s ? fmtM(s.bop_total_low_usd) : '—'} mid={s ? fmtM(s.bop_total_mid_usd) : '—'} high={s ? fmtM(s.bop_total_high_usd) : '—'} sub="Mid-case · use for initial budgeting" />
+              <RangeKpi label="Budget Ceiling"  low="—" mid={s ? fmtM(s.bop_total_high_usd) : '—'} high="—" sub="+15% upside · ceiling scenario" />
             </div>
           </div>
 

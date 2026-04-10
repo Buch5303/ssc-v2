@@ -9,6 +9,7 @@ import { apiFetch } from '../../../lib/api/client';
 import type { DataState } from '../../../lib/types/ui';
 import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard, PartialState } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
+import { KpiCard } from '../../../components/cards/KpiCard';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
@@ -63,25 +64,6 @@ function EngineStatusPill({ label, status, detail }: { label: string; status: st
       <span style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>{label}</span>
       <span style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', fontWeight: 600, color }}>{status.replace(/_/g,' ')}</span>
       {detail && <span style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>· {detail}</span>}
-    </div>
-  );
-}
-
-function KpiCard({ label, value, sub, badge, accent }: { label: string; value: string | number | undefined; sub?: string; badge?: string; accent?: string }) {
-  return (
-    <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)' }}>{label}</span>
-        {badge && (
-          <span style={{ fontSize: 7, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 3, border: '1px solid var(--badge-estimated-border)', backgroundColor: 'var(--badge-estimated-bg)', color: 'var(--badge-estimated-text)' }}>
-            {badge}
-          </span>
-        )}
-      </div>
-      <div style={{ fontSize: 22, fontFamily: 'monospace', fontWeight: 700, lineHeight: 1, marginBottom: 4, color: value !== undefined ? (accent ?? 'var(--cyan)') : 'var(--text-tertiary)' }}>
-        {value ?? '—'}
-      </div>
-      {sub && <div style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>{sub}</div>}
     </div>
   );
 }
@@ -208,10 +190,10 @@ export default function OverviewPage() {
           BOP Program Summary — excludes GT, generator, OEM controls
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-          <KpiCard label="BOP Planning Case"   value={bop ? fmtM(bop.bop_total_mid_usd) : undefined} sub="±15% range · Web research · Not RFQ" badge="ESTIMATED" accent="var(--cyan)" />
-          <KpiCard label="Suppliers in DB"     value={bop?.suppliers_in_db}        sub={`${bop?.bop_categories_priced ?? 0} BOP categories · All priced`} accent="var(--green)" />
-          <KpiCard label="Pricing Records"     value={bop?.pricing_records}         sub="Web research · Indicative only" badge="ESTIMATED" accent="var(--cyan)" />
-          <KpiCard label="AI Analyses Run"     value={engines?.claude.analyses_run} sub="Claude Haiku · Live intelligence" accent="var(--purple)" />
+          <KpiCard label="BOP Planning Case"   value={bop ? fmtM(bop.bop_total_mid_usd) : undefined} sub="±15% · web research · not RFQ" outputType="estimated" accent="var(--cyan)" />
+          <KpiCard label="Suppliers in DB"     value={bop?.suppliers_in_db}        sub={`${bop?.bop_categories_priced ?? 0} categories · all priced`} accent="var(--green)" />
+          <KpiCard label="Pricing Records"     value={bop?.pricing_records}         sub="Web research · indicative only" outputType="estimated" accent="var(--cyan)" />
+          <KpiCard label="AI Analyses Run"     value={engines?.claude.analyses_run} sub="Claude Haiku · live intelligence" outputType="live" accent="var(--purple)" />
         </div>
       </div>
 
@@ -225,7 +207,7 @@ export default function OverviewPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
             <KpiCard label="Total Contacts"  value={wave9?.contacts.total}      sub="W251 supplier intelligence" accent="var(--cyan)" />
             <KpiCard label="BOP-Tagged"      value={wave9?.contacts.tagged}     sub="Mapped to BOP categories" accent="var(--cyan)" />
-            <KpiCard label="With Email"      value={wave9?.contacts.with_email} sub="Reachable for RFQ outreach" accent="var(--green)" />
+            <KpiCard label="Verified Email"  value={wave9?.contacts.with_email} sub="Reachable for RFQ outreach" accent="var(--green)" />
             <KpiCard label="C-Suite"         value={wave9?.contacts.c_suite}    sub="CEO / CTO / COO / President" accent="var(--amber)" />
           </div>
         )}

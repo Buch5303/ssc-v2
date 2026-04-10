@@ -12,6 +12,7 @@ import type { TierStats, TierStat } from '../../../lib/api/discovery';
 import type { Wave9ContactsByCategory, Wave9ContactsBySeniority, CategoryStat, SeniorityStat } from '../../../lib/api/wave9';
 import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard, AwaitingKeyCard } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
+import { KpiCard } from '../../../components/cards/KpiCard';
 import { EnrichmentStatusBadge } from '../../../components/badges/EnrichmentStatusBadge';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
@@ -36,18 +37,6 @@ const TIER_META: Record<number, { label: string; color: string }> = {
 const SENIORITY_COLORS: Record<string, string> = {
   c_suite: '#06b6d4', vp: '#10b981', director: '#f59e0b', manager: '#64748b', individual: '#4a5568',
 };
-
-function KpiCard({ label, value, sub, accent }: { label: string; value: string | number | undefined; sub: string; accent?: string }) {
-  return (
-    <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
-      <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 22, fontFamily: 'monospace', fontWeight: 700, color: value !== undefined ? (accent ?? 'var(--cyan)') : 'var(--text-tertiary)', lineHeight: 1, marginBottom: 4 }}>
-        {value ?? '—'}
-      </div>
-      <div style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>{sub}</div>
-    </div>
-  );
-}
 
 export default function SupplierNetworkPage() {
   const statusQ = useQuery<DataState<StatusBop>>({
@@ -166,10 +155,10 @@ export default function SupplierNetworkPage() {
               Coverage Summary
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-              <KpiCard label="Suppliers in DB"     value={bop?.suppliers_in_db}       sub="Neon PostgreSQL · W251 program" />
-              <KpiCard label="BOP Categories"      value={bop?.bop_categories_priced} sub="Balance of Plant — all priced" />
-              <KpiCard label="Tier 1 OEM Partners" value={pieData.find((p: TierSlice) => p.tier === 1)?.count} sub="Global industrial leaders" accent="var(--cyan)" />
-              <KpiCard label="In Memory"           value={81}  sub="Discovery engine · Active session" accent="var(--green)" />
+              <KpiCard label="Suppliers in DB"     value={bop?.suppliers_in_db}       sub="PostgreSQL · W251 program" />
+              <KpiCard label="BOP Categories"      value={bop?.bop_categories_priced} sub="Balance of Plant · all priced" />
+              <KpiCard label="Tier 1 OEM Partners" value={pieData.find((p: TierSlice) => p.tier === 1)?.count} sub="Global OEM leaders" accent="var(--cyan)" />
+              <KpiCard label="In Memory"           value={81}  sub="Discovery engine · active" accent="var(--green)" />
             </div>
           </div>
 

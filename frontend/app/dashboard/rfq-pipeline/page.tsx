@@ -10,6 +10,7 @@ import type { DataState } from '../../../lib/types/ui';
 import type { RfqQueueResponse, RfqQueueItem } from '../../../lib/api/wave9';
 import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
+import { KpiCard } from '../../../components/cards/KpiCard';
 import { RfqDraftCard } from '../../../components/cards/RfqDraftCard';
 import { RfqDetailPanel } from '../../../components/cards/RfqDetailPanel';
 import { AnalysisDetailCard } from '../../../components/cards/AnalysisDetailCard';
@@ -33,18 +34,6 @@ const STATUS_STYLE: Record<string, { bg: string; text: string }> = {
   sent:        { bg: 'var(--cyan-dim)',         text: 'var(--cyan)' },
   replied:     { bg: 'var(--green-dim)',        text: 'var(--green)' },
 };
-
-function KpiCard({ label, value, sub, accent }: { label: string; value: string | number | undefined; sub: string; accent?: string }) {
-  return (
-    <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
-      <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 22, fontFamily: 'monospace', fontWeight: 700, color: value !== undefined ? (accent ?? 'var(--cyan)') : 'var(--text-tertiary)', lineHeight: 1, marginBottom: 4 }}>
-        {value ?? '—'}
-      </div>
-      <div style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>{sub}</div>
-    </div>
-  );
-}
 
 function ContactRow({ item }: { item: RfqQueueItem }) {
   const sen = SENIORITY_STYLE[item.seniority] ?? SENIORITY_STYLE.director;
@@ -128,10 +117,10 @@ export default function RfqPipelinePage() {
         <>
           {/* ── KPI BAND ── */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-            <KpiCard label="Priority Targets"   value={queue?.total}     sub="C-Suite/VP with email + BOP tag" accent="var(--cyan)" />
-            <KpiCard label="Pipeline Value"      value={totalValue ? fmtK(totalValue) : '—'} sub="Category mid estimates — not RFQ" accent="var(--amber)" />
-            <KpiCard label="RFQs Drafted"        value={queue?.drafted ?? 0} sub="Claude AI-generated outreach" accent="var(--purple)" />
-            <KpiCard label="Sent"                value={queue?.sent ?? 0}    sub="Outreach initiated" accent="var(--green)" />
+            <KpiCard label="Priority Targets"   value={queue?.total}     sub="C-Suite/VP · email + BOP tag" accent="var(--cyan)" />
+            <KpiCard label="Pipeline Value"      value={totalValue ? fmtK(totalValue) : '—'} sub="Mid estimates · not RFQ" accent="var(--amber)" />
+            <KpiCard label="RFQs Drafted"        value={queue?.drafted ?? 0} sub="Claude AI · outreach drafted" accent="var(--purple)" />
+            <KpiCard label="Sent"                value={queue?.sent ?? 0}    sub="Outreach sent" accent="var(--green)" />
           </div>
 
           {/* ── DECISION STATE SUMMARY — Directive 22A ── */}
