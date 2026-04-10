@@ -70,7 +70,7 @@ export function ExecSignalBand({ signals, uiState = 'operational' }: ExecSignalB
             backgroundColor: s.bg,
             border: `1px solid ${s.border}`,
             // Primary gets a subtle left accent bar
-            borderLeft: isPrimary ? `3px solid ${s.dot}` : `1px solid ${s.border}`,
+            borderLeft: isPrimary ? `4px solid ${s.dot}` : `1px solid ${s.border}`,
           }}>
             {/* State chip */}
             <div style={{
@@ -95,7 +95,7 @@ export function ExecSignalBand({ signals, uiState = 'operational' }: ExecSignalB
 
             {/* Label — primary is larger */}
             <div style={{
-              fontSize: isPrimary ? 13 : 11,
+              fontSize: isPrimary ? 15 : 10,
               fontFamily: 'monospace',
               fontWeight: 700,
               color: 'var(--text-primary)',

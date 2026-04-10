@@ -142,7 +142,7 @@ export default function RfqPipelinePage() {
 
           {/* ── KPI BAND ── */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-            <KpiCard label="Priority Targets"   value={queue?.total}     sub="C-Suite/VP · email + BOP category tag" accent="var(--cyan)" />
+            <KpiCard label="Priority Targets"   value={queue?.total}     sub="C-Suite/VP · email + category tag" accent="var(--cyan)" />
             <KpiCard label="Pipeline Value"      value={totalValue ? fmtK(totalValue) : '—'} sub="Mid estimates · not RFQ" accent="var(--amber)" />
             <KpiCard label="RFQs Drafted"        value={queue?.drafted ?? 0} sub="Claude AI · outreach drafted" accent="var(--purple)" />
             <KpiCard label="Sent"                value={queue?.sent ?? 0}    sub="Outreach sent" accent="var(--green)" />

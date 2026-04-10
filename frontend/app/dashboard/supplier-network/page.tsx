@@ -19,6 +19,7 @@ import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
 import { ExecSignalBand } from '../../../components/layout/ExecSignalBand';
 import { SectionLabel } from '../../../components/layout/SectionLabel';
+import { TermHelper } from '../../../components/layout/TermHelper';
 import { useRouteHighlight } from '../../../lib/hooks/useRouteHighlight';
 import { ExecutionContextStore } from '../../../lib/context/ExecutionContextStore';
 import { TierPieChart, type TierSlice } from '../../../components/charts/TierPieChart';
@@ -101,7 +102,7 @@ export default function SupplierNetworkPage() {
             Supplier Network
           </h1>
           <p style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', margin: '4px 0 0' }}>
-            BOP supply chain coverage · Tier distribution · Contact intelligence
+            Supplier coverage · Tier distribution · Contact intelligence <span style={{ fontSize: 7, fontFamily: 'monospace', color: 'var(--text-tertiary)' }}>· BOP = Balance of Plant</span>
           </p>
         </div>
         <OutputBadge outputType="seeded" freshness={tiersQ.data?.freshness} />
@@ -191,6 +192,7 @@ export default function SupplierNetworkPage() {
             {/* Tier distribution — governed wrapper */}
             <div style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 20 }}>
               <SectionLabel variant="card">Supplier Tier Distribution</SectionLabel>
+              <div style={{ fontSize: 7, fontFamily: 'monospace', color: 'var(--text-tertiary)', marginTop: -8, marginBottom: 12 }}>T1 = Global OEM · T2 = Specialist · T3 = Regional · T4 = Niche</div>
               <TierPieChart data={pieData} uiState={tiersQ.data?.uiState ?? 'loading'} />
             </div>
 

@@ -93,20 +93,20 @@ export default function CostIntelPage() {
             uiState={uiState}
             signals={[
               {
-                state: 'watch',
-                label: s ? `$${(s.bop_total_mid_usd / 1_000_000).toFixed(2)}M Planning Case` : 'Loading…',
-                sublabel: 'BOP mid-case · ±15% · not RFQ',
+                state: 'do-now',
+                label: 'Trillium: CRITICAL AVOID',
+                sublabel: 'Piping & Valves · $37M revenue risk · review before RFQ',
                 primary: true,
               },
               {
-                state: 'at-risk',
-                label: 'All Pricing ESTIMATED',
-                sublabel: 'No RFQ responses yet · ±15% accuracy',
+                state: 'watch',
+                label: s ? `$${(s.bop_total_mid_usd / 1_000_000).toFixed(2)}M Estimated` : 'Loading…',
+                sublabel: 'BOP planning case · ±15%',
               },
               {
-                state: 'do-now',
-                label: 'Trillium: CRITICAL AVOID',
-                sublabel: 'Piping & Valves · $37M · review before RFQ',
+                state: 'at-risk',
+                label: 'All Pricing Unverified',
+                sublabel: 'No RFQ responses yet',
               },
             ]}
           />
@@ -146,7 +146,7 @@ export default function CostIntelPage() {
                 title: 'Validate comparison output before sourcing Piping & Valves ($500K)',
                 whyItMatters: 'Trillium flagged CRITICAL AVOID. Confirm Flowserve vs CIRCOR before sourcing.',
                 readiness: 'NEEDS REVIEW' as import('../../../components/badges/ReadinessSignal').ReadinessState,
-                executionPath: 'RFQ Pipeline → Piping & Valves card → review risk flags',
+                executionPath: 'RFQ Pipeline → Piping & Valves → review flags',
                 outputType: 'generated',
               },
             ]}
@@ -154,7 +154,7 @@ export default function CostIntelPage() {
 
           {/* 5-second KPI band — budget floor / planning case / ceiling */}
           <div ref={verificationRef} id="cost-verification">
-            <SectionLabel>Program Budget Range · {s?.pricing_records ?? 0} records · {s?.categories_priced ?? 0} BOP <span style={{ fontSize: 7, fontFamily: 'monospace', color: 'var(--text-tertiary)', fontWeight: 400 }}>(Balance of Plant)</span> categories</SectionLabel>
+            <SectionLabel>Program Budget Range · {s?.pricing_records ?? 0} records · {s?.categories_priced ?? 0} categories <span style={{ fontSize: 7, fontFamily: 'monospace', color: 'var(--text-tertiary)', fontWeight: 400 }}>(BOP = Balance of Plant)</span></SectionLabel>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
               <RangeKpiCard label="Budget Floor"    mid={s ? fmtM(s.bop_total_low_usd) : '—'} low="—" high="—" showRange={false} sub="-15% downside · floor scenario" badge="ESTIMATED · ±15%" />
               <RangeKpiCard label="Planning Case"   low={s ? fmtM(s.bop_total_low_usd) : '—'} mid={s ? fmtM(s.bop_total_mid_usd) : '—'} high={s ? fmtM(s.bop_total_high_usd) : '—'} sub="Mid-case · use for initial budgeting" />

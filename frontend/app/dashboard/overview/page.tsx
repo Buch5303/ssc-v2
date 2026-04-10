@@ -134,20 +134,20 @@ export default function OverviewPage() {
           uiState={statusQ.data?.uiState ?? 'loading'}
           signals={[
             {
-              state: (engines.claude.analyses_run > 0 && engines.discovery.status === 'operational') ? 'healthy' : 'watch',
-              label: `${engines.claude.analyses_run} Analyses Complete`,
-              sublabel: '19 BOP categories · Claude live',
-              primary: true,
-            },
-            {
-              state: engines.perplexity.status === 'awaiting_key' ? 'blocked' : 'healthy',
-              label: engines.perplexity.status === 'awaiting_key' ? 'Pricing Unverified' : 'Pricing Verified',
-              sublabel: engines.perplexity.status === 'awaiting_key' ? 'Add Perplexity key to verify' : 'Perplexity active',
-            },
-            {
               state: 'do-now',
               label: '1 RFQ Draft Ready',
               sublabel: 'Baker Hughes · $340K · send now',
+              primary: true,
+            },
+            {
+              state: (engines.claude.analyses_run > 0 && engines.discovery.status === 'operational') ? 'healthy' : 'watch',
+              label: `${engines.claude.analyses_run} Analyses`,
+              sublabel: '19 categories · Claude live',
+            },
+            {
+              state: engines.perplexity.status === 'awaiting_key' ? 'at-risk' : 'healthy',
+              label: engines.perplexity.status === 'awaiting_key' ? 'Pricing Unverified' : 'Pricing Verified',
+              sublabel: engines.perplexity.status === 'awaiting_key' ? 'Add Perplexity key' : 'Perplexity active',
             },
           ]}
         />
@@ -214,7 +214,7 @@ export default function OverviewPage() {
 
       {/* ── KPI BAND — BOP program metrics ── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-        <SectionLabel>BOP Program Summary <span style={{ fontSize: 7, fontFamily: 'monospace', color: 'var(--text-tertiary)', fontWeight: 400 }}>— Balance of Plant — supporting equipment outside the core turbine unit</span></SectionLabel>
+        <SectionLabel>BOP Program Summary <span style={{ fontSize: 7, fontFamily: 'monospace', color: 'var(--text-tertiary)', fontWeight: 400 }}>— Balance of Plant · supporting systems outside the turbine core</span></SectionLabel>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
           <KpiCard label="BOP Planning Case"   value={bop ? fmtM(bop.bop_total_mid_usd) : undefined} sub="±15% · web research · not RFQ" outputType="estimated" accent="var(--cyan)" />
           <KpiCard label="Suppliers in DB"     value={bop?.suppliers_in_db}        sub={`${bop?.bop_categories_priced ?? 0} categories · all priced`} accent="var(--green)" />
