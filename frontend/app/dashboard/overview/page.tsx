@@ -112,14 +112,14 @@ export default function OverviewPage() {
   return (
     <div style={{ padding: 24, maxWidth: 1200, display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-      {/* ── COMMAND BAR (5-second zone top) ── */}
+      {/* ── COMMAND BAR ── */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
         <div>
           <h1 style={{ fontSize: 13, fontFamily: 'monospace', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-primary)', margin: 0 }}>
             Supply Chain Overview
           </h1>
           <p style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', margin: '4px 0 0' }}>
-            Project Jupiter · TG20B7-8 W251 Power Island · Santa Teresa, NM · 50 MW Gas Turbine BOP Procurement
+            Project Jupiter · W251 Power Island · Santa Teresa, NM · 50MW BOP Procurement
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -142,6 +142,29 @@ export default function OverviewPage() {
           <EngineStatusPill label="Perplexity"       status={engines.perplexity.status} />
         </div>
       )}
+
+      {/* ── DECISION STATE SUMMARY — Directive 23 ── */}
+      {engines && (
+        <DecisionStateSummary
+          uiState={statusQ.data?.uiState ?? 'loading'}
+          buckets={{
+            ready: engines.claude.analyses_run > 0 ? 1 : 0,
+            needsReview: engines.perplexity.status === 'awaiting_key' ? 1 : 0,
+            blocked: engines.discovery.status !== 'operational' ? 1 : 0,
+            nextAction: engines.perplexity.status === 'awaiting_key'
+              ? 'Add Perplexity API key to unlock VERIFIED badge tier'
+              : engines.claude.analyses_run < 19
+                ? 'Run remaining BOP category analyses'
+                : 'Send Lorenzo Simonelli RFQ — draft is ready',
+            nextActionEndpoint: engines.perplexity.status === 'awaiting_key'
+              ? undefined
+              : engines.claude.analyses_run < 19
+                ? 'GET /api/claude/run-compare-suppliers?category=X'
+                : 'POST /api/wave9/outreach/1/send',
+          }}
+        />
+      )}
+
 
       {/* ── ACTION ROUTES — Directive 24B ── */}
       {engines && (
@@ -179,32 +202,10 @@ export default function OverviewPage() {
         />
       )}
 
-      {/* ── DECISION STATE SUMMARY — Directive 23 ── */}
-      {engines && (
-        <DecisionStateSummary
-          uiState={statusQ.data?.uiState ?? 'loading'}
-          buckets={{
-            ready: engines.claude.analyses_run > 0 ? 1 : 0,
-            needsReview: engines.perplexity.status === 'awaiting_key' ? 1 : 0,
-            blocked: engines.discovery.status !== 'operational' ? 1 : 0,
-            nextAction: engines.perplexity.status === 'awaiting_key'
-              ? 'Add Perplexity API key to unlock VERIFIED badge tier'
-              : engines.claude.analyses_run < 19
-                ? 'Run remaining BOP category analyses'
-                : 'Send Lorenzo Simonelli RFQ — draft is ready',
-            nextActionEndpoint: engines.perplexity.status === 'awaiting_key'
-              ? undefined
-              : engines.claude.analyses_run < 19
-                ? 'GET /api/claude/run-compare-suppliers?category=X'
-                : 'POST /api/wave9/outreach/1/send',
-          }}
-        />
-      )}
-
       {/* ── KPI BAND — BOP program metrics ── */}
       <div>
         <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 10 }}>
-          BOP Program Summary (Balance of Plant — excludes GT flange-to-flange, generator, OEM controls)
+          BOP Program Summary — excludes GT, generator, OEM controls
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
           <KpiCard label="BOP Planning Case"   value={bop ? fmtM(bop.bop_total_mid_usd) : undefined} sub="±15% range · Web research · Not RFQ" badge="ESTIMATED" accent="var(--cyan)" />
@@ -244,7 +245,7 @@ export default function OverviewPage() {
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)' }}>
-            Recent AI Procurement Intelligence
+            AI Procurement Intelligence
           </div>
           <OutputBadge outputType="generated" freshness={claudeQ.data?.freshness} />
         </div>

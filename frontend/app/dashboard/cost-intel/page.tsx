@@ -89,7 +89,7 @@ export default function CostIntelPage() {
             BOP Cost Intelligence
           </h1>
           <p style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', margin: '4px 0 0' }}>
-            W251 Power Island (Balance of Plant) · Web-researched pricing · Not RFQ · For budgeting reference only
+            W251 Power Island · Web-researched pricing · Not RFQ · Budget reference only
           </p>
         </div>
         <OutputBadge outputType="estimated" freshness={stateQ.data?.freshness} />
@@ -101,7 +101,7 @@ export default function CostIntelPage() {
       {uiState === 'awaiting_key' && <DeferredCard capability="BOP Pricing Intelligence" activationRequirement="Discovery engine with seeded market pricing data" />}
       {uiState === 'empty' && <EmptyState title="No pricing records" description="Discovery engine not yet seeded. BOP cost intelligence unavailable." readiness="NOT STARTED" action="Run discovery seeding" />}
 
-      {/* ── DATA VIEWS ── */}
+      {/* ── OPERATIONAL SURFACE ── */}
       {(uiState === 'operational' || uiState === 'stale') && (
         <>
           {/* ── DECISION STATE SUMMARY — Directive 23 ── */}

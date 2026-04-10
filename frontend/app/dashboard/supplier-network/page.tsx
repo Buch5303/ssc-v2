@@ -110,13 +110,13 @@ export default function SupplierNetworkPage() {
             Supplier Network
           </h1>
           <p style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', margin: '4px 0 0' }}>
-            BOP supply chain coverage · Tier distribution · Wave 9 contact intelligence
+            BOP supply chain coverage · Tier distribution · Contact intelligence
           </p>
         </div>
         <OutputBadge outputType="seeded" freshness={tiersQ.data?.freshness} />
       </div>
 
-      {/* Full-page states */}
+      {/* ── FULL-PAGE STATES ── */}
       {isLoading && <LoadingSkeleton rows={4} height="h-20" />}
       {hasError  && <ErrorCard error={statusQ.data?.error ?? 'server_error'} />}
 
@@ -134,10 +134,36 @@ export default function SupplierNetworkPage() {
             }}
           />
 
+          {/* ── ACTION ROUTES — Directive 24B ── */}
+          <ActionRouteCard
+            uiState={isLoading ? 'loading' : hasError ? 'error' : 'operational'}
+            routes={[
+              {
+                title: 'Upgrade Apollo Basic to verify all 231 contacts',
+                whyItMatters: '64 of 231 contacts verified. Apollo Basic ($49/mo) → 95% coverage → full pipeline unlocked.',
+                readiness: 'AWAITING ENRICHMENT',
+                blocker: 'Apollo Basic not activated',
+                executionPath: 'Upgrade Apollo → enrich contacts',
+                endpoint: 'POST /api/wave9/enrich-contacts',
+                href: '/dashboard/supplier-network#enrichment-status',
+                outputType: 'seeded',
+              },
+              {
+                title: 'Draft remaining 6 RFQ targets in queue',
+                whyItMatters: '6 of 7 contacts undrafted. ~$1.8M uncontacted pipeline — Donaldson, Emerson, Amerex, BH EVP.',
+                readiness: 'NOT STARTED',
+                executionPath: 'Fire drafts — 30 sec each',
+                endpoint: 'POST /api/wave9/contacts/:id/rfq',
+                href: '/dashboard/rfq-pipeline#rfq-queue',
+                outputType: 'seeded',
+              },
+            ]}
+          />
+
           {/* ── KPI BAND ── */}
           <div>
             <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 10 }}>
-              Platform Coverage Summary
+              Coverage Summary
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
               <KpiCard label="Suppliers in DB"     value={bop?.suppliers_in_db}       sub="Neon PostgreSQL · W251 program" />
@@ -207,32 +233,6 @@ export default function SupplierNetworkPage() {
               <ContactCoverageChart data={catData} uiState={catQ.data?.uiState ?? 'empty'} />
             </div>
           )}
-
-          {/* ── ACTION ROUTES — Directive 24B ── */}
-          <ActionRouteCard
-            uiState={isLoading ? 'loading' : hasError ? 'error' : 'operational'}
-            routes={[
-              {
-                title: 'Upgrade Apollo Basic to verify all 231 contacts',
-                whyItMatters: '64 of 231 contacts verified. Apollo Basic ($49/mo) → 95% coverage → full pipeline unlocked.',
-                readiness: 'AWAITING ENRICHMENT',
-                blocker: 'Apollo Basic not activated',
-                executionPath: 'Upgrade Apollo → enrich contacts',
-                endpoint: 'POST /api/wave9/enrich-contacts',
-                href: '/dashboard/supplier-network#enrichment-status',
-                outputType: 'seeded',
-              },
-              {
-                title: 'Draft remaining 6 RFQ targets in queue',
-                whyItMatters: '6 of 7 contacts undrafted. ~$1.8M uncontacted pipeline — Donaldson, Emerson, Amerex, BH EVP.',
-                readiness: 'NOT STARTED',
-                executionPath: 'Fire drafts — 30 sec each',
-                endpoint: 'POST /api/wave9/contacts/:id/rfq',
-                href: '/dashboard/rfq-pipeline#rfq-queue',
-                outputType: 'seeded',
-              },
-            ]}
-          />
 
           {/* ── ENRICHMENT STATUS — Block D ── */}
           <div ref={enrichmentRef} id="enrichment-status">

@@ -112,7 +112,7 @@ export default function RfqPipelinePage() {
             RFQ Pipeline
           </h1>
           <p style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', margin: '4px 0 0' }}>
-            Contact outreach · Claude-drafted RFQs · Supplier comparison intelligence · W251 TG20B7-8
+            Contact outreach · Claude-drafted RFQs · Supplier intelligence · W251
           </p>
         </div>
         <OutputBadge outputType="seeded" freshness={queueQ.data?.freshness} />
@@ -197,7 +197,7 @@ export default function RfqPipelinePage() {
           {queue?.next && (
             <div style={{ backgroundColor: 'var(--cyan-dim)', border: '1px solid var(--cyan-border)', borderRadius: 8, padding: 16 }}>
               <div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--cyan)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
-                ▶ NEXT PRIORITY ACTION
+                ▶ NEXT TARGET
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
                 <div style={{ flex: 1 }}>

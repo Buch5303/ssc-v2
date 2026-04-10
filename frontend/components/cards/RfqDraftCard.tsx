@@ -53,7 +53,7 @@ export function RfqDraftCard({ items }: RfqDraftCardProps) {
             fontSize: 11, fontFamily: 'monospace', fontWeight: 700,
             textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--purple)',
           }}>
-            Drafted RFQ Outreach
+            RFQ Outreach Ready
           </span>
           <span style={{
             fontSize: 7, fontFamily: 'monospace', padding: '2px 8px', borderRadius: 3,
