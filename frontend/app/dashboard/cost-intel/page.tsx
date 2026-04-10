@@ -14,6 +14,7 @@ import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { CostRollupChart } from '../../../components/charts/CostRollupChart';
 import { RangeKpiCard } from '../../../components/cards/RangeKpiCard';
 import { SectionLabel } from '../../../components/layout/SectionLabel';
+import { ExecSignalBand } from '../../../components/layout/ExecSignalBand';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
@@ -87,6 +88,29 @@ export default function CostIntelPage() {
       {/* ── OPERATIONAL SURFACE ── */}
       {(uiState === 'operational' || uiState === 'stale') && (
         <>
+          {/* ── EXEC SIGNAL BAND — Directive 38 Block O ── */}
+          <ExecSignalBand
+            uiState={uiState}
+            signals={[
+              {
+                state: 'watch',
+                label: s ? `$${(s.bop_total_mid_usd / 1_000_000).toFixed(2)}M Planning Case` : 'Loading…',
+                sublabel: 'Balance of Plant · mid-case estimate · ±15%',
+                primary: true,
+              },
+              {
+                state: 'at-risk',
+                label: 'All Pricing ESTIMATED',
+                sublabel: 'No RFQ responses received yet · ±15% accuracy',
+              },
+              {
+                state: 'do-now',
+                label: 'Trillium: CRITICAL AVOID',
+                sublabel: 'Piping & Valves · $37M revenue risk · review before RFQ',
+              },
+            ]}
+          />
+
           {/* ── DECISION STATE SUMMARY — Directive 23 ── */}
           <DecisionStateSummary
             uiState={uiState}
@@ -122,7 +146,7 @@ export default function CostIntelPage() {
                 title: 'Validate comparison output before sourcing Piping & Valves ($500K)',
                 whyItMatters: 'Trillium flagged CRITICAL AVOID. Confirm Flowserve vs CIRCOR before sourcing.',
                 readiness: 'NEEDS REVIEW' as import('../../../components/badges/ReadinessSignal').ReadinessState,
-                executionPath: 'RFQ Pipeline → Piping & Valves card → review flags',
+                executionPath: 'RFQ Pipeline → Piping & Valves card → review risk flags',
                 outputType: 'generated',
               },
             ]}
@@ -130,7 +154,7 @@ export default function CostIntelPage() {
 
           {/* 5-second KPI band — budget floor / planning case / ceiling */}
           <div ref={verificationRef} id="cost-verification">
-            <SectionLabel>Program Budget Range · {s?.pricing_records ?? 0} records across {s?.categories_priced ?? 0} BOP categories</SectionLabel>
+            <SectionLabel>Program Budget Range · {s?.pricing_records ?? 0} records · {s?.categories_priced ?? 0} BOP <span style={{ fontSize: 7, fontFamily: 'monospace', color: 'var(--text-tertiary)', fontWeight: 400 }}>(Balance of Plant)</span> categories</SectionLabel>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
               <RangeKpiCard label="Budget Floor"    mid={s ? fmtM(s.bop_total_low_usd) : '—'} low="—" high="—" showRange={false} sub="-15% downside · floor scenario" badge="ESTIMATED · ±15%" />
               <RangeKpiCard label="Planning Case"   low={s ? fmtM(s.bop_total_low_usd) : '—'} mid={s ? fmtM(s.bop_total_mid_usd) : '—'} high={s ? fmtM(s.bop_total_high_usd) : '—'} sub="Mid-case · use for initial budgeting" />

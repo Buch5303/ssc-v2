@@ -17,6 +17,7 @@ import { EnrichmentStatusBadge } from '../../../components/badges/EnrichmentStat
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
+import { ExecSignalBand } from '../../../components/layout/ExecSignalBand';
 import { SectionLabel } from '../../../components/layout/SectionLabel';
 import { useRouteHighlight } from '../../../lib/hooks/useRouteHighlight';
 import { ExecutionContextStore } from '../../../lib/context/ExecutionContextStore';
@@ -29,10 +30,10 @@ interface StatusBop {
 }
 
 const TIER_META: Record<number, { label: string; color: string }> = {
-  1: { label: 'T1 — OEM / Global Major',  color: '#06b6d4' },
-  2: { label: 'T2 — Specialist',           color: '#10b981' },
-  3: { label: 'T3 — Regional',             color: '#f59e0b' },
-  4: { label: 'T4 — Niche / Component',    color: '#ef4444' },
+  1: { label: 'T1 — Global OEM (direct strategic)',  color: '#06b6d4' },
+  2: { label: 'T2 — Specialist supplier',           color: '#10b981' },
+  3: { label: 'T3 — Regional supplier',             color: '#f59e0b' },
+  4: { label: 'T4 — Niche / component',    color: '#ef4444' },
 };
 
 const SENIORITY_COLORS: Record<string, string> = {
@@ -112,6 +113,29 @@ export default function SupplierNetworkPage() {
 
       {!isLoading && !hasError && (
         <>
+          {/* ── EXEC SIGNAL BAND — Directive 38 Block O ── */}
+          <ExecSignalBand
+            uiState={isLoading ? 'loading' : 'operational'}
+            signals={[
+              {
+                state: bop && bop.suppliers_in_db > 0 ? 'healthy' : 'watch',
+                label: `${bop?.suppliers_in_db ?? 0} Suppliers Mapped`,
+                sublabel: `${bop?.bop_categories_priced ?? 0} BOP categories · all priced`,
+                primary: true,
+              },
+              {
+                state: 'at-risk',
+                label: '231 Contacts',
+                sublabel: '64 verified · 167 unverified · Apollo needed',
+              },
+              {
+                state: (pieData.find((p: import('../../../components/charts/TierPieChart').TierSlice) => p.tier === 1)?.count ?? 0) > 0 ? 'healthy' : 'watch',
+                label: `${pieData.find((p: import('../../../components/charts/TierPieChart').TierSlice) => p.tier === 1)?.count ?? 0} Tier 1 Suppliers`,
+                sublabel: 'Global OEM / strategic direct',
+              },
+            ]}
+          />
+
           {/* ── DECISION STATE SUMMARY — Directive 23 ── */}
           <DecisionStateSummary
             uiState={isLoading ? 'loading' : hasError ? 'error' : 'operational'}

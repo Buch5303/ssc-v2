@@ -13,6 +13,8 @@ import { KpiCard } from '../../../components/cards/KpiCard';
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 import { SectionLabel } from '../../../components/layout/SectionLabel';
+import { ExecSignalBand } from '../../../components/layout/ExecSignalBand';
+import { TERM_BOP } from '../../../components/layout/TermHelper';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
 
 interface StatusData {
@@ -126,6 +128,31 @@ export default function OverviewPage() {
         </div>
       )}
 
+      {/* ── EXEC SIGNAL BAND — Directive 38 Block O ── */}
+      {engines && (
+        <ExecSignalBand
+          uiState={statusQ.data?.uiState ?? 'loading'}
+          signals={[
+            {
+              state: (engines.claude.analyses_run > 0 && engines.discovery.status === 'operational') ? 'healthy' : 'watch',
+              label: `${engines.claude.analyses_run} Analyses Complete`,
+              sublabel: 'All 19 BOP categories · Claude AI intelligence active',
+              primary: true,
+            },
+            {
+              state: engines.perplexity.status === 'awaiting_key' ? 'blocked' : 'healthy',
+              label: engines.perplexity.status === 'awaiting_key' ? 'Pricing Unverified' : 'Pricing Verified',
+              sublabel: engines.perplexity.status === 'awaiting_key' ? 'ESTIMATED only · add Perplexity key' : 'Perplexity active',
+            },
+            {
+              state: 'do-now',
+              label: '1 RFQ Draft Ready',
+              sublabel: 'Baker Hughes CEO · $340K · send now',
+            },
+          ]}
+        />
+      )}
+
       {/* ── DECISION STATE SUMMARY — Directive 23 ── */}
       {engines && (
         <DecisionStateSummary
@@ -187,7 +214,7 @@ export default function OverviewPage() {
 
       {/* ── KPI BAND — BOP program metrics ── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-        <SectionLabel>BOP Program Summary — excludes GT, generator, OEM controls</SectionLabel>
+        <SectionLabel>BOP Program Summary <span style={{ fontSize: 7, fontFamily: 'monospace', color: 'var(--text-tertiary)', fontWeight: 400 }}>— Balance of Plant — supporting equipment outside the core turbine unit</span></SectionLabel>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
           <KpiCard label="BOP Planning Case"   value={bop ? fmtM(bop.bop_total_mid_usd) : undefined} sub="±15% · web research · not RFQ" outputType="estimated" accent="var(--cyan)" />
           <KpiCard label="Suppliers in DB"     value={bop?.suppliers_in_db}        sub={`${bop?.bop_categories_priced ?? 0} categories · all priced`} accent="var(--green)" />

@@ -17,6 +17,7 @@ import { AnalysisDetailCard } from '../../../components/cards/AnalysisDetailCard
 import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
 import { ReadinessSignal, type ReadinessState } from '../../../components/badges/ReadinessSignal';
 import { ActionRouteCard } from '../../../components/cards/ActionRouteCard';
+import { ExecSignalBand } from '../../../components/layout/ExecSignalBand';
 import { SectionLabel } from '../../../components/layout/SectionLabel';
 import { useRouteHighlight } from '../../../lib/hooks/useRouteHighlight';
 import { ExecutionContextStore } from '../../../lib/context/ExecutionContextStore';
@@ -116,9 +117,32 @@ export default function RfqPipelinePage() {
 
       {(uiState === 'operational' || uiState === 'stale') && (
         <>
+          {/* ── EXEC SIGNAL BAND — Directive 38 Block O ── */}
+          <ExecSignalBand
+            uiState={uiState}
+            signals={[
+              {
+                state: (queue?.drafted ?? 0) > 0 ? 'do-now' : 'watch',
+                label: (queue?.drafted ?? 0) > 0 ? `${queue!.drafted} Draft Ready to Send` : 'No Drafts Yet',
+                sublabel: (queue?.drafted ?? 0) > 0 ? 'Lorenzo Simonelli · Baker Hughes · $340K' : 'Fire first RFQ draft to activate pipeline',
+                primary: true,
+              },
+              {
+                state: (queue?.not_started ?? 0) > 0 ? 'at-risk' : 'healthy',
+                label: `${queue?.not_started ?? 0} Not Started`,
+                sublabel: `of ${queue?.total ?? 0} priority targets`,
+              },
+              {
+                state: (queue?.sent ?? 0) > 0 ? 'healthy' : 'watch',
+                label: `${queue?.sent ?? 0} Sent`,
+                sublabel: 'Outreach initiated',
+              },
+            ]}
+          />
+
           {/* ── KPI BAND ── */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-            <KpiCard label="Priority Targets"   value={queue?.total}     sub="C-Suite/VP · email + BOP tag" accent="var(--cyan)" />
+            <KpiCard label="Priority Targets"   value={queue?.total}     sub="C-Suite/VP · email + BOP category tag" accent="var(--cyan)" />
             <KpiCard label="Pipeline Value"      value={totalValue ? fmtK(totalValue) : '—'} sub="Mid estimates · not RFQ" accent="var(--amber)" />
             <KpiCard label="RFQs Drafted"        value={queue?.drafted ?? 0} sub="Claude AI · outreach drafted" accent="var(--purple)" />
             <KpiCard label="Sent"                value={queue?.sent ?? 0}    sub="Outreach sent" accent="var(--green)" />
