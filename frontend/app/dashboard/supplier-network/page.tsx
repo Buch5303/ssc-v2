@@ -12,6 +12,8 @@ import type { Wave9ContactsByCategory, Wave9ContactsBySeniority, CategoryStat, S
 import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard, AwaitingKeyCard } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { EnrichmentStatusBadge } from '../../../components/badges/EnrichmentStatusBadge';
+import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
+import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 import { TierPieChart, type TierSlice } from '../../../components/charts/TierPieChart';
 import { ContactCoverageChart, type CategoryBar } from '../../../components/charts/ContactCoverageChart';
 
@@ -108,6 +110,18 @@ export default function SupplierNetworkPage() {
 
       {!isLoading && !hasError && (
         <>
+          {/* ── DECISION STATE SUMMARY — Directive 23 ── */}
+          <DecisionStateSummary
+            uiState={isLoading ? 'loading' : hasError ? 'error' : 'operational'}
+            buckets={{
+              ready: (bySen?.by_seniority.reduce((a: number, x: import('../../../lib/api/wave9').SeniorityStat) => a + x.with_email, 0) ?? 0) > 0 ? 1 : 0,
+              needsReview: 1,
+              blocked: 0,
+              nextAction: 'Upgrade Apollo Basic ($49/mo) — verify all 231 contacts and unlock full RFQ pipeline',
+              nextActionEndpoint: 'POST /api/wave9/enrich-contacts',
+            }}
+          />
+
           {/* ── KPI BAND ── */}
           <div>
             <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 10 }}>

@@ -11,6 +11,8 @@ import type { PricingSummary, PricingCategory, PricingGroup } from '../../../lib
 import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
 import { CostRollupChart } from '../../../components/charts/CostRollupChart';
+import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
+import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 
 function fmtM(n: number) { return `$${(n/1_000_000).toFixed(3)}M`; }
 function fmtK(n: number) { return `$${(n/1_000).toFixed(0)}K`; }
@@ -90,6 +92,18 @@ export default function CostIntelPage() {
       {/* ── DATA VIEWS ── */}
       {(uiState === 'operational' || uiState === 'stale') && (
         <>
+          {/* ── DECISION STATE SUMMARY — Directive 23 ── */}
+          <DecisionStateSummary
+            uiState={uiState}
+            buckets={{
+              ready: (s?.categories_priced ?? 0),
+              needsReview: (s?.pricing_records ?? 0) > 0 ? 1 : 0,
+              blocked: 0,
+              nextAction: 'Issue RFQs to convert estimated pricing to verified — start with Vibration Monitoring ($340K) and Piping & Valves ($500K)',
+              nextActionEndpoint: 'POST /api/wave9/contacts/4/rfq',
+            }}
+          />
+
           {/* 5-second KPI band — budget floor / planning case / ceiling */}
           <div>
             <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 10 }}>

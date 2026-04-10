@@ -9,6 +9,8 @@ import { apiFetch } from '../../../lib/api/client';
 import type { DataState } from '../../../lib/types/ui';
 import { LoadingSkeleton, EmptyState, ErrorCard, DeferredCard } from '../../../components/states';
 import { OutputBadge } from '../../../components/badges/OutputBadge';
+import { DecisionStateSummary } from '../../../components/summary/DecisionStateSummary';
+import { ReadinessSignal } from '../../../components/badges/ReadinessSignal';
 
 interface StatusData {
   platform: string;
@@ -140,6 +142,28 @@ export default function OverviewPage() {
         </div>
       )}
 
+      {/* ── DECISION STATE SUMMARY — Directive 23 ── */}
+      {engines && (
+        <DecisionStateSummary
+          uiState={statusQ.data?.uiState ?? 'loading'}
+          buckets={{
+            ready: engines.claude.analyses_run > 0 ? 1 : 0,
+            needsReview: engines.perplexity.status === 'awaiting_key' ? 1 : 0,
+            blocked: engines.discovery.status !== 'operational' ? 1 : 0,
+            nextAction: engines.perplexity.status === 'awaiting_key'
+              ? 'Add Perplexity API key to unlock VERIFIED badge tier'
+              : engines.claude.analyses_run < 19
+                ? 'Run remaining BOP category analyses'
+                : 'Send Lorenzo Simonelli RFQ — draft is ready',
+            nextActionEndpoint: engines.perplexity.status === 'awaiting_key'
+              ? undefined
+              : engines.claude.analyses_run < 19
+                ? 'GET /api/claude/run-compare-suppliers?category=X'
+                : 'POST /api/wave9/outreach/1/send',
+          }}
+        />
+      )}
+
       {/* ── KPI BAND — BOP program metrics ── */}
       <div>
         <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 10 }}>
@@ -199,26 +223,29 @@ export default function OverviewPage() {
 
         {(claudeQ.data?.uiState === 'operational' || claudeQ.data?.uiState === 'stale') && analyses.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {analyses.map(r => (
-              <div key={r.id} style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
-                  <OutputBadge outputType="generated" />
-                  <span style={{ fontSize: 9, fontFamily: 'monospace', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                    {r.analysis_type.replace(/_/g,' ').toUpperCase()}
-                  </span>
-                  <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {r.subject_name}
-                  </span>
-                  <span style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--text-tertiary)', flexShrink: 0 }}>
-                    {r.model} · ${parseFloat(r.model_cost_usd).toFixed(4)}
-                  </span>
+            {analyses.map(r => {
+              const isComp = r.analysis_type === 'supplier_comparison';
+              const isRfq  = r.analysis_type === 'rfq_draft';
+              const readiness = isRfq ? 'READY TO SEND' : isComp ? 'READY FOR REVIEW' : 'COMPLETE';
+              return (
+                <div key={r.id} style={{ backgroundColor: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+                    <OutputBadge outputType="generated" />
+                    <span style={{ fontSize: 9, fontFamily: 'monospace', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                      {r.analysis_type.replace(/_/g,' ').toUpperCase()}
+                    </span>
+                    <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {r.subject_name}
+                    </span>
+                    <ReadinessSignal state={readiness} compact />
+                  </div>
+                  <p style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', lineHeight: 1.6, margin: 0,
+                    display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {r.preview}
+                  </p>
                 </div>
-                <p style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--text-tertiary)', lineHeight: 1.6, margin: 0,
-                  display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {r.preview}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
