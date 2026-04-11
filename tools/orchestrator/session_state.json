@@ -1,1 +1,18 @@
-{"session_id":"loop1","started_at":"2026-04-11T00:00:00+00:00","last_updated":"2026-04-11T00:00:00+00:00","current_directive":null,"completed_count":0,"failed_count":0,"escalated_count":0,"directives":[]}
+{
+  "session_id": "d57",
+  "started_at": "2026-04-11T00:00:00+00:00",
+  "last_updated": "2026-04-11T00:00:00+00:00",
+  "current_directive": null,
+  "completed_count": 6,
+  "failed_count": 0,
+  "escalated_count": 0,
+  "directives": [
+    {"directive_id": "D55-001", "title": "Enrich top 5 contacts", "status": "COMPLETE", "attempt": 1, "commit_sha": "b6ef600", "started_at": "", "completed_at": "", "error": "", "architect_plan": null, "research_results": [], "build_output": null, "audit_result": null},
+    {"directive_id": "D55-002", "title": "Pricing baseline", "status": "COMPLETE", "attempt": 1, "commit_sha": "0456f01", "started_at": "", "completed_at": "", "error": "", "architect_plan": null, "research_results": [], "build_output": null, "audit_result": null},
+    {"directive_id": "D55-003", "title": "Baker Hughes learning delta", "status": "COMPLETE", "attempt": 1, "commit_sha": "fb43f77", "started_at": "", "completed_at": "", "error": "", "architect_plan": null, "research_results": [], "build_output": null, "audit_result": null},
+    {"directive_id": "D56-001", "title": "Neon DB export script", "status": "COMPLETE", "attempt": 1, "commit_sha": "e6efd85", "started_at": "", "completed_at": "", "error": "", "architect_plan": null, "research_results": [], "build_output": null, "audit_result": null},
+    {"directive_id": "D56-002", "title": "RFQ drafts", "status": "COMPLETE", "attempt": 1, "commit_sha": "44977ce", "started_at": "", "completed_at": "", "error": "", "architect_plan": null, "research_results": [], "build_output": null, "audit_result": null},
+    {"directive_id": "D56-003", "title": "Pricing verification tracker", "status": "COMPLETE", "attempt": 1, "commit_sha": "5725ede", "started_at": "", "completed_at": "", "error": "", "architect_plan": null, "research_results": [], "build_output": null, "audit_result": null},
+    {"directive_id": "D56-004", "title": "Program master report", "status": "COMPLETE", "attempt": 1, "commit_sha": "5725ede", "started_at": "", "completed_at": "", "error": "", "architect_plan": null, "research_results": [], "build_output": null, "audit_result": null}
+  ]
+}
