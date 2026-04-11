@@ -106,10 +106,36 @@ Return structured audit result in JSON format."""
                     raise
             except Exception as e:
                 if attempt == MAX_RETRIES - 1:
-                    raise
+                    log.warning("xAI unreachable — falling back to Claude as Auditor")
+                    return self._call_claude_fallback(prompt)
                 time.sleep(BACKOFF_BASE ** attempt)
 
-        raise RuntimeError("Auditor: max retries exceeded")
+        return self._call_claude_fallback(prompt)
+
+    def _call_claude_fallback(self, prompt: str) -> str:
+        """Use Claude as Auditor fallback when xAI is unreachable."""
+        import os
+        anthropic_key = os.getenv("ANTHROPIC_API_KEY", "")
+        if not anthropic_key:
+            raise RuntimeError("Auditor: xAI unreachable and no ANTHROPIC_API_KEY fallback")
+
+        headers = {
+            "x-api-key":         anthropic_key,
+            "anthropic-version": "2023-06-01",
+            "Content-Type":      "application/json",
+        }
+        payload = {
+            "model":      "claude-haiku-4-5-20251001",
+            "max_tokens": MAX_TOKENS["auditor"],
+            "system":     AUDITOR_SYSTEM,
+            "messages":   [{"role": "user", "content": prompt}],
+        }
+        r = requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers=headers, json=payload, timeout=self.timeout
+        )
+        r.raise_for_status()
+        return r.json()["content"][0]["text"]
 
     def _parse(self, raw: str) -> Dict[str, Any]:
         clean = raw.strip()

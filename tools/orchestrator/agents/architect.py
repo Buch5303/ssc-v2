@@ -74,10 +74,41 @@ class ArchitectAgent:
                     raise
             except Exception as e:
                 if attempt == MAX_RETRIES - 1:
-                    raise
+                    log.warning("OpenAI unreachable — falling back to Claude as Architect")
+                    return self._call_claude_fallback(messages)
                 time.sleep(BACKOFF_BASE ** attempt)
 
-        raise RuntimeError("Architect: max retries exceeded")
+        log.warning("OpenAI max retries — falling back to Claude as Architect")
+        return self._call_claude_fallback(messages)
+
+    def _call_claude_fallback(self, messages: list) -> str:
+        """Use Claude as Architect fallback when OpenAI is unreachable."""
+        import os
+        anthropic_key = os.getenv("ANTHROPIC_API_KEY", "")
+        if not anthropic_key:
+            raise RuntimeError("Architect: OpenAI unreachable and no ANTHROPIC_API_KEY fallback")
+
+        # Convert OpenAI message format to Anthropic format
+        system_msg = next((m["content"] for m in messages if m["role"] == "system"), ARCHITECT_SYSTEM)
+        user_msg   = next((m["content"] for m in messages if m["role"] == "user"), "")
+
+        headers = {
+            "x-api-key":         anthropic_key,
+            "anthropic-version": "2023-06-01",
+            "Content-Type":      "application/json",
+        }
+        payload = {
+            "model":      "claude-haiku-4-5-20251001",
+            "max_tokens": MAX_TOKENS["architect"],
+            "system":     system_msg,
+            "messages":   [{"role": "user", "content": user_msg}],
+        }
+        r = requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers=headers, json=payload, timeout=self.timeout
+        )
+        r.raise_for_status()
+        return r.json()["content"][0]["text"]
 
     def _parse(self, raw: str) -> Dict[str, Any]:
         try:
