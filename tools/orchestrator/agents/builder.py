@@ -36,10 +36,11 @@ class BuilderAgent:
         build_spec: Dict[str, Any],
         research_context: str = "",
         correction_context: Optional[Dict[str, Any]] = None,
+        acceptance_criteria: list = None,
     ) -> Dict[str, Any]:
         """
         Given a build spec and optional research context, implement the directive.
-        Returns structured output with file contents.
+        Runs self-edit pass before returning to catch issues early.
         """
         if not self.available():
             raise RuntimeError("ANTHROPIC_API_KEY not set — Builder unavailable")
@@ -61,8 +62,19 @@ Research Evidence:
 
 Implement this specification exactly. Return complete file contents for all files."""
 
-        raw = self._call(prompt)
-        return self._parse(raw)
+        raw    = self._call(prompt)
+        result = self._parse(raw)
+
+        # Self-edit pass — catch issues before audit
+        if result.get("files") and acceptance_criteria:
+            from agents.self_editor import self_edit
+            result = self_edit(
+                result,
+                acceptance_criteria,
+                build_spec.get("title", ""),
+            )
+
+        return result
 
     def _call(self, prompt: str) -> str:
         headers = {
