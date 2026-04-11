@@ -93,14 +93,20 @@ class Orchestrator:
 
     # ── Main loop ─────────────────────────────────────────────────────────────
 
-    def run(self, once: bool = False) -> None:
-        """Run the orchestration loop. Stops when queue is empty or once=True."""
-        log.info("Orchestrator starting — dry_run=%s", self.dry_run)
+    def run(self, once: bool = False, loop: bool = False) -> None:
+        """Run the orchestration loop. Stops when queue is empty unless loop=True."""
+        log.info("Orchestrator starting — dry_run=%s loop=%s", self.dry_run, loop)
         log.info("Agents: Architect=%s, Researcher=%s, Builder=%s, Auditor=%s",
                  "✓" if self.architect.available() else "✗ (no key)",
                  "✓" if self.researcher.available() else "✗ (no key)",
                  "✓" if self.builder.available() else "✗ (no key)",
                  "✓" if self.auditor.available() else "✗ (no key)")
+
+        if loop:
+            log.info("CONTINUOUS MODE — running forever. Add directives to directive_queue.json anytime.")
+            log.info("Press Ctrl+C to stop.")
+            self._run_continuous()
+            return
 
         completed_ids = [
             d.directive_id for d in self.state.state.directives
@@ -130,6 +136,66 @@ class Orchestrator:
             if not success:
                 log.warning("Directive %s failed or escalated — pausing 30s", directive.id)
                 time.sleep(30)
+
+    def _run_continuous(self) -> None:
+        """
+        Continuous loop — runs forever.
+        Polls directive_queue.json every 60 seconds for new work.
+        Auto-syncs git before each run to pick up remote changes.
+        """
+        import subprocess
+        poll_interval = 60  # seconds between queue checks
+
+        while True:
+            try:
+                # Auto-sync git — pull latest before each cycle
+                self._git_sync()
+
+                # Reload queue and state
+                self.queue.reload()
+                completed_ids = [
+                    d.directive_id for d in self.state.state.directives
+                    if d.status == "COMPLETE"
+                ]
+
+                directive = self.queue.next(completed_ids)
+
+                if directive:
+                    log.info("━" * 60)
+                    log.info("DIRECTIVE: [%s] %s", directive.id, directive.title)
+                    log.info("━" * 60)
+
+                    success = self.run_directive(directive)
+                    if success:
+                        log.info("✓ [%s] Complete — checking for more work", directive.id)
+                    else:
+                        log.warning("✗ [%s] Failed — will retry next cycle", directive.id)
+                        time.sleep(30)
+                else:
+                    log.info("Queue empty — polling again in %ds. Add directives to directive_queue.json to continue.", poll_interval)
+                    time.sleep(poll_interval)
+
+            except KeyboardInterrupt:
+                log.info("Orchestrator stopped by user.")
+                break
+            except Exception as e:
+                log.error("Unexpected loop error: %s — continuing in 30s", e)
+                time.sleep(30)
+
+    def _git_sync(self) -> None:
+        """Auto-sync git — rebase local on remote before each cycle."""
+        import subprocess
+        try:
+            subprocess.run(
+                ["git", "fetch", "origin", BRANCH],
+                capture_output=True, cwd=REPO_ROOT,
+            )
+            subprocess.run(
+                ["git", "rebase", f"origin/{BRANCH}"],
+                capture_output=True, cwd=REPO_ROOT,
+            )
+        except Exception as e:
+            log.debug("Git sync skipped: %s", e)
 
     # ── Single directive pipeline ─────────────────────────────────────────────
 
@@ -379,6 +445,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--once",     action="store_true", help="Run one directive then stop")
     p.add_argument("--dry-run",  action="store_true", help="Plan only — no building or commits")
     p.add_argument("--status",   action="store_true", help="Show queue status and exit")
+    p.add_argument("--loop",     action="store_true", help="Run forever — poll queue every 60s for new directives")
     p.add_argument("--add",      help="Add a directive to the queue (JSON string or file path)")
     return p.parse_args()
 
@@ -386,7 +453,6 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    # Change to orchestrator directory for relative paths
     import os
     os.chdir(Path(__file__).parent)
 
@@ -397,7 +463,6 @@ def main() -> None:
         return
 
     if args.add:
-        # Add a directive to the queue
         try:
             if Path(args.add).exists():
                 with open(args.add) as f:
@@ -412,7 +477,7 @@ def main() -> None:
         return
 
     orchestrator.status()
-    orchestrator.run(once=args.once)
+    orchestrator.run(once=args.once, loop=args.loop)
 
 
 if __name__ == "__main__":

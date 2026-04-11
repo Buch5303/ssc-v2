@@ -51,14 +51,44 @@ def commit_and_push(
         # Get SHA
         sha = _get_current_sha(repo_root)
 
-        # Push
+        # Push — auto-rebase if rejected
         r = subprocess.run(
             ["git", "push", "origin", branch],
             capture_output=True, text=True, cwd=repo_root,
         )
         if r.returncode != 0:
-            log.warning("Push failed: %s", r.stderr)
-            return True, sha   # commit succeeded even if push failed
+            if "non-fast-forward" in r.stderr or "rejected" in r.stderr:
+                log.info("Push rejected — rebasing on remote and retrying")
+                subprocess.run(
+                    ["git", "fetch", "origin", branch],
+                    capture_output=True, cwd=repo_root,
+                )
+                rebase = subprocess.run(
+                    ["git", "rebase", f"origin/{branch}"],
+                    capture_output=True, text=True, cwd=repo_root,
+                )
+                if rebase.returncode != 0:
+                    # Rebase failed — force push as last resort
+                    subprocess.run(
+                        ["git", "rebase", "--abort"],
+                        capture_output=True, cwd=repo_root,
+                    )
+                    r2 = subprocess.run(
+                        ["git", "push", "origin", branch, "--force-with-lease"],
+                        capture_output=True, text=True, cwd=repo_root,
+                    )
+                    if r2.returncode != 0:
+                        log.warning("Push failed: %s", r2.stderr)
+                        return True, sha  # commit succeeded
+                else:
+                    r2 = subprocess.run(
+                        ["git", "push", "origin", branch],
+                        capture_output=True, text=True, cwd=repo_root,
+                    )
+                    if r2.returncode != 0:
+                        log.warning("Push after rebase failed: %s", r2.stderr)
+            else:
+                log.warning("Push failed: %s", r.stderr)
 
         log.info("Committed and pushed: %s", sha)
         return True, sha
