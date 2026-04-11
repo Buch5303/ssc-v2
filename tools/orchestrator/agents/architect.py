@@ -111,8 +111,27 @@ class ArchitectAgent:
         return r.json()["content"][0]["text"]
 
     def _parse(self, raw: str) -> Dict[str, Any]:
+        clean = raw.strip()
+        # Strip markdown fences
+        if "```json" in clean:
+            start = clean.find("```json") + 7
+            end   = clean.rfind("```")
+            clean = clean[start:end].strip()
+        elif clean.startswith("```"):
+            lines = clean.split("\n")
+            clean = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+
         try:
-            return json.loads(raw)
-        except json.JSONDecodeError as e:
-            log.error("Architect returned invalid JSON: %s", raw[:200])
-            raise RuntimeError(f"Architect JSON parse failed: {e}")
+            return json.loads(clean)
+        except json.JSONDecodeError:
+            # Try extracting JSON object from prose
+            start = clean.find("{")
+            end   = clean.rfind("}") + 1
+            if start >= 0 and end > start:
+                try:
+                    return json.loads(clean[start:end])
+                except json.JSONDecodeError:
+                    pass
+
+        log.error("Architect returned invalid JSON: %s", raw[:200])
+        raise RuntimeError(f"Architect JSON parse failed — could not extract valid JSON from response")
