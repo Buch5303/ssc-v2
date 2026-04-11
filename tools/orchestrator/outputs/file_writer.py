@@ -65,8 +65,17 @@ def run_tests(
 ) -> Tuple[bool, str]:
     """
     Run pytest on the tools directory.
+    Installs pytest automatically if missing.
     Returns (passed, output_string).
     """
+    import subprocess as sp
+    # Auto-install pytest if missing
+    check = sp.run(["python3", "-m", "pytest", "--version"],
+                   capture_output=True, cwd=repo_root)
+    if check.returncode != 0:
+        sp.run(["pip3", "install", "pytest", "--break-system-packages", "-q"],
+               capture_output=True, cwd=repo_root)
+
     try:
         result = subprocess.run(
             ["python3", "-m", "pytest", test_path, "-q", "--tb=short"],
