@@ -1,10 +1,1 @@
-{
-  "session_id": "fresh",
-  "started_at": "2026-04-11T00:00:00+00:00",
-  "last_updated": "2026-04-11T00:00:00+00:00",
-  "current_directive": null,
-  "completed_count": 0,
-  "failed_count": 0,
-  "escalated_count": 0,
-  "directives": []
-}
+{"session_id":"fresh2","started_at":"2026-04-11T00:00:00+00:00","last_updated":"2026-04-11T00:00:00+00:00","current_directive":null,"completed_count":0,"failed_count":0,"escalated_count":0,"directives":[]}
