@@ -316,7 +316,7 @@ class Orchestrator:
             ds.status = "AUDITING"
             self.state.update_directive(ds)
 
-        audit_result = self.auditor.audit(
+            audit_result = self.auditor.audit(
                 build_output={
                     **build_output,
                     "files_written":   files_written,
