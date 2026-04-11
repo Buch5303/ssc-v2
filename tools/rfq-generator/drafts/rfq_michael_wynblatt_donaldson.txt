@@ -1,0 +1,15 @@
+Subject: Project Jupiter — W251B8 BOP Controls / DCS Integration — Budgetary Pricing Request
+
+Dear Michael,
+
+I'm reaching out regarding Project Jupiter — a 50MW W251B8 power island for the Oracle/OpenAI campus at Santa Teresa, New Mexico, where Trans World Power serves as program manager.
+
+We are seeking budgetary pricing for the Controls and DCS Integration scope — specifically the turbine control interface, BOP PLC/DCS, SCADA integration, HMI, field instrumentation, and all associated wiring and commissioning for a 50MW natural gas power island.
+
+Our estimate for this scope is in the $450K–$560K range. Given Donaldson's instrumentation expertise and our existing engagement on the Inlet Air Filtering scope with Tod, we'd like to consolidate the controls discussion with you directly.
+
+Can you point me to the right contact for controls and automation scope within Donaldson, or are you the right person to discuss this?
+
+Best regards,
+Greg Buchanan
+CEO, Trans World Power

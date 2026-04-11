@@ -1,36 +1,36 @@
 {
   "directives": [
     {
-      "id": "D56-001",
-      "title": "Build Neon DB contact export script",
-      "task": "Create tools/contact-verifier/export_contacts_from_db.py — a Python script that connects to Neon PostgreSQL via DATABASE_URL env var and exports all contacts to contacts.csv. CSV columns: first_name, last_name, full_name, company, company_domain, title, priority, category, rfq_status, email. The script must be syntactically valid Python and include a --dry-run flag that prints row count without writing. Also create tools/contact-verifier/EXPORT_README.md explaining how to run it.",
+      "id": "D57-001",
+      "title": "Build RFQ send tracker and status dashboard",
+      "task": "Create tools/rfq-generator/rfq_tracker.py that manages the full RFQ lifecycle. It must: (1) read all .txt files from tools/rfq-generator/drafts/, (2) maintain a tools/rfq-generator/rfq_status.json file tracking each RFQ with fields: contact, company, category, est_value_usd, status (DRAFTED|SENT|RESPONDED|AWARDED|DECLINED), sent_date, response_date, quoted_price, notes, (3) produce tools/rfq-generator/rfq_status_report.md showing pipeline summary, total value in each status bucket, and next actions. Pre-populate rfq_status.json with Baker Hughes VIB_MON as RESPONDED (quoted $340K on Apr 10 2026) and all 6 drafted RFQs as DRAFTED.",
       "priority": 1,
       "depends_on": [],
-      "context": "DATABASE_URL is set in .env. Table is likely named contacts or wave9_contacts. Priority mapping: Baker Hughes contacts = ACTIVE_RFQ, Tier 1 suppliers = TIER1, others = NORMAL. The script does not need to actually run during build — just be correct Python that will work when DATABASE_URL is available."
+      "context": "6 RFQ drafts exist in tools/rfq-generator/drafts/. Baker Hughes already responded at $340K. The tracker needs to show total pipeline value, conversion rate, and next actions clearly."
     },
     {
-      "id": "D56-002",
-      "title": "Generate RFQ drafts for 6 remaining W251 priority contacts",
-      "task": "Create tools/rfq-generator/generate_rfqs.py and run it to produce 6 RFQ draft files in tools/rfq-generator/drafts/. One file per contact: rfq_tod_carpenter_donaldson.txt, rfq_bob_yeager_emerson.txt, rfq_rod_christie_bakerhughes.txt, rfq_michael_wynblatt_donaldson.txt, rfq_harrison_amerex.txt, rfq_neil_ashford_turbotect.txt. Each RFQ: professional C-suite email, under 300 words, references W251B8 power island Santa Teresa NM Project Jupiter, requests budgetary pricing for the relevant BOP category.",
+      "id": "D57-002",
+      "title": "Build supplier intelligence enrichment for top 10 strategic suppliers",
+      "task": "Create tools/supplier-intelligence/enrich_suppliers.py and produce tools/supplier-intelligence/supplier_profiles.md with intelligence profiles for the top 10 strategic suppliers: GE Vernova, Siemens Energy, ABB Power, Emerson (Power & Water), Donaldson Company, Baker Hughes (TPS), CECO Environmental, Eaton Electrical, Flowserve, and EthosEnergy. For each supplier include: company overview, relevant product lines for W251 BOP, key decision maker contacts known, estimated lead times, known W251/frame GT references, and recommended outreach approach. Use only information available in the repo and general knowledge — no external API calls required.",
       "priority": 2,
       "depends_on": [],
-      "context": "Baker Hughes Simonelli RFQ already drafted ($340K Vibration Monitoring). Contacts: Tod Carpenter (Donaldson CEO, Inlet Air Filtering $480K), Bob Yeager (Emerson President Power, Fuel Gas $374K), Rod Christie (Baker Hughes EVP Turbomachinery), Michael Wynblatt (Donaldson CTO), Harrison K (Amerex VP, Fire Fighting $229K), Neil Ashford (Turbotect, Compressor Washing $132K). TWP is program manager. Sign as Greg Buchanan, CEO Trans World Power."
+      "context": "Project Jupiter 50MW W251B8 BOP. These are the top-tier suppliers across STRATEGIC spend categories. Profiles should be concise but actionable — 1 page per supplier."
     },
     {
-      "id": "D56-003",
-      "title": "Build pricing verification status tracker",
-      "task": "Create tools/pricing-discovery/track_verification_status.py and run it to produce two output files: tools/pricing-discovery/outputs/verification_status_report.md and tools/pricing-discovery/outputs/pricing_dashboard.txt. The report shows all 19 BOP categories with ESTIMATED vs VERIFIED status, total $ at risk, and RFQ send priority ranked by $ impact. The dashboard is a one-page executive summary. Read from tools/pricing-discovery/outputs/pricing_updated.csv for input data.",
+      "id": "D57-003",
+      "title": "Build automated BOP cost model Excel-equivalent CSV with scenario analysis",
+      "task": "Create tools/pricing-discovery/bop_cost_model.py that generates tools/pricing-discovery/outputs/bop_cost_model.csv with full scenario analysis. The CSV must have columns: category, category_code, bom_low, bom_mid, bom_high, rfq_quoted, rfq_variance_pct, confidence, spend_tier, preferred_supplier, avoid_supplier, scenario_optimistic, scenario_base, scenario_pessimistic. Populate rfq_quoted for VIB_MON with 340000. Compute scenario columns as: optimistic = bom_low * 0.95, base = bom_mid, pessimistic = bom_high * 1.10. Add a summary row with totals. Also produce outputs/bop_scenario_summary.md with a 3-scenario comparison table.",
       "priority": 3,
       "depends_on": [],
-      "context": "All 19 categories currently COMPONENT_BUILDUPS confidence. Total BOP mid $9.274M. Trillium AVOID on PIPING_VALVES. Baker Hughes VIB_MON will upgrade when response received. 8 STRATEGIC tier categories above $500K."
+      "context": "BOM data is in tools/pricing-discovery/bom_library.py. Baker Hughes quoted $340K for VIB_MON. All other categories at BOM estimate only. Scenarios: optimistic ($7.85M), base ($9.27M), pessimistic ($10.6M)."
     },
     {
-      "id": "D56-004",
-      "title": "Generate W251 program intelligence master report",
-      "task": "Create tools/reports/w251_program_status.md — a comprehensive boardroom-ready executive brief. Sections: (1) Program Overview, (2) BOP Cost Model — all 19 categories with pricing, (3) Supplier Network — 73 suppliers, tier distribution, (4) Contact Pipeline — 231 contacts, RFQ readiness, (5) Active RFQs — Baker Hughes + 6 remaining targets with $ values, (6) Risk Register — Trillium AVOID, pricing unverified, contact gap, (7) Recommended 30-Day Action Plan. Use actual data from pricing_updated.csv and contacts_sample.csv.",
+      "id": "D57-004",
+      "title": "Build contact outreach sequence generator",
+      "task": "Create tools/contact-verifier/outreach_sequences.py that generates personalized 3-touch outreach sequences for the top 8 W251 priority contacts. For each contact produce: Touch 1 (initial RFQ intro, reference Project Jupiter), Touch 2 (follow-up 5 days later, add urgency — Q3 2026 award target), Touch 3 (final follow-up 10 days after Touch 1, offer alternative contact or pivot). Output to tools/contact-verifier/outreach_sequences/ as individual .md files per contact. Contacts: Lorenzo Simonelli (BH CEO), Bob Yeager (Emerson), Tod Carpenter (Donaldson), Michael Wynblatt (Donaldson), Rod Christie (BH EVP), Harrison K (Amerex), Neil Ashford (Turbotect), Alberto Malandra (EthosEnergy Italia).",
       "priority": 4,
-      "depends_on": ["D56-002", "D56-003"],
-      "context": "Project Jupiter. 50MW W251B8. Oracle/OpenAI campus Santa Teresa NM. TWP program manager. EthosEnergy GT supplier. Total BOP $9.274M. 1 RFQ drafted (Baker Hughes $340K). 6 more to send. CFO/CPO level document."
+      "depends_on": ["D57-001"],
+      "context": "Sequences should be professional C-suite appropriate. Sign as Greg Buchanan, CEO Trans World Power. Reference W251B8, Project Jupiter, Santa Teresa NM, Oracle/OpenAI campus. EthosEnergy sequence should reference the MOU signed March 13 2026 and Todd Dunlop as technical contact."
     }
   ]
 }
