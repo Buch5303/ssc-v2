@@ -1,0 +1,81 @@
+PURCHASE ORDER
+Trans World Power LLC
+Project Jupiter — W251B8 BOP Package
+
+PO Number:    TWP-2026-0001
+Date:         April 12, 2026
+Revision:     0
+
+VENDOR:
+Baker Hughes
+[Address]
+[City, State, ZIP]
+[Phone] | [Email]
+
+SHIP TO:
+Santa Teresa Power Station
+[Site Address]
+Santa Teresa, NM 88008
+
+PROJECT: Project Jupiter — 50MW W251B8 Power Island
+PROGRAM MANAGER: Trans World Power LLC
+GT SUPPLIER: EthosEnergy Italia
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LINE ITEMS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Item 01: Vibration Monitoring System
+  Description: Bently Nevada 3500 Series Vibration Monitoring System for W251B8 gas turbine, complete with proximitors, monitors, rack, and integration to plant DCS
+  Quantity:    1 Lot
+  Unit Price:  $340,000.00
+  Total:       $340,000.00
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PO TOTAL:    $340,000.00 USD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TERMS AND CONDITIONS:
+
+1. DELIVERY
+   Required delivery: Per agreed schedule. Vendor to confirm within 5 business days.
+   Delivery point: Santa Teresa, NM project site (DDP Incoterms 2020)
+   Expedite notification: Vendor to notify TWP immediately if delivery is at risk.
+
+2. PAYMENT TERMS
+   30% upon PO execution (net 15)
+   40% upon factory acceptance test (FAT) completion
+   30% upon site delivery and inspection acceptance
+
+3. QUALITY REQUIREMENTS
+   Vendor shall provide: ITP (Inspection Test Plan), FAT procedure, and QA documentation.
+   TWP reserves the right to witness FAT at vendor facility.
+   All equipment shall comply with applicable codes: ASME, NFPA, IEEE, NEC as applicable.
+
+4. WARRANTY
+   Vendor warrants all equipment for 24 months from First Power or 30 months from delivery,
+   whichever occurs first.
+
+5. DOCUMENTATION
+   Vendor shall provide within 30 days of PO: general arrangement drawings, data sheets,
+   preliminary O&M manual, spare parts list with pricing.
+
+6. LIQUIDATED DAMAGES
+   Delivery delay: $5,000 per calendar day after scheduled delivery date.
+   Maximum LD exposure: 10% of PO value.
+
+7. INTELLECTUAL PROPERTY
+   Vendor retains IP in equipment. TWP receives license to use all documentation and
+   software for operation and maintenance of the project.
+
+8. GOVERNING LAW
+   This PO is governed by the laws of the State of New Mexico, USA.
+
+ACCEPTANCE:
+
+Trans World Power LLC                    Baker Hughes
+_______________________                  _______________________
+Greg Buchanan, CEO                       [Authorized Signatory]
+Date: _______________                    Date: _______________
+
+[TWP Address]                            [Vendor Address]

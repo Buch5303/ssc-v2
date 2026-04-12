@@ -1,0 +1,22 @@
+{
+  "baseline": 9274000.0,
+  "scenarios": {
+    "base": {
+      "total": 9274000,
+      "name": "Base Case \u2014 BOM Estimates"
+    },
+    "conservative": {
+      "total": 10077458,
+      "name": "Conservative \u2014 Historical Overrun"
+    },
+    "optimistic": {
+      "total": 9135385,
+      "name": "Optimistic \u2014 Competitive Pressure"
+    },
+    "aggressive": {
+      "total": 8854055,
+      "name": "Aggressive \u2014 Best Negotiated"
+    }
+  },
+  "generated": "2026-04-12T17:37:58.811541"
+}
