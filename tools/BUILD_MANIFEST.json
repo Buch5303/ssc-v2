@@ -1,0 +1,106 @@
+{
+  "platform": "FlowSeer SSC V2",
+  "program": "Project Jupiter \u2014 W251B8 50MW BOP",
+  "version": "2.1.0",
+  "build_date": "2026-04-11",
+  "grok_audit": "PASS 102/102",
+  "latest_commit": "0481bd3",
+  "ui_baseline": "2111282",
+  "rfq_send_date": "2026-05-25",
+  "days_to_rfq": 44,
+  "bop_total_mid": 9274000,
+  "tests": {
+    "contact_verifier": "45/45",
+    "pricing_discovery": "67/67",
+    "orchestrator": "13/13",
+    "total": "125/125"
+  },
+  "tools": {
+    "orchestrator": {
+      "version": "v2.1",
+      "agents": [
+        "ChatGPT (Architect)",
+        "Perplexity (Researcher)",
+        "Claude (Builder+Self-Editor)",
+        "Grok (Auditor)"
+      ],
+      "features": [
+        "parallel_dual_track",
+        "self_edit",
+        "research_cache_24hr",
+        "tiered_models",
+        "claude_fallback"
+      ],
+      "entry": "tools/orchestrator/go.py"
+    },
+    "contact_verifier": {
+      "pipeline_layers": 10,
+      "contacts_total": 231,
+      "contacts_verified": 64,
+      "entry": "tools/contact-verifier/contact_verifier.py",
+      "paid_upgrade": "Apollo $49/mo + Hunter $34/mo"
+    },
+    "pricing_discovery": {
+      "categories": 19,
+      "bop_mid_usd": 9274000,
+      "vectors": [
+        "BOM_buildUP",
+        "FERC_EIA",
+        "USASpending",
+        "Google_CSE",
+        "Perplexity"
+      ],
+      "entry": "tools/pricing-discovery/pricing_discovery.py"
+    },
+    "rfq_pipeline": {
+      "total_rfqs": 7,
+      "responded": 1,
+      "drafted": 6,
+      "send_date": "2026-05-25",
+      "pipeline_value_usd": 2862000,
+      "entry": "tools/rfq-generator/rfq_send_scheduler.py"
+    },
+    "live_api": {
+      "endpoints": 6,
+      "db": "Neon PostgreSQL",
+      "fallback": "CSV",
+      "entry": "tools/api/neon_api.py",
+      "init": "tools/api/init_db.py"
+    },
+    "dashboard": {
+      "data_files": 6,
+      "frontend": "flowseer-dashboard.vercel.app",
+      "entry": "tools/dashboard/generate_dashboard_data.py"
+    },
+    "monitoring": {
+      "health_checks": 25,
+      "entry": "tools/monitoring/platform_health.py"
+    }
+  },
+  "reports": {
+    "program_status": "tools/reports/w251_program_status.md",
+    "program_timeline": "tools/reports/program_timeline.md",
+    "weekly_status": "tools/reports/weekly_status_report.md",
+    "rfq_countdown": "tools/reports/rfq_countdown.md",
+    "grok_audit": "tools/reports/GROK_AUDIT_REPORT.md",
+    "changelog": "tools/changelog/CHANGELOG.md",
+    "verification": "tools/pricing-discovery/outputs/verification_status_report.md",
+    "supplier_profiles": "tools/supplier-intelligence/supplier_profiles.md"
+  },
+  "critical_path": {
+    "ethosenergy_icd": "PENDING \u2014 blocks Transformer, Exhaust, Electrical RFQs ($1.725M)",
+    "transformer_lead": "52-70 weeks \u2014 must RFQ May 25, award Aug 15 for Q2 2027",
+    "baker_hughes_decision": "Accept $340K quote or negotiate before May 1"
+  },
+  "api_keys_required": {
+    "ANTHROPIC_API_KEY": "required \u2014 Claude builder",
+    "OPENAI_API_KEY": "required \u2014 ChatGPT architect",
+    "PERPLEXITY_API_KEY": "required \u2014 Perplexity researcher",
+    "XAI_API_KEY": "required \u2014 Grok auditor",
+    "DATABASE_URL": "required \u2014 Neon PostgreSQL",
+    "GOOGLE_API_KEY": "optional \u2014 live pricing CSE",
+    "GOOGLE_CSE_ID": "optional \u2014 live pricing CSE",
+    "APOLLO_API_KEY": "optional \u2014 contact enrichment $49/mo",
+    "HUNTER_API_KEY": "optional \u2014 email verification $34/mo"
+  }
+}
