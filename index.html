@@ -3,814 +3,669 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FlowSeer — Project Jupiter Intelligence</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<title>FlowSeer — Project Jupiter Command Interface</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:       #090c0f;
-  --bg2:      #0e1318;
-  --bg3:      #141b22;
-  --border:   #1e2a35;
-  --amber:    #f59e0b;
-  --amber2:   #fbbf24;
-  --red:      #ef4444;
-  --green:    #22c55e;
-  --blue:     #3b82f6;
-  --muted:    #4a6070;
-  --text:     #c8d8e4;
-  --dim:      #6b8599;
+  --bg-base:#070D14;--bg-surface:#0C1520;--bg-panel:#101D2B;--bg-raised:#152332;--bg-hover:#1A2C3D;
+  --border-subtle:#162030;--border-default:#1E2F42;--border-strong:#2A4058;
+  --text-primary:#D8E8F4;--text-secondary:#7A9BB5;--text-dim:#3D5A72;
+  --critical:#EF4444;--critical-bg:rgba(239,68,68,.08);--critical-bd:rgba(239,68,68,.22);
+  --warning:#F59E0B;--warning-bg:rgba(245,158,11,.07);--warning-bd:rgba(245,158,11,.22);
+  --success:#10B981;--success-bg:rgba(16,185,129,.07);--success-bd:rgba(16,185,129,.2);
+  --info:#3B82F6;--info-bg:rgba(59,130,246,.07);--info-bd:rgba(59,130,246,.2);
+  --accent:#1D6FA4;--accent2:#2486C5;
+  --font-ui:'IBM Plex Sans',sans-serif;--font-mono:'IBM Plex Mono',monospace;
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-primary);font-size:13px;line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;background:rgba(7,13,20,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border-default);display:flex;align-items:stretch;height:52px}
+.topbar-brand{display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid var(--border-subtle);min-width:220px}
+.brand-logo{width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;color:#fff;flex-shrink:0}
+.brand-name{font-size:13px;font-weight:600;color:var(--text-primary)}
+.brand-prog{font-size:10px;color:var(--text-secondary);letter-spacing:.5px}
+.topbar-nav{display:flex;align-items:stretch;flex:1;padding:0 8px}
+.nav-tab{display:flex;align-items:center;gap:6px;padding:0 16px;border:none;background:none;cursor:pointer;font-family:var(--font-ui);font-size:12px;font-weight:500;color:var(--text-dim);letter-spacing:.3px;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap}
+.nav-tab:hover{color:var(--text-secondary)}
+.nav-tab.active{color:var(--text-primary);border-bottom-color:var(--accent2)}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:var(--critical);display:none}
+.nav-tab.alert .nav-dot{display:block}
+.topbar-right{display:flex;align-items:center;gap:12px;padding:0 16px;border-left:1px solid var(--border-subtle);margin-left:auto}
+.health-pill{display:flex;align-items:center;gap:5px;background:var(--success-bg);border:1px solid var(--success-bd);border-radius:100px;padding:3px 10px;font-family:var(--font-mono);font-size:10px;color:var(--success);letter-spacing:.8px}
+.pulse{width:5px;height:5px;border-radius:50%;background:var(--success);animation:pulse 2.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(16,185,129,.4)}50%{opacity:.6;box-shadow:0 0 0 4px rgba(16,185,129,0)}}
+.ts-chip{font-family:var(--font-mono);font-size:10px;color:var(--text-dim)}
 
-body {
-  font-family: 'JetBrains Mono', monospace;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+/* CONDITION BANNER */
+.cond-bar{background:var(--critical-bg);border-bottom:1px solid var(--critical-bd);padding:0 24px;display:flex;align-items:center;min-height:40px;gap:0}
+.cond-bar.warn{background:var(--warning-bg);border-bottom-color:var(--warning-bd)}
+.cond-bar.ok{background:var(--success-bg);border-bottom-color:var(--success-bd)}
+.cond-tag{font-family:var(--font-mono);font-size:9px;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;padding:0 12px 0 0;border-right:1px solid var(--critical-bd);margin-right:12px;color:var(--critical);white-space:nowrap}
+.cond-bar.warn .cond-tag{color:var(--warning);border-right-color:var(--warning-bd)}
+.cond-bar.ok .cond-tag{color:var(--success);border-right-color:var(--success-bd)}
+.cond-items{display:flex;flex:1;overflow:hidden}
+.cond-item{display:flex;align-items:center;gap:8px;padding:10px 16px;border-right:1px solid rgba(30,47,66,.4);font-size:11px;flex-shrink:0}
+.cond-item:last-child{border-right:none}
+.ci-label{color:var(--text-dim)}
+.ci-val{color:var(--text-primary);font-weight:500}
+.ci-action{color:var(--critical);font-family:var(--font-mono);font-size:10px;cursor:pointer}
+.cond-bar.warn .ci-action{color:var(--warning)}
 
-/* Animated grid background */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(245,158,11,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(245,158,11,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
-  z-index: 0;
-}
+/* PAGES */
+.page{display:none}
+.page.active{display:block}
+.content{max-width:1440px;margin:0 auto;padding:24px 24px 48px}
 
-.wrap { position: relative; z-index: 1; max-width: 1440px; margin: 0 auto; padding: 0 24px 48px; }
+/* TIER LABELS */
+.tier-lbl{font-family:var(--font-mono);font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.tier-lbl::after{content:'';flex:1;height:1px;background:var(--border-subtle)}
 
-/* ── HEADER ──────────────────────────────────────────────── */
-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 20px 0 16px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 28px;
-}
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:24px}
+.kpi{background:var(--bg-panel);border:1px solid var(--border-default);border-radius:10px;padding:16px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--border-strong)}
+.kpi.c-crit::before{background:var(--critical)}
+.kpi.c-warn::before{background:var(--warning)}
+.kpi.c-ok::before{background:var(--success)}
+.kpi.c-info::before{background:var(--info)}
+.kpi-lbl{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px}
+.kpi-val{font-family:var(--font-mono);font-size:24px;color:var(--text-primary);line-height:1;margin-bottom:6px;letter-spacing:-.5px}
+.kpi.c-crit .kpi-val{color:#F87171}
+.kpi.c-warn .kpi-val{color:var(--warning)}
+.kpi.c-ok .kpi-val{color:var(--success)}
+.kpi-sub{font-size:10px;color:var(--text-dim);line-height:1.4}
+.kpi-badge{position:absolute;top:10px;right:10px}
 
-.brand { display: flex; align-items: baseline; gap: 12px; }
+/* BADGES */
+.badge{display:inline-flex;align-items:center;font-family:var(--font-mono);font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.bv{background:var(--success-bg);color:var(--success);border:1px solid var(--success-bd)}
+.be{background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-bd)}
+.bc{background:var(--critical-bg);color:var(--critical);border:1px solid var(--critical-bd)}
+.bs{background:var(--info-bg);color:var(--info);border:1px solid var(--info-bd)}
+.bp{background:var(--bg-raised);color:var(--text-secondary);border:1px solid var(--border-strong)}
+.bd{background:rgba(234,179,8,.08);color:#EAB308;border:1px solid rgba(234,179,8,.2)}
 
-.brand-name {
-  font-family: 'Syne', sans-serif;
-  font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
-  color: var(--amber);
-}
+/* PANELS */
+.panel{background:var(--bg-panel);border:1px solid var(--border-default);border-radius:10px;overflow:hidden}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised)}
+.pt{font-size:11px;font-weight:600;letter-spacing:.8px;color:var(--text-secondary);text-transform:uppercase}
+.pm{display:flex;align-items:center;gap:8px}
+.pb{padding:16px 18px}
+.pb0{padding:0}
 
-.brand-sub {
-  font-size: 11px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase;
-}
+/* ALERT CARDS */
+.a-cards{display:flex;flex-direction:column;gap:8px}
+.a-card{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:8px;border:1px solid}
+.a-crit{background:var(--critical-bg);border-color:var(--critical-bd)}
+.a-warn{background:var(--warning-bg);border-color:var(--warning-bd)}
+.a-ok{background:var(--success-bg);border-color:var(--success-bd)}
+.a-title{font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:3px}
+.a-crit .a-title{color:#FCA5A5}
+.a-warn .a-title{color:#FDE68A}
+.a-ok .a-title{color:#6EE7B7}
+.a-detail{font-size:11px;color:var(--text-secondary);line-height:1.5}
+.a-action{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);margin-top:6px;cursor:pointer}
+.a-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
 
-.header-right { display: flex; align-items: center; gap: 24px; }
+/* TABLES */
+.dt{width:100%;border-collapse:collapse;font-size:11px}
+.dt th{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);padding:9px 14px;text-align:left;border-bottom:1px solid var(--border-default);white-space:nowrap;background:var(--bg-raised)}
+.dt td{padding:9px 14px;border-bottom:1px solid var(--border-subtle);color:var(--text-primary);vertical-align:middle}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:var(--bg-hover)}
+.dt .mono{font-family:var(--font-mono);font-size:11px}
+.dt .dim{color:var(--text-secondary)}
+.dt .r{text-align:right}
+.dt .crit-row td{background:rgba(239,68,68,.04)}
 
-.health-badge {
-  display: flex; align-items: center; gap: 6px;
-  background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2);
-  border-radius: 4px; padding: 5px 10px;
-  font-size: 11px; color: var(--green); letter-spacing: 1px;
-}
+/* BARS */
+.bars{display:flex;flex-direction:column;gap:5px}
+.bar-row{display:grid;grid-template-columns:160px 1fr 72px;align-items:center;gap:10px}
+.bar-lbl{font-size:10px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{height:7px;background:var(--bg-raised);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width 1.4s cubic-bezier(.16,1,.3,1)}
+.bf-s{background:linear-gradient(90deg,#1D6FA4,#2A8DC8)}
+.bf-t{background:linear-gradient(90deg,#2D5A4C,#3D7A68)}
+.bf-std{background:linear-gradient(90deg,#2A3A4A,#3A5068)}
+.bf-v{background:linear-gradient(90deg,#1A6644,#27B375)}
+.bar-amt{font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);text-align:right}
 
-.health-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 6px var(--green);
-  animation: pulse 2s ease-in-out infinite;
-}
+/* SCENARIOS */
+.sc-group{display:flex;flex-direction:column;gap:10px}
+.sc-row{display:grid;grid-template-columns:176px 1fr 100px;align-items:center;gap:12px}
+.sc-name{font-size:11px;color:var(--text-secondary)}
+.sc-track{height:28px;background:var(--bg-raised);border-radius:6px;position:relative;overflow:hidden}
+.sc-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-family:var(--font-mono);font-size:11px;transition:width 1.5s cubic-bezier(.16,1,.3,1)}
+.sc-base{background:rgba(55,65,81,.6);color:#9CA3AF}
+.sc-cons{background:rgba(127,29,29,.5);color:#FCA5A5}
+.sc-opti{background:rgba(20,83,45,.55);color:#86EFAC}
+.sc-aggr{background:rgba(6,78,59,.55);color:#6EE7B7}
+.sc-delta{font-family:var(--font-mono);font-size:10px;text-align:right}
 
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+/* PIPELINE STAGES */
+.stages{display:flex;align-items:stretch;background:var(--bg-raised);border:1px solid var(--border-default);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.stage{flex:1;padding:18px 16px;border-right:1px solid var(--border-default);position:relative}
+.stage:last-child{border-right:none}
+.stage.active{background:rgba(29,111,164,.08)}
+.s-name{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px}
+.stage.active .s-name{color:var(--accent2)}
+.s-count{font-family:var(--font-mono);font-size:28px;color:var(--text-primary);line-height:1}
+.stage.active .s-count{color:var(--accent2)}
+.s-val{font-size:10px;color:var(--text-secondary);margin-top:4px}
+.s-arr{position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:16px;height:16px;background:var(--bg-panel);border:1px solid var(--border-default);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--text-dim);z-index:1}
 
-.ts { font-size: 11px; color: var(--dim); }
+/* STAT ROW */
+.sr{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--border-subtle);font-size:11px}
+.sr:last-child{border-bottom:none}
+.sk{color:var(--text-secondary)}
+.sv{font-family:var(--font-mono);color:var(--text-primary)}
+.sv.pos{color:#F87171}.sv.warn{color:var(--warning)}.sv.ok{color:var(--success)}
 
-/* ── ALERT BAR ───────────────────────────────────────────── */
-.alert-bar {
-  background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.25);
-  border-radius: 6px; padding: 10px 16px;
-  display: flex; align-items: center; gap: 16px;
-  margin-bottom: 28px;
-  font-size: 12px;
-}
+/* CRITICAL PATH */
+.cp-list{display:flex;flex-direction:column;gap:8px}
+.cp-item{display:flex;gap:12px;padding:12px 14px;background:var(--bg-raised);border-radius:8px;border-left:3px solid}
+.cp-crit{border-left-color:var(--critical)}
+.cp-warn{border-left-color:var(--warning)}
+.cp-ok{border-left-color:var(--success)}
+.cp-num{font-family:var(--font-mono);font-size:18px;font-weight:300;color:var(--text-dim);flex-shrink:0;width:24px;line-height:1}
+.cp-title{font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:3px}
+.cp-detail{font-size:10px;color:var(--text-secondary);line-height:1.5}
+.cp-action{font-family:var(--font-mono);font-size:9px;letter-spacing:.5px;margin-top:5px;cursor:pointer}
+.cp-crit .cp-action{color:#F87171}.cp-warn .cp-action{color:var(--warning)}.cp-ok .cp-action{color:var(--success)}
 
-.alert-tag {
-  background: var(--red); color: #fff;
-  font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
-  padding: 2px 7px; border-radius: 3px; white-space: nowrap;
-  font-family: 'Syne', sans-serif;
-}
+/* CONC BARS */
+.conc-bars{display:flex;flex-direction:column;gap:7px}
+.conc-row{display:flex;align-items:center;gap:10px}
+.conc-lbl{font-size:10px;color:var(--text-secondary);width:100px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.conc-track{flex:1;height:14px;background:var(--bg-raised);border-radius:3px;overflow:hidden}
+.conc-fill{height:100%;border-radius:3px;transition:width 1.3s cubic-bezier(.16,1,.3,1)}
+.conc-pct{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);width:36px;text-align:right;flex-shrink:0}
 
-.alert-text { color: #f87171; flex: 1; }
-.alert-action { color: var(--dim); font-size: 11px; white-space: nowrap; }
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.g32{display:grid;grid-template-columns:3fr 2fr;gap:16px}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}.mb24{margin-bottom:24px}.mb32{margin-bottom:32px}
 
-/* ── KPI STRIP ───────────────────────────────────────────── */
-.kpi-strip {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 12px; margin-bottom: 28px;
-}
+/* STATUS DOT */
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.d-c{background:var(--critical);box-shadow:0 0 5px var(--critical)}
+.d-w{background:var(--warning);box-shadow:0 0 5px rgba(245,158,11,.5)}
+.d-o{background:var(--success);box-shadow:0 0 5px rgba(16,185,129,.5)}
+.d-d{background:var(--text-dim)}
 
-.kpi {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 8px; padding: 16px;
-  position: relative; overflow: hidden;
-}
+/* FOOTER */
+.pf{border-top:1px solid var(--border-subtle);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:.5px;margin-top:32px}
 
-.kpi::after {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0;
-  height: 2px; background: var(--amber);
-  opacity: 0.4;
-}
+/* CONF STRIP */
+.conf-strip{display:flex;gap:10px;align-items:center;padding:10px 14px;background:var(--bg-raised);border-radius:6px;margin-bottom:14px;font-size:10px;color:var(--text-secondary)}
 
-.kpi.critical::after { background: var(--red); opacity: 0.8; }
-.kpi.good::after { background: var(--green); opacity: 0.6; }
+/* RESPONSIVE */
+@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.g32,.g21{grid-template-columns:1fr}}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.g2,.g3{grid-template-columns:1fr}}
 
-.kpi-label {
-  font-size: 10px; color: var(--dim);
-  letter-spacing: 1.5px; text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.kpi-value {
-  font-family: 'Syne', sans-serif;
-  font-size: 26px; font-weight: 800;
-  color: var(--amber2); line-height: 1;
-}
-
-.kpi.critical .kpi-value { color: #f87171; }
-.kpi.good .kpi-value { color: var(--green); }
-
-.kpi-sub {
-  font-size: 10px; color: var(--dim); margin-top: 5px;
-}
-
-/* ── MAIN GRID ───────────────────────────────────────────── */
-.grid-main {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: auto auto;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.grid-bottom {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 16px;
-}
-
-/* ── PANEL ───────────────────────────────────────────────── */
-.panel {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.panel-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--border);
-}
-
-.panel-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 12px; font-weight: 700;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--text);
-}
-
-.panel-badge {
-  font-size: 10px; padding: 2px 8px;
-  border-radius: 10px;
-  background: rgba(245,158,11,0.12);
-  color: var(--amber);
-  border: 1px solid rgba(245,158,11,0.2);
-}
-
-.panel-badge.red {
-  background: rgba(239,68,68,0.1);
-  color: #f87171; border-color: rgba(239,68,68,0.2);
-}
-
-.panel-badge.green {
-  background: rgba(34,197,94,0.1);
-  color: var(--green); border-color: rgba(34,197,94,0.2);
-}
-
-.panel-body { padding: 16px 18px; }
-
-/* ── RFQ LIST ────────────────────────────────────────────── */
-.rfq-list { list-style: none; }
-.rfq-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 7px 0;
-  border-bottom: 1px solid rgba(30,42,53,0.6);
-  font-size: 11px;
-}
-.rfq-item:last-child { border-bottom: none; }
-
-.rfq-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--muted); flex-shrink: 0;
-}
-.rfq-dot.responded { background: var(--green); box-shadow: 0 0 5px var(--green); }
-.rfq-dot.critical  { background: var(--red);   box-shadow: 0 0 5px var(--red); }
-
-.rfq-co { color: var(--text); width: 110px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rfq-cat { color: var(--dim); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
-.rfq-val { color: var(--amber); width: 80px; text-align: right; flex-shrink: 0; }
-.rfq-status {
-  font-size: 9px; letter-spacing: 1px; padding: 2px 6px;
-  border-radius: 3px; width: 72px; text-align: center; flex-shrink: 0;
-}
-.rfq-status.responded { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
-.rfq-status.drafted   { background: rgba(74,96,112,0.2);  color: var(--dim);   border: 1px solid var(--border); }
-.rfq-status.critical  { background: rgba(239,68,68,0.1);  color: #f87171;      border: 1px solid rgba(239,68,68,0.2); }
-
-/* ── BOP CHART ───────────────────────────────────────────── */
-.bop-bars { display: flex; flex-direction: column; gap: 6px; }
-.bop-row { display: flex; align-items: center; gap: 10px; font-size: 10px; }
-.bop-label { width: 140px; color: var(--dim); flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bop-track { flex: 1; height: 8px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
-.bop-bar {
-  height: 100%; border-radius: 4px;
-  background: linear-gradient(90deg, var(--amber), var(--amber2));
-  transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
-}
-.bop-bar.strategic { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-.bop-bar.targeted  { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-.bop-bar.standard  { background: linear-gradient(90deg, #6b7280, #9ca3af); }
-.bop-bar.verified  { background: linear-gradient(90deg, #22c55e, #4ade80); }
-.bop-amt { width: 70px; text-align: right; color: var(--text); flex-shrink: 0; }
-
-/* ── COUNTDOWN ───────────────────────────────────────────── */
-.countdown-block {
-  text-align: center; padding: 20px 0;
-}
-.countdown-num {
-  font-family: 'Syne', sans-serif;
-  font-size: 64px; font-weight: 800;
-  color: var(--amber);
-  line-height: 1;
-  text-shadow: 0 0 40px rgba(245,158,11,0.3);
-}
-.countdown-label {
-  font-size: 11px; color: var(--dim);
-  letter-spacing: 3px; text-transform: uppercase; margin-top: 4px;
-}
-.countdown-date {
-  font-size: 13px; color: var(--text); margin-top: 10px;
-  font-family: 'Syne', sans-serif; font-weight: 600;
-}
-
-.rfq-mini-list { margin-top: 14px; }
-.rfq-mini-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 5px 0; border-bottom: 1px solid var(--border);
-  font-size: 10px;
-}
-.rfq-mini-row:last-child { border-bottom: none; }
-.rfq-mini-co { color: var(--dim); }
-.rfq-mini-val { color: var(--amber); }
-
-/* ── SCENARIOS ───────────────────────────────────────────── */
-.scenario-list { display: flex; flex-direction: column; gap: 10px; }
-.scenario-row { display: flex; align-items: center; gap: 12px; }
-.scenario-name { font-size: 11px; color: var(--dim); width: 150px; flex-shrink: 0; }
-.scenario-track { flex: 1; height: 24px; background: var(--bg3); border-radius: 5px; position: relative; overflow: hidden; }
-.scenario-fill {
-  height: 100%;
-  border-radius: 5px;
-  display: flex; align-items: center; justify-content: flex-end;
-  padding-right: 8px;
-  font-family: 'Syne', sans-serif;
-  font-size: 11px; font-weight: 700;
-  transition: width 1.4s cubic-bezier(0.16,1,0.3,1);
-}
-.scenario-fill.base         { background: linear-gradient(90deg, #374151, #4b5563); color: #9ca3af; }
-.scenario-fill.conservative { background: linear-gradient(90deg, #7f1d1d, #991b1b); color: #fca5a5; }
-.scenario-fill.optimistic   { background: linear-gradient(90deg, #14532d, #166534); color: #86efac; }
-.scenario-fill.aggressive   { background: linear-gradient(90deg, #064e3b, #065f46); color: #6ee7b7; }
-
-/* ── CRITICAL PATH ───────────────────────────────────────── */
-.crit-list { display: flex; flex-direction: column; gap: 10px; }
-.crit-item {
-  background: var(--bg3); border-radius: 7px; padding: 12px 14px;
-  border-left: 3px solid var(--red);
-  font-size: 11px;
-}
-.crit-item.warn { border-left-color: var(--amber); }
-.crit-item.ok   { border-left-color: var(--green); }
-
-.crit-title { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-.crit-detail { color: var(--dim); line-height: 1.5; }
-.crit-action { color: var(--amber); margin-top: 6px; font-size: 10px; letter-spacing: 0.5px; }
-.crit-action.red { color: #f87171; }
-
-/* ── PROGRESS RING ───────────────────────────────────────── */
-.rings-row { display: flex; justify-content: space-around; align-items: center; padding: 10px 0; }
-.ring-block { text-align: center; }
-.ring-svg { transform: rotate(-90deg); }
-.ring-bg { fill: none; stroke: var(--bg3); stroke-width: 5; }
-.ring-fill { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 1.5s cubic-bezier(0.16,1,0.3,1); }
-.ring-label { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; fill: var(--amber); }
-.ring-sub { font-size: 10px; color: var(--dim); margin-top: 5px; letter-spacing: 1px; text-transform: uppercase; }
-
-/* ── FOOTER ──────────────────────────────────────────────── */
-footer {
-  border-top: 1px solid var(--border);
-  padding: 14px 0; margin-top: 28px;
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 10px; color: var(--muted); letter-spacing: 0.5px;
-}
-
-/* ── RESPONSIVE ──────────────────────────────────────────── */
-@media (max-width: 1100px) {
-  .kpi-strip { grid-template-columns: repeat(3, 1fr); }
-  .grid-main { grid-template-columns: 1fr 1fr; }
-  .grid-bottom { grid-template-columns: 1fr; }
-}
-@media (max-width: 700px) {
-  .kpi-strip { grid-template-columns: repeat(2, 1fr); }
-  .grid-main { grid-template-columns: 1fr; }
-}
-
-/* ── ANIMATIONS ──────────────────────────────────────────── */
-.panel, .kpi, .alert-bar {
-  opacity: 0; transform: translateY(12px);
-  animation: rise 0.5s ease forwards;
-}
-@keyframes rise { to { opacity: 1; transform: translateY(0); } }
-
-.kpi:nth-child(1) { animation-delay: 0.05s; }
-.kpi:nth-child(2) { animation-delay: 0.10s; }
-.kpi:nth-child(3) { animation-delay: 0.15s; }
-.kpi:nth-child(4) { animation-delay: 0.20s; }
-.kpi:nth-child(5) { animation-delay: 0.25s; }
-.kpi:nth-child(6) { animation-delay: 0.30s; }
+/* ANIMATION */
+.fi{opacity:0;transform:translateY(8px);animation:fi .4s ease forwards}
+@keyframes fi{to{opacity:1;transform:translateY(0)}}
+.d1{animation-delay:.04s}.d2{animation-delay:.08s}.d3{animation-delay:.12s}.d4{animation-delay:.16s}
+.d5{animation-delay:.20s}.d6{animation-delay:.24s}.d7{animation-delay:.30s}.d8{animation-delay:.36s}
 </style>
 </head>
 <body>
-<div class="wrap">
 
-<!-- HEADER -->
-<header>
-  <div class="brand">
-    <span class="brand-name">FlowSeer</span>
-    <span class="brand-sub">Project Jupiter · W251B8 · 50MW · Santa Teresa NM</span>
-  </div>
-  <div class="header-right">
-    <div class="health-badge">
-      <div class="health-dot"></div>
-      25/25 HEALTHY
+<!-- TOPBAR -->
+<nav class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-logo">FS</div>
+    <div>
+      <div class="brand-name">FlowSeer</div>
+      <div class="brand-prog">Project Jupiter · W251B8 · 50MW</div>
     </div>
-    <div class="ts" id="ts"></div>
   </div>
-</header>
+  <div class="topbar-nav">
+    <button class="nav-tab active alert" onclick="go('overview')" id="t-overview"><span class="nav-dot"></span>Overview</button>
+    <button class="nav-tab" onclick="go('cost')" id="t-cost">Cost Intelligence</button>
+    <button class="nav-tab" onclick="go('suppliers')" id="t-suppliers">Supplier Network</button>
+    <button class="nav-tab alert" onclick="go('rfq')" id="t-rfq"><span class="nav-dot"></span>RFQ Pipeline</button>
+  </div>
+  <div class="topbar-right">
+    <div class="health-pill"><div class="pulse"></div>25/25 HEALTHY</div>
+    <div class="ts-chip" id="ts">—</div>
+  </div>
+</nav>
 
-<!-- ALERT BAR -->
-<div class="alert-bar">
-  <span class="alert-tag">🔴 CRITICAL</span>
-  <span class="alert-text">EthosEnergy ICD not received — blocking Transformer ($760K) + Exhaust ($431K) + Electrical ($535K) = $1.725M in RFQs</span>
-  <span class="alert-action">→ tools/flowseer.py icd escalate</span>
+<!-- ═══ PAGE: OVERVIEW ═══ -->
+<div class="page active" id="p-overview">
+  <div class="cond-bar">
+    <span class="cond-tag">🔴 Critical</span>
+    <div class="cond-items">
+      <div class="cond-item"><span class="ci-label">Condition:</span><span class="ci-val">AMBER — On track, one unresolved blocker</span></div>
+      <div class="cond-item"><span class="ci-label">Changed:</span><span class="ci-val">BH quoted $340K · 12 RFQs drafted · Trillium AVOID resolved → Flowserve</span></div>
+      <div class="cond-item"><span class="ci-label">Action Required:</span><span class="ci-action">EthosEnergy ICD overdue → escalate to Alberto Malandra immediately</span></div>
+    </div>
+  </div>
+  <div class="content">
+    <div class="tier-lbl fi d1">Tier 1 — Executive Summary</div>
+    <div class="kpi-grid">
+      <div class="kpi c-warn fi d1"><div class="kpi-lbl">BOP Baseline</div><div class="kpi-val">$9.27M</div><div class="kpi-sub">19 categories · $185/kW · 50MW</div><div class="kpi-badge"><span class="badge be">Estimated</span></div></div>
+      <div class="kpi c-info fi d2"><div class="kpi-lbl">RFQ Pipeline</div><div class="kpi-val">$9.90M</div><div class="kpi-sub">13 packages · 1 responded · 12 drafted</div><div class="kpi-badge"><span class="badge bp">In Progress</span></div></div>
+      <div class="kpi c-warn fi d3"><div class="kpi-lbl">Days to Send</div><div class="kpi-val" id="ov-days">—</div><div class="kpi-sub">May 25, 2026 — Fixed</div></div>
+      <div class="kpi c-ok fi d4"><div class="kpi-lbl">BH VIB_MON Quote</div><div class="kpi-val">$340K</div><div class="kpi-sub">+26.7% vs estimate · Decision pending</div><div class="kpi-badge"><span class="badge bv">Verified</span></div></div>
+      <div class="kpi fi d5"><div class="kpi-lbl">Contact Intel</div><div class="kpi-val">231</div><div class="kpi-sub">73 suppliers · 64 verified contacts</div><div class="kpi-badge"><span class="badge be">Partial</span></div></div>
+      <div class="kpi c-crit fi d6"><div class="kpi-lbl">EthosEnergy ICD</div><div class="kpi-val">Pending</div><div class="kpi-sub">Blocks $1.73M in RFQs · Due May 1</div><div class="kpi-badge"><span class="badge bc">Blocker</span></div></div>
+    </div>
+
+    <div class="tier-lbl fi d7">Tier 2 — Decision Drivers</div>
+    <div class="g32 mb24">
+      <div class="a-cards fi d7">
+        <div class="a-card a-crit">
+          <div style="flex:1">
+            <div class="a-title">EthosEnergy ICD Not Received — Program Blocker</div>
+            <div class="a-detail">ICD blocks Transformer ($760K, 52–70 wk lead), Exhaust ($431K), and Electrical Distribution ($535K). Total blocked: <strong>$1,725,700</strong>. Required by May 1. Every day of delay risks Q2 2027 First Power target.</div>
+            <div class="a-action">→ tools/flowseer.py icd escalate · Alberto Malandra + Todd Dunlop, EthosEnergy Italia</div>
+          </div>
+          <div class="a-right"><span class="badge bc">Critical</span><span style="font-family:var(--font-mono);font-size:10px;color:#F87171">$1.73M blocked</span></div>
+        </div>
+        <div class="a-card a-warn">
+          <div style="flex:1">
+            <div class="a-title">Baker Hughes VIB_MON — Commercial Decision Required</div>
+            <div class="a-detail">Quoted $340,000 at +26.7% above $268K estimate. Quote is within market range ($290K–$420K). Decision: accept and issue PO, negotiate, or rebid. Must resolve before May 1.</div>
+            <div class="a-action">→ PO template ready: tools/contracts/drafts/TWP-2026-0001_VIB_MON_Baker_Hughes.txt</div>
+          </div>
+          <div class="a-right"><span class="badge bd">High</span><span style="font-family:var(--font-mono);font-size:10px;color:var(--warning)">+$71.7K vs est.</span></div>
+        </div>
+        <div class="a-card a-warn">
+          <div style="flex:1">
+            <div class="a-title">Generator + Switchgear — True Critical Path (40–56 wk lead)</div>
+            <div class="a-detail">Generator is the binding constraint on Q2 2027 First Power. If awarded August 15, earliest delivery is October 2027. RFQ must go to GE Vernova AND Siemens Energy on May 25. Zero slippage permitted.</div>
+            <div class="a-action">→ Both RFQs ready: rfq_generator_ge_vernova.txt · rfq_generator_siemens_energy.txt</div>
+          </div>
+          <div class="a-right"><span class="badge bd">High</span><span style="font-family:var(--font-mono);font-size:10px;color:var(--warning)">$2.09M · 40–56wk</span></div>
+        </div>
+        <div class="a-card a-ok">
+          <div style="flex:1">
+            <div class="a-title">Trillium AVOID — Resolved. Flowserve Selected as Replacement.</div>
+            <div class="a-detail">Piping &amp; Valves ($507,600) previously sourced to disqualified supplier. Flowserve selected. RFQ drafted and ready for May 25 send. No further action needed.</div>
+            <div class="a-action">→ rfq_piping_valves_flowserve.txt ready · No action needed</div>
+          </div>
+          <div class="a-right"><span class="badge bv">Resolved</span></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="panel fi d8">
+          <div class="ph"><span class="pt">Program Scorecard</span><span class="badge bd">Amber</span></div>
+          <div class="pb">
+            <div class="sr"><span class="sk">BOP Budget vs $10M target</span><span class="sv ok">$9.27M ✓</span></div>
+            <div class="sr"><span class="sk">RFQ packages prepared</span><span class="sv ok">13 / 13 ✓</span></div>
+            <div class="sr"><span class="sk">RFQ send date</span><span class="sv ok">May 25 — locked ✓</span></div>
+            <div class="sr"><span class="sk">Categories priced</span><span class="sv ok">19 / 19 ✓</span></div>
+            <div class="sr"><span class="sk">BH quote received</span><span class="sv ok">Yes — $340K ✓</span></div>
+            <div class="sr"><span class="sk">EthosEnergy ICD</span><span class="sv pos">Pending — At Risk ✗</span></div>
+            <div class="sr"><span class="sk">Trillium AVOID</span><span class="sv ok">Resolved → Flowserve ✓</span></div>
+            <div class="sr"><span class="sk">First Power target</span><span class="sv ok">Q2 2027 — On Track ✓</span></div>
+          </div>
+        </div>
+        <div class="panel fi d8">
+          <div class="ph"><span class="pt">Platform Health</span><span class="badge bv">Live</span></div>
+          <div class="pb">
+            <div class="sr"><span class="sk">Tests passing</span><span class="sv ok">125 / 125</span></div>
+            <div class="sr"><span class="sk">Health checks</span><span class="sv ok">25 / 25</span></div>
+            <div class="sr"><span class="sk">Grok audit</span><span class="sv ok">PASS 102/102</span></div>
+            <div class="sr"><span class="sk">Directives completed</span><span class="sv ok">91 complete</span></div>
+            <div class="sr"><span class="sk">Integration test</span><span class="sv ok">15/15 VIABLE</span></div>
+            <div class="sr"><span class="sk">Latest commit</span><span class="sv mono dim">cfa49c8</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tier-lbl fi">Tier 3 — Program Timeline</div>
+    <div class="panel fi">
+      <div class="ph"><span class="pt">Phase Timeline — Project Jupiter W251B8</span><span class="badge bp">Phase 1 Active</span></div>
+      <div class="pb0">
+        <table class="dt">
+          <thead><tr><th>Phase</th><th>Period</th><th>Key Milestone</th><th>Status</th><th>Owner</th></tr></thead>
+          <tbody>
+            <tr><td>1 — Procurement Prep</td><td class="mono dim">Apr–May 2026</td><td>13 RFQs drafted · Pricing confirmed · Suppliers selected</td><td><span class="badge bv">Complete</span></td><td>TWP / FlowSeer</td></tr>
+            <tr class="crit-row"><td>1 — Blocker</td><td class="mono dim">Apr–May 1</td><td>EthosEnergy ICD receipt — unlocks $1.73M in RFQs</td><td><span class="badge bc">At Risk</span></td><td>Alberto Malandra</td></tr>
+            <tr><td>2 — RFQ Send Day</td><td class="mono dim">May 25, 2026</td><td>All 13 packages sent simultaneously to 11 suppliers</td><td><span class="badge bp" id="days-badge">43 Days</span></td><td>Greg Buchanan</td></tr>
+            <tr><td>3 — Response Collection</td><td class="mono dim">May 25–Jul 15</td><td>30–45 day supplier response window · 6–13 expected responses</td><td><span class="badge bs">Pending</span></td><td>Suppliers</td></tr>
+            <tr><td>4 — Award</td><td class="mono dim">Jul 15–Aug 15</td><td>Quote evaluation, negotiation, PO awards — all 13 packages</td><td><span class="badge bs">Pending</span></td><td>TWP</td></tr>
+            <tr><td>5 — Manufacturing</td><td class="mono dim">Aug–Dec 2026</td><td>Generator Oct 2027 (critical) · Transformer Feb–May 2027</td><td><span class="badge bs">Pending</span></td><td>Suppliers</td></tr>
+            <tr><td>6 — First Power</td><td class="mono dim">Q2 2027</td><td>Installation, commissioning, grid synchronization</td><td><span class="badge bs">Target</span></td><td>EthosEnergy / TWP</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="pf"><span>FlowSeer v2.1.0 · Trans World Power LLC · Project Jupiter W251B8 · Santa Teresa NM</span><span>ESTIMATED confidence on 18 of 19 categories · VERIFIED: VIB_MON only</span><span id="ft1">—</span></div>
 </div>
 
-<!-- KPI STRIP -->
-<div class="kpi-strip">
-  <div class="kpi">
-    <div class="kpi-label">BOP Baseline</div>
-    <div class="kpi-value">$9.27M</div>
-    <div class="kpi-sub">19 categories · $185/kW</div>
+<!-- ═══ PAGE: COST INTEL ═══ -->
+<div class="page" id="p-cost">
+  <div class="cond-bar warn">
+    <span class="cond-tag" style="color:var(--warning);border-right-color:var(--warning-bd)">⚠ Estimated</span>
+    <div class="cond-items">
+      <div class="cond-item"><span class="ci-label">Baseline:</span><span class="ci-val">$9,274,000 · 19 categories · BOM build-up</span></div>
+      <div class="cond-item"><span class="ci-label">Confidence:</span><span class="ci-val">1/19 RFQ-Verified · 18/19 Estimated</span></div>
+      <div class="cond-item"><span class="ci-label">Market Signal:</span><span class="ci-val">$185/kW vs market $186–200/kW · recommend 8–12% contingency</span></div>
+    </div>
   </div>
-  <div class="kpi good">
-    <div class="kpi-label">RFQ Pipeline</div>
-    <div class="kpi-value">$9.9M</div>
-    <div class="kpi-sub">13 packages · 1 responded</div>
+  <div class="content">
+    <div class="tier-lbl fi d1">Tier 1 — Cost Position</div>
+    <div class="kpi-grid">
+      <div class="kpi fi d1"><div class="kpi-lbl">BOP Baseline Mid</div><div class="kpi-val">$9.27M</div><div class="kpi-sub">19 categories · 50MW W251B8</div><div class="kpi-badge"><span class="badge be">Estimated</span></div></div>
+      <div class="kpi c-warn fi d2"><div class="kpi-lbl">Conservative Scenario</div><div class="kpi-val">$10.08M</div><div class="kpi-sub">+8.7% · Historical overrun factors</div><div class="kpi-badge"><span class="badge bd">Risk</span></div></div>
+      <div class="kpi c-ok fi d3"><div class="kpi-lbl">Optimistic Scenario</div><div class="kpi-val">$9.14M</div><div class="kpi-sub">–1.5% · Competitive bidding</div></div>
+      <div class="kpi fi d4"><div class="kpi-lbl">Market Benchmark</div><div class="kpi-val">$185/kW</div><div class="kpi-sub">Market: $186–$200/kW · Monitor</div><div class="kpi-badge"><span class="badge bs">Benchmark</span></div></div>
+      <div class="kpi c-ok fi d5"><div class="kpi-lbl">RFQ-Verified</div><div class="kpi-val">1 / 19</div><div class="kpi-sub">VIB_MON · $340K · BH · +26.7%</div><div class="kpi-badge"><span class="badge bv">Verified</span></div></div>
+      <div class="kpi fi d6"><div class="kpi-lbl">Recommended Budget</div><div class="kpi-val">$10.4M</div><div class="kpi-sub">With 12% contingency buffer</div><div class="kpi-badge"><span class="badge bs">Advisory</span></div></div>
+    </div>
+
+    <div class="tier-lbl fi">Tier 2 — Decision Insights</div>
+    <div class="g2 mb24">
+      <div class="panel fi d7">
+        <div class="ph"><span class="pt">Award Scenario Modeling</span><span class="badge bs">4 Scenarios</span></div>
+        <div class="pb">
+          <div class="conf-strip">
+            <span class="badge bv" style="font-size:8px">Confirmed</span>
+            <span>BH VIB_MON $340K applied in all scenarios · 18 categories at BOM estimate</span>
+          </div>
+          <div class="sc-group">
+            <div class="sc-row"><span class="sc-name">Aggressive (negotiated)</span><div class="sc-track"><div class="sc-fill sc-aggr" style="width:0%" data-w="85.4">$8,854,055</div></div><span class="sc-delta" style="color:#6EE7B7">–4.5%</span></div>
+            <div class="sc-row"><span class="sc-name">Optimistic (competitive)</span><div class="sc-track"><div class="sc-fill sc-opti" style="width:0%" data-w="88.1">$9,135,385</div></div><span class="sc-delta" style="color:#86EFAC">–1.5%</span></div>
+            <div class="sc-row"><span class="sc-name">Base (BOM estimates)</span><div class="sc-track"><div class="sc-fill sc-base" style="width:0%" data-w="89.5">$9,274,000</div></div><span class="sc-delta" style="color:#9CA3AF">baseline</span></div>
+            <div class="sc-row"><span class="sc-name">Conservative (overruns)</span><div class="sc-track"><div class="sc-fill sc-cons" style="width:0%" data-w="97.3">$10,077,458</div></div><span class="sc-delta" style="color:#FCA5A5">+8.7%</span></div>
+          </div>
+          <div style="margin-top:14px;padding:10px 12px;background:var(--bg-raised);border-radius:6px;font-size:10px;color:var(--text-secondary);line-height:1.6">
+            Recommended budget authority: <strong style="color:var(--warning)">$10.0M – $10.4M</strong> (8–12% contingency). Conservative scenario driven by Generator (+18%) and Transformer (+15%) historical premiums.
+          </div>
+        </div>
+      </div>
+      <div class="panel fi d7">
+        <div class="ph"><span class="pt">Spend Concentration Risk</span><span class="badge bd">Top 5 = 53.7%</span></div>
+        <div class="pb">
+          <div style="font-size:10px;color:var(--text-secondary);margin-bottom:12px;line-height:1.6">GE Vernova single-supplier exposure = <strong style="color:var(--warning)">22.6%</strong> ($2.09M). Mitigated by competitive bid against Siemens Energy. Donaldson bundle opportunity: Inlet Air + Controls/DCS = $1.03M.</div>
+          <div class="conc-bars">
+            <div class="conc-row"><span class="conc-lbl">GE Vernova</span><div class="conc-track"><div class="conc-fill" data-w="100" style="width:0%;background:linear-gradient(90deg,#1D4A6A,#2470A8)"></div></div><span class="conc-pct">22.6%</span></div>
+            <div class="conc-row"><span class="conc-lbl">CECO Environ.</span><div class="conc-track"><div class="conc-fill" data-w="77" style="width:0%;background:linear-gradient(90deg,#1A3D2E,#2A6048)"></div></div><span class="conc-pct">17.5%</span></div>
+            <div class="conc-row"><span class="conc-lbl">Emerson</span><div class="conc-track"><div class="conc-fill" data-w="58" style="width:0%;background:linear-gradient(90deg,#1D4A6A,#2470A8)"></div></div><span class="conc-pct">13.0%</span></div>
+            <div class="conc-row"><span class="conc-lbl">ABB Power</span><div class="conc-track"><div class="conc-fill" data-w="36" style="width:0%;background:linear-gradient(90deg,#1D4A6A,#2470A8)"></div></div><span class="conc-pct">8.2%</span></div>
+            <div class="conc-row"><span class="conc-lbl">Donaldson (2×)</span><div class="conc-track"><div class="conc-fill" data-w="49" style="width:0%;background:linear-gradient(90deg,#1A3D2E,#2A6048)"></div></div><span class="conc-pct">11.1%</span></div>
+            <div class="conc-row"><span class="conc-lbl">Flowserve</span><div class="conc-track"><div class="conc-fill" data-w="24" style="width:0%;background:linear-gradient(90deg,#2A2A1A,#4A4A30)"></div></div><span class="conc-pct">5.5%</span></div>
+            <div class="conc-row"><span class="conc-lbl">All Others (5)</span><div class="conc-track"><div class="conc-fill" data-w="28" style="width:0%;background:var(--bg-hover)"></div></div><span class="conc-pct">22.1%</span></div>
+          </div>
+          <div style="margin-top:12px;padding:8px 10px;background:var(--warning-bg);border:1px solid var(--warning-bd);border-radius:6px;font-size:10px;color:var(--text-secondary)">⚠ Trillium Flow Technologies: <strong style="color:#FDE68A">AVOID</strong> flag resolved → Flowserve selected for $507K Piping &amp; Valves scope.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tier-lbl fi">Tier 3 — Full 19-Category Pricing Matrix</div>
+    <div class="panel fi">
+      <div class="ph"><span class="pt">BOP Category Breakdown — All 19 Categories</span><div class="pm"><span class="badge bv">1 Verified</span><span class="badge be">18 Estimated</span></div></div>
+      <div class="pb0"><table class="dt"><thead><tr><th>#</th><th>Category</th><th>Code</th><th>Tier</th><th>Low</th><th>Mid Est.</th><th>High</th><th>RFQ Quoted</th><th>Variance</th><th>Preferred Supplier</th><th>Confidence</th></tr></thead><tbody id="cost-tbody"></tbody></table></div>
+    </div>
   </div>
-  <div class="kpi critical">
-    <div class="kpi-label">Days to RFQ Send</div>
-    <div class="kpi-value" id="days-count">43</div>
-    <div class="kpi-sub">May 25, 2026 — FIXED</div>
-  </div>
-  <div class="kpi">
-    <div class="kpi-label">BH VIB_MON Quote</div>
-    <div class="kpi-value">$340K</div>
-    <div class="kpi-sub">+26.7% vs $268K estimate</div>
-  </div>
-  <div class="kpi">
-    <div class="kpi-label">Contacts</div>
-    <div class="kpi-value">231</div>
-    <div class="kpi-sub">64 verified · 73 suppliers</div>
-  </div>
-  <div class="kpi critical">
-    <div class="kpi-label">ICD Status</div>
-    <div class="kpi-value">PEND</div>
-    <div class="kpi-sub">Blocks $1.725M in RFQs</div>
-  </div>
+  <div class="pf"><span>Cost Intelligence · FlowSeer v2.1.0 · BOM build-up · ENR CCI normalized 2024 USD</span><span>18 of 19 categories carry ESTIMATED confidence — upgrades to VERIFIED as responses arrive</span><span id="ft2">—</span></div>
 </div>
 
-<!-- MAIN GRID -->
-<div class="grid-main">
-
-  <!-- RFQ PIPELINE -->
-  <div class="panel" style="animation-delay:0.1s; grid-column: span 2;">
-    <div class="panel-head">
-      <span class="panel-title">RFQ Pipeline</span>
-      <span class="panel-badge">13 packages · $9,898,000</span>
-    </div>
-    <div class="panel-body">
-      <ul class="rfq-list">
-        <li class="rfq-item">
-          <div class="rfq-dot responded"></div>
-          <span class="rfq-co">Baker Hughes</span>
-          <span class="rfq-cat">Vibration Monitoring System</span>
-          <span class="rfq-val">$340,000</span>
-          <span class="rfq-status responded">RESPONDED</span>
-        </li>
-        <li class="rfq-item">
-          <div class="rfq-dot critical"></div>
-          <span class="rfq-co">GE Vernova</span>
-          <span class="rfq-cat">Generator + Switchgear ⚠ CRITICAL PATH</span>
-          <span class="rfq-val">$2,093,850</span>
-          <span class="rfq-status critical">CRITICAL</span>
-        </li>
-        <li class="rfq-item">
-          <div class="rfq-dot critical"></div>
-          <span class="rfq-co">Siemens Energy</span>
-          <span class="rfq-cat">Generator + Switchgear ⚠ Competitive bid</span>
-          <span class="rfq-val">$2,093,850</span>
-          <span class="rfq-status critical">CRITICAL</span>
-        </li>
-        <li class="rfq-item">
-          <div class="rfq-dot"></div>
-          <span class="rfq-co">ABB Power</span>
-          <span class="rfq-cat">Step-up Transformer (GSU) — 52-70 wk lead</span>
-          <span class="rfq-val">$760,000</span>
-          <span class="rfq-status drafted">DRAFTED</span>
-        </li>
-        <li class="rfq-item">
-          <div class="rfq-dot"></div>
-          <span class="rfq-co">CECO Environmental</span>
-          <span class="rfq-cat">Emissions Control — SCR / CO Catalyst</span>
-          <span class="rfq-val">$891,750</span>
-          <span class="rfq-status drafted">DRAFTED</span>
-        </li>
-        <li class="rfq-item">
-          <div class="rfq-dot"></div>
-          <span class="rfq-co">Emerson</span>
-          <span class="rfq-cat">Fuel Gas System — Bob Yeager</span>
-          <span class="rfq-val">$700,600</span>
-          <span class="rfq-status drafted">DRAFTED</span>
-        </li>
-        <li class="rfq-item">
-          <div class="rfq-dot"></div>
-          <span class="rfq-co">Donaldson</span>
-          <span class="rfq-cat">Inlet Air Filtering — Tod Carpenter</span>
-          <span class="rfq-val">$525,150</span>
-          <span class="rfq-status drafted">DRAFTED</span>
-        </li>
-        <li class="rfq-item">
-          <div class="rfq-dot"></div>
-          <span class="rfq-co">Eaton</span>
-          <span class="rfq-cat">Electrical Distribution (Auxiliary)</span>
-          <span class="rfq-val">$535,050</span>
-          <span class="rfq-status drafted">DRAFTED</span>
-        </li>
-        <li class="rfq-item">
-          <div class="rfq-dot"></div>
-          <span class="rfq-co">Flowserve</span>
-          <span class="rfq-cat">Piping &amp; Valves — replaces Trillium AVOID</span>
-          <span class="rfq-val">$507,600</span>
-          <span class="rfq-status drafted">DRAFTED</span>
-        </li>
-        <li class="rfq-item">
-          <div class="rfq-dot"></div>
-          <span class="rfq-co">Donaldson</span>
-          <span class="rfq-cat">Controls / DCS — Michael Wynblatt</span>
-          <span class="rfq-val">$504,600</span>
-          <span class="rfq-status drafted">DRAFTED</span>
-        </li>
-        <li class="rfq-item">
-          <div class="rfq-dot"></div>
-          <span class="rfq-co">Baker Hughes</span>
-          <span class="rfq-cat">Exhaust System — Rod Christie</span>
-          <span class="rfq-val">$430,650</span>
-          <span class="rfq-status drafted">DRAFTED</span>
-        </li>
-        <li class="rfq-item">
-          <div class="rfq-dot"></div>
-          <span class="rfq-co">Amerex Corp</span>
-          <span class="rfq-cat">Fire Fighting System</span>
-          <span class="rfq-val">$229,400</span>
-          <span class="rfq-status drafted">DRAFTED</span>
-        </li>
-        <li class="rfq-item">
-          <div class="rfq-dot"></div>
-          <span class="rfq-co">Turbotect</span>
-          <span class="rfq-cat">Compressor Washing — Neil Ashford</span>
-          <span class="rfq-val">$132,300</span>
-          <span class="rfq-status drafted">DRAFTED</span>
-        </li>
-      </ul>
+<!-- ═══ PAGE: SUPPLIERS ═══ -->
+<div class="page" id="p-suppliers">
+  <div class="cond-bar warn">
+    <span class="cond-tag" style="color:var(--warning);border-right-color:var(--warning-bd)">⚠ Network</span>
+    <div class="cond-items">
+      <div class="cond-item"><span class="ci-label">Coverage:</span><span class="ci-val">73 suppliers · 19 categories · 10 strategic profiles</span></div>
+      <div class="cond-item"><span class="ci-label">Risk:</span><span class="ci-val">GE Vernova 22.6% exposure — mitigated by competitive bid vs Siemens Energy</span></div>
+      <div class="cond-item"><span class="ci-label">Resolved:</span><span class="ci-val" style="color:var(--success)">Trillium AVOID → Flowserve confirmed · $507K scope now properly sourced</span></div>
     </div>
   </div>
-
-  <!-- COUNTDOWN + SEND PLAN -->
-  <div class="panel" style="animation-delay:0.2s;">
-    <div class="panel-head">
-      <span class="panel-title">RFQ Send Countdown</span>
-      <span class="panel-badge">May 25, 2026</span>
+  <div class="content">
+    <div class="tier-lbl fi d1">Tier 1 — Network Health</div>
+    <div class="kpi-grid">
+      <div class="kpi fi d1"><div class="kpi-lbl">Total Suppliers</div><div class="kpi-val">73</div><div class="kpi-sub">19 categories identified</div></div>
+      <div class="kpi c-info fi d2"><div class="kpi-lbl">Tier 1 Strategic</div><div class="kpi-val">28</div><div class="kpi-sub">Primary preferred vendors</div></div>
+      <div class="kpi fi d3"><div class="kpi-lbl">Tier 2 Qualified</div><div class="kpi-val">31</div><div class="kpi-sub">Competitive alternatives</div></div>
+      <div class="kpi fi d4"><div class="kpi-lbl">Tier 3 Backup</div><div class="kpi-val">14</div><div class="kpi-sub">Contingency sourcing</div></div>
+      <div class="kpi c-ok fi d5"><div class="kpi-lbl">Competitive Bids</div><div class="kpi-val">3</div><div class="kpi-sub">Generator · Transformer · Emissions</div><div class="kpi-badge"><span class="badge bv">Active</span></div></div>
+      <div class="kpi c-ok fi d6"><div class="kpi-lbl">Avoid Flags</div><div class="kpi-val">1</div><div class="kpi-sub">Trillium — Resolved → Flowserve</div><div class="kpi-badge"><span class="badge bv">Resolved</span></div></div>
     </div>
-    <div class="panel-body">
-      <div class="countdown-block">
-        <div class="countdown-num" id="countdown-num">43</div>
-        <div class="countdown-label">Days Until Send</div>
-        <div class="countdown-date">May 25, 2026 — All 13 RFQs</div>
+
+    <div class="tier-lbl fi">Tier 2 — Strategic Analysis</div>
+    <div class="g2 mb24">
+      <div class="panel fi d7">
+        <div class="ph"><span class="pt">Critical Path Suppliers</span><span class="badge bc">2 Critical</span></div>
+        <div class="pb">
+          <div class="cp-list">
+            <div class="cp-item cp-crit"><div class="cp-num">1</div><div><div class="cp-title">GE Vernova — Generator + Switchgear ($2.09M)</div><div class="cp-detail">True critical path. 40–56 week lead time. Must award by August 15 for Q2 2027 first power. Competitive bid with Siemens Energy required.</div><div class="cp-action">→ rfq_generator_ge_vernova.txt ready for May 25</div></div></div>
+            <div class="cp-item cp-crit"><div class="cp-num">2</div><div><div class="cp-title">ABB Power Grids — Step-up Transformer ($760K)</div><div class="cp-detail">52–70 week lead. Blocked on EthosEnergy ICD for voltage/MVA specification. Competitive bid with Siemens Energy. Expedite premium ~15% available.</div><div class="cp-action">→ Blocked · rfq_transformer_abb.txt ready when ICD received</div></div></div>
+            <div class="cp-item cp-warn"><div class="cp-num">3</div><div><div class="cp-title">Emerson — Fuel Gas System ($700K)</div><div class="cp-detail">Fisher regulators + Daniel flow meters — W251B8 standard. Bob Yeager (President) primary contact. 16–24 week lead. Expected at estimate.</div><div class="cp-action">→ rfq_bob_yeager_emerson.txt ready</div></div></div>
+            <div class="cp-item cp-warn"><div class="cp-num">4</div><div><div class="cp-title">CECO Environmental — SCR / Emissions ($892K)</div><div class="cp-detail">Combined SCR + CO catalyst package. 24–36 week lead. Pending NM environmental permit scope confirmation before RFQ can be fully specified.</div><div class="cp-action">→ Confirm NM permit limits · rfq_ceco_emissions.txt drafted</div></div></div>
+          </div>
+        </div>
       </div>
-      <div class="rfq-mini-list">
-        <div class="rfq-mini-row">
-          <span class="rfq-mini-co">Generator (2×)</span>
-          <span class="rfq-mini-val" style="color:#f87171">$4.19M ⚠</span>
-        </div>
-        <div class="rfq-mini-row">
-          <span class="rfq-mini-co">Transformer (2×)</span>
-          <span class="rfq-mini-val" style="color:#f87171">$1.52M ⚠</span>
-        </div>
-        <div class="rfq-mini-row">
-          <span class="rfq-mini-co">Emissions / SCR</span>
-          <span class="rfq-mini-val">$891K</span>
-        </div>
-        <div class="rfq-mini-row">
-          <span class="rfq-mini-co">Fuel Gas (Emerson)</span>
-          <span class="rfq-mini-val">$700K</span>
-        </div>
-        <div class="rfq-mini-row">
-          <span class="rfq-mini-co">Inlet Air (Donaldson)</span>
-          <span class="rfq-mini-val">$525K</span>
-        </div>
-        <div class="rfq-mini-row">
-          <span class="rfq-mini-co">Elec. Distribution</span>
-          <span class="rfq-mini-val">$535K</span>
-        </div>
-        <div class="rfq-mini-row">
-          <span class="rfq-mini-co">6 remaining packages</span>
-          <span class="rfq-mini-val">$1.53M</span>
+      <div class="panel fi d7">
+        <div class="ph"><span class="pt">Sourcing Strategy</span></div>
+        <div class="pb0">
+          <table class="dt">
+            <thead><tr><th>Category</th><th>Strategy</th><th>Preferred</th><th>Backup</th></tr></thead>
+            <tbody>
+              <tr><td>Generator</td><td><span class="badge bs">Compete</span></td><td>GE Vernova</td><td>Siemens Energy</td></tr>
+              <tr><td>Transformer</td><td><span class="badge bs">Compete</span></td><td>ABB Power</td><td>Siemens / WEG</td></tr>
+              <tr><td>Emissions SCR</td><td><span class="badge bs">Compete</span></td><td>CECO Environmental</td><td>Peerless Mfg</td></tr>
+              <tr><td>Fuel Gas</td><td><span class="badge bp">Single</span></td><td>Emerson</td><td>CIRCOR Energy</td></tr>
+              <tr><td>Inlet Air</td><td><span class="badge bp">Single</span></td><td>Donaldson</td><td>Camfil</td></tr>
+              <tr><td>Controls/DCS</td><td><span class="badge bp">Single</span></td><td>Donaldson/Emerson</td><td>—</td></tr>
+              <tr><td>Piping &amp; Valves</td><td><span class="badge bp">Single</span></td><td>Flowserve</td><td>Watts Water</td></tr>
+              <tr><td>Electrical</td><td><span class="badge bp">Single</span></td><td>Eaton</td><td>ABB LV</td></tr>
+              <tr><td>Fire Fighting</td><td><span class="badge bp">Single</span></td><td>Amerex</td><td>—</td></tr>
+              <tr><td>Comp. Washing</td><td><span class="badge bp">Single</span></td><td>Turbotect</td><td>Rochem</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
-  </div>
 
+    <div class="tier-lbl fi">Tier 3 — Strategic Supplier Profiles (Tier 1)</div>
+    <div class="panel fi">
+      <div class="ph"><span class="pt">10 Strategic Supplier Intelligence Profiles</span><span class="badge be">Partial enrichment</span></div>
+      <div class="pb0">
+        <table class="dt">
+          <thead><tr><th>Supplier</th><th>HQ</th><th>BOP Scope</th><th>Exposure</th><th>Lead Contact</th><th>Relationship</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr class="crit-row"><td><strong>GE Vernova</strong></td><td class="dim">Schenectady NY</td><td>Generator + Switchgear</td><td class="mono">$2,093,850</td><td class="dim">Gas Power BD</td><td class="dim">New</td><td><span class="badge bp">RFQ Ready</span></td></tr>
+            <tr><td><strong>Emerson</strong></td><td class="dim">St. Louis MO</td><td>Fuel Gas · Controls/DCS</td><td class="mono">$1,205,200</td><td>Bob Yeager, Pres.</td><td class="dim">New</td><td><span class="badge bp">RFQ Ready</span></td></tr>
+            <tr><td><strong>CECO Environmental</strong></td><td class="dim">Parsons KS</td><td>Emissions · Exhaust · Acoustic</td><td class="mono">$1,626,800</td><td class="dim">Env. Solutions</td><td class="dim">New</td><td><span class="badge bd">Permit Pending</span></td></tr>
+            <tr class="crit-row"><td><strong>ABB Power Grids</strong></td><td class="dim">Zürich / Cary NC</td><td>Step-up Transformer</td><td class="mono">$760,000</td><td class="dim">NA Transformers</td><td class="dim">New</td><td><span class="badge bc">Blocked — ICD</span></td></tr>
+            <tr><td><strong>Siemens Energy</strong></td><td class="dim">Houston TX</td><td>Generator (alt) · Transformer (alt)</td><td class="mono">$2,093,850</td><td class="dim">Power Gen Sales</td><td class="dim">New</td><td><span class="badge bp">RFQ Ready</span></td></tr>
+            <tr><td><strong>Baker Hughes</strong></td><td class="dim">Houston TX</td><td>VIB_MON · Exhaust</td><td class="mono">$608,900</td><td>Lorenzo Simonelli CEO</td><td style="color:var(--success)">Warm</td><td><span class="badge bv">$340K Responded</span></td></tr>
+            <tr><td><strong>Donaldson Company</strong></td><td class="dim">Minneapolis MN</td><td>Inlet Air · Controls/DCS</td><td class="mono">$1,029,750</td><td>Tod Carpenter CEO</td><td class="dim">New</td><td><span class="badge bp">RFQ Ready</span></td></tr>
+            <tr><td><strong>Eaton Corporation</strong></td><td class="dim">Dublin IE / USA</td><td>Electrical Distribution</td><td class="mono">$535,050</td><td class="dim">Power Dist.</td><td class="dim">New</td><td><span class="badge bp">RFQ Ready</span></td></tr>
+            <tr><td><strong>Flowserve</strong></td><td class="dim">Irving TX</td><td>Piping &amp; Valves</td><td class="mono">$507,600</td><td class="dim">Power Gen</td><td class="dim">New</td><td><span class="badge bv">Selected (Trillium repl.)</span></td></tr>
+            <tr><td><strong>EthosEnergy Italia</strong></td><td class="dim">Turin, Italy</td><td>W251B8 Gas Turbine OEM</td><td class="mono">Program GT</td><td>Alberto Malandra MD</td><td style="color:var(--success)">Contracted</td><td><span class="badge bc">ICD Outstanding</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="pf"><span>Supplier Network · FlowSeer v2.1.0 · 10 of 73 suppliers at strategic detail</span><span>Full profiles: tools/supplier-intelligence/supplier_profiles.md</span><span id="ft3">—</span></div>
 </div>
 
-<!-- BOTTOM GRID -->
-<div class="grid-bottom">
-
-  <!-- LEFT: BOP BARS + SCENARIOS -->
-  <div style="display:flex;flex-direction:column;gap:16px;">
-
-    <!-- BOP PRICING BARS -->
-    <div class="panel" style="animation-delay:0.25s;">
-      <div class="panel-head">
-        <span class="panel-title">BOP Category Breakdown</span>
-        <span class="panel-badge">$9,274,000 baseline</span>
-      </div>
-      <div class="panel-body">
-        <div class="bop-bars" id="bop-bars"></div>
-      </div>
+<!-- ═══ PAGE: RFQ PIPELINE ═══ -->
+<div class="page" id="p-rfq">
+  <div class="cond-bar warn">
+    <span class="cond-tag" style="color:var(--warning);border-right-color:var(--warning-bd)">📋 RFQ</span>
+    <div class="cond-items">
+      <div class="cond-item"><span class="ci-label">Stage:</span><span class="ci-val">1 Responded · 12 Drafted · 0 Sent · 0 Awarded</span></div>
+      <div class="cond-item"><span class="ci-label">Blocked:</span><span class="ci-val">$1.725M pending EthosEnergy ICD (Transformer + Exhaust + Electrical)</span></div>
+      <div class="cond-item"><span class="ci-label">Send Date:</span><span class="ci-val" style="color:var(--warning)">May 25, 2026 — <span id="rfq-days-cond">43</span> days</span></div>
     </div>
-
-    <!-- AWARD SCENARIOS -->
-    <div class="panel" style="animation-delay:0.3s;">
-      <div class="panel-head">
-        <span class="panel-title">Award Scenario Modeling</span>
-        <span class="panel-badge">4 scenarios</span>
-      </div>
-      <div class="panel-body">
-        <div class="scenario-list">
-          <div class="scenario-row">
-            <span class="scenario-name">Aggressive (negotiated)</span>
-            <div class="scenario-track">
-              <div class="scenario-fill aggressive" style="width:0%" data-target="85.4">$8,854,055</div>
-            </div>
-          </div>
-          <div class="scenario-row">
-            <span class="scenario-name">Optimistic (competitive)</span>
-            <div class="scenario-track">
-              <div class="scenario-fill optimistic" style="width:0%" data-target="88.1">$9,135,385</div>
-            </div>
-          </div>
-          <div class="scenario-row">
-            <span class="scenario-name">Base (BOM estimates)</span>
-            <div class="scenario-track">
-              <div class="scenario-fill base" style="width:0%" data-target="89.5">$9,274,000</div>
-            </div>
-          </div>
-          <div class="scenario-row">
-            <span class="scenario-name">Conservative (+overruns)</span>
-            <div class="scenario-track">
-              <div class="scenario-fill conservative" style="width:0%" data-target="97.3">$10,077,458</div>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:12px;font-size:10px;color:var(--dim);line-height:1.6;">
-          Recommended budget with 8-12% contingency: <span style="color:var(--amber)">$10.0M – $10.4M</span><br>
-          Market benchmark: TWP at $185/kW vs market $186-$200/kW
-        </div>
-      </div>
-    </div>
-
   </div>
+  <div class="content">
+    <div class="tier-lbl fi d1">Tier 1 — Pipeline Status</div>
+    <div class="stages fi d1">
+      <div class="stage"><div class="s-name">Drafted</div><div class="s-count">12</div><div class="s-val">$9.56M ready to send</div><div class="s-arr">›</div></div>
+      <div class="stage active"><div class="s-name">Send Day</div><div class="s-count" id="rfq-stage-days">43d</div><div class="s-val">May 25, 2026</div><div class="s-arr">›</div></div>
+      <div class="stage"><div class="s-name">Sent</div><div class="s-count">0</div><div class="s-val">Awaiting May 25</div><div class="s-arr">›</div></div>
+      <div class="stage"><div class="s-name">Responded</div><div class="s-count" style="color:var(--success)">1</div><div class="s-val">$340K — Baker Hughes</div><div class="s-arr">›</div></div>
+      <div class="stage"><div class="s-name">Evaluated</div><div class="s-count">0</div><div class="s-val">Jul 15 – Aug 15</div><div class="s-arr">›</div></div>
+      <div class="stage"><div class="s-name">Awarded</div><div class="s-count">0</div><div class="s-val">Target Aug 15, 2026</div></div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi fi d1"><div class="kpi-lbl">Total Pipeline</div><div class="kpi-val">$9.90M</div><div class="kpi-sub">13 packages · 11 suppliers</div></div>
+      <div class="kpi c-warn fi d2"><div class="kpi-lbl">Days to Send</div><div class="kpi-val" id="rfq-days-kpi">—</div><div class="kpi-sub">May 25, 2026 — FIXED</div></div>
+      <div class="kpi c-ok fi d3"><div class="kpi-lbl">Responses Received</div><div class="kpi-val">1 / 13</div><div class="kpi-sub">Baker Hughes $340K · +26.7%</div><div class="kpi-badge"><span class="badge bv">Live</span></div></div>
+      <div class="kpi c-crit fi d4"><div class="kpi-lbl">Blocked Value</div><div class="kpi-val">$1.73M</div><div class="kpi-sub">Transformer + Exhaust + Electrical</div><div class="kpi-badge"><span class="badge bc">ICD Req'd</span></div></div>
+      <div class="kpi fi d5"><div class="kpi-lbl">Critical Path RFQs</div><div class="kpi-val">2</div><div class="kpi-sub">Generator 40–56wk · Transformer 52–70wk</div></div>
+      <div class="kpi fi d6"><div class="kpi-lbl">Pre-Send Gates</div><div class="kpi-val">7 / 10</div><div class="kpi-sub">3 manual gates need human action</div></div>
+    </div>
 
-  <!-- RIGHT: CRITICAL PATH + PROGRESS -->
-  <div style="display:flex;flex-direction:column;gap:16px;">
-
-    <!-- PROGRESS RINGS -->
-    <div class="panel" style="animation-delay:0.3s;">
-      <div class="panel-head">
-        <span class="panel-title">Program Progress</span>
-        <span class="panel-badge green">Phase 1</span>
+    <div class="tier-lbl fi">Tier 2 — Bottlenecks and Decisions</div>
+    <div class="g2 mb24">
+      <div class="panel fi d7">
+        <div class="ph"><span class="pt">Pre-Send Gate Checks</span><span class="badge bd">3 Pending</span></div>
+        <div class="pb">
+          <div class="cp-list">
+            <div class="cp-item cp-crit"><div class="cp-num">G03</div><div><div class="cp-title">EthosEnergy ICD not received</div><div class="cp-detail">Blocks 3 RFQs: Transformer (voltage/MVA spec), Exhaust (flange dims), Electrical Distribution. Cannot finalize without it.</div><div class="cp-action">→ tools/flowseer.py icd escalate</div></div></div>
+            <div class="cp-item cp-warn"><div class="cp-num">G02</div><div><div class="cp-title">Baker Hughes $340K decision pending</div><div class="cp-detail">Accept ($340K), negotiate (target ~$310K), or rebid. Quote within market range. PO template already generated.</div><div class="cp-action">→ tools/contracts/drafts/TWP-2026-0001_VIB_MON_Baker_Hughes.txt</div></div></div>
+            <div class="cp-item cp-warn"><div class="cp-num">G07</div><div><div class="cp-title">NM Environmental Permit Scope (CECO Emissions $892K)</div><div class="cp-detail">NOx/CO limits need NM Environment Dept confirmation before CECO RFQ can be fully specified.</div><div class="cp-action">→ Confirm permit limits with NM EPC / regulatory counsel</div></div></div>
+          </div>
+        </div>
       </div>
-      <div class="panel-body">
-        <div class="rings-row">
-          <div class="ring-block">
-            <svg class="ring-svg" width="80" height="80" viewBox="0 0 80 80">
-              <circle class="ring-bg" cx="40" cy="40" r="32"/>
-              <circle class="ring-fill" cx="40" cy="40" r="32"
-                stroke="#f59e0b"
-                stroke-dasharray="201"
-                stroke-dashoffset="201"
-                data-val="100"
-                id="ring-pricing"/>
-              <text class="ring-label" x="40" y="45" text-anchor="middle" font-family="Syne" font-size="15" font-weight="800" fill="#f59e0b" transform="rotate(90,40,40)">19/19</text>
-            </svg>
-            <div class="ring-sub">BOP Priced</div>
-          </div>
-          <div class="ring-block">
-            <svg class="ring-svg" width="80" height="80" viewBox="0 0 80 80">
-              <circle class="ring-bg" cx="40" cy="40" r="32"/>
-              <circle class="ring-fill" cx="40" cy="40" r="32"
-                stroke="#22c55e"
-                stroke-dasharray="201"
-                stroke-dashoffset="201"
-                data-val="100"
-                id="ring-rfq"/>
-              <text x="40" y="45" text-anchor="middle" font-family="Syne" font-size="15" font-weight="800" fill="#22c55e" transform="rotate(90,40,40)">13/13</text>
-            </svg>
-            <div class="ring-sub">RFQs Ready</div>
-          </div>
-          <div class="ring-block">
-            <svg class="ring-svg" width="80" height="80" viewBox="0 0 80 80">
-              <circle class="ring-bg" cx="40" cy="40" r="32"/>
-              <circle class="ring-fill" cx="40" cy="40" r="32"
-                stroke="#3b82f6"
-                stroke-dasharray="201"
-                stroke-dashoffset="201"
-                data-val="28"
-                id="ring-contacts"/>
-              <text x="40" y="45" text-anchor="middle" font-family="Syne" font-size="15" font-weight="800" fill="#3b82f6" transform="rotate(90,40,40)">64</text>
-            </svg>
-            <div class="ring-sub">Verified</div>
-          </div>
+      <div class="panel fi d7">
+        <div class="ph"><span class="pt">Response Forecast — Post May 25</span><span class="badge bs">Projected</span></div>
+        <div class="pb0">
+          <table class="dt">
+            <thead><tr><th>Supplier</th><th>Prob.</th><th>Est. Response</th><th>Exp. Price</th><th>vs Est.</th></tr></thead>
+            <tbody>
+              <tr><td>Baker Hughes</td><td class="mono" style="color:var(--success)">92%</td><td class="dim">Jun 6</td><td class="mono">$495K</td><td style="color:#FCA5A5">+15%</td></tr>
+              <tr><td>Emerson</td><td class="mono">85%</td><td class="dim">Jun 12</td><td class="mono">$700K</td><td class="dim">at est.</td></tr>
+              <tr><td>Donaldson (×2)</td><td class="mono">88%</td><td class="dim">Jun 9</td><td class="mono">$1.03M</td><td class="dim">at est.</td></tr>
+              <tr><td>GE Vernova</td><td class="mono">80%</td><td class="dim">Jul 1</td><td class="mono">~$2.1M</td><td style="color:#FCA5A5">+5–18%</td></tr>
+              <tr><td>Siemens Energy</td><td class="mono">72%</td><td class="dim">Jul 8</td><td class="mono">~$2.1M</td><td style="color:#FCA5A5">+5–18%</td></tr>
+              <tr><td>ABB Power</td><td class="mono">75%</td><td class="dim">Jul 10</td><td class="mono">~$760K</td><td style="color:#FCA5A5">+10–15%</td></tr>
+              <tr><td>Amerex / Turbotect</td><td class="mono">80%</td><td class="dim">Jun 15</td><td class="mono">$340K</td><td class="dim">–8–0%</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <!-- CRITICAL PATH -->
-    <div class="panel" style="animation-delay:0.35s; flex:1;">
-      <div class="panel-head">
-        <span class="panel-title">Critical Path</span>
-        <span class="panel-badge red">1 Blocker</span>
-      </div>
-      <div class="panel-body">
-        <div class="crit-list">
-          <div class="crit-item">
-            <div class="crit-title">EthosEnergy ICD — PENDING</div>
-            <div class="crit-detail">Blocks: Transformer + Exhaust + Electrical = $1.725M. Required by May 1.</div>
-            <div class="crit-action red">→ flowseer.py icd escalate</div>
-          </div>
-          <div class="crit-item warn">
-            <div class="crit-title">Baker Hughes $340K — DECISION NEEDED</div>
-            <div class="crit-detail">+26.7% above $268K estimate. Accept, negotiate, or rebid before May 1.</div>
-            <div class="crit-action">→ flowseer.py rfq</div>
-          </div>
-          <div class="crit-item warn">
-            <div class="crit-title">Generator — TRUE CRITICAL PATH</div>
-            <div class="crit-detail">40-56 wk lead. Oct 2027 delivery if awarded Aug 15. Must RFQ May 25.</div>
-            <div class="crit-action">→ GE + Siemens RFQs ready</div>
-          </div>
-          <div class="crit-item warn">
-            <div class="crit-title">Transformer — 52-70 wk Lead Time</div>
-            <div class="crit-detail">ABB + Siemens competitive bid. Blocked on ICD for voltage spec.</div>
-            <div class="crit-action">→ Resolve ICD to unblock</div>
-          </div>
-          <div class="crit-item ok">
-            <div class="crit-title">Trillium AVOID — RESOLVED</div>
-            <div class="crit-detail">Flowserve selected for Piping &amp; Valves ($507K). RFQ drafted.</div>
-            <div class="crit-action" style="color:var(--green)">✓ No action needed</div>
-          </div>
-        </div>
+    <div class="tier-lbl fi">Tier 3 — Full Pipeline Detail</div>
+    <div class="panel fi">
+      <div class="ph"><span class="pt">13-Package RFQ Pipeline</span><div class="pm"><span class="badge bv">1 Responded</span><span class="badge bp">12 Drafted</span></div></div>
+      <div class="pb0">
+        <table class="dt">
+          <thead><tr><th>ID</th><th>Supplier</th><th>Contact</th><th>Category</th><th>Lead Time</th><th>Est. Value</th><th>Status</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="mono dim">RFQ-001</td><td>Baker Hughes</td><td>Lorenzo Simonelli</td><td>Vibration Monitoring</td><td class="dim">8–14 wk</td><td class="mono">$340,000</td><td><span class="badge bv">Responded</span></td><td class="dim" style="font-size:10px">$340K · +26.7% · Decision pending</td></tr>
+            <tr class="crit-row"><td class="mono dim">RFQ-008</td><td><strong>GE Vernova</strong></td><td class="dim">Gas Power BD</td><td>Generator + Switchgear</td><td style="color:#F87171">40–56 wk ⚠</td><td class="mono">$2,093,850</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">CRITICAL PATH · compete vs RFQ-009</td></tr>
+            <tr class="crit-row"><td class="mono dim">RFQ-009</td><td><strong>Siemens Energy</strong></td><td class="dim">Power Gen Sales</td><td>Generator + Switchgear</td><td style="color:#F87171">44–58 wk ⚠</td><td class="mono">$2,093,850</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">Competitive bid vs GE Vernova</td></tr>
+            <tr class="crit-row"><td class="mono dim">RFQ-010</td><td><strong>ABB Power</strong></td><td class="dim">NA Transformers</td><td>Step-up Transformer</td><td style="color:#F87171">52–70 wk ⚠</td><td class="mono">$760,000</td><td><span class="badge bc">Blocked</span></td><td class="dim" style="font-size:10px">Pending EthosEnergy ICD</td></tr>
+            <tr><td class="mono dim">RFQ-012</td><td>CECO Environmental</td><td class="dim">Env. Solutions</td><td>Emissions Control SCR</td><td class="dim">24–36 wk</td><td class="mono">$891,750</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">NM permit scope pending</td></tr>
+            <tr><td class="mono dim">RFQ-002</td><td>Emerson</td><td>Bob Yeager</td><td>Fuel Gas System</td><td class="dim">16–24 wk</td><td class="mono">$700,600</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">Fisher regulators + Daniel meters</td></tr>
+            <tr><td class="mono dim">RFQ-006</td><td>Eaton Corporation</td><td class="dim">Power Dist.</td><td>Electrical Distribution</td><td class="dim">20–30 wk</td><td class="mono">$535,050</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">Station service MV/LV switchgear</td></tr>
+            <tr><td class="mono dim">RFQ-003</td><td>Donaldson Co.</td><td>Tod Carpenter</td><td>Inlet Air Filtering</td><td class="dim">14–20 wk</td><td class="mono">$525,150</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">CEO outreach · Ultra-Web</td></tr>
+            <tr><td class="mono dim">RFQ-013</td><td>Flowserve</td><td class="dim">Power Gen</td><td>Piping &amp; Valves</td><td class="dim">10–16 wk</td><td class="mono">$507,600</td><td><span class="badge bv">Drafted</span></td><td class="dim" style="font-size:10px">Replaces Trillium AVOID ✓</td></tr>
+            <tr><td class="mono dim">RFQ-004</td><td>Donaldson Co.</td><td>Michael Wynblatt</td><td>Controls / DCS</td><td class="dim">20–28 wk</td><td class="mono">$504,600</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">CTO outreach · BOP DCS</td></tr>
+            <tr class="crit-row"><td class="mono dim">RFQ-011</td><td>Siemens Energy</td><td class="dim">Transformers</td><td>Transformer (alt)</td><td style="color:var(--warning)">54–68 wk</td><td class="mono">$760,000</td><td><span class="badge bc">Blocked</span></td><td class="dim" style="font-size:10px">Compete vs ABB · pending ICD</td></tr>
+            <tr><td class="mono dim">RFQ-005</td><td>Baker Hughes</td><td>Rod Christie EVP</td><td>Exhaust System</td><td class="dim">20–28 wk</td><td class="mono">$430,650</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">Leverage BH relationship</td></tr>
+            <tr><td class="mono dim">RFQ-006</td><td>Amerex Corp.</td><td>Harrison K</td><td>Fire Fighting System</td><td class="dim">10–16 wk</td><td class="mono">$229,400</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">NFPA 750 package</td></tr>
+            <tr><td class="mono dim">RFQ-007</td><td>Turbotect Ltd.</td><td>Neil Ashford</td><td>Compressor Washing</td><td class="dim">8–12 wk</td><td class="mono">$132,300</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">Online + offline W-frame</td></tr>
+            <tr style="background:var(--bg-raised)"><td colspan="5" style="font-size:11px;color:var(--text-secondary);font-weight:600;padding:10px 14px">TOTAL PIPELINE VALUE</td><td class="mono" style="font-size:13px;color:var(--warning);font-weight:600">$9,898,000</td><td colspan="2"></td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
-
   </div>
-
-</div>
-
-<!-- FOOTER -->
-<footer>
-  <span>FlowSeer v2.1.0 · Grok Audit PASS 102/102 · 125/125 tests · commit cfa49c8</span>
-  <span>Trans World Power LLC · Project Jupiter W251B8 · Santa Teresa NM</span>
-  <span>Claude (Builder) · ChatGPT (Architect) · Perplexity (Research) · Grok (Audit)</span>
-</footer>
-
+  <div class="pf"><span>RFQ Pipeline · FlowSeer v2.1.0 · 13 packages · $9,898,000 total</span><span>Ingest responses: tools/rfq-generator/ingest_response.py · Send plan: tools/scheduling/rfq_send_plan.md</span><span id="ft4">—</span></div>
 </div>
 
 <script>
-// Timestamp
-function updateTs() {
-  const now = new Date();
-  document.getElementById('ts').textContent =
-    now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + ' · ' +
-    now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-}
-updateTs();
-setInterval(updateTs, 60000);
-
-// Live countdown
-function updateCountdown() {
-  const send = new Date('2026-05-25T00:00:00');
-  const now  = new Date();
-  const days = Math.ceil((send - now) / 86400000);
-  document.getElementById('days-count').textContent  = days;
-  document.getElementById('countdown-num').textContent = days;
-}
-updateCountdown();
-
-// BOP bars data
-const bopData = [
-  {label: 'Generator + Switchgear', val: 2093850, tier: 'strategic'},
-  {label: 'Emissions Control (SCR)', val: 891750, tier: 'strategic'},
-  {label: 'Step-up Transformer', val: 760000, tier: 'strategic'},
-  {label: 'Fuel Gas System', val: 700600, tier: 'strategic'},
-  {label: 'Electrical Distribution', val: 535050, tier: 'strategic'},
-  {label: 'Inlet Air Filtering', val: 525150, tier: 'strategic'},
-  {label: 'Piping & Valves', val: 507600, tier: 'strategic'},
-  {label: 'Controls / DCS', val: 504600, tier: 'strategic'},
-  {label: 'Exhaust System', val: 430650, tier: 'targeted'},
-  {label: 'Civil & Structural', val: 336250, tier: 'targeted'},
-  {label: 'Acoustic Enclosure', val: 305100, tier: 'targeted'},
-  {label: 'Lube Oil System', val: 288900, tier: 'targeted'},
-  {label: 'Vibration Monitoring', val: 268250, tier: 'verified'},
-  {label: 'Starting System', val: 238950, tier: 'targeted'},
-  {label: 'Fire Fighting', val: 229400, tier: 'targeted'},
-  {label: 'Cooling System', val: 225450, tier: 'targeted'},
-  {label: 'Fuel Oil System', val: 195750, tier: 'targeted'},
-  {label: 'Compressor Washing', val: 132300, tier: 'standard'},
-  {label: 'Telecoms / Network', val: 104400, tier: 'standard'},
+const BOP=[
+  {cat:'Generator and Electrical Switchgear',code:'GENERATOR',tier:'strategic',low:1781273,mid:2093850,high:2408628,sup:'GE Vernova',conf:'ESTIMATED'},
+  {cat:'Emissions Control (SCR / CO Catalyst)',code:'EMISSIONS',tier:'strategic',low:757988,mid:891750,high:1025513,sup:'CECO Environmental',conf:'ESTIMATED'},
+  {cat:'Step-up Transformer (GSU)',code:'TRANSFORMER',tier:'strategic',low:646000,mid:760000,high:874000,sup:'ABB Power Grids',conf:'ESTIMATED'},
+  {cat:'Fuel Gas System',code:'FUEL_GAS',tier:'strategic',low:595510,mid:700600,high:805690,sup:'Emerson',conf:'ESTIMATED'},
+  {cat:'Electrical Distribution (Auxiliary)',code:'ELEC_DIST',tier:'strategic',low:454793,mid:535050,high:615308,sup:'Eaton',conf:'ESTIMATED'},
+  {cat:'Inlet Air Filtering System',code:'INLET_AIR',tier:'strategic',low:446378,mid:525150,high:603923,sup:'Donaldson',conf:'ESTIMATED'},
+  {cat:'Piping and Valves (BOP interconnect)',code:'PIPING_VALVES',tier:'strategic',low:431460,mid:507600,high:583740,sup:'Flowserve',conf:'ESTIMATED'},
+  {cat:'Controls / DCS Integration',code:'CONTROLS_DCS',tier:'strategic',low:428910,mid:504600,high:580290,sup:'Emerson',conf:'ESTIMATED'},
+  {cat:'Exhaust System',code:'EXHAUST',tier:'targeted',low:366053,mid:430650,high:495248,sup:'CECO / BH',conf:'ESTIMATED'},
+  {cat:'Civil and Structural Works',code:'CIVIL_STRUCT',tier:'targeted',low:285813,mid:336250,high:386688,sup:'Local EPC',conf:'ESTIMATED'},
+  {cat:'Acoustic Enclosure / Noise Control',code:'ACOUSTIC',tier:'targeted',low:259335,mid:305100,high:350865,sup:'CECO',conf:'ESTIMATED'},
+  {cat:'Lube Oil System',code:'LUBE_OIL',tier:'targeted',low:245565,mid:288900,high:332235,sup:'Parker Hannifin',conf:'ESTIMATED'},
+  {cat:'Vibration Monitoring System',code:'VIB_MON',tier:'targeted',low:228013,mid:268250,high:308488,sup:'Baker Hughes',conf:'RFQ_VERIFIED',quoted:340000,vp:26.7},
+  {cat:'Starting System',code:'STARTING',tier:'targeted',low:203108,mid:238950,high:274793,sup:'Koenig',conf:'ESTIMATED'},
+  {cat:'Fire Fighting System',code:'FIRE_FIGHT',tier:'targeted',low:194990,mid:229400,high:263810,sup:'Amerex',conf:'ESTIMATED'},
+  {cat:'Cooling / Cooling Water System',code:'COOLING',tier:'targeted',low:191633,mid:225450,high:259268,sup:'SPX Cooling',conf:'ESTIMATED'},
+  {cat:'Fuel Oil / Backup Fuel System',code:'FUEL_OIL',tier:'targeted',low:166388,mid:195750,high:225113,sup:'Parker',conf:'ESTIMATED'},
+  {cat:'Compressor Washing System',code:'WATER_WASH',tier:'standard',low:112455,mid:132300,high:152145,sup:'Turbotect',conf:'ESTIMATED'},
+  {cat:'Telecommunications / Plant Network',code:'TELECOMS',tier:'standard',low:88740,mid:104400,high:120060,sup:'Cisco',conf:'ESTIMATED'},
 ];
 
-const maxBop = 2093850;
-const bopContainer = document.getElementById('bop-bars');
-bopData.forEach(item => {
-  const pct = (item.val / maxBop * 100).toFixed(1);
-  const fmt = item.val >= 1000000
-    ? '$' + (item.val/1000000).toFixed(2) + 'M'
-    : '$' + Math.round(item.val/1000) + 'K';
-  const row = document.createElement('div');
-  row.className = 'bop-row';
-  row.innerHTML = `
-    <span class="bop-label">${item.label}</span>
-    <div class="bop-track">
-      <div class="bop-bar ${item.tier}" style="width:0%" data-target="${pct}"></div>
-    </div>
-    <span class="bop-amt">${fmt}</span>`;
-  bopContainer.appendChild(row);
-});
+function go(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('p-'+id).classList.add('active');
+  document.getElementById('t-'+id).classList.add('active');
+  if(id==='cost') buildCostTable();
+  updateBars();
+}
 
-// Animate bars after load
-setTimeout(() => {
-  document.querySelectorAll('.bop-bar[data-target]').forEach(el => {
-    el.style.width = el.dataset.target + '%';
-  });
-  document.querySelectorAll('.scenario-fill[data-target]').forEach(el => {
-    el.style.width = el.dataset.target + '%';
-  });
-}, 200);
+function ts(){
+  const now=new Date();
+  const s=now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' · '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const el=document.getElementById('ts');if(el)el.textContent=s;
+  ['ft1','ft2','ft3','ft4'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='Last refreshed: '+s;});
+}
+ts();setInterval(ts,60000);
 
-// Animate rings
-setTimeout(() => {
-  document.querySelectorAll('.ring-fill[data-val]').forEach(el => {
-    const circ = 201;
-    const pct  = parseInt(el.dataset.val) / 100;
-    el.style.strokeDashoffset = circ - (circ * pct);
+function days(){
+  const d=Math.ceil((new Date('2026-05-25')-new Date())/86400000);
+  ['ov-days','rfq-days-kpi','rfq-days-cond'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=d;});
+  const rs=document.getElementById('rfq-stage-days');if(rs)rs.textContent=d+'d';
+  const db=document.getElementById('days-badge');if(db)db.textContent=d+' Days';
+}
+days();
+
+function updateBars(){
+  setTimeout(()=>{
+    document.querySelectorAll('[data-w]').forEach(el=>el.style.width=el.dataset.w+'%');
+  },200);
+}
+updateBars();
+
+function fmt(n){
+  if(!n&&n!==0)return'—';
+  if(n>=1000000)return'$'+(n/1000000).toFixed(2)+'M';
+  return'$'+Math.round(n/1000)+'K';
+}
+
+function buildCostTable(){
+  const tb=document.getElementById('cost-tbody');
+  if(!tb||tb.children.length>0)return;
+  BOP.forEach((r,i)=>{
+    const v=r.conf==='RFQ_VERIFIED';
+    const tb_=r.tier==='strategic'?'<span class="badge bs" style="font-size:8px">Strategic</span>':r.tier==='targeted'?'<span class="badge bp" style="font-size:8px">Targeted</span>':'<span style="font-size:9px;color:var(--text-dim)">Standard</span>';
+    const cb=v?'<span class="badge bv">Verified</span>':'<span class="badge be">Estimated</span>';
+    const qv=r.quoted?fmt(r.quoted):'—';
+    const vv=r.vp?`<span style="color:#F87171">+${r.vp}%</span>`:'<span class="dim">—</span>';
+    const tr=document.createElement('tr');
+    if(v)tr.style.background='rgba(16,185,129,.04)';
+    tr.innerHTML=`<td class="mono dim">${i+1}</td><td>${r.cat}</td><td class="mono dim" style="font-size:10px">${r.code}</td><td>${tb_}</td><td class="mono dim">${fmt(r.low)}</td><td class="mono" style="font-weight:500">${fmt(r.mid)}</td><td class="mono dim">${fmt(r.high)}</td><td class="mono">${qv}</td><td>${vv}</td><td class="dim" style="font-size:10px">${r.sup}</td><td>${cb}</td>`;
+    tb.appendChild(tr);
   });
-}, 300);
+  const total=BOP.reduce((s,r)=>s+r.mid,0);
+  const tr=document.createElement('tr');
+  tr.style.background='var(--bg-raised)';tr.style.fontWeight='600';
+  tr.innerHTML=`<td colspan="5" style="font-size:11px;color:var(--text-secondary);padding:10px 14px">TOTAL BOP BASELINE (19 CATEGORIES)</td><td class="mono" style="font-size:13px;color:var(--warning)">${fmt(total)}</td><td colspan="5"></td>`;
+  tb.appendChild(tr);
+  updateBars();
+}
 </script>
 </body>
 </html>
