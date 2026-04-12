@@ -70,6 +70,36 @@ REPO_ROOT  = str(Path(__file__).parent.parent.parent)
 POLL_SLEEP = 60   # seconds between queue polls when empty
 
 
+def _extract_obvious_queries(task: str) -> list:
+    """
+    Extract obvious research queries from a directive task description.
+    Fires these in parallel with architect planning so research is
+    ready before the build phase starts.
+    """
+    queries = []
+    task_lower = task.lower()
+
+    # Pricing research signals
+    if any(w in task_lower for w in ["pricing", "price", "cost", "quote", "rfq"]):
+        if "w251" in task_lower or "gas turbine" in task_lower or "bop" in task_lower:
+            queries.append("W251 gas turbine balance of plant current market pricing 2025 2026")
+
+    # Contact research signals
+    if any(w in task_lower for w in ["contact", "email", "outreach", "linkedin"]):
+        if any(co in task_lower for co in ["baker hughes", "emerson", "donaldson", "siemens", "ge "]):
+            queries.append("gas turbine BOP supplier executive contacts power generation 2025")
+
+    # Regulatory/index signals
+    if any(w in task_lower for w in ["enr", "cci", "index", "escalation", "inflation"]):
+        queries.append("ENR Construction Cost Index 2024 2025 current value")
+
+    # Market intelligence signals
+    if any(w in task_lower for w in ["market", "intelligence", "supplier profile", "company overview"]):
+        pass  # Too broad — let architect decide
+
+    return queries[:2]   # cap at 2 prefetch queries
+
+
 class Orchestrator:
 
     def __init__(self, dry_run: bool = False) -> None:
@@ -180,18 +210,32 @@ class Orchestrator:
         self.log.log_directive_start(directive.id, directive.title)
 
         try:
-            # Phase 1: Architect
+            # Phase 1: Architect plans — simultaneously start any obvious research
             log.info("[%s] Planning...", directive.id)
             ds.status = "PLANNING"
             self.state.update_directive(ds)
+
+            # Fire architect and pre-fetch research simultaneously if context
+            # suggests research will be needed (keywords in task description)
+            prefetch_future = None
+            obvious_queries = _extract_obvious_queries(directive.task)
+
+            if obvious_queries and self.researcher.available() and not self.dry_run:
+                log.info("[%s] Pre-fetching %d research queries in parallel with planning",
+                         directive.id, len(obvious_queries))
+                import concurrent.futures as cf
+                _executor = cf.ThreadPoolExecutor(max_workers=1)
+                prefetch_future = _executor.submit(
+                    self.researcher.research, obvious_queries, directive.context
+                )
 
             plan = self.architect.plan(directive.task, directive.context)
             ds.architect_plan = plan
             self.state.update_directive(ds)
             self.log.log_architect_plan(directive.id, plan)
 
-            queries   = plan.get("research_queries", [])
-            criteria  = plan.get("acceptance_criteria", [])
+            queries  = plan.get("research_queries", [])
+            criteria = plan.get("acceptance_criteria", [])
 
             log.info("[%s] Plan: %d files, %d criteria, %d research queries",
                      directive.id,
@@ -203,21 +247,40 @@ class Orchestrator:
                 self.state.update_directive(ds)
                 return True
 
-            # Phase 2: Research (only if needed)
+            # Phase 2: Research — collect prefetch + any additional queries
             research_context = ""
-            if queries:
-                log.info("[%s] Researching (%d queries)...", directive.id, len(queries))
+            all_queries = list(dict.fromkeys(obvious_queries + queries))  # dedupe
+
+            if all_queries:
+                log.info("[%s] Researching (%d queries)...", directive.id, len(all_queries))
                 ds.status = "RESEARCHING"
                 self.state.update_directive(ds)
-                results = self.researcher.research(queries, directive.context)
-                ds.research_results = results
+
+                # Collect prefetch results if they're ready
+                prefetch_results = []
+                if prefetch_future:
+                    try:
+                        prefetch_results = prefetch_future.result(timeout=5)
+                    except Exception:
+                        pass
+
+                # Fetch any remaining queries not covered by prefetch
+                prefetched_queries = {r.get("query", "") for r in prefetch_results}
+                remaining = [q for q in queries if q not in prefetched_queries]
+                fresh     = self.researcher.research(remaining, directive.context) if remaining else []
+
+                all_results = prefetch_results + fresh
+                ds.research_results = all_results
                 self.state.update_directive(ds)
-                research_context = self.researcher.format_for_builder(results)
-                finding_count = sum(len(r.get("findings", [])) for r in results)
-                self.log.log_research_complete(directive.id, len(queries), finding_count)
-                log.info("[%s] Research: %d findings", directive.id, finding_count)
+                research_context = self.researcher.format_for_builder(all_results)
+                finding_count = sum(len(r.get("findings", [])) for r in all_results)
+                self.log.log_research_complete(directive.id, len(all_queries), finding_count)
+                log.info("[%s] Research: %d findings (%d prefetched)",
+                         directive.id, finding_count, len(prefetch_results))
             else:
                 log.info("[%s] No research needed — skipping Perplexity", directive.id)
+                if prefetch_future:
+                    prefetch_future.cancel()
 
             # Phases 3-5: Build → Self-Edit → Audit loop
             return self._build_audit_loop(directive, ds, plan, research_context, criteria)
