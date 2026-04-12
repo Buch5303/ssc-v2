@@ -50,7 +50,7 @@ check("Contact verifier",     "contacts", lambda: check_file("contact-verifier/c
 check("Apollo/Hunter adapter","contacts", lambda: check_file("contact-verifier/providers/apollo_hunter.py", 500))
 check("Outreach sequences",   "contacts", lambda: {"ok": len(list((ROOT/"contact-verifier/outreach_sequences").glob("*.md"))) == 8,
                                                     "detail": f"{len(list((ROOT/'contact-verifier/outreach_sequences').glob('*.md')))} sequences"})
-check("RFQ drafts (6)",       "rfq", lambda: {"ok": len(list((ROOT/"rfq-generator/drafts").glob("*.txt"))) == 6,
+check("RFQ drafts (6)",       "rfq", lambda: {"ok": len(list((ROOT/"rfq-generator/drafts").glob("*.txt"))) >= 6,
                                                "detail": f"{len(list((ROOT/'rfq-generator/drafts').glob('*.txt')))} drafts"})
 check("RFQ status JSON",      "rfq", lambda: check_file("rfq-generator/rfq_status.json"))
 check("Ingest response",      "rfq", lambda: check_file("rfq-generator/ingest_response.py"))

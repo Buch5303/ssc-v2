@@ -9,25 +9,11 @@
       "days_out": 43
     },
     {
-      "severity": "CRITICAL",
-      "code": "SUP-001",
-      "title": "Piping & Valves Supplier Not Confirmed",
-      "detail": "Trillium AVOID flag active on $507,600 scope. Flowserve recommended replacement. No RFQ drafted.",
-      "action": "Add Flowserve Piping & Valves RFQ to rfq_status.json and draft RFQ"
-    },
-    {
       "severity": "HIGH",
       "code": "RFQ-001",
       "title": "Baker Hughes VIB_MON Decision Pending",
       "detail": "Quoted $340,000 (+26.7% above $268K estimate). Decision needed before May 1.",
       "action": "Accept, negotiate, or rebid. Run ingest_response.py to formally record."
-    },
-    {
-      "severity": "HIGH",
-      "code": "RFQ-002",
-      "title": "Generator + Switchgear RFQ Not Drafted ($2.09M)",
-      "detail": "Highest value BOP item. 40-56 week lead time. Must issue May 25 \u2014 no slippage.",
-      "action": "Draft Generator RFQ to GE Vernova AND Siemens Energy (competitive bid required)"
     },
     {
       "severity": "LOW",
@@ -38,10 +24,10 @@
     }
   ],
   "counts": {
-    "CRITICAL": 2,
-    "HIGH": 2,
+    "CRITICAL": 1,
+    "HIGH": 1,
     "MEDIUM": 0,
     "LOW": 1
   },
-  "generated": "2026-04-12T17:34:23.587734"
+  "generated": "2026-04-12T20:04:07.266088"
 }
