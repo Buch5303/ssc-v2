@@ -68,10 +68,12 @@ check("Comparison matrix",    "supplier", lambda: check_file("supplier-intellige
 # ── Data integrity checks ─────────────────────────────────────────────────────
 def check_bop_total():
     rows = []
-    p = ROOT / "pricing-discovery/outputs/pricing_updated.csv"
-    if p.exists():
-        with open(p) as f:
-            rows = [r for r in csv.DictReader(f) if r.get("category") != "TOTAL"]
+    for fname in ["bop_cost_model.csv", "pricing_updated.csv"]:
+        p = ROOT / f"pricing-discovery/outputs/{fname}"
+        if p.exists():
+            with open(p) as f:
+                rows = [r for r in csv.DictReader(f) if r.get("category") != "TOTAL"]
+            break
     total = sum(float(r.get("mid_usd") or r.get("bom_mid",0)) for r in rows)
     ok    = abs(total - 9_274_000) < 100_000
     return {"ok": ok, "detail": f"${total:,.0f} (expected ~$9,274,000)", "warn": not ok}

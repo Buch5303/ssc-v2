@@ -1,0 +1,35 @@
+To: alberto.malandra@ethosenergy.com
+Cc: todd.dunlop@ethosenergy.com
+Subject: Project Jupiter — W251B8 Interface Control Document — URGENT
+Date: April 12, 2026
+
+Alberto,
+
+Following up urgently on the W251B8 Interface Control Document for Project Jupiter.
+
+We are 43 days from our May 25, 2026 RFQ send date. The EthosEnergy ICD is blocking
+three critical RFQ packages:
+
+  - Step-up Transformer (ABB/Siemens) — $760,000 — 52-70 week lead time
+  - Exhaust System (CECO/BH) — $430,650
+  - Electrical Distribution (Eaton) — $535,050
+
+Total blocked scope: $1,725,700
+
+The Transformer is on the critical path for Q2 2027 First Power. Every week of ICD
+delay directly impacts the project schedule.
+
+We need the following five data points by May 1:
+  1. Generator output voltage (kV)
+  2. Generator MVA rating
+  3. Exhaust flange dimensions and temperature profile
+  4. Fuel gas pressure and composition
+  5. Auxiliary power requirements (kW/voltage)
+
+A preliminary ICD with these five items is sufficient to proceed with RFQ issuance.
+
+Please confirm receipt and provide a delivery date for the ICD.
+
+Greg Buchanan
+CEO, Trans World Power LLC
+buch5303@gmail.com

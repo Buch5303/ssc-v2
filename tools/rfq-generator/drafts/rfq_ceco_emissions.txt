@@ -1,0 +1,34 @@
+Subject: Project Jupiter — W251B8 Emissions Control (SCR + CO Catalyst) — Request for Budgetary Pricing
+
+Dear CECO Environmental — Power Generation Solutions,
+
+Trans World Power LLC is procuring the Emissions Control package for Project Jupiter —
+a 50MW W251B8 power island in Santa Teresa, New Mexico.
+
+SCOPE OF SUPPLY:
+- Selective Catalytic Reduction (SCR) system — NOx reduction
+- CO Catalyst system — CO oxidation
+- Ammonia injection grid (AIG) and ammonia storage/vaporization
+- Ductwork, expansion joints, and structural support
+- Instrumentation, controls, and integration to plant DCS
+
+PROGRAM:
+- Fuel: Natural gas (primary), fuel oil (backup/startup)
+- Emissions limits: Per New Mexico Environment Department permit (to be confirmed)
+- Standards: EPA MACT, BACT requirements for NM
+- Site: Santa Teresa, NM — high desert environment
+
+NOTE: NM environmental permit scope is being confirmed. We will provide permit limits
+with confirmed scope before PO award. Budgetary proposal may be based on typical
+NOx/CO limits for natural gas combined-cycle applications.
+
+REQUEST:
+1. Budgetary price (±20%)
+2. Lead time from PO to delivery
+3. Key technical assumptions
+4. References for similar 40-60MW GT installations
+
+Response by June 15, 2026.
+
+Greg Buchanan | CEO, Trans World Power LLC
+buch5303@gmail.com

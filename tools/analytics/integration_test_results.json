@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-04-12 20:12:48.124701",
+  "passed": 12,
+  "total": 15,
+  "fails": [
+    "All RFQ draft files present (\u226513)",
+    "Platform health monitor: 25/25 checks passing",
+    "EthosEnergy ICD tracker callable and shows status"
+  ],
+  "verdict": "NOT_VIABLE"
+}

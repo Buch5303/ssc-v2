@@ -1,0 +1,46 @@
+To: powergen.sales@siemens-energy.com
+Cc: 
+Subject: Project Jupiter — W251B8 50MW Generator + Switchgear — RFQ
+Date: April 12, 2026
+
+Subject: Project Jupiter — W251B8 50MW Generator + Switchgear — Request for Budgetary Pricing
+
+Dear Siemens Energy North America — Power Generation,
+
+Trans World Power LLC (TWP) is the program manager for Project Jupiter — a 50MW W251B8 natural gas power island for an Oracle/OpenAI data center campus in Santa Teresa, New Mexico. EthosEnergy (Italia) is the gas turbine supplier under a trilateral MOU signed March 13, 2026.
+
+We are soliciting budgetary pricing from Siemens Energy for the Generator and Main Electrical Switchgear package.
+
+SCOPE OF SUPPLY (budgetary):
+- SGen air-cooled synchronous generator, rated for W251B8 output (~50MW)
+- Terminal voltage per EthosEnergy interface specification
+- SIPROTEC 5 protection and excitation system
+- Generator circuit breaker, 13.8kV class
+- Isolated phase bus duct, generator to GSU
+- Neutral grounding unit
+- All accessories, instrumentation, and documentation
+
+PROGRAM DETAILS:
+- Site: Santa Teresa, NM (high desert, 4,100 ft elevation)
+- GT: Westinghouse W251B8, 50MW class, EthosEnergy Italia manufacture
+- Target: Q2 2027 first power
+- Standards: ANSI/IEEE, NEMA, NEC
+
+LEAD TIME IS CRITICAL:
+We require delivery no later than Q4 2026 to support Q2 2027 commissioning.
+Please confirm earliest delivery commitment with your proposal.
+
+REQUEST:
+1. Budgetary price (±20%) for above scope
+2. Confirmed lead time from PO to site delivery
+3. Reference projects at 40-60MW rating
+4. Key assumptions and exclusions
+
+This RFQ is being issued simultaneously to GE Vernova. Competitive award.
+
+Response requested by June 15, 2026.
+
+Regards,
+Greg Buchanan
+CEO, Trans World Power LLC
+buch5303@gmail.com
