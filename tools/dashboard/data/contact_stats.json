@@ -1,0 +1,33 @@
+{
+  "total": 231,
+  "verified": 64,
+  "by_priority": {
+    "ACTIVE_RFQ": 2,
+    "TIER1": 12,
+    "NORMAL": 217
+  },
+  "verification_rate": 27.7,
+  "top_contacts": [
+    {
+      "name": "Lorenzo Simonelli",
+      "company": "Baker Hughes",
+      "status": "RESPONDED"
+    },
+    {
+      "name": "Bob Yeager",
+      "company": "Emerson",
+      "status": "DRAFTED"
+    },
+    {
+      "name": "Tod Carpenter",
+      "company": "Donaldson",
+      "status": "DRAFTED"
+    },
+    {
+      "name": "Alberto Malandra",
+      "company": "EthosEnergy",
+      "status": "ICD_PENDING"
+    }
+  ],
+  "last_updated": "2026-04-12T14:18:29.901775"
+}

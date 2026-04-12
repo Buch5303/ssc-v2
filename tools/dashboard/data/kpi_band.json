@@ -1,0 +1,11 @@
+{
+  "primary_signal": "Baker Hughes VIB_MON \u2014 $340,000 quoted \u2014 +26.7% vs estimate",
+  "primary_action": "Accept quote or negotiate \u2014 decision needed before May 1",
+  "critical_alert": "TRILLIUM AVOID \u2014 Piping & Valves $507K \u2014 select Flowserve before RFQ",
+  "days_to_rfq": 43,
+  "rfq_date": "May 25, 2026",
+  "total_bop": "$9,274,000",
+  "pipeline_value": "$3.28M",
+  "categories_verified": "0/19",
+  "last_updated": "2026-04-12T14:18:29.902041"
+}
