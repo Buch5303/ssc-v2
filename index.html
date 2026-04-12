@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowSeer — Project Jupiter Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #090c0f;
+  --bg2:      #0e1318;
+  --bg3:      #141b22;
+  --border:   #1e2a35;
+  --amber:    #f59e0b;
+  --amber2:   #fbbf24;
+  --red:      #ef4444;
+  --green:    #22c55e;
+  --blue:     #3b82f6;
+  --muted:    #4a6070;
+  --text:     #c8d8e4;
+  --dim:      #6b8599;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Animated grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(245,158,11,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245,158,11,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap { position: relative; z-index: 1; max-width: 1440px; margin: 0 auto; padding: 0 24px 48px; }
+
+/* ── HEADER ──────────────────────────────────────────────── */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 0 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+}
+
+.brand { display: flex; align-items: baseline; gap: 12px; }
+
+.brand-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+  color: var(--amber);
+}
+
+.brand-sub {
+  font-size: 11px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase;
+}
+
+.header-right { display: flex; align-items: center; gap: 24px; }
+
+.health-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2);
+  border-radius: 4px; padding: 5px 10px;
+  font-size: 11px; color: var(--green); letter-spacing: 1px;
+}
+
+.health-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.ts { font-size: 11px; color: var(--dim); }
+
+/* ── ALERT BAR ───────────────────────────────────────────── */
+.alert-bar {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 6px; padding: 10px 16px;
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 28px;
+  font-size: 12px;
+}
+
+.alert-tag {
+  background: var(--red); color: #fff;
+  font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+  padding: 2px 7px; border-radius: 3px; white-space: nowrap;
+  font-family: 'Syne', sans-serif;
+}
+
+.alert-text { color: #f87171; flex: 1; }
+.alert-action { color: var(--dim); font-size: 11px; white-space: nowrap; }
+
+/* ── KPI STRIP ───────────────────────────────────────────── */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px; margin-bottom: 28px;
+}
+
+.kpi {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 16px;
+  position: relative; overflow: hidden;
+}
+
+.kpi::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px; background: var(--amber);
+  opacity: 0.4;
+}
+
+.kpi.critical::after { background: var(--red); opacity: 0.8; }
+.kpi.good::after { background: var(--green); opacity: 0.6; }
+
+.kpi-label {
+  font-size: 10px; color: var(--dim);
+  letter-spacing: 1.5px; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.kpi-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px; font-weight: 800;
+  color: var(--amber2); line-height: 1;
+}
+
+.kpi.critical .kpi-value { color: #f87171; }
+.kpi.good .kpi-value { color: var(--green); }
+
+.kpi-sub {
+  font-size: 10px; color: var(--dim); margin-top: 5px;
+}
+
+/* ── MAIN GRID ───────────────────────────────────────────── */
+.grid-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.grid-bottom {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+/* ── PANEL ───────────────────────────────────────────────── */
+.panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text);
+}
+
+.panel-badge {
+  font-size: 10px; padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(245,158,11,0.12);
+  color: var(--amber);
+  border: 1px solid rgba(245,158,11,0.2);
+}
+
+.panel-badge.red {
+  background: rgba(239,68,68,0.1);
+  color: #f87171; border-color: rgba(239,68,68,0.2);
+}
+
+.panel-badge.green {
+  background: rgba(34,197,94,0.1);
+  color: var(--green); border-color: rgba(34,197,94,0.2);
+}
+
+.panel-body { padding: 16px 18px; }
+
+/* ── RFQ LIST ────────────────────────────────────────────── */
+.rfq-list { list-style: none; }
+.rfq-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(30,42,53,0.6);
+  font-size: 11px;
+}
+.rfq-item:last-child { border-bottom: none; }
+
+.rfq-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--muted); flex-shrink: 0;
+}
+.rfq-dot.responded { background: var(--green); box-shadow: 0 0 5px var(--green); }
+.rfq-dot.critical  { background: var(--red);   box-shadow: 0 0 5px var(--red); }
+
+.rfq-co { color: var(--text); width: 110px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rfq-cat { color: var(--dim); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+.rfq-val { color: var(--amber); width: 80px; text-align: right; flex-shrink: 0; }
+.rfq-status {
+  font-size: 9px; letter-spacing: 1px; padding: 2px 6px;
+  border-radius: 3px; width: 72px; text-align: center; flex-shrink: 0;
+}
+.rfq-status.responded { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+.rfq-status.drafted   { background: rgba(74,96,112,0.2);  color: var(--dim);   border: 1px solid var(--border); }
+.rfq-status.critical  { background: rgba(239,68,68,0.1);  color: #f87171;      border: 1px solid rgba(239,68,68,0.2); }
+
+/* ── BOP CHART ───────────────────────────────────────────── */
+.bop-bars { display: flex; flex-direction: column; gap: 6px; }
+.bop-row { display: flex; align-items: center; gap: 10px; font-size: 10px; }
+.bop-label { width: 140px; color: var(--dim); flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bop-track { flex: 1; height: 8px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
+.bop-bar {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, var(--amber), var(--amber2));
+  transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+}
+.bop-bar.strategic { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.bop-bar.targeted  { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+.bop-bar.standard  { background: linear-gradient(90deg, #6b7280, #9ca3af); }
+.bop-bar.verified  { background: linear-gradient(90deg, #22c55e, #4ade80); }
+.bop-amt { width: 70px; text-align: right; color: var(--text); flex-shrink: 0; }
+
+/* ── COUNTDOWN ───────────────────────────────────────────── */
+.countdown-block {
+  text-align: center; padding: 20px 0;
+}
+.countdown-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 64px; font-weight: 800;
+  color: var(--amber);
+  line-height: 1;
+  text-shadow: 0 0 40px rgba(245,158,11,0.3);
+}
+.countdown-label {
+  font-size: 11px; color: var(--dim);
+  letter-spacing: 3px; text-transform: uppercase; margin-top: 4px;
+}
+.countdown-date {
+  font-size: 13px; color: var(--text); margin-top: 10px;
+  font-family: 'Syne', sans-serif; font-weight: 600;
+}
+
+.rfq-mini-list { margin-top: 14px; }
+.rfq-mini-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 5px 0; border-bottom: 1px solid var(--border);
+  font-size: 10px;
+}
+.rfq-mini-row:last-child { border-bottom: none; }
+.rfq-mini-co { color: var(--dim); }
+.rfq-mini-val { color: var(--amber); }
+
+/* ── SCENARIOS ───────────────────────────────────────────── */
+.scenario-list { display: flex; flex-direction: column; gap: 10px; }
+.scenario-row { display: flex; align-items: center; gap: 12px; }
+.scenario-name { font-size: 11px; color: var(--dim); width: 150px; flex-shrink: 0; }
+.scenario-track { flex: 1; height: 24px; background: var(--bg3); border-radius: 5px; position: relative; overflow: hidden; }
+.scenario-fill {
+  height: 100%;
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding-right: 8px;
+  font-family: 'Syne', sans-serif;
+  font-size: 11px; font-weight: 700;
+  transition: width 1.4s cubic-bezier(0.16,1,0.3,1);
+}
+.scenario-fill.base         { background: linear-gradient(90deg, #374151, #4b5563); color: #9ca3af; }
+.scenario-fill.conservative { background: linear-gradient(90deg, #7f1d1d, #991b1b); color: #fca5a5; }
+.scenario-fill.optimistic   { background: linear-gradient(90deg, #14532d, #166534); color: #86efac; }
+.scenario-fill.aggressive   { background: linear-gradient(90deg, #064e3b, #065f46); color: #6ee7b7; }
+
+/* ── CRITICAL PATH ───────────────────────────────────────── */
+.crit-list { display: flex; flex-direction: column; gap: 10px; }
+.crit-item {
+  background: var(--bg3); border-radius: 7px; padding: 12px 14px;
+  border-left: 3px solid var(--red);
+  font-size: 11px;
+}
+.crit-item.warn { border-left-color: var(--amber); }
+.crit-item.ok   { border-left-color: var(--green); }
+
+.crit-title { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.crit-detail { color: var(--dim); line-height: 1.5; }
+.crit-action { color: var(--amber); margin-top: 6px; font-size: 10px; letter-spacing: 0.5px; }
+.crit-action.red { color: #f87171; }
+
+/* ── PROGRESS RING ───────────────────────────────────────── */
+.rings-row { display: flex; justify-content: space-around; align-items: center; padding: 10px 0; }
+.ring-block { text-align: center; }
+.ring-svg { transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: var(--bg3); stroke-width: 5; }
+.ring-fill { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 1.5s cubic-bezier(0.16,1,0.3,1); }
+.ring-label { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; fill: var(--amber); }
+.ring-sub { font-size: 10px; color: var(--dim); margin-top: 5px; letter-spacing: 1px; text-transform: uppercase; }
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 14px 0; margin-top: 28px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 10px; color: var(--muted); letter-spacing: 0.5px;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .kpi-strip { grid-template-columns: repeat(3, 1fr); }
+  .grid-main { grid-template-columns: 1fr 1fr; }
+  .grid-bottom { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+  .grid-main { grid-template-columns: 1fr; }
+}
+
+/* ── ANIMATIONS ──────────────────────────────────────────── */
+.panel, .kpi, .alert-bar {
+  opacity: 0; transform: translateY(12px);
+  animation: rise 0.5s ease forwards;
+}
+@keyframes rise { to { opacity: 1; transform: translateY(0); } }
+
+.kpi:nth-child(1) { animation-delay: 0.05s; }
+.kpi:nth-child(2) { animation-delay: 0.10s; }
+.kpi:nth-child(3) { animation-delay: 0.15s; }
+.kpi:nth-child(4) { animation-delay: 0.20s; }
+.kpi:nth-child(5) { animation-delay: 0.25s; }
+.kpi:nth-child(6) { animation-delay: 0.30s; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+<header>
+  <div class="brand">
+    <span class="brand-name">FlowSeer</span>
+    <span class="brand-sub">Project Jupiter · W251B8 · 50MW · Santa Teresa NM</span>
+  </div>
+  <div class="header-right">
+    <div class="health-badge">
+      <div class="health-dot"></div>
+      25/25 HEALTHY
+    </div>
+    <div class="ts" id="ts"></div>
+  </div>
+</header>
+
+<!-- ALERT BAR -->
+<div class="alert-bar">
+  <span class="alert-tag">🔴 CRITICAL</span>
+  <span class="alert-text">EthosEnergy ICD not received — blocking Transformer ($760K) + Exhaust ($431K) + Electrical ($535K) = $1.725M in RFQs</span>
+  <span class="alert-action">→ tools/flowseer.py icd escalate</span>
+</div>
+
+<!-- KPI STRIP -->
+<div class="kpi-strip">
+  <div class="kpi">
+    <div class="kpi-label">BOP Baseline</div>
+    <div class="kpi-value">$9.27M</div>
+    <div class="kpi-sub">19 categories · $185/kW</div>
+  </div>
+  <div class="kpi good">
+    <div class="kpi-label">RFQ Pipeline</div>
+    <div class="kpi-value">$9.9M</div>
+    <div class="kpi-sub">13 packages · 1 responded</div>
+  </div>
+  <div class="kpi critical">
+    <div class="kpi-label">Days to RFQ Send</div>
+    <div class="kpi-value" id="days-count">43</div>
+    <div class="kpi-sub">May 25, 2026 — FIXED</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">BH VIB_MON Quote</div>
+    <div class="kpi-value">$340K</div>
+    <div class="kpi-sub">+26.7% vs $268K estimate</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Contacts</div>
+    <div class="kpi-value">231</div>
+    <div class="kpi-sub">64 verified · 73 suppliers</div>
+  </div>
+  <div class="kpi critical">
+    <div class="kpi-label">ICD Status</div>
+    <div class="kpi-value">PEND</div>
+    <div class="kpi-sub">Blocks $1.725M in RFQs</div>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="grid-main">
+
+  <!-- RFQ PIPELINE -->
+  <div class="panel" style="animation-delay:0.1s; grid-column: span 2;">
+    <div class="panel-head">
+      <span class="panel-title">RFQ Pipeline</span>
+      <span class="panel-badge">13 packages · $9,898,000</span>
+    </div>
+    <div class="panel-body">
+      <ul class="rfq-list">
+        <li class="rfq-item">
+          <div class="rfq-dot responded"></div>
+          <span class="rfq-co">Baker Hughes</span>
+          <span class="rfq-cat">Vibration Monitoring System</span>
+          <span class="rfq-val">$340,000</span>
+          <span class="rfq-status responded">RESPONDED</span>
+        </li>
+        <li class="rfq-item">
+          <div class="rfq-dot critical"></div>
+          <span class="rfq-co">GE Vernova</span>
+          <span class="rfq-cat">Generator + Switchgear ⚠ CRITICAL PATH</span>
+          <span class="rfq-val">$2,093,850</span>
+          <span class="rfq-status critical">CRITICAL</span>
+        </li>
+        <li class="rfq-item">
+          <div class="rfq-dot critical"></div>
+          <span class="rfq-co">Siemens Energy</span>
+          <span class="rfq-cat">Generator + Switchgear ⚠ Competitive bid</span>
+          <span class="rfq-val">$2,093,850</span>
+          <span class="rfq-status critical">CRITICAL</span>
+        </li>
+        <li class="rfq-item">
+          <div class="rfq-dot"></div>
+          <span class="rfq-co">ABB Power</span>
+          <span class="rfq-cat">Step-up Transformer (GSU) — 52-70 wk lead</span>
+          <span class="rfq-val">$760,000</span>
+          <span class="rfq-status drafted">DRAFTED</span>
+        </li>
+        <li class="rfq-item">
+          <div class="rfq-dot"></div>
+          <span class="rfq-co">CECO Environmental</span>
+          <span class="rfq-cat">Emissions Control — SCR / CO Catalyst</span>
+          <span class="rfq-val">$891,750</span>
+          <span class="rfq-status drafted">DRAFTED</span>
+        </li>
+        <li class="rfq-item">
+          <div class="rfq-dot"></div>
+          <span class="rfq-co">Emerson</span>
+          <span class="rfq-cat">Fuel Gas System — Bob Yeager</span>
+          <span class="rfq-val">$700,600</span>
+          <span class="rfq-status drafted">DRAFTED</span>
+        </li>
+        <li class="rfq-item">
+          <div class="rfq-dot"></div>
+          <span class="rfq-co">Donaldson</span>
+          <span class="rfq-cat">Inlet Air Filtering — Tod Carpenter</span>
+          <span class="rfq-val">$525,150</span>
+          <span class="rfq-status drafted">DRAFTED</span>
+        </li>
+        <li class="rfq-item">
+          <div class="rfq-dot"></div>
+          <span class="rfq-co">Eaton</span>
+          <span class="rfq-cat">Electrical Distribution (Auxiliary)</span>
+          <span class="rfq-val">$535,050</span>
+          <span class="rfq-status drafted">DRAFTED</span>
+        </li>
+        <li class="rfq-item">
+          <div class="rfq-dot"></div>
+          <span class="rfq-co">Flowserve</span>
+          <span class="rfq-cat">Piping &amp; Valves — replaces Trillium AVOID</span>
+          <span class="rfq-val">$507,600</span>
+          <span class="rfq-status drafted">DRAFTED</span>
+        </li>
+        <li class="rfq-item">
+          <div class="rfq-dot"></div>
+          <span class="rfq-co">Donaldson</span>
+          <span class="rfq-cat">Controls / DCS — Michael Wynblatt</span>
+          <span class="rfq-val">$504,600</span>
+          <span class="rfq-status drafted">DRAFTED</span>
+        </li>
+        <li class="rfq-item">
+          <div class="rfq-dot"></div>
+          <span class="rfq-co">Baker Hughes</span>
+          <span class="rfq-cat">Exhaust System — Rod Christie</span>
+          <span class="rfq-val">$430,650</span>
+          <span class="rfq-status drafted">DRAFTED</span>
+        </li>
+        <li class="rfq-item">
+          <div class="rfq-dot"></div>
+          <span class="rfq-co">Amerex Corp</span>
+          <span class="rfq-cat">Fire Fighting System</span>
+          <span class="rfq-val">$229,400</span>
+          <span class="rfq-status drafted">DRAFTED</span>
+        </li>
+        <li class="rfq-item">
+          <div class="rfq-dot"></div>
+          <span class="rfq-co">Turbotect</span>
+          <span class="rfq-cat">Compressor Washing — Neil Ashford</span>
+          <span class="rfq-val">$132,300</span>
+          <span class="rfq-status drafted">DRAFTED</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN + SEND PLAN -->
+  <div class="panel" style="animation-delay:0.2s;">
+    <div class="panel-head">
+      <span class="panel-title">RFQ Send Countdown</span>
+      <span class="panel-badge">May 25, 2026</span>
+    </div>
+    <div class="panel-body">
+      <div class="countdown-block">
+        <div class="countdown-num" id="countdown-num">43</div>
+        <div class="countdown-label">Days Until Send</div>
+        <div class="countdown-date">May 25, 2026 — All 13 RFQs</div>
+      </div>
+      <div class="rfq-mini-list">
+        <div class="rfq-mini-row">
+          <span class="rfq-mini-co">Generator (2×)</span>
+          <span class="rfq-mini-val" style="color:#f87171">$4.19M ⚠</span>
+        </div>
+        <div class="rfq-mini-row">
+          <span class="rfq-mini-co">Transformer (2×)</span>
+          <span class="rfq-mini-val" style="color:#f87171">$1.52M ⚠</span>
+        </div>
+        <div class="rfq-mini-row">
+          <span class="rfq-mini-co">Emissions / SCR</span>
+          <span class="rfq-mini-val">$891K</span>
+        </div>
+        <div class="rfq-mini-row">
+          <span class="rfq-mini-co">Fuel Gas (Emerson)</span>
+          <span class="rfq-mini-val">$700K</span>
+        </div>
+        <div class="rfq-mini-row">
+          <span class="rfq-mini-co">Inlet Air (Donaldson)</span>
+          <span class="rfq-mini-val">$525K</span>
+        </div>
+        <div class="rfq-mini-row">
+          <span class="rfq-mini-co">Elec. Distribution</span>
+          <span class="rfq-mini-val">$535K</span>
+        </div>
+        <div class="rfq-mini-row">
+          <span class="rfq-mini-co">6 remaining packages</span>
+          <span class="rfq-mini-val">$1.53M</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM GRID -->
+<div class="grid-bottom">
+
+  <!-- LEFT: BOP BARS + SCENARIOS -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <!-- BOP PRICING BARS -->
+    <div class="panel" style="animation-delay:0.25s;">
+      <div class="panel-head">
+        <span class="panel-title">BOP Category Breakdown</span>
+        <span class="panel-badge">$9,274,000 baseline</span>
+      </div>
+      <div class="panel-body">
+        <div class="bop-bars" id="bop-bars"></div>
+      </div>
+    </div>
+
+    <!-- AWARD SCENARIOS -->
+    <div class="panel" style="animation-delay:0.3s;">
+      <div class="panel-head">
+        <span class="panel-title">Award Scenario Modeling</span>
+        <span class="panel-badge">4 scenarios</span>
+      </div>
+      <div class="panel-body">
+        <div class="scenario-list">
+          <div class="scenario-row">
+            <span class="scenario-name">Aggressive (negotiated)</span>
+            <div class="scenario-track">
+              <div class="scenario-fill aggressive" style="width:0%" data-target="85.4">$8,854,055</div>
+            </div>
+          </div>
+          <div class="scenario-row">
+            <span class="scenario-name">Optimistic (competitive)</span>
+            <div class="scenario-track">
+              <div class="scenario-fill optimistic" style="width:0%" data-target="88.1">$9,135,385</div>
+            </div>
+          </div>
+          <div class="scenario-row">
+            <span class="scenario-name">Base (BOM estimates)</span>
+            <div class="scenario-track">
+              <div class="scenario-fill base" style="width:0%" data-target="89.5">$9,274,000</div>
+            </div>
+          </div>
+          <div class="scenario-row">
+            <span class="scenario-name">Conservative (+overruns)</span>
+            <div class="scenario-track">
+              <div class="scenario-fill conservative" style="width:0%" data-target="97.3">$10,077,458</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:10px;color:var(--dim);line-height:1.6;">
+          Recommended budget with 8-12% contingency: <span style="color:var(--amber)">$10.0M – $10.4M</span><br>
+          Market benchmark: TWP at $185/kW vs market $186-$200/kW
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: CRITICAL PATH + PROGRESS -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <!-- PROGRESS RINGS -->
+    <div class="panel" style="animation-delay:0.3s;">
+      <div class="panel-head">
+        <span class="panel-title">Program Progress</span>
+        <span class="panel-badge green">Phase 1</span>
+      </div>
+      <div class="panel-body">
+        <div class="rings-row">
+          <div class="ring-block">
+            <svg class="ring-svg" width="80" height="80" viewBox="0 0 80 80">
+              <circle class="ring-bg" cx="40" cy="40" r="32"/>
+              <circle class="ring-fill" cx="40" cy="40" r="32"
+                stroke="#f59e0b"
+                stroke-dasharray="201"
+                stroke-dashoffset="201"
+                data-val="100"
+                id="ring-pricing"/>
+              <text class="ring-label" x="40" y="45" text-anchor="middle" font-family="Syne" font-size="15" font-weight="800" fill="#f59e0b" transform="rotate(90,40,40)">19/19</text>
+            </svg>
+            <div class="ring-sub">BOP Priced</div>
+          </div>
+          <div class="ring-block">
+            <svg class="ring-svg" width="80" height="80" viewBox="0 0 80 80">
+              <circle class="ring-bg" cx="40" cy="40" r="32"/>
+              <circle class="ring-fill" cx="40" cy="40" r="32"
+                stroke="#22c55e"
+                stroke-dasharray="201"
+                stroke-dashoffset="201"
+                data-val="100"
+                id="ring-rfq"/>
+              <text x="40" y="45" text-anchor="middle" font-family="Syne" font-size="15" font-weight="800" fill="#22c55e" transform="rotate(90,40,40)">13/13</text>
+            </svg>
+            <div class="ring-sub">RFQs Ready</div>
+          </div>
+          <div class="ring-block">
+            <svg class="ring-svg" width="80" height="80" viewBox="0 0 80 80">
+              <circle class="ring-bg" cx="40" cy="40" r="32"/>
+              <circle class="ring-fill" cx="40" cy="40" r="32"
+                stroke="#3b82f6"
+                stroke-dasharray="201"
+                stroke-dashoffset="201"
+                data-val="28"
+                id="ring-contacts"/>
+              <text x="40" y="45" text-anchor="middle" font-family="Syne" font-size="15" font-weight="800" fill="#3b82f6" transform="rotate(90,40,40)">64</text>
+            </svg>
+            <div class="ring-sub">Verified</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CRITICAL PATH -->
+    <div class="panel" style="animation-delay:0.35s; flex:1;">
+      <div class="panel-head">
+        <span class="panel-title">Critical Path</span>
+        <span class="panel-badge red">1 Blocker</span>
+      </div>
+      <div class="panel-body">
+        <div class="crit-list">
+          <div class="crit-item">
+            <div class="crit-title">EthosEnergy ICD — PENDING</div>
+            <div class="crit-detail">Blocks: Transformer + Exhaust + Electrical = $1.725M. Required by May 1.</div>
+            <div class="crit-action red">→ flowseer.py icd escalate</div>
+          </div>
+          <div class="crit-item warn">
+            <div class="crit-title">Baker Hughes $340K — DECISION NEEDED</div>
+            <div class="crit-detail">+26.7% above $268K estimate. Accept, negotiate, or rebid before May 1.</div>
+            <div class="crit-action">→ flowseer.py rfq</div>
+          </div>
+          <div class="crit-item warn">
+            <div class="crit-title">Generator — TRUE CRITICAL PATH</div>
+            <div class="crit-detail">40-56 wk lead. Oct 2027 delivery if awarded Aug 15. Must RFQ May 25.</div>
+            <div class="crit-action">→ GE + Siemens RFQs ready</div>
+          </div>
+          <div class="crit-item warn">
+            <div class="crit-title">Transformer — 52-70 wk Lead Time</div>
+            <div class="crit-detail">ABB + Siemens competitive bid. Blocked on ICD for voltage spec.</div>
+            <div class="crit-action">→ Resolve ICD to unblock</div>
+          </div>
+          <div class="crit-item ok">
+            <div class="crit-title">Trillium AVOID — RESOLVED</div>
+            <div class="crit-detail">Flowserve selected for Piping &amp; Valves ($507K). RFQ drafted.</div>
+            <div class="crit-action" style="color:var(--green)">✓ No action needed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span>FlowSeer v2.1.0 · Grok Audit PASS 102/102 · 125/125 tests · commit cfa49c8</span>
+  <span>Trans World Power LLC · Project Jupiter W251B8 · Santa Teresa NM</span>
+  <span>Claude (Builder) · ChatGPT (Architect) · Perplexity (Research) · Grok (Audit)</span>
+</footer>
+
+</div>
+
+<script>
+// Timestamp
+function updateTs() {
+  const now = new Date();
+  document.getElementById('ts').textContent =
+    now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + ' · ' +
+    now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
+updateTs();
+setInterval(updateTs, 60000);
+
+// Live countdown
+function updateCountdown() {
+  const send = new Date('2026-05-25T00:00:00');
+  const now  = new Date();
+  const days = Math.ceil((send - now) / 86400000);
+  document.getElementById('days-count').textContent  = days;
+  document.getElementById('countdown-num').textContent = days;
+}
+updateCountdown();
+
+// BOP bars data
+const bopData = [
+  {label: 'Generator + Switchgear', val: 2093850, tier: 'strategic'},
+  {label: 'Emissions Control (SCR)', val: 891750, tier: 'strategic'},
+  {label: 'Step-up Transformer', val: 760000, tier: 'strategic'},
+  {label: 'Fuel Gas System', val: 700600, tier: 'strategic'},
+  {label: 'Electrical Distribution', val: 535050, tier: 'strategic'},
+  {label: 'Inlet Air Filtering', val: 525150, tier: 'strategic'},
+  {label: 'Piping & Valves', val: 507600, tier: 'strategic'},
+  {label: 'Controls / DCS', val: 504600, tier: 'strategic'},
+  {label: 'Exhaust System', val: 430650, tier: 'targeted'},
+  {label: 'Civil & Structural', val: 336250, tier: 'targeted'},
+  {label: 'Acoustic Enclosure', val: 305100, tier: 'targeted'},
+  {label: 'Lube Oil System', val: 288900, tier: 'targeted'},
+  {label: 'Vibration Monitoring', val: 268250, tier: 'verified'},
+  {label: 'Starting System', val: 238950, tier: 'targeted'},
+  {label: 'Fire Fighting', val: 229400, tier: 'targeted'},
+  {label: 'Cooling System', val: 225450, tier: 'targeted'},
+  {label: 'Fuel Oil System', val: 195750, tier: 'targeted'},
+  {label: 'Compressor Washing', val: 132300, tier: 'standard'},
+  {label: 'Telecoms / Network', val: 104400, tier: 'standard'},
+];
+
+const maxBop = 2093850;
+const bopContainer = document.getElementById('bop-bars');
+bopData.forEach(item => {
+  const pct = (item.val / maxBop * 100).toFixed(1);
+  const fmt = item.val >= 1000000
+    ? '$' + (item.val/1000000).toFixed(2) + 'M'
+    : '$' + Math.round(item.val/1000) + 'K';
+  const row = document.createElement('div');
+  row.className = 'bop-row';
+  row.innerHTML = `
+    <span class="bop-label">${item.label}</span>
+    <div class="bop-track">
+      <div class="bop-bar ${item.tier}" style="width:0%" data-target="${pct}"></div>
+    </div>
+    <span class="bop-amt">${fmt}</span>`;
+  bopContainer.appendChild(row);
+});
+
+// Animate bars after load
+setTimeout(() => {
+  document.querySelectorAll('.bop-bar[data-target]').forEach(el => {
+    el.style.width = el.dataset.target + '%';
+  });
+  document.querySelectorAll('.scenario-fill[data-target]').forEach(el => {
+    el.style.width = el.dataset.target + '%';
+  });
+}, 200);
+
+// Animate rings
+setTimeout(() => {
+  document.querySelectorAll('.ring-fill[data-val]').forEach(el => {
+    const circ = 201;
+    const pct  = parseInt(el.dataset.val) / 100;
+    el.style.strokeDashoffset = circ - (circ * pct);
+  });
+}, 300);
+</script>
+</body>
+</html>
