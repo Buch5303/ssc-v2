@@ -3,34 +3,58 @@
     {
       "id": "D57-001",
       "title": "Build RFQ send tracker and status dashboard",
-      "task": "Create tools/rfq-generator/rfq_tracker.py that manages the full RFQ lifecycle. It must: (1) read all .txt files from tools/rfq-generator/drafts/, (2) maintain a tools/rfq-generator/rfq_status.json file tracking each RFQ with fields: contact, company, category, est_value_usd, status (DRAFTED|SENT|RESPONDED|AWARDED|DECLINED), sent_date, response_date, quoted_price, notes, (3) produce tools/rfq-generator/rfq_status_report.md showing pipeline summary, total value in each status bucket, and next actions. Pre-populate rfq_status.json with Baker Hughes VIB_MON as RESPONDED (quoted $340K on Apr 10 2026) and all 6 drafted RFQs as DRAFTED.",
+      "task": "Create tools/rfq-generator/rfq_tracker.py that manages the full RFQ lifecycle. Read all .txt files from tools/rfq-generator/drafts/. Maintain tools/rfq-generator/rfq_status.json tracking each RFQ with: contact, company, category, est_value_usd, status (DRAFTED|SENT|RESPONDED|AWARDED|DECLINED), sent_date, response_date, quoted_price, notes. Produce tools/rfq-generator/rfq_status_report.md showing pipeline summary, total value per status bucket, next actions. Pre-populate: Baker Hughes VIB_MON = RESPONDED ($340K Apr 10 2026), all 6 drafted RFQs = DRAFTED.",
       "priority": 1,
       "depends_on": [],
-      "context": "6 RFQ drafts exist in tools/rfq-generator/drafts/. Baker Hughes already responded at $340K. The tracker needs to show total pipeline value, conversion rate, and next actions clearly."
+      "context": "6 RFQ drafts in tools/rfq-generator/drafts/. Baker Hughes $340K responded. Tracker shows total pipeline value and next actions."
     },
     {
       "id": "D57-002",
-      "title": "Build supplier intelligence enrichment for top 10 strategic suppliers",
-      "task": "Create tools/supplier-intelligence/enrich_suppliers.py and produce tools/supplier-intelligence/supplier_profiles.md with intelligence profiles for the top 10 strategic suppliers: GE Vernova, Siemens Energy, ABB Power, Emerson (Power & Water), Donaldson Company, Baker Hughes (TPS), CECO Environmental, Eaton Electrical, Flowserve, and EthosEnergy. For each supplier include: company overview, relevant product lines for W251 BOP, key decision maker contacts known, estimated lead times, known W251/frame GT references, and recommended outreach approach. Use only information available in the repo and general knowledge — no external API calls required.",
+      "title": "Build supplier intelligence profiles for top 10 strategic suppliers",
+      "task": "Create tools/supplier-intelligence/supplier_profiles.md with 1-page intelligence profiles for: GE Vernova, Siemens Energy, ABB Power, Emerson Power, Donaldson Company, Baker Hughes TPS, CECO Environmental, Eaton Electrical, Flowserve, EthosEnergy. Each profile: overview, relevant BOP products, key contacts known, lead times, W251 references, recommended outreach approach. No external API calls — use existing knowledge.",
       "priority": 2,
       "depends_on": [],
-      "context": "Project Jupiter 50MW W251B8 BOP. These are the top-tier suppliers across STRATEGIC spend categories. Profiles should be concise but actionable — 1 page per supplier."
+      "context": "Project Jupiter 50MW W251B8 BOP procurement. Top-tier suppliers across STRATEGIC spend categories."
     },
     {
       "id": "D57-003",
-      "title": "Build automated BOP cost model Excel-equivalent CSV with scenario analysis",
-      "task": "Create tools/pricing-discovery/bop_cost_model.py that generates tools/pricing-discovery/outputs/bop_cost_model.csv with full scenario analysis. The CSV must have columns: category, category_code, bom_low, bom_mid, bom_high, rfq_quoted, rfq_variance_pct, confidence, spend_tier, preferred_supplier, avoid_supplier, scenario_optimistic, scenario_base, scenario_pessimistic. Populate rfq_quoted for VIB_MON with 340000. Compute scenario columns as: optimistic = bom_low * 0.95, base = bom_mid, pessimistic = bom_high * 1.10. Add a summary row with totals. Also produce outputs/bop_scenario_summary.md with a 3-scenario comparison table.",
+      "title": "Build BOP cost model with 3-scenario analysis",
+      "task": "Create tools/pricing-discovery/bop_cost_model.py that generates tools/pricing-discovery/outputs/bop_cost_model.csv with: category, bom_low, bom_mid, bom_high, rfq_quoted, rfq_variance_pct, confidence, spend_tier, preferred_supplier, avoid_supplier, scenario_optimistic (low*0.95), scenario_base (mid), scenario_pessimistic (high*1.10). VIB_MON rfq_quoted=340000. Summary row with totals. Also produce outputs/bop_scenario_summary.md with 3-scenario comparison table.",
       "priority": 3,
       "depends_on": [],
-      "context": "BOM data is in tools/pricing-discovery/bom_library.py. Baker Hughes quoted $340K for VIB_MON. All other categories at BOM estimate only. Scenarios: optimistic ($7.85M), base ($9.27M), pessimistic ($10.6M)."
+      "context": "All 19 BOM categories. Baker Hughes VIB_MON quoted $340K. Scenarios: optimistic $7.49M / base $9.27M / pessimistic $11.73M."
     },
     {
       "id": "D57-004",
-      "title": "Build contact outreach sequence generator",
-      "task": "Create tools/contact-verifier/outreach_sequences.py that generates personalized 3-touch outreach sequences for the top 8 W251 priority contacts. For each contact produce: Touch 1 (initial RFQ intro, reference Project Jupiter), Touch 2 (follow-up 5 days later, add urgency — Q3 2026 award target), Touch 3 (final follow-up 10 days after Touch 1, offer alternative contact or pivot). Output to tools/contact-verifier/outreach_sequences/ as individual .md files per contact. Contacts: Lorenzo Simonelli (BH CEO), Bob Yeager (Emerson), Tod Carpenter (Donaldson), Michael Wynblatt (Donaldson), Rod Christie (BH EVP), Harrison K (Amerex), Neil Ashford (Turbotect), Alberto Malandra (EthosEnergy Italia).",
+      "title": "Generate 3-touch outreach sequences for top 8 W251 contacts",
+      "task": "Create tools/contact-verifier/outreach_sequences/ directory with 8 .md files — one per contact. Each file has Touch 1 (initial RFQ), Touch 2 (day 5 follow-up, add urgency), Touch 3 (day 10 final, pivot offer). Contacts: Lorenzo Simonelli (BH CEO), Bob Yeager (Emerson), Tod Carpenter (Donaldson), Michael Wynblatt (Donaldson), Rod Christie (BH EVP), Harrison K (Amerex), Neil Ashford (Turbotect), Alberto Malandra (EthosEnergy). Sign as Greg Buchanan, CEO Trans World Power.",
       "priority": 4,
       "depends_on": ["D57-001"],
-      "context": "Sequences should be professional C-suite appropriate. Sign as Greg Buchanan, CEO Trans World Power. Reference W251B8, Project Jupiter, Santa Teresa NM, Oracle/OpenAI campus. EthosEnergy sequence should reference the MOU signed March 13 2026 and Todd Dunlop as technical contact."
+      "context": "C-suite appropriate. Reference W251B8, Project Jupiter, Santa Teresa NM, Oracle/OpenAI campus. EthosEnergy sequence references MOU March 13 2026 and Todd Dunlop."
+    },
+    {
+      "id": "D58-001",
+      "title": "Track A dashboard audit — Overview page hardening",
+      "task": "Audit frontend/app/dashboard/overview/page.tsx against Track A standards. Verify and fix: (1) ExecSignalBand primary signal is unmistakable and DO NOW variant fires when RFQ is ready, (2) All KpiCards have accurate sub-labels in plain English with no procurement jargon, (3) DataState handles all 7 states cleanly — loading, empty, error, deferred, partial, stale, live, (4) TermHelper is applied to BOP, RFQ, W251, and other domain terms on first use, (5) No broken or degraded visual states. Write the corrected page.tsx to tools/track-a-review/overview_hardened.tsx — do NOT modify the frontend directly.",
+      "priority": 5,
+      "depends_on": ["D57-004"],
+      "context": "Track A standard: executive 5-second scan, zero-training readability, top-signal dominance. UI baseline 2111282 locked. Output goes to tools/track-a-review/ for Grok review before promotion."
+    },
+    {
+      "id": "D58-002",
+      "title": "Track A dashboard audit — RFQ Pipeline page hardening",
+      "task": "Audit frontend/app/dashboard/rfq-pipeline/page.tsx against Track A standards. Same criteria as D58-001. Verify: ExecSignalBand fires 'X RFQ Ready — Send Now' as primary DO NOW signal, KpiCards show pipeline value and status counts clearly, RfqDetailPanel shows contact + category + value + status with zero-training labels. Write corrected page to tools/track-a-review/rfq_pipeline_hardened.tsx.",
+      "priority": 6,
+      "depends_on": ["D58-001"],
+      "context": "Track A standard. RFQ pipeline is the highest-action page — must drive send decisions immediately. Baker Hughes $340K responded. 6 RFQs ready to send."
+    },
+    {
+      "id": "D58-003",
+      "title": "Track A dashboard audit — Supplier Network + Cost Intel hardening",
+      "task": "Audit both frontend/app/dashboard/supplier-network/page.tsx and frontend/app/dashboard/cost-intel/page.tsx. For Supplier Network: verify Trillium AVOID is unmistakable, tier distribution is scannable, contact count + verification status are clear. For Cost Intel: verify Trillium AVOID on Piping & Valves is the primary alert, ESTIMATED vs VERIFIED distinction is explicit and color-coded, total BOP mid $9.274M is the dominant number. Write corrected pages to tools/track-a-review/supplier_network_hardened.tsx and tools/track-a-review/cost_intel_hardened.tsx.",
+      "priority": 7,
+      "depends_on": ["D58-002"],
+      "context": "Track A standard. Trillium AVOID must be impossible to miss on both pages. ESTIMATED/VERIFIED labeling must be explicit — never ambiguous."
     }
   ]
 }
