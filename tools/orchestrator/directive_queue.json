@@ -1,36 +1,12 @@
 {
   "directives": [
     {
-      "id": "D58-001",
-      "title": "Build live Neon DB API layer for dashboard",
-      "task": "Create tools/api/neon_api.py — a FastAPI server that connects to Neon PostgreSQL via DATABASE_URL and exposes these endpoints: GET /api/contacts (all contacts with filters), GET /api/contacts/stats (count by priority/status), GET /api/suppliers (all suppliers with tier), GET /api/pricing (all 19 BOP categories with latest estimates), GET /api/rfq-status (RFQ pipeline from rfq_status.json), GET /api/program-summary (key metrics: total BOP value, contact count, RFQ count). Also create tools/api/requirements.txt with fastapi uvicorn psycopg2-binary python-dotenv.",
+      "id": "AUDIT-001",
+      "title": "Grok detailed audit — all Track A deliverables D52 through D68",
+      "task": "You are Grok, the QA/Auditor. Execute a detailed audit of all FlowSeer SSC V2 deliverables built since Track A implementation. Read the full audit order at tools/reports/GROK_AUDIT_ORDER.md. Audit all 10 areas against all criteria listed. For each area: list files reviewed, criteria met/failed, issues by severity (BLOCKING/MAJOR/MINOR), and corrections required. Produce the complete audit report at tools/reports/GROK_AUDIT_REPORT.md. Include an overall verdict (PASS/CONDITIONAL_PASS/BLOCK), total issue counts, and a final recommendation (PROMOTE TO PRODUCTION / CORRECT AND REAUDIT / HOLD). Be rigorous — this is a real procurement intelligence platform handling $9.27M in BOP decisions.",
       "priority": 1,
       "depends_on": [],
-      "context": "DATABASE_URL in .env. This is the backend data layer for the FlowSeer dashboard. The dashboard at flowseer-dashboard.vercel.app currently uses mock data — this API will serve real data. Keep endpoints simple and fast. No auth required for pilot."
-    },
-    {
-      "id": "D58-002",
-      "title": "Build automated contact enrichment pipeline runner",
-      "task": "Create tools/contact-verifier/run_enrichment.py — a script that reads contacts from tools/contact-verifier/contacts_sample.csv, runs each through the free verification pipeline (Google search, SEC EDGAR, Wikidata), and writes verified results to tools/contact-verifier/outputs/contacts_enriched.csv. Must handle rate limiting gracefully with 2s delay between contacts. Also create tools/contact-verifier/enrichment_summary.md showing: total processed, verified count, verification rate, top verified contacts by priority.",
-      "priority": 2,
-      "depends_on": [],
-      "context": "Contact verifier already built at tools/contact-verifier/contact_verifier.py. This is the runner that processes all contacts automatically. Run in dry-run mode — do not make live API calls, use the existing dry-run infrastructure."
-    },
-    {
-      "id": "D58-003",
-      "title": "Build RFQ response ingestion and learning update system",
-      "task": "Create tools/rfq-generator/ingest_response.py — a script that: (1) reads a new RFQ response from command line args (--contact, --company, --category-code, --quoted-price, --date), (2) updates rfq_status.json marking the RFQ as RESPONDED, (3) runs the learning engine delta computation, (4) updates pricing_updated.csv with new RFQ_VERIFIED confidence for that category, (5) updates the program dashboard and verification report, (6) prints a summary of the update. This is how new RFQ responses get ingested into the platform going forward.",
-      "priority": 3,
-      "depends_on": [],
-      "context": "When Baker Hughes formal quote arrives on VIB_MON, this script ingests it. When Emerson responds on Fuel Gas, same. The learning engine is at tools/pricing-discovery/learning_engine.py. rfq_status.json is at tools/rfq-generator/rfq_status.json."
-    },
-    {
-      "id": "D58-004",
-      "title": "Build program timeline and milestone tracker",
-      "task": "Create tools/reports/program_timeline.py that generates tools/reports/program_timeline.md — a full Project Jupiter procurement timeline from today through Q4 2026. Must include: Phase 1 (Apr-May 2026): BOP procurement prep, RFQ drafting, contact enrichment. Phase 2 (May 25 2026): RFQ send date — all 7 RFQs go out simultaneously. Phase 3 (Jun-Jul 2026): RFQ response collection window (30-45 day supplier response time). Phase 4 (Jul-Aug 2026): Quote evaluation, supplier selection, PO award. Phase 5 (Aug-Dec 2026): Manufacturing, delivery, site preparation. Phase 6 (Q1 2027): Installation, commissioning, first power. Mark critical path items. Include Baker Hughes VIB_MON as already in Phase 3.",
-      "priority": 4,
-      "depends_on": [],
-      "context": "RFQs go out May 25 2026. Baker Hughes already responded at $340K — treat as ahead of schedule. Transformer is critical path (52-70 week lead). EthosEnergy ICD needed before Transformer RFQ can be finalized. Target first power Q1 2027."
+      "context": "Audit scope: commits 788fd8c through 0de9e1e. 10 delivery areas. 134 files. Locked baselines: UI 2111282 untouched, pricing $9.274M BOP dry-run baseline, 45/45 contact verifier tests, 67/67 pricing tests. Full audit criteria in tools/reports/GROK_AUDIT_ORDER.md. Output audit report to tools/reports/GROK_AUDIT_REPORT.md."
     }
   ]
 }
