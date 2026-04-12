@@ -1,0 +1,90 @@
+{
+  "predictions": [
+    {
+      "rfq_id": "RFQ-002",
+      "company": "Emerson",
+      "category": "Fuel Gas System",
+      "est_value_usd": 700600,
+      "response_probability": "85%",
+      "expected_response_date": "June 12, 2026",
+      "avg_response_days": 18,
+      "relationship": "NEW",
+      "pricing_tendency": "AT_ESTIMATE",
+      "expected_price": 700600,
+      "expected_variance": "+0.0% (at estimate)",
+      "confidence": "MEDIUM"
+    },
+    {
+      "rfq_id": "RFQ-003",
+      "company": "Donaldson Company",
+      "category": "Inlet Air Filtering System",
+      "est_value_usd": 525150,
+      "response_probability": "88%",
+      "expected_response_date": "June 09, 2026",
+      "avg_response_days": 15,
+      "relationship": "NEW",
+      "pricing_tendency": "AT_ESTIMATE",
+      "expected_price": 525150,
+      "expected_variance": "+0.0% (at estimate)",
+      "confidence": "MEDIUM"
+    },
+    {
+      "rfq_id": "RFQ-004",
+      "company": "Donaldson Company",
+      "category": "Controls / DCS Integration",
+      "est_value_usd": 504600,
+      "response_probability": "88%",
+      "expected_response_date": "June 09, 2026",
+      "avg_response_days": 15,
+      "relationship": "NEW",
+      "pricing_tendency": "AT_ESTIMATE",
+      "expected_price": 504600,
+      "expected_variance": "+0.0% (at estimate)",
+      "confidence": "MEDIUM"
+    },
+    {
+      "rfq_id": "RFQ-005",
+      "company": "Baker Hughes",
+      "category": "Exhaust System",
+      "est_value_usd": 430650,
+      "response_probability": "92%",
+      "expected_response_date": "June 06, 2026",
+      "avg_response_days": 12,
+      "relationship": "WARM",
+      "pricing_tendency": "ABOVE_ESTIMATE",
+      "expected_price": 495247,
+      "expected_variance": "+15.0% (above estimate)",
+      "confidence": "HIGH"
+    },
+    {
+      "rfq_id": "RFQ-006",
+      "company": "Amerex Corporation",
+      "category": "Fire Fighting System",
+      "est_value_usd": 229400,
+      "response_probability": "78%",
+      "expected_response_date": "June 15, 2026",
+      "avg_response_days": 21,
+      "relationship": "NEW",
+      "pricing_tendency": "BELOW_ESTIMATE",
+      "expected_price": 211048,
+      "expected_variance": "-8.0% (below estimate)",
+      "confidence": "MEDIUM"
+    },
+    {
+      "rfq_id": "RFQ-007",
+      "company": "Turbotect Ltd.",
+      "category": "Compressor Washing System",
+      "est_value_usd": 132300,
+      "response_probability": "82%",
+      "expected_response_date": "June 10, 2026",
+      "avg_response_days": 16,
+      "relationship": "NEW",
+      "pricing_tendency": "AT_ESTIMATE",
+      "expected_price": 132300,
+      "expected_variance": "+0.0% (at estimate)",
+      "confidence": "MEDIUM"
+    }
+  ],
+  "total_expected": 2568945,
+  "send_date": "2026-05-25"
+}
