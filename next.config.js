@@ -1,14 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-  async rewrites() {
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://ssc-v2.vercel.app';
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${apiBase}/api/:path*`,
-      },
-    ];
+  experimental: {
+    serverComponentsExternalPackages: ['pg'],
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        pg: false, fs: false, net: false, tls: false,
+      };
+    }
+    return config;
   },
 };
+
 module.exports = nextConfig;
