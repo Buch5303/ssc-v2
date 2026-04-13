@@ -1,0 +1,11 @@
+node_modules
+.next
+src
+frontend
+scripts
+benchmarks
+docs
+tests
+tools/orchestrator
+tools/contact-verifier/tests
+tools/pricing-discovery/tests

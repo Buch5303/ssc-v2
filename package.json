@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3001",
-    "build": "next build",
+    "dev": "echo Static site",
+    "build": "echo Static build - no compilation needed",
     "start": "next start -p 3001",
     "lint": "next lint"
   },
