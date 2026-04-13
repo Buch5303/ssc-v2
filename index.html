@@ -8,35 +8,43 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg-base:#070D14;--bg-surface:#0C1520;--bg-panel:#101D2B;--bg-raised:#152332;--bg-hover:#1A2C3D;
-  --border-subtle:#162030;--border-default:#1E2F42;--border-strong:#2A4058;
-  --text-primary:#D8E8F4;--text-secondary:#7A9BB5;--text-dim:#3D5A72;
-  --critical:#EF4444;--critical-bg:rgba(239,68,68,.08);--critical-bd:rgba(239,68,68,.22);
-  --warning:#F59E0B;--warning-bg:rgba(245,158,11,.07);--warning-bd:rgba(245,158,11,.22);
+  /* Brand — FlowSeer logo palette */
+  --brand-navy:  #0B1220;
+  --brand-blue:  #1E6FCC;
+  --brand-blue2: #2E8BE8;
+  --brand-red:   #CC2020;
+  --brand-red2:  #E83535;
+  --brand-white: #EAEEF4;
+
+  --bg-base:#080E18;--bg-surface:#0D1624;--bg-panel:#101D2C;--bg-raised:#162437;--bg-hover:#1C2E44;
+  --border-subtle:#192536;--border-default:#1F3048;--border-strong:#2C4468;
+  --text-primary:#DCE8F6;--text-secondary:#7A9EC0;--text-dim:#3A5876;
+  --critical:#E83535;--critical-bg:rgba(232,53,53,.08);--critical-bd:rgba(232,53,53,.22);
+  --warning:#E8920A;--warning-bg:rgba(232,146,10,.07);--warning-bd:rgba(232,146,10,.22);
   --success:#10B981;--success-bg:rgba(16,185,129,.07);--success-bd:rgba(16,185,129,.2);
-  --info:#3B82F6;--info-bg:rgba(59,130,246,.07);--info-bd:rgba(59,130,246,.2);
-  --accent:#1D6FA4;--accent2:#2486C5;
+  --info:#1E6FCC;--info-bg:rgba(30,111,204,.07);--info-bd:rgba(30,111,204,.2);
+  --accent:#1E6FCC;--accent2:#2E8BE8;
   --font-ui:'IBM Plex Sans',sans-serif;--font-mono:'IBM Plex Mono',monospace;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-primary);font-size:13px;line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased}
 
 /* TOPBAR */
-.topbar{position:sticky;top:0;z-index:100;background:rgba(7,13,20,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border-default);display:flex;align-items:stretch;height:52px}
-.topbar-brand{display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid var(--border-subtle);min-width:220px}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(8,14,24,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border-default);display:flex;align-items:stretch;height:52px}
+.topbar-brand{display:flex;align-items:center;gap:10px;padding:0 22px;border-right:1px solid var(--border-subtle);min-width:230px}
 .brand-logo{width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;color:#fff;flex-shrink:0}
-.brand-name{font-size:13px;font-weight:600;color:var(--text-primary)}
-.brand-prog{font-size:10px;color:var(--text-secondary);letter-spacing:.5px}
+.brand-name{font-size:14px;font-weight:700;letter-spacing:-.2px}
+.brand-prog{font-size:10px;color:var(--brand-blue2);letter-spacing:.5px;opacity:.8}
 .topbar-nav{display:flex;align-items:stretch;flex:1;padding:0 8px}
 .nav-tab{display:flex;align-items:center;gap:6px;padding:0 16px;border:none;background:none;cursor:pointer;font-family:var(--font-ui);font-size:12px;font-weight:500;color:var(--text-dim);letter-spacing:.3px;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap}
 .nav-tab:hover{color:var(--text-secondary)}
-.nav-tab.active{color:var(--text-primary);border-bottom-color:var(--accent2)}
+.nav-tab.active{color:var(--text-primary);border-bottom-color:#2E8BE8}
 .nav-dot{width:5px;height:5px;border-radius:50%;background:var(--critical);display:none}
 .nav-tab.alert .nav-dot{display:block}
 .topbar-right{display:flex;align-items:center;gap:12px;padding:0 16px;border-left:1px solid var(--border-subtle);margin-left:auto}
-.health-pill{display:flex;align-items:center;gap:5px;background:var(--success-bg);border:1px solid var(--success-bd);border-radius:100px;padding:3px 10px;font-family:var(--font-mono);font-size:10px;color:var(--success);letter-spacing:.8px}
-.pulse{width:5px;height:5px;border-radius:50%;background:var(--success);animation:pulse 2.5s infinite}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(16,185,129,.4)}50%{opacity:.6;box-shadow:0 0 0 4px rgba(16,185,129,0)}}
+.health-pill{display:flex;align-items:center;gap:5px;background:rgba(30,111,204,.1);border:1px solid rgba(30,111,204,.25);border-radius:100px;padding:3px 10px;font-family:var(--font-mono);font-size:10px;color:#2E8BE8;letter-spacing:.8px}
+.pulse{width:5px;height:5px;border-radius:50%;background:#2E8BE8;animation:pulse 2.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(30,111,204,.4)}50%{opacity:.6;box-shadow:0 0 0 4px rgba(30,111,204,0)}}
 .ts-chip{font-family:var(--font-mono);font-size:10px;color:var(--text-dim)}
 
 /* CONDITION BANNER */
@@ -70,7 +78,7 @@ body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-prima
 .kpi.c-crit::before{background:var(--critical)}
 .kpi.c-warn::before{background:var(--warning)}
 .kpi.c-ok::before{background:var(--success)}
-.kpi.c-info::before{background:var(--info)}
+.kpi.c-info::before{background:#1E6FCC}
 .kpi-lbl{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px}
 .kpi-val{font-family:var(--font-mono);font-size:24px;color:var(--text-primary);line-height:1;margin-bottom:6px;letter-spacing:-.5px}
 .kpi.c-crit .kpi-val{color:#F87171}
@@ -220,9 +228,19 @@ body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-prima
 <!-- TOPBAR -->
 <nav class="topbar">
   <div class="topbar-brand">
-    <div class="brand-logo">FS</div>
+    <div class="brand-logo" style="background:none;padding:0;width:32px;height:32px">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="5" fill="#0B1220"/>
+          <!-- F mark: blue/white/red striped -->
+          <path d="M7 6h14l-3 4H10v3h7l-3 4h-4v9H7V6z" fill="#1E6FCC"/>
+          <path d="M9 6h4v20H9z" fill="none"/>
+          <!-- Diagonal slash accent -->
+          <path d="M16 6h6l-8 20h-4z" fill="#DCE8F6" opacity="0.85"/>
+          <path d="M20 6h5l-8 20h-4z" fill="#E83535"/>
+        </svg>
+      </div>
     <div>
-      <div class="brand-name">FlowSeer</div>
+      <div class="brand-name" style="font-weight:700;letter-spacing:-.2px"><span style="color:#DCE8F6">Flow</span><span style="color:#E83535">Seer</span></div>
       <div class="brand-prog">Project Jupiter · W251B8 · 50MW</div>
     </div>
   </div>
