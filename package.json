@@ -1,40 +1,30 @@
 {
-  "name": "ssc-v2",
-  "version": "2.0.0",
-  "description": "SSC Supply Chain V2 \u2014 Governance & Execution Platform",
-  "main": "src/server.js",
+  "name": "flowseer-dashboard",
+  "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "start": "node src/server.js",
-    "test": "AUTH_MODE=headers node --max-old-space-size=1024 tests/run-all-regressions.js",
-    "test:day22": "node tests/day22-approval-governance-tests.js",
-    "test:day23": "node tests/day23-workflow-execution-tests.js",
-    "test:day24": "node tests/day24-input-validation-tests.js",
-    "test:day25": "node tests/day25-auth-hardening-tests.js",
-    "test:day26": "node tests/day26-governance-hardening-tests.js",
-    "test:day27": "node tests/day27-enforcement-tests.js",
-    "test:day28": "node tests/day28-logging-audit-ratelimit-tests.js",
-    "test:day29": "node tests/day29-distributed-infra-tests.js",
-    "test:day30": "node tests/day30-eqs-audit-tests.js",
-    "test:day31": "node tests/day31-grok-remediation-tests.js",
-    "test:day32": "node tests/day32-production-backbone-tests.js",
-    "test:day33": "node tests/day33-supply-chain-data-tests.js",
-    "test:day34": "node tests/day34-query-api-tests.js",
-    "test:day35": "node tests/day35-pilot-prep-tests.js",
-    "chaos": "node scripts/chaos-validate.js",
-    "benchmark": "node benchmarks/run-benchmarks.js",
-    "migrate": "node src/db/migrate.js"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "next lint"
   },
   "dependencies": {
-    "express": "^4.21.0",
-    "ioredis": "^5.10.1",
-    "jsonwebtoken": "^9.0.3",
-    "pg": "^8.20.0",
-    "sql.js": "^1.11.0"
+    "@tanstack/react-query": "^5.51.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.408.0",
+    "next": "14.2.5",
+    "next-auth": "^4.24.13",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.12.7"
   },
   "devDependencies": {
-    "supertest": "^7.0.0"
+    "@types/node": "^20.14.11",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^3.4.6",
+    "typescript": "^5.5.3"
   }
 }

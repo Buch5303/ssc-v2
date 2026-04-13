@@ -1,0 +1,9 @@
+contact_id,full_name,title,company,company_domain,proposed_email,confidence_label,confidence_score,ambiguity_reason,evidence_count,primary_evidence_url,reviewer_action_needed,suppression_reason,last_checked_at
+,Lorenzo Simonelli,Chairman & CEO,Baker Hughes,bakerhughes.com,l.simonelli@bakerhughes.com,NEEDS_REVIEW,,,,,Manual research required,,2026-04-10T20:23:29.659709+00:00
+,Rod Christie,EVP Turbomachinery,Baker Hughes,bakerhughes.com,r.christie@bakerhughes.com,NEEDS_REVIEW,,,,,Manual research required,,2026-04-10T20:23:29.660852+00:00
+,Michael Wynblatt,Chief Technology Officer,Donaldson Company,donaldson.com,m.wynblatt@donaldson.com,NEEDS_REVIEW,,,,,Manual research required,,2026-04-10T20:23:29.661212+00:00
+,Tod Carpenter,Chairman President & CEO,Donaldson Company,donaldson.com,t.carpenter@donaldson.com,NEEDS_REVIEW,,,,,Manual research required,,2026-04-10T20:23:29.661445+00:00
+,Bob Yeager,President Power & Water,Emerson,emerson.com,bob.yeager@emerson.com,NEEDS_REVIEW,,,,,Manual research required,,2026-04-10T20:23:29.661609+00:00
+,Lalit Tejwani,VP Sales Power & Water,Emerson,emerson.com,lalit.tejwani@emerson.com,NEEDS_REVIEW,,,,,Manual research required,,2026-04-10T20:23:29.661779+00:00
+,Harrison K.,VP of Sales,Amerex Corporation,amerex-fire.com,h.k@amerex-fire.com,NEEDS_REVIEW,,,,,Manual research required,,2026-04-10T20:23:29.662170+00:00
+,Neil Ashford,UK Representative,Turbotect Ltd.,turbotect.com,neil.ashford@turbotect.com,NEEDS_REVIEW,,,,,Manual research required,,2026-04-10T20:23:29.662451+00:00

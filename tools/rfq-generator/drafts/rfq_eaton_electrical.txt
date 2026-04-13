@@ -1,0 +1,31 @@
+Subject: Project Jupiter — W251B8 Auxiliary Electrical Distribution — Request for Budgetary Pricing
+
+Dear Eaton — Power Distribution Solutions,
+
+Trans World Power LLC is procuring the Auxiliary Electrical Distribution package for
+Project Jupiter — a 50MW W251B8 power island in Santa Teresa, New Mexico.
+
+SCOPE OF SUPPLY:
+- Medium voltage switchgear (5kV or 15kV class) — station service
+- Low voltage switchgear and MCCs (480V)
+- Unit substation transformer(s) — station service
+- Uninterruptible Power Supply (UPS) — control and instrumentation
+- Distribution panelboards
+- Cable management systems (cable trays, conduit)
+- Power and control cabling (supply and install)
+
+PROGRAM:
+- Standards: ANSI, IEEE, NEMA, NEC
+- Seismic: Zone consideration for NM site
+- Hazardous area: None anticipated
+
+REQUEST:
+1. Budgetary price (±20%) for complete auxiliary electrical distribution package
+2. Lead time from PO to delivery
+3. Key exclusions and assumptions
+4. Reference projects at similar scale
+
+Response by June 15, 2026.
+
+Greg Buchanan | CEO, Trans World Power LLC
+buch5303@gmail.com

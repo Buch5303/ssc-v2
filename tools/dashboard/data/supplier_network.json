@@ -1,0 +1,60 @@
+{
+  "total_suppliers": 73,
+  "by_tier": {
+    "Tier 1": 28,
+    "Tier 2": 31,
+    "Tier 3": 14
+  },
+  "strategic_tier1": 28,
+  "preferred_suppliers": [
+    {
+      "name": "Baker Hughes",
+      "category": "VIB_MON",
+      "status": "RESPONDED",
+      "alert": ""
+    },
+    {
+      "name": "Emerson",
+      "category": "FUEL_GAS",
+      "status": "DRAFTED",
+      "alert": ""
+    },
+    {
+      "name": "Donaldson",
+      "category": "INLET_AIR",
+      "status": "DRAFTED",
+      "alert": ""
+    },
+    {
+      "name": "Donaldson",
+      "category": "CONTROLS_DCS",
+      "status": "DRAFTED",
+      "alert": ""
+    },
+    {
+      "name": "Flowserve",
+      "category": "PIPING_VALVES",
+      "status": "PENDING",
+      "alert": "Replace Trillium AVOID"
+    },
+    {
+      "name": "ABB Power",
+      "category": "TRANSFORMER",
+      "status": "PENDING",
+      "alert": "Critical path \u2014 issue RFQ May 25"
+    },
+    {
+      "name": "GE Vernova",
+      "category": "GENERATOR",
+      "status": "PENDING",
+      "alert": "Highest $ item"
+    }
+  ],
+  "avoid_suppliers": [
+    {
+      "name": "Trillium Flow Technologies",
+      "reason": "Revenue too small for single-source risk"
+    }
+  ],
+  "last_updated": "2026-04-13T03:29:35.383489"
+}

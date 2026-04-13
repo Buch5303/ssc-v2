@@ -1,0 +1,40 @@
+To: transformers.na@abb.com
+Cc: 
+Subject: Project Jupiter — W251B8 GSU Transformer — RFQ
+Date: April 12, 2026
+
+Subject: Project Jupiter — W251B8 Step-Up Transformer (GSU) — Request for Budgetary Pricing
+
+Dear ABB Power Grids — Transformers North America,
+
+Trans World Power LLC (TWP) is procuring a Generator Step-Up Transformer (GSU) for Project Jupiter — a 50MW W251B8 power island in Santa Teresa, New Mexico.
+
+SCOPE OF SUPPLY:
+- Oil-immersed power transformer (ONAN/ONAF cooled)
+- HV winding: 115kV or 230kV (TBD — pending grid interconnect study)
+- LV winding: 13.8kV (generator terminal voltage, to be confirmed with EthosEnergy)
+- MVA rating: Per EthosEnergy W251B8 interface specification
+- Impedance: 8-10% (TBD)
+- Bushings, cooling equipment, oil preservation system
+- Buchholz relay, temperature indicators, oil level gauge
+- NEMA/IEEE/ANSI standards
+- Foundation design loading data
+
+PROGRAM:
+- Site: Santa Teresa, NM — high desert, seismic zone consideration
+- Standards: IEEE C57.12, ANSI, NEMA
+- Lead time concern: This is our CRITICAL PATH item — 52-70 week leads are reported in market
+
+REQUEST:
+1. Budgetary price (±15%)
+2. Confirmed lead time from PO to site delivery
+3. Expedite premium for delivery within 52 weeks
+4. Reference list of similar power transformers at 40-70MVA
+5. Preliminary dimensional/weight data for foundation design
+
+Note: We are issuing this RFQ simultaneously to Siemens Energy and WEG Transformers. Award based on price, lead time, and references.
+
+Response by June 15, 2026.
+
+Greg Buchanan | CEO, Trans World Power LLC
+buch5303@gmail.com

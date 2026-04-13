@@ -1,0 +1,23 @@
+{
+  "run_timestamp": "2026-04-10T20:23:29.664447+00:00",
+  "dry_run": true,
+  "counts": {
+    "total_input": 8,
+    "total_processed": 8,
+    "total_skipped": 0,
+    "total_verified": 0,
+    "total_likely": 0,
+    "total_pattern": 0,
+    "total_needs_review": 8,
+    "total_rfq_ready": 0
+  },
+  "providers": {},
+  "output_files": {
+    "verified": "outputs/contacts_verified.csv",
+    "needs_review": "outputs/contacts_needs_review.csv",
+    "rfq_ready": "outputs/contacts_ready_for_rfq.csv",
+    "summary_json": "outputs/run_summary.json",
+    "summary_md": "outputs/run_summary.md"
+  },
+  "warnings": []
+}

@@ -1,0 +1,46 @@
+Subject: Project Jupiter — W251B8 BOP Piping & Valves Package — Request for Budgetary Pricing
+
+Dear Flowserve — Power Generation Solutions,
+
+Trans World Power LLC is procuring the BOP Interconnect Piping and Valves package for Project Jupiter — a 50MW W251B8 power island in Santa Teresa, New Mexico.
+
+SCOPE OF SUPPLY (budgetary):
+Lube Oil System Piping:
+  - Schedule 40/80 carbon steel piping, flanged connections
+  - Butterfly valves, gate valves, check valves (API 600/602)
+  - Lube oil supply/return headers, 4" to 12"
+  - Flexible connections at turbine skid interfaces
+
+Fuel Gas Piping:
+  - ASME B31.3 compliant carbon steel piping
+  - Ball valves with manual and actuated operation (Flowserve Worcester)
+  - Emergency shutdown valves (ESDVs) — SIL rated
+  - Fuel gas manifold and distribution
+
+Cooling Water Piping:
+  - Cooling tower to GT lube oil coolers
+  - Schedule 40 carbon steel, 4" to 10"
+  - Butterfly valves, Y-strainers
+
+Fire Protection:
+  - Deluge system piping, transformer area
+  - Wet pipe sprinkler, control building
+  - Listed fire protection components
+
+PROGRAM:
+- Piping design code: ASME B31.3
+- Valves: API 600, 602, 608, 609 as applicable
+- Materials: Carbon steel primary, SS for fuel gas critical
+
+REQUEST:
+1. Budgetary price (±20%) for complete BOP piping and valve package
+2. Lead time from PO to delivery
+3. Reference list of similar GT BOP projects
+4. Key exclusions and clarifications
+
+Note: A previous supplier was disqualified for this scope. Flowserve is our preferred replacement.
+
+Response by June 15, 2026.
+
+Greg Buchanan | CEO, Trans World Power LLC
+buch5303@gmail.com

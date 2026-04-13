@@ -1,0 +1,22 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/alerts/route": "app/api/alerts/route.js",
+  "/api/contacts/route": "app/api/contacts/route.js",
+  "/api/email/dispatch/route": "app/api/email/dispatch/route.js",
+  "/api/health/route": "app/api/health/route.js",
+  "/api/live/route": "app/api/live/route.js",
+  "/api/program/pricing/route": "app/api/program/pricing/route.js",
+  "/api/program/rfq/route": "app/api/program/rfq/route.js",
+  "/api/rfq/ingest/route": "app/api/rfq/ingest/route.js",
+  "/dashboard/analytics/page": "app/dashboard/analytics/page.js",
+  "/api/program/summary/route": "app/api/program/summary/route.js",
+  "/dashboard/cost-intel/page": "app/dashboard/cost-intel/page.js",
+  "/dashboard/overview/page": "app/dashboard/overview/page.js",
+  "/dashboard/log-response/page": "app/dashboard/log-response/page.js",
+  "/dashboard/rfq-pipeline/page": "app/dashboard/rfq-pipeline/page.js",
+  "/dashboard/supplier-network/page": "app/dashboard/supplier-network/page.js",
+  "/dashboard/send-rfq/page": "app/dashboard/send-rfq/page.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js"
+}

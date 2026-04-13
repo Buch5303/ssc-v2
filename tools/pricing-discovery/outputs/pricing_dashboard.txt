@@ -1,0 +1,45 @@
+
+╔══════════════════════════════════════════════════════════════════════╗
+║        PROJECT JUPITER — W251 BOP PROCUREMENT DASHBOARD             ║
+║        Generated: 2026-04-11 13:48 UTC                           ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  PROGRAM: 50MW W251B8 Power Island | Santa Teresa NM                ║
+║  CLIENT:  Oracle/OpenAI Data Center Campus                          ║
+║  PM:      Trans World Power (TWP)                                   ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  BUDGET SUMMARY                                                      ║
+║  ─────────────────────────────────────────────────────────────────  ║
+║  Total BOP Mid Estimate:      $   9,274,000                  ║
+║  Categories Priced:                    19 / 19                      ║
+║  Verified by RFQ:                       0 / 19                      ║
+║  Total $ Unverified:          $   9,274,000                  ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  RFQ STATUS                                                          ║
+║  ─────────────────────────────────────────────────────────────────  ║
+║  RFQs Sent:          1  (Baker Hughes — Vibration Monitoring)       ║
+║  RFQs Drafted:       6  (ready to send today)                       ║
+║  RFQs Remaining:    12  (to be issued)                              ║
+║  Value of 6 ready RFQs:       $2,592,800                            ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  TOP 5 CATEGORIES BY VALUE                                           ║
+║  ─────────────────────────────────────────────────────────────────  ║
+║  1. Generator + Switchgear      $2,093,850  ESTIMATED               ║
+║  2. Emissions Control (SCR)       $891,750  ESTIMATED               ║
+║  3. Step-up Transformer           $760,000  ESTIMATED               ║
+║  4. Fuel Gas System               $700,600  ESTIMATED               ║
+║  5. Electrical Distribution       $535,050  ESTIMATED               ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  ALERTS                                                              ║
+║  ─────────────────────────────────────────────────────────────────  ║
+║  🔴 CRITICAL: Trillium AVOID — Piping & Valves ($507,600)          ║
+║  🟡 HIGH: Baker Hughes VIB_MON response pending ($340K quoted)      ║
+║  🟡 HIGH: 6 RFQ drafts ready — send today to unlock $2.59M         ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  NEXT ACTIONS                                                        ║
+║  ─────────────────────────────────────────────────────────────────  ║
+║  1. Send 6 drafted RFQs (Emerson, Donaldson x2, BH, Amerex,        ║
+║     Turbotect) — today                                              ║
+║  2. Select Piping & Valves alternative to Trillium                  ║
+║  3. Follow up Baker Hughes if no response by Apr 15                 ║
+║  4. Issue RFQs for Generator + Transformer (highest $ unverified)   ║
+╚══════════════════════════════════════════════════════════════════════╝

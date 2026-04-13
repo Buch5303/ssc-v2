@@ -1,0 +1,12 @@
+{
+  "directives": [
+    {
+      "id": "AUDIT-001",
+      "title": "Grok detailed audit — all Track A deliverables D52 through D68",
+      "task": "You are Grok, the QA/Auditor. Execute a detailed audit of all FlowSeer SSC V2 deliverables built since Track A implementation. Read the full audit order at tools/reports/GROK_AUDIT_ORDER.md. Audit all 10 areas against all criteria listed. For each area: list files reviewed, criteria met/failed, issues by severity (BLOCKING/MAJOR/MINOR), and corrections required. Produce the complete audit report at tools/reports/GROK_AUDIT_REPORT.md. Include an overall verdict (PASS/CONDITIONAL_PASS/BLOCK), total issue counts, and a final recommendation (PROMOTE TO PRODUCTION / CORRECT AND REAUDIT / HOLD). Be rigorous — this is a real procurement intelligence platform handling $9.27M in BOP decisions.",
+      "priority": 1,
+      "depends_on": [],
+      "context": "Audit scope: commits 788fd8c through 0de9e1e. 10 delivery areas. 134 files. Locked baselines: UI 2111282 untouched, pricing $9.274M BOP dry-run baseline, 45/45 contact verifier tests, 67/67 pricing tests. Full audit criteria in tools/reports/GROK_AUDIT_ORDER.md. Output audit report to tools/reports/GROK_AUDIT_REPORT.md."
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+To: gas.power.sales@ge.com
+Cc: 
+Subject: Project Jupiter — W251B8 50MW Generator + Switchgear — RFQ
+Date: April 12, 2026
+
+Subject: Project Jupiter — W251B8 50MW Generator + Switchgear — Request for Budgetary Pricing
+
+Dear GE Vernova Gas Power Team,
+
+Trans World Power LLC (TWP) is the program manager for Project Jupiter — a 50MW W251B8 natural gas power island being developed for an Oracle/OpenAI data center campus in Santa Teresa, New Mexico. EthosEnergy (Italia) is the gas turbine supplier under a trilateral MOU executed March 13, 2026.
+
+We are soliciting budgetary pricing from GE Vernova for the Generator and Main Electrical Switchgear package for this project.
+
+SCOPE OF SUPPLY (budgetary):
+- Synchronous generator, air-cooled or hydrogen-cooled, rated for W251B8 output
+- Generator terminal voltage per EthosEnergy interface specification (to be confirmed)
+- Static excitation system with AVR
+- Generator protection system (87G, 40, 46, 24, 59, 81)
+- Generator circuit breaker (GCB), 13.8kV class or as required
+- Isophase bus duct from generator terminals to GSU
+- Neutral grounding unit
+- All accessories, instrumentation, and documentation
+
+PROGRAM DETAILS:
+- Site: Santa Teresa, NM (elevation ~4,100 ft, desert environment)
+- GT: W251B8, 50MW class, EthosEnergy Italia
+- Power factor: 0.85 lagging minimum
+- Grid connection: 115kV or 230kV (TBD per ERCOT/Western Interconnect study)
+- Standards: ANSI/IEEE, NEMA, applicable NEC
+
+CRITICAL NOTE — LEAD TIME:
+This is our highest-priority procurement item. Generator and switchgear lead times of 40-56 weeks require an August 2026 award to support a Q2 2027 first power target. Please confirm your earliest delivery commitment.
+
+REQUEST:
+1. Budgetary price (±20%) for the above scope
+2. Lead time from PO to delivery (site)
+3. Key technical assumptions
+4. Reference projects at similar power rating
+
+We are issuing this RFQ to GE Vernova and Siemens Energy simultaneously. Award will be based on technical merit, price, lead time, and references.
+
+Please respond by June 15, 2026.
+
+Regards,
+Greg Buchanan
+CEO, Trans World Power LLC
+buch5303@gmail.com

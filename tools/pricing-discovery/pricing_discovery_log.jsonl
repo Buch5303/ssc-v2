@@ -1,0 +1,133 @@
+{"ts": "2026-04-10T14:27:33.278622+00:00", "code": "VIB_MON", "category": "Vibration Monitoring System", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.279132+00:00", "code": "INLET_AIR", "category": "Inlet Air Filtering System", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.279406+00:00", "code": "FUEL_GAS", "category": "Fuel Gas System", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.279630+00:00", "code": "LUBE_OIL", "category": "Lube Oil System", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.279839+00:00", "code": "EXHAUST", "category": "Exhaust System", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.280048+00:00", "code": "COOLING", "category": "Cooling / Cooling Water System", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.280240+00:00", "code": "FIRE_FIGHT", "category": "Fire Fighting System", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.280418+00:00", "code": "PIPING_VALVES", "category": "Piping and Valves (BOP interconnect)", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.280594+00:00", "code": "ELEC_DIST", "category": "Electrical Distribution (Auxiliary)", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.280747+00:00", "code": "CONTROLS_DCS", "category": "Controls / DCS Integration", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.280895+00:00", "code": "ACOUSTIC", "category": "Acoustic Enclosure / Noise Control", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.281054+00:00", "code": "WATER_WASH", "category": "Compressor Washing System", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.281223+00:00", "code": "CIVIL_STRUCT", "category": "Civil and Structural Works", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.281371+00:00", "code": "EMISSIONS", "category": "Emissions Control (SCR / CO Catalyst)", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.281529+00:00", "code": "FUEL_OIL", "category": "Fuel Oil / Backup Fuel System", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.281710+00:00", "code": "STARTING", "category": "Starting System", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.281842+00:00", "code": "TRANSFORMER", "category": "Step-up Transformer (GSU)", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.281976+00:00", "code": "TELECOMS", "category": "Telecommunications / Plant Network", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:27:33.282122+00:00", "code": "GENERATOR", "category": "Generator and Electrical Switchgear", "mid_usd": 0, "confidence": "BUDGETARY_ESTIMATE", "evidence_count": 0}
+{"ts": "2026-04-10T14:28:44.623423+00:00", "code": "VIB_MON", "category": "Vibration Monitoring System", "mid_usd": 268250.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.623896+00:00", "code": "INLET_AIR", "category": "Inlet Air Filtering System", "mid_usd": 525150.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.624411+00:00", "code": "FUEL_GAS", "category": "Fuel Gas System", "mid_usd": 700600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.624791+00:00", "code": "LUBE_OIL", "category": "Lube Oil System", "mid_usd": 288900.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.625213+00:00", "code": "EXHAUST", "category": "Exhaust System", "mid_usd": 430650.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.625741+00:00", "code": "COOLING", "category": "Cooling / Cooling Water System", "mid_usd": 225450.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.626234+00:00", "code": "FIRE_FIGHT", "category": "Fire Fighting System", "mid_usd": 229400.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.626641+00:00", "code": "PIPING_VALVES", "category": "Piping and Valves (BOP interconnect)", "mid_usd": 507600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.627098+00:00", "code": "ELEC_DIST", "category": "Electrical Distribution (Auxiliary)", "mid_usd": 535050.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.627531+00:00", "code": "CONTROLS_DCS", "category": "Controls / DCS Integration", "mid_usd": 504600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.627915+00:00", "code": "ACOUSTIC", "category": "Acoustic Enclosure / Noise Control", "mid_usd": 305100.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.628359+00:00", "code": "WATER_WASH", "category": "Compressor Washing System", "mid_usd": 132300.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.628825+00:00", "code": "CIVIL_STRUCT", "category": "Civil and Structural Works", "mid_usd": 336250.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.629262+00:00", "code": "EMISSIONS", "category": "Emissions Control (SCR / CO Catalyst)", "mid_usd": 891750.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.629710+00:00", "code": "FUEL_OIL", "category": "Fuel Oil / Backup Fuel System", "mid_usd": 195750.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.630093+00:00", "code": "STARTING", "category": "Starting System", "mid_usd": 238950.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.630529+00:00", "code": "TRANSFORMER", "category": "Step-up Transformer (GSU)", "mid_usd": 760000.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.630937+00:00", "code": "TELECOMS", "category": "Telecommunications / Plant Network", "mid_usd": 104400.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T14:28:44.631371+00:00", "code": "GENERATOR", "category": "Generator and Electrical Switchgear", "mid_usd": 2093850.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "VIB_MON", "category": "Vibration Monitoring System", "mid_usd": 14600454.22517249, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "INLET_AIR", "category": "Inlet Air Filtering System", "mid_usd": 14638148.356097998, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "FUEL_GAS", "category": "Fuel Gas System", "mid_usd": 14663891.58408897, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "LUBE_OIL", "category": "Lube Oil System", "mid_usd": 14603484.134879038, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "EXHAUST", "category": "Exhaust System", "mid_usd": 14624282.667610414, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "COOLING", "category": "Cooling / Cooling Water System", "mid_usd": 14594174.315465944, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "FIRE_FIGHT", "category": "Fire Fighting System", "mid_usd": 14594753.886572039, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "PIPING_VALVES", "category": "Piping and Valves (BOP interconnect)", "mid_usd": 14635573.29966459, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "ELEC_DIST", "category": "Electrical Distribution (Auxiliary)", "mid_usd": 14639600.952034794, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "CONTROLS_DCS", "category": "Controls / DCS Integration", "mid_usd": 14635133.119077682, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "ACOUSTIC", "category": "Acoustic Enclosure / Noise Control", "mid_usd": 14605861.110048337, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "WATER_WASH", "category": "Compressor Washing System", "mid_usd": 14580506.708242469, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "CIVIL_STRUCT", "category": "Civil and Structural Works", "mid_usd": 14610431.65180906, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "EMISSIONS", "category": "Emissions Control (SCR / CO Catalyst)", "mid_usd": 14691938.423818089, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "FUEL_OIL", "category": "Fuel Oil / Backup Fuel System", "mid_usd": 14589816.52765556, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "STARTING", "category": "Starting System", "mid_usd": 14596155.128107028, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "TRANSFORMER", "category": "Step-up Transformer (GSU)", "mid_usd": 14672607.159709737, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "TELECOMS", "category": "Telecommunications / Plant Network", "mid_usd": 14576413.028784228, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:22:30.477655+00:00", "code": "GENERATOR", "category": "Generator and Electrical Switchgear", "mid_usd": 14868318.784991903, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 7, "contradictions": 1}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "VIB_MON", "category": "Vibration Monitoring System", "mid_usd": 268250.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "INLET_AIR", "category": "Inlet Air Filtering System", "mid_usd": 525150.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "FUEL_GAS", "category": "Fuel Gas System", "mid_usd": 700600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "LUBE_OIL", "category": "Lube Oil System", "mid_usd": 288900.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "EXHAUST", "category": "Exhaust System", "mid_usd": 430650.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "COOLING", "category": "Cooling / Cooling Water System", "mid_usd": 225450.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "FIRE_FIGHT", "category": "Fire Fighting System", "mid_usd": 229400.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "PIPING_VALVES", "category": "Piping and Valves (BOP interconnect)", "mid_usd": 507600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "ELEC_DIST", "category": "Electrical Distribution (Auxiliary)", "mid_usd": 535050.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "CONTROLS_DCS", "category": "Controls / DCS Integration", "mid_usd": 504600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "ACOUSTIC", "category": "Acoustic Enclosure / Noise Control", "mid_usd": 305100.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "WATER_WASH", "category": "Compressor Washing System", "mid_usd": 132300.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "CIVIL_STRUCT", "category": "Civil and Structural Works", "mid_usd": 336250.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "EMISSIONS", "category": "Emissions Control (SCR / CO Catalyst)", "mid_usd": 891750.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "FUEL_OIL", "category": "Fuel Oil / Backup Fuel System", "mid_usd": 195750.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "STARTING", "category": "Starting System", "mid_usd": 238950.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "TRANSFORMER", "category": "Step-up Transformer (GSU)", "mid_usd": 760000.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "TELECOMS", "category": "Telecommunications / Plant Network", "mid_usd": 104400.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T15:23:52.669373+00:00", "code": "GENERATOR", "category": "Generator and Electrical Switchgear", "mid_usd": 2093850.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "VIB_MON", "category": "Vibration Monitoring System", "mid_usd": 268250.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "INLET_AIR", "category": "Inlet Air Filtering System", "mid_usd": 525150.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "FUEL_GAS", "category": "Fuel Gas System", "mid_usd": 700600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "LUBE_OIL", "category": "Lube Oil System", "mid_usd": 288900.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "EXHAUST", "category": "Exhaust System", "mid_usd": 430650.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "COOLING", "category": "Cooling / Cooling Water System", "mid_usd": 225450.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "FIRE_FIGHT", "category": "Fire Fighting System", "mid_usd": 229400.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "PIPING_VALVES", "category": "Piping and Valves (BOP interconnect)", "mid_usd": 507600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "ELEC_DIST", "category": "Electrical Distribution (Auxiliary)", "mid_usd": 535050.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "CONTROLS_DCS", "category": "Controls / DCS Integration", "mid_usd": 504600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "ACOUSTIC", "category": "Acoustic Enclosure / Noise Control", "mid_usd": 305100.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "WATER_WASH", "category": "Compressor Washing System", "mid_usd": 132300.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "CIVIL_STRUCT", "category": "Civil and Structural Works", "mid_usd": 336250.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "EMISSIONS", "category": "Emissions Control (SCR / CO Catalyst)", "mid_usd": 891750.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "FUEL_OIL", "category": "Fuel Oil / Backup Fuel System", "mid_usd": 195750.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "STARTING", "category": "Starting System", "mid_usd": 238950.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "TRANSFORMER", "category": "Step-up Transformer (GSU)", "mid_usd": 760000.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "TELECOMS", "category": "Telecommunications / Plant Network", "mid_usd": 104400.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:11.247852+00:00", "code": "GENERATOR", "category": "Generator and Electrical Switchgear", "mid_usd": 2093850.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "VIB_MON", "category": "Vibration Monitoring System", "mid_usd": 268250.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "INLET_AIR", "category": "Inlet Air Filtering System", "mid_usd": 525150.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "FUEL_GAS", "category": "Fuel Gas System", "mid_usd": 700600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "LUBE_OIL", "category": "Lube Oil System", "mid_usd": 288900.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "EXHAUST", "category": "Exhaust System", "mid_usd": 430650.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "COOLING", "category": "Cooling / Cooling Water System", "mid_usd": 225450.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "FIRE_FIGHT", "category": "Fire Fighting System", "mid_usd": 229400.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "PIPING_VALVES", "category": "Piping and Valves (BOP interconnect)", "mid_usd": 507600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "ELEC_DIST", "category": "Electrical Distribution (Auxiliary)", "mid_usd": 535050.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "CONTROLS_DCS", "category": "Controls / DCS Integration", "mid_usd": 504600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "ACOUSTIC", "category": "Acoustic Enclosure / Noise Control", "mid_usd": 305100.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "WATER_WASH", "category": "Compressor Washing System", "mid_usd": 132300.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "CIVIL_STRUCT", "category": "Civil and Structural Works", "mid_usd": 336250.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "EMISSIONS", "category": "Emissions Control (SCR / CO Catalyst)", "mid_usd": 891750.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "FUEL_OIL", "category": "Fuel Oil / Backup Fuel System", "mid_usd": 195750.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "STARTING", "category": "Starting System", "mid_usd": 238950.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "TRANSFORMER", "category": "Step-up Transformer (GSU)", "mid_usd": 760000.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "TELECOMS", "category": "Telecommunications / Plant Network", "mid_usd": 104400.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-10T20:23:36.154688+00:00", "code": "GENERATOR", "category": "Generator and Electrical Switchgear", "mid_usd": 2093850.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "VIB_MON", "category": "Vibration Monitoring System", "mid_usd": 268250.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "INLET_AIR", "category": "Inlet Air Filtering System", "mid_usd": 525150.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "FUEL_GAS", "category": "Fuel Gas System", "mid_usd": 700600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "LUBE_OIL", "category": "Lube Oil System", "mid_usd": 288900.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "EXHAUST", "category": "Exhaust System", "mid_usd": 430650.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "COOLING", "category": "Cooling / Cooling Water System", "mid_usd": 225450.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "FIRE_FIGHT", "category": "Fire Fighting System", "mid_usd": 229400.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "PIPING_VALVES", "category": "Piping and Valves (BOP interconnect)", "mid_usd": 507600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "ELEC_DIST", "category": "Electrical Distribution (Auxiliary)", "mid_usd": 535050.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "CONTROLS_DCS", "category": "Controls / DCS Integration", "mid_usd": 504600.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "ACOUSTIC", "category": "Acoustic Enclosure / Noise Control", "mid_usd": 305100.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "WATER_WASH", "category": "Compressor Washing System", "mid_usd": 132300.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "CIVIL_STRUCT", "category": "Civil and Structural Works", "mid_usd": 336250.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "EMISSIONS", "category": "Emissions Control (SCR / CO Catalyst)", "mid_usd": 891750.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "FUEL_OIL", "category": "Fuel Oil / Backup Fuel System", "mid_usd": 195750.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "STARTING", "category": "Starting System", "mid_usd": 238950.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "TRANSFORMER", "category": "Step-up Transformer (GSU)", "mid_usd": 760000.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "TELECOMS", "category": "Telecommunications / Plant Network", "mid_usd": 104400.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
+{"ts": "2026-04-12T17:20:02.613932+00:00", "code": "GENERATOR", "category": "Generator and Electrical Switchgear", "mid_usd": 2093850.0, "confidence": "COMPONENT_BUILDUPS", "evidence_count": 1, "contradictions": 0}
