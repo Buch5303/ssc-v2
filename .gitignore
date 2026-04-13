@@ -4,3 +4,5 @@ data/*.db
 .env
 .DS_Store
 coverage/
+.next/
+node_modules/
