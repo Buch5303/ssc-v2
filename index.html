@@ -7,220 +7,249 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
+/* ════════════════════════════════════════════════════════════
+   FLOWSEER — SILENT STATE DESIGN SYSTEM
+   90% monochrome. Color = action required. Not decoration.
+════════════════════════════════════════════════════════════ */
 :root {
-  /* Brand — FlowSeer logo palette */
-  --brand-navy:  #0B1220;
-  --brand-blue:  #1E6FCC;
-  --brand-blue2: #2E8BE8;
-  --brand-red:   #CC2020;
-  --brand-red2:  #E83535;
-  --brand-white: #EAEEF4;
+  /* Silent palette — deep navy to near-white, all monochrome */
+  --bg-0:   #070C13;   /* deepest — page bg */
+  --bg-1:   #0B1220;   /* surface — panels */
+  --bg-2:   #0F1A2C;   /* raised — table headers, KPI bg */
+  --bg-3:   #142236;   /* elevated — hover, active */
 
-  --bg-base:#080E18;--bg-surface:#0D1624;--bg-panel:#101D2C;--bg-raised:#162437;--bg-hover:#1C2E44;
-  --border-subtle:#192536;--border-default:#1F3048;--border-strong:#2C4468;
-  --text-primary:#DCE8F6;--text-secondary:#7A9EC0;--text-dim:#3A5876;
-  --critical:#E83535;--critical-bg:rgba(232,53,53,.08);--critical-bd:rgba(232,53,53,.22);
-  --warning:#E8920A;--warning-bg:rgba(232,146,10,.07);--warning-bd:rgba(232,146,10,.22);
-  --success:#10B981;--success-bg:rgba(16,185,129,.07);--success-bd:rgba(16,185,129,.2);
-  --info:#1E6FCC;--info-bg:rgba(30,111,204,.07);--info-bd:rgba(30,111,204,.2);
-  --accent:#1E6FCC;--accent2:#2E8BE8;
-  --font-ui:'IBM Plex Sans',sans-serif;--font-mono:'IBM Plex Mono',monospace;
+  /* Monochrome text scale */
+  --t-0:    #E8EFF8;   /* primary */
+  --t-1:    #8BA4BE;   /* secondary */
+  --t-2:    #496175;   /* tertiary / dim */
+  --t-3:    #253A4E;   /* ghost / disabled */
+
+  /* Structure — extremely subtle */
+  --line:   #111E2D;   /* dividers */
+  --edge:   #192840;   /* panel edges */
+
+  /* ACTION COLORS — used only when something requires decision */
+  --act-red:    #CC2020;   /* critical — must act now */
+  --act-red-bg: rgba(204,32,32,.07);
+  --act-red-bd: rgba(204,32,32,.18);
+  --act-amb:    #C87800;   /* high — decision pending */
+  --act-amb-bg: rgba(200,120,0,.06);
+  --act-amb-bd: rgba(200,120,0,.16);
+
+  /* FlowSeer brand — used only for chrome identity */
+  --brand-blue: #1E6FCC;
+  --brand-red:  #CC2020;
+
+  --font-ui:   'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-primary);font-size:13px;line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased}
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font-ui); background:var(--bg-0); color:var(--t-0); font-size:13px; line-height:1.5; min-height:100vh; -webkit-font-smoothing:antialiased; }
 
-/* TOPBAR */
-.topbar{position:sticky;top:0;z-index:100;background:rgba(8,14,24,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border-default);display:flex;align-items:stretch;height:52px}
-.topbar-brand{display:flex;align-items:center;gap:10px;padding:0 22px;border-right:1px solid var(--border-subtle);min-width:230px}
-.brand-logo{width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;color:#fff;flex-shrink:0}
-.brand-name{font-size:14px;font-weight:700;letter-spacing:-.2px}
-.brand-prog{font-size:10px;color:var(--brand-blue2);letter-spacing:.5px;opacity:.8}
-.topbar-nav{display:flex;align-items:stretch;flex:1;padding:0 8px}
-.nav-tab{display:flex;align-items:center;gap:6px;padding:0 16px;border:none;background:none;cursor:pointer;font-family:var(--font-ui);font-size:12px;font-weight:500;color:var(--text-dim);letter-spacing:.3px;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap}
-.nav-tab:hover{color:var(--text-secondary)}
-.nav-tab.active{color:var(--text-primary);border-bottom-color:#2E8BE8}
-.nav-dot{width:5px;height:5px;border-radius:50%;background:var(--critical);display:none}
-.nav-tab.alert .nav-dot{display:block}
-.topbar-right{display:flex;align-items:center;gap:12px;padding:0 16px;border-left:1px solid var(--border-subtle);margin-left:auto}
-.health-pill{display:flex;align-items:center;gap:5px;background:rgba(30,111,204,.1);border:1px solid rgba(30,111,204,.25);border-radius:100px;padding:3px 10px;font-family:var(--font-mono);font-size:10px;color:#2E8BE8;letter-spacing:.8px}
-.pulse{width:5px;height:5px;border-radius:50%;background:#2E8BE8;animation:pulse 2.5s infinite}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(30,111,204,.4)}50%{opacity:.6;box-shadow:0 0 0 4px rgba(30,111,204,0)}}
-.ts-chip{font-family:var(--font-mono);font-size:10px;color:var(--text-dim)}
+/* ── TOPBAR ────────────────────────────────────────────────── */
+.topbar { position:sticky; top:0; z-index:100; background:rgba(7,12,19,.97); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); display:flex; align-items:stretch; height:50px; }
+.topbar-brand { display:flex; align-items:center; gap:10px; padding:0 20px; border-right:1px solid var(--line); min-width:220px; }
+.brand-logo { width:30px; height:30px; background:none; padding:0; flex-shrink:0; }
+.brand-name { font-size:14px; font-weight:700; letter-spacing:-.2px; }
+.brand-prog { font-size:9px; color:var(--t-2); letter-spacing:.8px; text-transform:uppercase; margin-top:1px; }
+.topbar-nav { display:flex; align-items:stretch; flex:1; padding:0 8px; }
+.nav-tab { display:flex; align-items:center; gap:6px; padding:0 16px; border:none; background:none; cursor:pointer; font-family:var(--font-ui); font-size:11px; font-weight:500; color:var(--t-2); letter-spacing:.5px; border-bottom:2px solid transparent; transition:color .15s, border-color .15s; white-space:nowrap; }
+.nav-tab:hover { color:var(--t-1); }
+.nav-tab.active { color:var(--t-0); border-bottom-color:var(--brand-blue); }
+.nav-dot { width:4px; height:4px; border-radius:50%; background:var(--act-red); display:none; }
+.nav-tab.alert .nav-dot { display:block; }
+.topbar-right { display:flex; align-items:center; gap:14px; padding:0 16px; border-left:1px solid var(--line); margin-left:auto; }
+.health-pill { display:flex; align-items:center; gap:5px; font-family:var(--font-mono); font-size:9px; color:var(--t-2); letter-spacing:1px; }
+.pulse { width:5px; height:5px; border-radius:50%; background:var(--t-2); }
+.ts-chip { font-family:var(--font-mono); font-size:9px; color:var(--t-3); letter-spacing:.3px; }
 
-/* CONDITION BANNER */
-.cond-bar{background:var(--critical-bg);border-bottom:1px solid var(--critical-bd);padding:0 24px;display:flex;align-items:center;min-height:40px;gap:0}
-.cond-bar.warn{background:var(--warning-bg);border-bottom-color:var(--warning-bd)}
-.cond-bar.ok{background:var(--success-bg);border-bottom-color:var(--success-bd)}
-.cond-tag{font-family:var(--font-mono);font-size:9px;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;padding:0 12px 0 0;border-right:1px solid var(--critical-bd);margin-right:12px;color:var(--critical);white-space:nowrap}
-.cond-bar.warn .cond-tag{color:var(--warning);border-right-color:var(--warning-bd)}
-.cond-bar.ok .cond-tag{color:var(--success);border-right-color:var(--success-bd)}
-.cond-items{display:flex;flex:1;overflow:hidden}
-.cond-item{display:flex;align-items:center;gap:8px;padding:10px 16px;border-right:1px solid rgba(30,47,66,.4);font-size:11px;flex-shrink:0}
-.cond-item:last-child{border-right:none}
-.ci-label{color:var(--text-dim)}
-.ci-val{color:var(--text-primary);font-weight:500}
-.ci-action{color:var(--critical);font-family:var(--font-mono);font-size:10px;cursor:pointer}
-.cond-bar.warn .ci-action{color:var(--warning)}
+/* ── CONDITION BANNER ──────────────────────────────────────── */
+.cond-bar { background:var(--act-red-bg); border-bottom:1px solid var(--act-red-bd); padding:0 24px; display:flex; align-items:center; min-height:38px; }
+.cond-bar.warn { background:var(--act-amb-bg); border-bottom-color:var(--act-amb-bd); }
+.cond-bar.mono { background:var(--bg-1); border-bottom-color:var(--line); }
+.cond-tag { font-family:var(--font-mono); font-size:9px; font-weight:500; letter-spacing:1.8px; text-transform:uppercase; padding:0 12px 0 0; border-right:1px solid var(--act-red-bd); margin-right:14px; color:var(--act-red); white-space:nowrap; }
+.cond-bar.warn .cond-tag { color:var(--act-amb); border-right-color:var(--act-amb-bd); }
+.cond-bar.mono .cond-tag { color:var(--t-2); border-right-color:var(--line); }
+.cond-items { display:flex; flex:1; }
+.cond-item { display:flex; align-items:center; gap:8px; padding:0 16px; border-right:1px solid var(--line); font-size:11px; }
+.cond-item:last-child { border-right:none; }
+.ci-label { color:var(--t-2); }
+.ci-val { color:var(--t-0); font-weight:500; }
+.ci-action { color:var(--act-red); font-family:var(--font-mono); font-size:10px; }
+.cond-bar.warn .ci-action { color:var(--act-amb); }
 
-/* PAGES */
-.page{display:none}
-.page.active{display:block}
-.content{max-width:1440px;margin:0 auto;padding:24px 24px 48px}
+/* ── PAGES ─────────────────────────────────────────────────── */
+.page { display:none; }
+.page.active { display:block; }
+.content { max-width:1420px; margin:0 auto; padding:28px 24px 56px; }
 
-/* TIER LABELS */
-.tier-lbl{font-family:var(--font-mono);font-size:9px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.tier-lbl::after{content:'';flex:1;height:1px;background:var(--border-subtle)}
+/* ── SECTION LABELS ────────────────────────────────────────── */
+.tier-lbl { font-family:var(--font-mono); font-size:9px; font-weight:400; letter-spacing:2.5px; text-transform:uppercase; color:var(--t-3); margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+.tier-lbl::after { content:''; flex:1; height:1px; background:var(--line); }
 
-/* KPI GRID */
-.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:24px}
-.kpi{background:var(--bg-panel);border:1px solid var(--border-default);border-radius:10px;padding:16px;position:relative;overflow:hidden}
-.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--border-strong)}
-.kpi.c-crit::before{background:var(--critical)}
-.kpi.c-warn::before{background:var(--warning)}
-.kpi.c-ok::before{background:var(--success)}
-.kpi.c-info::before{background:#1E6FCC}
-.kpi-lbl{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px}
-.kpi-val{font-family:var(--font-mono);font-size:24px;color:var(--text-primary);line-height:1;margin-bottom:6px;letter-spacing:-.5px}
-.kpi.c-crit .kpi-val{color:#F87171}
-.kpi.c-warn .kpi-val{color:var(--warning)}
-.kpi.c-ok .kpi-val{color:var(--success)}
-.kpi-sub{font-size:10px;color:var(--text-dim);line-height:1.4}
-.kpi-badge{position:absolute;top:10px;right:10px}
+/* ── KPI STRIP ─────────────────────────────────────────────── */
+.kpi-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:1px; background:var(--line); margin-bottom:32px; }
+.kpi { background:var(--bg-1); padding:20px 18px 16px; position:relative; }
+/* No colored top bars. Silent by default. */
+.kpi-lbl { font-family:var(--font-mono); font-size:9px; font-weight:400; letter-spacing:2px; text-transform:uppercase; color:var(--t-2); margin-bottom:12px; }
+.kpi-val { font-family:var(--font-mono); font-size:26px; font-weight:300; color:var(--t-0); line-height:1; margin-bottom:5px; letter-spacing:-1px; }
+.kpi-sub { font-size:10px; color:var(--t-2); line-height:1.4; }
+.kpi-badge { position:absolute; top:12px; right:14px; }
+/* Action states — ONLY these get color */
+.kpi.act-red .kpi-val { color:var(--act-red); }
+.kpi.act-red::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--act-red); }
+.kpi.act-amb .kpi-val { color:var(--act-amb); }
+.kpi.act-amb::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--act-amb); }
 
-/* BADGES */
-.badge{display:inline-flex;align-items:center;font-family:var(--font-mono);font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:4px;white-space:nowrap}
-.bv{background:var(--success-bg);color:var(--success);border:1px solid var(--success-bd)}
-.be{background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-bd)}
-.bc{background:var(--critical-bg);color:var(--critical);border:1px solid var(--critical-bd)}
-.bs{background:var(--info-bg);color:var(--info);border:1px solid var(--info-bd)}
-.bp{background:var(--bg-raised);color:var(--text-secondary);border:1px solid var(--border-strong)}
-.bd{background:rgba(234,179,8,.08);color:#EAB308;border:1px solid rgba(234,179,8,.2)}
+/* ── BADGES — trust signals ────────────────────────────────── */
+.badge { display:inline-flex; align-items:center; font-family:var(--font-mono); font-size:9px; font-weight:400; letter-spacing:1px; text-transform:uppercase; padding:2px 7px; border-radius:2px; white-space:nowrap; }
+/* Silent defaults — almost invisible */
+.bv { background:transparent; color:var(--t-1); border:1px solid var(--edge); }
+.be { background:transparent; color:var(--t-2); border:1px solid var(--line); }
+.bp { background:transparent; color:var(--t-2); border:1px solid var(--line); }
+.bs { background:transparent; color:var(--t-2); border:1px solid var(--line); }
+/* Action states */
+.bc { background:var(--act-red-bg); color:var(--act-red); border:1px solid var(--act-red-bd); }
+.bd { background:var(--act-amb-bg); color:var(--act-amb); border:1px solid var(--act-amb-bd); }
+/* Verified = slightly brighter but still not green — just confirmed */
+.bv-on { background:transparent; color:var(--t-0); border:1px solid var(--edge); }
 
-/* PANELS */
-.panel{background:var(--bg-panel);border:1px solid var(--border-default);border-radius:10px;overflow:hidden}
-.ph{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised)}
-.pt{font-size:11px;font-weight:600;letter-spacing:.8px;color:var(--text-secondary);text-transform:uppercase}
-.pm{display:flex;align-items:center;gap:8px}
-.pb{padding:16px 18px}
-.pb0{padding:0}
+/* ── PANELS ────────────────────────────────────────────────── */
+.panel { background:var(--bg-1); border:1px solid var(--line); border-radius:0; overflow:hidden; }
+.ph { display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-bottom:1px solid var(--line); }
+.pt { font-family:var(--font-mono); font-size:9px; font-weight:400; letter-spacing:2px; color:var(--t-2); text-transform:uppercase; }
+.pm { display:flex; align-items:center; gap:8px; }
+.pb { padding:20px 18px; }
+.pb0 { padding:0; }
 
-/* ALERT CARDS */
-.a-cards{display:flex;flex-direction:column;gap:8px}
-.a-card{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:8px;border:1px solid}
-.a-crit{background:var(--critical-bg);border-color:var(--critical-bd)}
-.a-warn{background:var(--warning-bg);border-color:var(--warning-bd)}
-.a-ok{background:var(--success-bg);border-color:var(--success-bd)}
-.a-title{font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:3px}
-.a-crit .a-title{color:#FCA5A5}
-.a-warn .a-title{color:#FDE68A}
-.a-ok .a-title{color:#6EE7B7}
-.a-detail{font-size:11px;color:var(--text-secondary);line-height:1.5}
-.a-action{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);margin-top:6px;cursor:pointer}
-.a-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+/* ── ALERT CARDS ───────────────────────────────────────────── */
+.a-cards { display:flex; flex-direction:column; gap:12px; }
+.a-card { padding:16px 20px; border-left:3px solid; }
+/* Critical = red left border, very subtle red tint */
+.a-crit { background:var(--act-red-bg); border-left-color:var(--act-red); border:1px solid var(--act-red-bd); border-left:3px solid var(--act-red); }
+/* Warning = amber left border, very subtle amber tint */
+.a-warn { background:var(--act-amb-bg); border:1px solid var(--act-amb-bd); border-left:3px solid var(--act-amb); }
+/* Resolved = no color — just monochrome, silent */
+.a-ok { background:var(--bg-2); border:1px solid var(--line); border-left:3px solid var(--t-3); }
+.a-title { font-size:12px; font-weight:600; color:var(--t-0); margin-bottom:4px; letter-spacing:.1px; }
+.a-crit .a-title { color:#F4A0A0; }
+.a-warn .a-title { color:#E8C080; }
+.a-ok  .a-title { color:var(--t-1); }
+.a-detail { font-size:11px; color:var(--t-1); line-height:1.6; }
+.a-ok .a-detail { color:var(--t-2); }
+.a-action { font-family:var(--font-mono); font-size:9px; color:var(--t-3); margin-top:7px; letter-spacing:.3px; }
+.a-crit .a-action { color:rgba(204,32,32,.6); }
+.a-warn .a-action { color:rgba(200,120,0,.6); }
+.a-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0; }
 
-/* TABLES */
-.dt{width:100%;border-collapse:collapse;font-size:11px}
-.dt th{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);padding:9px 14px;text-align:left;border-bottom:1px solid var(--border-default);white-space:nowrap;background:var(--bg-raised)}
-.dt td{padding:9px 14px;border-bottom:1px solid var(--border-subtle);color:var(--text-primary);vertical-align:middle}
-.dt tr:last-child td{border-bottom:none}
-.dt tr:hover td{background:var(--bg-hover)}
-.dt .mono{font-family:var(--font-mono);font-size:11px}
-.dt .dim{color:var(--text-secondary)}
-.dt .r{text-align:right}
-.dt .crit-row td{background:rgba(239,68,68,.04)}
+/* ── DATA TABLES ───────────────────────────────────────────── */
+.dt { width:100%; border-collapse:collapse; font-size:11px; }
+.dt th { font-family:var(--font-mono); font-size:9px; font-weight:400; letter-spacing:1.5px; text-transform:uppercase; color:var(--t-3); padding:9px 14px; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap; background:var(--bg-2); }
+.dt td { padding:10px 14px; border-bottom:1px solid var(--line); color:var(--t-0); vertical-align:middle; }
+.dt tr:last-child td { border-bottom:none; }
+.dt tr:hover td { background:var(--bg-3); }
+.dt .mono { font-family:var(--font-mono); font-size:11px; }
+.dt .dim { color:var(--t-2); }
+.dt .r { text-align:right; }
+/* Critical rows — very subtle red wash, no noise */
+.dt .crit-row td { background:rgba(204,32,32,.04); }
 
-/* BARS */
-.bars{display:flex;flex-direction:column;gap:5px}
-.bar-row{display:grid;grid-template-columns:160px 1fr 72px;align-items:center;gap:10px}
-.bar-lbl{font-size:10px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bar-track{height:7px;background:var(--bg-raised);border-radius:4px;overflow:hidden}
-.bar-fill{height:100%;border-radius:4px;transition:width 1.4s cubic-bezier(.16,1,.3,1)}
-.bf-s{background:linear-gradient(90deg,#1D6FA4,#2A8DC8)}
-.bf-t{background:linear-gradient(90deg,#2D5A4C,#3D7A68)}
-.bf-std{background:linear-gradient(90deg,#2A3A4A,#3A5068)}
-.bf-v{background:linear-gradient(90deg,#1A6644,#27B375)}
-.bar-amt{font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);text-align:right}
+/* ── HORIZONTAL BARS ───────────────────────────────────────── */
+.bars { display:flex; flex-direction:column; gap:8px; }
+.bar-row { display:grid; grid-template-columns:160px 1fr 72px; align-items:center; gap:10px; }
+.bar-lbl { font-size:10px; color:var(--t-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bar-track { height:5px; background:var(--bg-3); border-radius:2px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:2px; transition:width 1.4s cubic-bezier(.16,1,.3,1); }
+/* All bars same color — just mono blue-grey, varying opacity */
+.bf-s   { background:var(--t-1); opacity:1; }
+.bf-t   { background:var(--t-2); opacity:.9; }
+.bf-std { background:var(--t-3); opacity:1; }
+.bf-v   { background:var(--t-1); opacity:1; }
+.bar-amt { font-family:var(--font-mono); font-size:10px; color:var(--t-2); text-align:right; }
 
-/* SCENARIOS */
-.sc-group{display:flex;flex-direction:column;gap:10px}
-.sc-row{display:grid;grid-template-columns:176px 1fr 100px;align-items:center;gap:12px}
-.sc-name{font-size:11px;color:var(--text-secondary)}
-.sc-track{height:28px;background:var(--bg-raised);border-radius:6px;position:relative;overflow:hidden}
-.sc-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-family:var(--font-mono);font-size:11px;transition:width 1.5s cubic-bezier(.16,1,.3,1)}
-.sc-base{background:rgba(55,65,81,.6);color:#9CA3AF}
-.sc-cons{background:rgba(127,29,29,.5);color:#FCA5A5}
-.sc-opti{background:rgba(20,83,45,.55);color:#86EFAC}
-.sc-aggr{background:rgba(6,78,59,.55);color:#6EE7B7}
-.sc-delta{font-family:var(--font-mono);font-size:10px;text-align:right}
+/* ── SCENARIO BARS ─────────────────────────────────────────── */
+.sc-group { display:flex; flex-direction:column; gap:10px; }
+.sc-row { display:grid; grid-template-columns:180px 1fr 90px; align-items:center; gap:12px; }
+.sc-name { font-size:11px; color:var(--t-2); }
+.sc-track { height:26px; background:var(--bg-2); border-radius:2px; position:relative; overflow:hidden; }
+.sc-fill { height:100%; border-radius:2px; display:flex; align-items:center; padding:0 10px; font-family:var(--font-mono); font-size:11px; transition:width 1.5s cubic-bezier(.16,1,.3,1); }
+/* Silent fills — no vivid colors */
+.sc-base { background:var(--bg-3); color:var(--t-1); }
+.sc-cons { background:var(--act-red-bg); color:rgba(204,32,32,.8); border-right:2px solid var(--act-red-bd); }
+.sc-opti { background:var(--bg-3); color:var(--t-1); }
+.sc-aggr { background:var(--bg-3); color:var(--t-1); }
+.sc-delta { font-family:var(--font-mono); font-size:10px; text-align:right; color:var(--t-2); }
+.sc-cons + .sc-delta { color:var(--act-red); }
 
-/* PIPELINE STAGES */
-.stages{display:flex;align-items:stretch;background:var(--bg-raised);border:1px solid var(--border-default);border-radius:10px;overflow:hidden;margin-bottom:20px}
-.stage{flex:1;padding:18px 16px;border-right:1px solid var(--border-default);position:relative}
-.stage:last-child{border-right:none}
-.stage.active{background:rgba(29,111,164,.08)}
-.s-name{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px}
-.stage.active .s-name{color:var(--accent2)}
-.s-count{font-family:var(--font-mono);font-size:28px;color:var(--text-primary);line-height:1}
-.stage.active .s-count{color:var(--accent2)}
-.s-val{font-size:10px;color:var(--text-secondary);margin-top:4px}
-.s-arr{position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:16px;height:16px;background:var(--bg-panel);border:1px solid var(--border-default);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--text-dim);z-index:1}
+/* ── PIPELINE STAGES ───────────────────────────────────────── */
+.stages { display:flex; align-items:stretch; border:1px solid var(--line); margin-bottom:24px; }
+.stage { flex:1; padding:18px 16px; border-right:1px solid var(--line); position:relative; }
+.stage:last-child { border-right:none; }
+.stage.active { background:var(--bg-2); }
+.s-name { font-family:var(--font-mono); font-size:9px; font-weight:400; letter-spacing:2px; text-transform:uppercase; color:var(--t-3); margin-bottom:8px; }
+.stage.active .s-name { color:var(--brand-blue); }
+.s-count { font-family:var(--font-mono); font-size:28px; font-weight:300; color:var(--t-1); line-height:1; }
+.stage.active .s-count { color:var(--t-0); }
+.s-count.responded { color:var(--t-0); }
+.s-val { font-size:10px; color:var(--t-2); margin-top:3px; }
+.s-arr { position:absolute; right:-8px; top:50%; transform:translateY(-50%); width:14px; height:14px; background:var(--bg-0); border:1px solid var(--line); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:7px; color:var(--t-3); z-index:1; }
 
-/* STAT ROW */
-.sr{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--border-subtle);font-size:11px}
-.sr:last-child{border-bottom:none}
-.sk{color:var(--text-secondary)}
-.sv{font-family:var(--font-mono);color:var(--text-primary)}
-.sv.pos{color:#F87171}.sv.warn{color:var(--warning)}.sv.ok{color:var(--success)}
+/* ── STAT ROWS ─────────────────────────────────────────────── */
+.sr { display:flex; justify-content:space-between; align-items:baseline; padding:9px 0; border-bottom:1px solid var(--line); font-size:11px; }
+.sr:last-child { border-bottom:none; }
+.sk { color:var(--t-2); }
+.sv { font-family:var(--font-mono); color:var(--t-1); }
+.sv.ok  { color:var(--t-0); }
+.sv.pos { color:var(--act-red); font-weight:500; }
+.sv.warn{ color:var(--act-amb); }
 
-/* CRITICAL PATH */
-.cp-list{display:flex;flex-direction:column;gap:8px}
-.cp-item{display:flex;gap:12px;padding:12px 14px;background:var(--bg-raised);border-radius:8px;border-left:3px solid}
-.cp-crit{border-left-color:var(--critical)}
-.cp-warn{border-left-color:var(--warning)}
-.cp-ok{border-left-color:var(--success)}
-.cp-num{font-family:var(--font-mono);font-size:18px;font-weight:300;color:var(--text-dim);flex-shrink:0;width:24px;line-height:1}
-.cp-title{font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:3px}
-.cp-detail{font-size:10px;color:var(--text-secondary);line-height:1.5}
-.cp-action{font-family:var(--font-mono);font-size:9px;letter-spacing:.5px;margin-top:5px;cursor:pointer}
-.cp-crit .cp-action{color:#F87171}.cp-warn .cp-action{color:var(--warning)}.cp-ok .cp-action{color:var(--success)}
+/* ── CRITICAL PATH ─────────────────────────────────────────── */
+.cp-list { display:flex; flex-direction:column; gap:8px; }
+.cp-item { display:flex; gap:14px; padding:14px 16px; border-left:2px solid; }
+.cp-crit { background:var(--act-red-bg); border-left-color:var(--act-red); border:1px solid var(--act-red-bd); border-left:2px solid var(--act-red); }
+.cp-warn { background:var(--act-amb-bg); border:1px solid var(--act-amb-bd); border-left:2px solid var(--act-amb); }
+.cp-ok   { background:var(--bg-2); border:1px solid var(--line); border-left:2px solid var(--t-3); }
+.cp-num  { font-family:var(--font-mono); font-size:16px; font-weight:300; color:var(--t-3); flex-shrink:0; width:24px; line-height:1.1; }
+.cp-title { font-size:12px; font-weight:600; color:var(--t-0); margin-bottom:4px; }
+.cp-crit .cp-title { color:#F4A0A0; }
+.cp-warn .cp-title { color:#E8C080; }
+.cp-ok .cp-title   { color:var(--t-2); }
+.cp-detail { font-size:10px; color:var(--t-1); line-height:1.6; }
+.cp-ok .cp-detail  { color:var(--t-2); }
+.cp-action { font-family:var(--font-mono); font-size:9px; margin-top:6px; color:var(--t-3); }
+.cp-crit .cp-action { color:rgba(204,32,32,.55); }
+.cp-warn .cp-action { color:rgba(200,120,0,.55); }
 
-/* CONC BARS */
-.conc-bars{display:flex;flex-direction:column;gap:7px}
-.conc-row{display:flex;align-items:center;gap:10px}
-.conc-lbl{font-size:10px;color:var(--text-secondary);width:100px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.conc-track{flex:1;height:14px;background:var(--bg-raised);border-radius:3px;overflow:hidden}
-.conc-fill{height:100%;border-radius:3px;transition:width 1.3s cubic-bezier(.16,1,.3,1)}
-.conc-pct{font-family:var(--font-mono);font-size:10px;color:var(--text-dim);width:36px;text-align:right;flex-shrink:0}
+/* ── CONCENTRATION BARS ────────────────────────────────────── */
+.conc-bars { display:flex; flex-direction:column; gap:8px; }
+.conc-row  { display:flex; align-items:center; gap:10px; }
+.conc-lbl  { font-size:10px; color:var(--t-1); width:100px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.conc-track{ flex:1; height:12px; background:var(--bg-2); }
+.conc-fill { height:100%; background:var(--t-2); transition:width 1.3s cubic-bezier(.16,1,.3,1); }
+.conc-pct  { font-family:var(--font-mono); font-size:10px; color:var(--t-2); width:36px; text-align:right; flex-shrink:0; }
 
-/* GRIDS */
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-.g32{display:grid;grid-template-columns:3fr 2fr;gap:16px}
-.g21{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+/* ── GRIDS ─────────────────────────────────────────────────── */
+.g2  { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.g3  { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; }
+.g32 { display:grid; grid-template-columns:3fr 2fr; gap:20px; }
+.g21 { display:grid; grid-template-columns:2fr 1fr; gap:20px; }
 .mb12{margin-bottom:12px}.mb16{margin-bottom:16px}.mb24{margin-bottom:24px}.mb32{margin-bottom:32px}
 
-/* STATUS DOT */
-.dot{display:inline-block;width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.d-c{background:var(--critical);box-shadow:0 0 5px var(--critical)}
-.d-w{background:var(--warning);box-shadow:0 0 5px rgba(245,158,11,.5)}
-.d-o{background:var(--success);box-shadow:0 0 5px rgba(16,185,129,.5)}
-.d-d{background:var(--text-dim)}
+/* ── CONF STRIP ────────────────────────────────────────────── */
+.conf-strip { display:flex; gap:10px; align-items:center; padding:10px 14px; background:var(--bg-2); margin-bottom:14px; font-size:10px; color:var(--t-2); border-left:2px solid var(--t-3); }
 
-/* FOOTER */
-.pf{border-top:1px solid var(--border-subtle);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:.5px;margin-top:32px}
+/* ── FOOTER ────────────────────────────────────────────────── */
+.pf { border-top:1px solid var(--line); padding:12px 0; display:flex; justify-content:space-between; align-items:center; font-family:var(--font-mono); font-size:9px; color:var(--t-3); letter-spacing:.3px; margin-top:40px; }
 
-/* CONF STRIP */
-.conf-strip{display:flex;gap:10px;align-items:center;padding:10px 14px;background:var(--bg-raised);border-radius:6px;margin-bottom:14px;font-size:10px;color:var(--text-secondary)}
+/* ── RESPONSIVE ────────────────────────────────────────────── */
+@media(max-width:1200px){ .kpi-grid{grid-template-columns:repeat(3,1fr)} .g32,.g21{grid-template-columns:1fr} }
+@media(max-width:900px) { .kpi-grid{grid-template-columns:repeat(2,1fr)} .g2,.g3{grid-template-columns:1fr} }
 
-/* RESPONSIVE */
-@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.g32,.g21{grid-template-columns:1fr}}
-@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.g2,.g3{grid-template-columns:1fr}}
-
-/* ANIMATION */
-.fi{opacity:0;transform:translateY(8px);animation:fi .4s ease forwards}
-@keyframes fi{to{opacity:1;transform:translateY(0)}}
-.d1{animation-delay:.04s}.d2{animation-delay:.08s}.d3{animation-delay:.12s}.d4{animation-delay:.16s}
-.d5{animation-delay:.20s}.d6{animation-delay:.24s}.d7{animation-delay:.30s}.d8{animation-delay:.36s}
+/* ── ENTRANCE ──────────────────────────────────────────────── */
+.fi { opacity:0; transform:translateY(6px); animation:fi .35s ease forwards; }
+@keyframes fi{ to{opacity:1;transform:translateY(0)} }
+.d1{animation-delay:.03s}.d2{animation-delay:.06s}.d3{animation-delay:.09s}.d4{animation-delay:.12s}
+.d5{animation-delay:.15s}.d6{animation-delay:.18s}.d7{animation-delay:.24s}.d8{animation-delay:.30s}
 </style>
 </head>
 <body>
@@ -269,12 +298,12 @@ body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-prima
   <div class="content">
     <div class="tier-lbl fi d1">Tier 1 — Executive Summary</div>
     <div class="kpi-grid">
-      <div class="kpi c-warn fi d1"><div class="kpi-lbl">BOP Baseline</div><div class="kpi-val">$9.27M</div><div class="kpi-sub">19 categories · $185/kW · 50MW</div><div class="kpi-badge"><span class="badge be">Estimated</span></div></div>
-      <div class="kpi c-info fi d2"><div class="kpi-lbl">RFQ Pipeline</div><div class="kpi-val">$9.90M</div><div class="kpi-sub">13 packages · 1 responded · 12 drafted</div><div class="kpi-badge"><span class="badge bp">In Progress</span></div></div>
-      <div class="kpi c-warn fi d3"><div class="kpi-lbl">Days to Send</div><div class="kpi-val" id="ov-days">—</div><div class="kpi-sub">May 25, 2026 — Fixed</div></div>
-      <div class="kpi c-ok fi d4"><div class="kpi-lbl">BH VIB_MON Quote</div><div class="kpi-val">$340K</div><div class="kpi-sub">+26.7% vs estimate · Decision pending</div><div class="kpi-badge"><span class="badge bv">Verified</span></div></div>
+      <div class="kpi fi d1"><div class="kpi-lbl">BOP Baseline</div><div class="kpi-val">$9.27M</div><div class="kpi-sub">19 categories · $185/kW · 50MW</div><div class="kpi-badge"><span class="badge be">Estimated</span></div></div>
+      <div class="kpi fi d2"><div class="kpi-lbl">RFQ Pipeline</div><div class="kpi-val">$9.90M</div><div class="kpi-sub">13 packages · 1 responded · 12 drafted</div><div class="kpi-badge"><span class="badge bp">In Progress</span></div></div>
+      <div class="kpi act-amb fi d3"><div class="kpi-lbl">Days to Send</div><div class="kpi-val" id="ov-days">—</div><div class="kpi-sub">May 25, 2026 — Fixed</div></div>
+      <div class="kpi fi d4"><div class="kpi-lbl">BH VIB_MON Quote</div><div class="kpi-val">$340K</div><div class="kpi-sub">+26.7% vs estimate · Decision pending</div><div class="kpi-badge"><span class="badge bv-on">Verified</span></div></div>
       <div class="kpi fi d5"><div class="kpi-lbl">Contact Intel</div><div class="kpi-val">231</div><div class="kpi-sub">73 suppliers · 64 verified contacts</div><div class="kpi-badge"><span class="badge be">Partial</span></div></div>
-      <div class="kpi c-crit fi d6"><div class="kpi-lbl">EthosEnergy ICD</div><div class="kpi-val">Pending</div><div class="kpi-sub">Blocks $1.73M in RFQs · Due May 1</div><div class="kpi-badge"><span class="badge bc">Blocker</span></div></div>
+      <div class="kpi act-red fi d6"><div class="kpi-lbl">EthosEnergy ICD</div><div class="kpi-val">Pending</div><div class="kpi-sub">Blocks $1.73M in RFQs · Due May 1</div><div class="kpi-badge"><span class="badge bc">Blocker</span></div></div>
     </div>
 
     <div class="tier-lbl fi d7">Tier 2 — Decision Drivers</div>
@@ -328,7 +357,7 @@ body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-prima
           </div>
         </div>
         <div class="panel fi d8">
-          <div class="ph"><span class="pt">Platform Health</span><span class="badge bv">Live</span></div>
+          <div class="ph"><span class="pt">Platform Health</span><span class="badge bp">Live</span></div>
           <div class="pb">
             <div class="sr"><span class="sk">Tests passing</span><span class="sv ok">125 / 125</span></div>
             <div class="sr"><span class="sk">Health checks</span><span class="sv ok">25 / 25</span></div>
@@ -377,10 +406,10 @@ body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-prima
     <div class="tier-lbl fi d1">Tier 1 — Cost Position</div>
     <div class="kpi-grid">
       <div class="kpi fi d1"><div class="kpi-lbl">BOP Baseline Mid</div><div class="kpi-val">$9.27M</div><div class="kpi-sub">19 categories · 50MW W251B8</div><div class="kpi-badge"><span class="badge be">Estimated</span></div></div>
-      <div class="kpi c-warn fi d2"><div class="kpi-lbl">Conservative Scenario</div><div class="kpi-val">$10.08M</div><div class="kpi-sub">+8.7% · Historical overrun factors</div><div class="kpi-badge"><span class="badge bd">Risk</span></div></div>
-      <div class="kpi c-ok fi d3"><div class="kpi-lbl">Optimistic Scenario</div><div class="kpi-val">$9.14M</div><div class="kpi-sub">–1.5% · Competitive bidding</div></div>
+      <div class="kpi act-red fi d2"><div class="kpi-lbl">Conservative Scenario</div><div class="kpi-val">$10.08M</div><div class="kpi-sub">+8.7% · Historical overrun factors</div><div class="kpi-badge"><span class="badge bd">Risk</span></div></div>
+      <div class="kpi fi d3"><div class="kpi-lbl">Optimistic Scenario</div><div class="kpi-val">$9.14M</div><div class="kpi-sub">–1.5% · Competitive bidding</div></div>
       <div class="kpi fi d4"><div class="kpi-lbl">Market Benchmark</div><div class="kpi-val">$185/kW</div><div class="kpi-sub">Market: $186–$200/kW · Monitor</div><div class="kpi-badge"><span class="badge bs">Benchmark</span></div></div>
-      <div class="kpi c-ok fi d5"><div class="kpi-lbl">RFQ-Verified</div><div class="kpi-val">1 / 19</div><div class="kpi-sub">VIB_MON · $340K · BH · +26.7%</div><div class="kpi-badge"><span class="badge bv">Verified</span></div></div>
+      <div class="kpi fi d5"><div class="kpi-lbl">RFQ-Verified</div><div class="kpi-val">1 / 19</div><div class="kpi-sub">VIB_MON · $340K · BH · +26.7%</div><div class="kpi-badge"><span class="badge bv-on">Verified</span></div></div>
       <div class="kpi fi d6"><div class="kpi-lbl">Recommended Budget</div><div class="kpi-val">$10.4M</div><div class="kpi-sub">With 12% contingency buffer</div><div class="kpi-badge"><span class="badge bs">Advisory</span></div></div>
     </div>
 
@@ -394,27 +423,27 @@ body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-prima
             <span>BH VIB_MON $340K applied in all scenarios · 18 categories at BOM estimate</span>
           </div>
           <div class="sc-group">
-            <div class="sc-row"><span class="sc-name">Aggressive (negotiated)</span><div class="sc-track"><div class="sc-fill sc-aggr" style="width:0%" data-w="85.4">$8,854,055</div></div><span class="sc-delta" style="color:#6EE7B7">–4.5%</span></div>
-            <div class="sc-row"><span class="sc-name">Optimistic (competitive)</span><div class="sc-track"><div class="sc-fill sc-opti" style="width:0%" data-w="88.1">$9,135,385</div></div><span class="sc-delta" style="color:#86EFAC">–1.5%</span></div>
-            <div class="sc-row"><span class="sc-name">Base (BOM estimates)</span><div class="sc-track"><div class="sc-fill sc-base" style="width:0%" data-w="89.5">$9,274,000</div></div><span class="sc-delta" style="color:#9CA3AF">baseline</span></div>
-            <div class="sc-row"><span class="sc-name">Conservative (overruns)</span><div class="sc-track"><div class="sc-fill sc-cons" style="width:0%" data-w="97.3">$10,077,458</div></div><span class="sc-delta" style="color:#FCA5A5">+8.7%</span></div>
+            <div class="sc-row"><span class="sc-name">Aggressive (negotiated)</span><div class="sc-track"><div class="sc-fill sc-aggr" style="width:0%" data-w="85.4">$8,854,055</div></div><span class="sc-delta" style="color:var(--t-1)">–4.5%</span></div>
+            <div class="sc-row"><span class="sc-name">Optimistic (competitive)</span><div class="sc-track"><div class="sc-fill sc-opti" style="width:0%" data-w="88.1">$9,135,385</div></div><span class="sc-delta" style="color:var(--t-1)">–1.5%</span></div>
+            <div class="sc-row"><span class="sc-name">Base (BOM estimates)</span><div class="sc-track"><div class="sc-fill sc-base" style="width:0%" data-w="89.5">$9,274,000</div></div><span class="sc-delta" style="color:var(--t-2)">baseline</span></div>
+            <div class="sc-row"><span class="sc-name">Conservative (overruns)</span><div class="sc-track"><div class="sc-fill sc-cons" style="width:0%" data-w="97.3">$10,077,458</div></div><span class="sc-delta" style="color:var(--act-red)">+8.7%</span></div>
           </div>
           <div style="margin-top:14px;padding:10px 12px;background:var(--bg-raised);border-radius:6px;font-size:10px;color:var(--text-secondary);line-height:1.6">
-            Recommended budget authority: <strong style="color:var(--warning)">$10.0M – $10.4M</strong> (8–12% contingency). Conservative scenario driven by Generator (+18%) and Transformer (+15%) historical premiums.
+            Recommended budget authority: <strong style="color:var(--act-amb)">$10.0M – $10.4M</strong> (8–12% contingency). Conservative scenario driven by Generator (+18%) and Transformer (+15%) historical premiums.
           </div>
         </div>
       </div>
       <div class="panel fi d7">
         <div class="ph"><span class="pt">Spend Concentration Risk</span><span class="badge bd">Top 5 = 53.7%</span></div>
         <div class="pb">
-          <div style="font-size:10px;color:var(--text-secondary);margin-bottom:12px;line-height:1.6">GE Vernova single-supplier exposure = <strong style="color:var(--warning)">22.6%</strong> ($2.09M). Mitigated by competitive bid against Siemens Energy. Donaldson bundle opportunity: Inlet Air + Controls/DCS = $1.03M.</div>
+          <div style="font-size:10px;color:var(--text-secondary);margin-bottom:12px;line-height:1.6">GE Vernova single-supplier exposure = <strong style="color:var(--act-amb)">22.6%</strong> ($2.09M). Mitigated by competitive bid against Siemens Energy. Donaldson bundle opportunity: Inlet Air + Controls/DCS = $1.03M.</div>
           <div class="conc-bars">
-            <div class="conc-row"><span class="conc-lbl">GE Vernova</span><div class="conc-track"><div class="conc-fill" data-w="100" style="width:0%;background:linear-gradient(90deg,#1D4A6A,#2470A8)"></div></div><span class="conc-pct">22.6%</span></div>
-            <div class="conc-row"><span class="conc-lbl">CECO Environ.</span><div class="conc-track"><div class="conc-fill" data-w="77" style="width:0%;background:linear-gradient(90deg,#1A3D2E,#2A6048)"></div></div><span class="conc-pct">17.5%</span></div>
-            <div class="conc-row"><span class="conc-lbl">Emerson</span><div class="conc-track"><div class="conc-fill" data-w="58" style="width:0%;background:linear-gradient(90deg,#1D4A6A,#2470A8)"></div></div><span class="conc-pct">13.0%</span></div>
-            <div class="conc-row"><span class="conc-lbl">ABB Power</span><div class="conc-track"><div class="conc-fill" data-w="36" style="width:0%;background:linear-gradient(90deg,#1D4A6A,#2470A8)"></div></div><span class="conc-pct">8.2%</span></div>
-            <div class="conc-row"><span class="conc-lbl">Donaldson (2×)</span><div class="conc-track"><div class="conc-fill" data-w="49" style="width:0%;background:linear-gradient(90deg,#1A3D2E,#2A6048)"></div></div><span class="conc-pct">11.1%</span></div>
-            <div class="conc-row"><span class="conc-lbl">Flowserve</span><div class="conc-track"><div class="conc-fill" data-w="24" style="width:0%;background:linear-gradient(90deg,#2A2A1A,#4A4A30)"></div></div><span class="conc-pct">5.5%</span></div>
+            <div class="conc-row"><span class="conc-lbl">GE Vernova</span><div class="conc-track"><div class="conc-fill" data-w="100" style="width:0%;background:var(--t-2)"></div></div><span class="conc-pct">22.6%</span></div>
+            <div class="conc-row"><span class="conc-lbl">CECO Environ.</span><div class="conc-track"><div class="conc-fill" data-w="77" style="width:0%;background:var(--t-2)"></div></div><span class="conc-pct">17.5%</span></div>
+            <div class="conc-row"><span class="conc-lbl">Emerson</span><div class="conc-track"><div class="conc-fill" data-w="58" style="width:0%;background:var(--t-2)"></div></div><span class="conc-pct">13.0%</span></div>
+            <div class="conc-row"><span class="conc-lbl">ABB Power</span><div class="conc-track"><div class="conc-fill" data-w="36" style="width:0%;background:var(--t-2)"></div></div><span class="conc-pct">8.2%</span></div>
+            <div class="conc-row"><span class="conc-lbl">Donaldson (2×)</span><div class="conc-track"><div class="conc-fill" data-w="49" style="width:0%;background:var(--t-2)"></div></div><span class="conc-pct">11.1%</span></div>
+            <div class="conc-row"><span class="conc-lbl">Flowserve</span><div class="conc-track"><div class="conc-fill" data-w="24" style="width:0%;background:var(--t-2)"></div></div><span class="conc-pct">5.5%</span></div>
             <div class="conc-row"><span class="conc-lbl">All Others (5)</span><div class="conc-track"><div class="conc-fill" data-w="28" style="width:0%;background:var(--bg-hover)"></div></div><span class="conc-pct">22.1%</span></div>
           </div>
           <div style="margin-top:12px;padding:8px 10px;background:var(--warning-bg);border:1px solid var(--warning-bd);border-radius:6px;font-size:10px;color:var(--text-secondary)">⚠ Trillium Flow Technologies: <strong style="color:#FDE68A">AVOID</strong> flag resolved → Flowserve selected for $507K Piping &amp; Valves scope.</div>
@@ -424,7 +453,7 @@ body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-prima
 
     <div class="tier-lbl fi">Tier 3 — Full 19-Category Pricing Matrix</div>
     <div class="panel fi">
-      <div class="ph"><span class="pt">BOP Category Breakdown — All 19 Categories</span><div class="pm"><span class="badge bv">1 Verified</span><span class="badge be">18 Estimated</span></div></div>
+      <div class="ph"><span class="pt">BOP Category Breakdown — All 19 Categories</span><div class="pm"><span class="badge bv-on">1 Verified</span><span class="badge be">18 Estimated</span></div></div>
       <div class="pb0"><table class="dt"><thead><tr><th>#</th><th>Category</th><th>Code</th><th>Tier</th><th>Low</th><th>Mid Est.</th><th>High</th><th>RFQ Quoted</th><th>Variance</th><th>Preferred Supplier</th><th>Confidence</th></tr></thead><tbody id="cost-tbody"></tbody></table></div>
     </div>
   </div>
@@ -438,18 +467,18 @@ body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-prima
     <div class="cond-items">
       <div class="cond-item"><span class="ci-label">Coverage:</span><span class="ci-val">73 suppliers · 19 categories · 10 strategic profiles</span></div>
       <div class="cond-item"><span class="ci-label">Risk:</span><span class="ci-val">GE Vernova 22.6% exposure — mitigated by competitive bid vs Siemens Energy</span></div>
-      <div class="cond-item"><span class="ci-label">Resolved:</span><span class="ci-val" style="color:var(--success)">Trillium AVOID → Flowserve confirmed · $507K scope now properly sourced</span></div>
+      <div class="cond-item"><span class="ci-label">Resolved:</span><span class="ci-val" style="color:var(--t-0)">Trillium AVOID → Flowserve confirmed · $507K scope now properly sourced</span></div>
     </div>
   </div>
   <div class="content">
     <div class="tier-lbl fi d1">Tier 1 — Network Health</div>
     <div class="kpi-grid">
       <div class="kpi fi d1"><div class="kpi-lbl">Total Suppliers</div><div class="kpi-val">73</div><div class="kpi-sub">19 categories identified</div></div>
-      <div class="kpi c-info fi d2"><div class="kpi-lbl">Tier 1 Strategic</div><div class="kpi-val">28</div><div class="kpi-sub">Primary preferred vendors</div></div>
+      <div class="kpi fi d2"><div class="kpi-lbl">Tier 1 Strategic</div><div class="kpi-val">28</div><div class="kpi-sub">Primary preferred vendors</div></div>
       <div class="kpi fi d3"><div class="kpi-lbl">Tier 2 Qualified</div><div class="kpi-val">31</div><div class="kpi-sub">Competitive alternatives</div></div>
       <div class="kpi fi d4"><div class="kpi-lbl">Tier 3 Backup</div><div class="kpi-val">14</div><div class="kpi-sub">Contingency sourcing</div></div>
-      <div class="kpi c-ok fi d5"><div class="kpi-lbl">Competitive Bids</div><div class="kpi-val">3</div><div class="kpi-sub">Generator · Transformer · Emissions</div><div class="kpi-badge"><span class="badge bv">Active</span></div></div>
-      <div class="kpi c-ok fi d6"><div class="kpi-lbl">Avoid Flags</div><div class="kpi-val">1</div><div class="kpi-sub">Trillium — Resolved → Flowserve</div><div class="kpi-badge"><span class="badge bv">Resolved</span></div></div>
+      <div class="kpi fi d5"><div class="kpi-lbl">Competitive Bids</div><div class="kpi-val">3</div><div class="kpi-sub">Generator · Transformer · Emissions</div><div class="kpi-badge"><span class="badge bv">Active</span></div></div>
+      <div class="kpi fi d6"><div class="kpi-lbl">Avoid Flags</div><div class="kpi-val">1</div><div class="kpi-sub">Trillium — Resolved → Flowserve</div><div class="kpi-badge"><span class="badge bv">Resolved</span></div></div>
     </div>
 
     <div class="tier-lbl fi">Tier 2 — Strategic Analysis</div>
@@ -499,11 +528,11 @@ body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-prima
             <tr><td><strong>CECO Environmental</strong></td><td class="dim">Parsons KS</td><td>Emissions · Exhaust · Acoustic</td><td class="mono">$1,626,800</td><td class="dim">Env. Solutions</td><td class="dim">New</td><td><span class="badge bd">Permit Pending</span></td></tr>
             <tr class="crit-row"><td><strong>ABB Power Grids</strong></td><td class="dim">Zürich / Cary NC</td><td>Step-up Transformer</td><td class="mono">$760,000</td><td class="dim">NA Transformers</td><td class="dim">New</td><td><span class="badge bc">Blocked — ICD</span></td></tr>
             <tr><td><strong>Siemens Energy</strong></td><td class="dim">Houston TX</td><td>Generator (alt) · Transformer (alt)</td><td class="mono">$2,093,850</td><td class="dim">Power Gen Sales</td><td class="dim">New</td><td><span class="badge bp">RFQ Ready</span></td></tr>
-            <tr><td><strong>Baker Hughes</strong></td><td class="dim">Houston TX</td><td>VIB_MON · Exhaust</td><td class="mono">$608,900</td><td>Lorenzo Simonelli CEO</td><td style="color:var(--success)">Warm</td><td><span class="badge bv">$340K Responded</span></td></tr>
+            <tr><td><strong>Baker Hughes</strong></td><td class="dim">Houston TX</td><td>VIB_MON · Exhaust</td><td class="mono">$608,900</td><td>Lorenzo Simonelli CEO</td><td style="color:var(--t-0)">Warm</td><td><span class="badge bv-on">$340K Responded</span></td></tr>
             <tr><td><strong>Donaldson Company</strong></td><td class="dim">Minneapolis MN</td><td>Inlet Air · Controls/DCS</td><td class="mono">$1,029,750</td><td>Tod Carpenter CEO</td><td class="dim">New</td><td><span class="badge bp">RFQ Ready</span></td></tr>
             <tr><td><strong>Eaton Corporation</strong></td><td class="dim">Dublin IE / USA</td><td>Electrical Distribution</td><td class="mono">$535,050</td><td class="dim">Power Dist.</td><td class="dim">New</td><td><span class="badge bp">RFQ Ready</span></td></tr>
-            <tr><td><strong>Flowserve</strong></td><td class="dim">Irving TX</td><td>Piping &amp; Valves</td><td class="mono">$507,600</td><td class="dim">Power Gen</td><td class="dim">New</td><td><span class="badge bv">Selected (Trillium repl.)</span></td></tr>
-            <tr><td><strong>EthosEnergy Italia</strong></td><td class="dim">Turin, Italy</td><td>W251B8 Gas Turbine OEM</td><td class="mono">Program GT</td><td>Alberto Malandra MD</td><td style="color:var(--success)">Contracted</td><td><span class="badge bc">ICD Outstanding</span></td></tr>
+            <tr><td><strong>Flowserve</strong></td><td class="dim">Irving TX</td><td>Piping &amp; Valves</td><td class="mono">$507,600</td><td class="dim">Power Gen</td><td class="dim">New</td><td><span class="badge bp">Selected (Trillium repl.)</span></td></tr>
+            <tr><td><strong>EthosEnergy Italia</strong></td><td class="dim">Turin, Italy</td><td>W251B8 Gas Turbine OEM</td><td class="mono">Program GT</td><td>Alberto Malandra MD</td><td style="color:var(--t-0)">Contracted</td><td><span class="badge bc">ICD Outstanding</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -519,7 +548,7 @@ body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-prima
     <div class="cond-items">
       <div class="cond-item"><span class="ci-label">Stage:</span><span class="ci-val">1 Responded · 12 Drafted · 0 Sent · 0 Awarded</span></div>
       <div class="cond-item"><span class="ci-label">Blocked:</span><span class="ci-val">$1.725M pending EthosEnergy ICD (Transformer + Exhaust + Electrical)</span></div>
-      <div class="cond-item"><span class="ci-label">Send Date:</span><span class="ci-val" style="color:var(--warning)">May 25, 2026 — <span id="rfq-days-cond">43</span> days</span></div>
+      <div class="cond-item"><span class="ci-label">Send Date:</span><span class="ci-val" style="color:var(--act-amb)">May 25, 2026 — <span id="rfq-days-cond">43</span> days</span></div>
     </div>
   </div>
   <div class="content">
@@ -528,15 +557,15 @@ body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-prima
       <div class="stage"><div class="s-name">Drafted</div><div class="s-count">12</div><div class="s-val">$9.56M ready to send</div><div class="s-arr">›</div></div>
       <div class="stage active"><div class="s-name">Send Day</div><div class="s-count" id="rfq-stage-days">43d</div><div class="s-val">May 25, 2026</div><div class="s-arr">›</div></div>
       <div class="stage"><div class="s-name">Sent</div><div class="s-count">0</div><div class="s-val">Awaiting May 25</div><div class="s-arr">›</div></div>
-      <div class="stage"><div class="s-name">Responded</div><div class="s-count" style="color:var(--success)">1</div><div class="s-val">$340K — Baker Hughes</div><div class="s-arr">›</div></div>
+      <div class="stage"><div class="s-name">Responded</div><div class="s-count" style="color:var(--t-0)">1</div><div class="s-val">$340K — Baker Hughes</div><div class="s-arr">›</div></div>
       <div class="stage"><div class="s-name">Evaluated</div><div class="s-count">0</div><div class="s-val">Jul 15 – Aug 15</div><div class="s-arr">›</div></div>
       <div class="stage"><div class="s-name">Awarded</div><div class="s-count">0</div><div class="s-val">Target Aug 15, 2026</div></div>
     </div>
     <div class="kpi-grid">
       <div class="kpi fi d1"><div class="kpi-lbl">Total Pipeline</div><div class="kpi-val">$9.90M</div><div class="kpi-sub">13 packages · 11 suppliers</div></div>
-      <div class="kpi c-warn fi d2"><div class="kpi-lbl">Days to Send</div><div class="kpi-val" id="rfq-days-kpi">—</div><div class="kpi-sub">May 25, 2026 — FIXED</div></div>
-      <div class="kpi c-ok fi d3"><div class="kpi-lbl">Responses Received</div><div class="kpi-val">1 / 13</div><div class="kpi-sub">Baker Hughes $340K · +26.7%</div><div class="kpi-badge"><span class="badge bv">Live</span></div></div>
-      <div class="kpi c-crit fi d4"><div class="kpi-lbl">Blocked Value</div><div class="kpi-val">$1.73M</div><div class="kpi-sub">Transformer + Exhaust + Electrical</div><div class="kpi-badge"><span class="badge bc">ICD Req'd</span></div></div>
+      <div class="kpi act-red fi d2"><div class="kpi-lbl">Days to Send</div><div class="kpi-val" id="rfq-days-kpi">—</div><div class="kpi-sub">May 25, 2026 — FIXED</div></div>
+      <div class="kpi fi d3"><div class="kpi-lbl">Responses Received</div><div class="kpi-val">1 / 13</div><div class="kpi-sub">Baker Hughes $340K · +26.7%</div><div class="kpi-badge"><span class="badge bp">Live</span></div></div>
+      <div class="kpi act-red fi d4"><div class="kpi-lbl">Blocked Value</div><div class="kpi-val">$1.73M</div><div class="kpi-sub">Transformer + Exhaust + Electrical</div><div class="kpi-badge"><span class="badge bc">ICD Req'd</span></div></div>
       <div class="kpi fi d5"><div class="kpi-lbl">Critical Path RFQs</div><div class="kpi-val">2</div><div class="kpi-sub">Generator 40–56wk · Transformer 52–70wk</div></div>
       <div class="kpi fi d6"><div class="kpi-lbl">Pre-Send Gates</div><div class="kpi-val">7 / 10</div><div class="kpi-sub">3 manual gates need human action</div></div>
     </div>
@@ -559,12 +588,12 @@ body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-prima
           <table class="dt">
             <thead><tr><th>Supplier</th><th>Prob.</th><th>Est. Response</th><th>Exp. Price</th><th>vs Est.</th></tr></thead>
             <tbody>
-              <tr><td>Baker Hughes</td><td class="mono" style="color:var(--success)">92%</td><td class="dim">Jun 6</td><td class="mono">$495K</td><td style="color:#FCA5A5">+15%</td></tr>
+              <tr><td>Baker Hughes</td><td class="mono" style="color:var(--t-0)">92%</td><td class="dim">Jun 6</td><td class="mono">$495K</td><td style="color:var(--act-red)">+15%</td></tr>
               <tr><td>Emerson</td><td class="mono">85%</td><td class="dim">Jun 12</td><td class="mono">$700K</td><td class="dim">at est.</td></tr>
               <tr><td>Donaldson (×2)</td><td class="mono">88%</td><td class="dim">Jun 9</td><td class="mono">$1.03M</td><td class="dim">at est.</td></tr>
-              <tr><td>GE Vernova</td><td class="mono">80%</td><td class="dim">Jul 1</td><td class="mono">~$2.1M</td><td style="color:#FCA5A5">+5–18%</td></tr>
-              <tr><td>Siemens Energy</td><td class="mono">72%</td><td class="dim">Jul 8</td><td class="mono">~$2.1M</td><td style="color:#FCA5A5">+5–18%</td></tr>
-              <tr><td>ABB Power</td><td class="mono">75%</td><td class="dim">Jul 10</td><td class="mono">~$760K</td><td style="color:#FCA5A5">+10–15%</td></tr>
+              <tr><td>GE Vernova</td><td class="mono">80%</td><td class="dim">Jul 1</td><td class="mono">~$2.1M</td><td style="color:var(--act-red)">+5–18%</td></tr>
+              <tr><td>Siemens Energy</td><td class="mono">72%</td><td class="dim">Jul 8</td><td class="mono">~$2.1M</td><td style="color:var(--act-red)">+5–18%</td></tr>
+              <tr><td>ABB Power</td><td class="mono">75%</td><td class="dim">Jul 10</td><td class="mono">~$760K</td><td style="color:var(--act-red)">+10–15%</td></tr>
               <tr><td>Amerex / Turbotect</td><td class="mono">80%</td><td class="dim">Jun 15</td><td class="mono">$340K</td><td class="dim">–8–0%</td></tr>
             </tbody>
           </table>
@@ -579,21 +608,21 @@ body{font-family:var(--font-ui);background:var(--bg-base);color:var(--text-prima
         <table class="dt">
           <thead><tr><th>ID</th><th>Supplier</th><th>Contact</th><th>Category</th><th>Lead Time</th><th>Est. Value</th><th>Status</th><th>Notes</th></tr></thead>
           <tbody>
-            <tr><td class="mono dim">RFQ-001</td><td>Baker Hughes</td><td>Lorenzo Simonelli</td><td>Vibration Monitoring</td><td class="dim">8–14 wk</td><td class="mono">$340,000</td><td><span class="badge bv">Responded</span></td><td class="dim" style="font-size:10px">$340K · +26.7% · Decision pending</td></tr>
-            <tr class="crit-row"><td class="mono dim">RFQ-008</td><td><strong>GE Vernova</strong></td><td class="dim">Gas Power BD</td><td>Generator + Switchgear</td><td style="color:#F87171">40–56 wk ⚠</td><td class="mono">$2,093,850</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">CRITICAL PATH · compete vs RFQ-009</td></tr>
-            <tr class="crit-row"><td class="mono dim">RFQ-009</td><td><strong>Siemens Energy</strong></td><td class="dim">Power Gen Sales</td><td>Generator + Switchgear</td><td style="color:#F87171">44–58 wk ⚠</td><td class="mono">$2,093,850</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">Competitive bid vs GE Vernova</td></tr>
-            <tr class="crit-row"><td class="mono dim">RFQ-010</td><td><strong>ABB Power</strong></td><td class="dim">NA Transformers</td><td>Step-up Transformer</td><td style="color:#F87171">52–70 wk ⚠</td><td class="mono">$760,000</td><td><span class="badge bc">Blocked</span></td><td class="dim" style="font-size:10px">Pending EthosEnergy ICD</td></tr>
+            <tr><td class="mono dim">RFQ-001</td><td>Baker Hughes</td><td>Lorenzo Simonelli</td><td>Vibration Monitoring</td><td class="dim">8–14 wk</td><td class="mono">$340,000</td><td><span class="badge bv-on">Responded</span></td><td class="dim" style="font-size:10px">$340K · +26.7% · Decision pending</td></tr>
+            <tr class="crit-row"><td class="mono dim">RFQ-008</td><td><strong>GE Vernova</strong></td><td class="dim">Gas Power BD</td><td>Generator + Switchgear</td><td style="color:var(--act-red)">40–56 wk ⚠</td><td class="mono">$2,093,850</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">CRITICAL PATH · compete vs RFQ-009</td></tr>
+            <tr class="crit-row"><td class="mono dim">RFQ-009</td><td><strong>Siemens Energy</strong></td><td class="dim">Power Gen Sales</td><td>Generator + Switchgear</td><td style="color:var(--act-red)">44–58 wk ⚠</td><td class="mono">$2,093,850</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">Competitive bid vs GE Vernova</td></tr>
+            <tr class="crit-row"><td class="mono dim">RFQ-010</td><td><strong>ABB Power</strong></td><td class="dim">NA Transformers</td><td>Step-up Transformer</td><td style="color:var(--act-red)">52–70 wk ⚠</td><td class="mono">$760,000</td><td><span class="badge bc">Blocked</span></td><td class="dim" style="font-size:10px">Pending EthosEnergy ICD</td></tr>
             <tr><td class="mono dim">RFQ-012</td><td>CECO Environmental</td><td class="dim">Env. Solutions</td><td>Emissions Control SCR</td><td class="dim">24–36 wk</td><td class="mono">$891,750</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">NM permit scope pending</td></tr>
             <tr><td class="mono dim">RFQ-002</td><td>Emerson</td><td>Bob Yeager</td><td>Fuel Gas System</td><td class="dim">16–24 wk</td><td class="mono">$700,600</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">Fisher regulators + Daniel meters</td></tr>
             <tr><td class="mono dim">RFQ-006</td><td>Eaton Corporation</td><td class="dim">Power Dist.</td><td>Electrical Distribution</td><td class="dim">20–30 wk</td><td class="mono">$535,050</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">Station service MV/LV switchgear</td></tr>
             <tr><td class="mono dim">RFQ-003</td><td>Donaldson Co.</td><td>Tod Carpenter</td><td>Inlet Air Filtering</td><td class="dim">14–20 wk</td><td class="mono">$525,150</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">CEO outreach · Ultra-Web</td></tr>
-            <tr><td class="mono dim">RFQ-013</td><td>Flowserve</td><td class="dim">Power Gen</td><td>Piping &amp; Valves</td><td class="dim">10–16 wk</td><td class="mono">$507,600</td><td><span class="badge bv">Drafted</span></td><td class="dim" style="font-size:10px">Replaces Trillium AVOID ✓</td></tr>
+            <tr><td class="mono dim">RFQ-013</td><td>Flowserve</td><td class="dim">Power Gen</td><td>Piping &amp; Valves</td><td class="dim">10–16 wk</td><td class="mono">$507,600</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">Replaces Trillium AVOID ✓</td></tr>
             <tr><td class="mono dim">RFQ-004</td><td>Donaldson Co.</td><td>Michael Wynblatt</td><td>Controls / DCS</td><td class="dim">20–28 wk</td><td class="mono">$504,600</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">CTO outreach · BOP DCS</td></tr>
-            <tr class="crit-row"><td class="mono dim">RFQ-011</td><td>Siemens Energy</td><td class="dim">Transformers</td><td>Transformer (alt)</td><td style="color:var(--warning)">54–68 wk</td><td class="mono">$760,000</td><td><span class="badge bc">Blocked</span></td><td class="dim" style="font-size:10px">Compete vs ABB · pending ICD</td></tr>
+            <tr class="crit-row"><td class="mono dim">RFQ-011</td><td>Siemens Energy</td><td class="dim">Transformers</td><td>Transformer (alt)</td><td style="color:var(--act-amb)">54–68 wk</td><td class="mono">$760,000</td><td><span class="badge bc">Blocked</span></td><td class="dim" style="font-size:10px">Compete vs ABB · pending ICD</td></tr>
             <tr><td class="mono dim">RFQ-005</td><td>Baker Hughes</td><td>Rod Christie EVP</td><td>Exhaust System</td><td class="dim">20–28 wk</td><td class="mono">$430,650</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">Leverage BH relationship</td></tr>
             <tr><td class="mono dim">RFQ-006</td><td>Amerex Corp.</td><td>Harrison K</td><td>Fire Fighting System</td><td class="dim">10–16 wk</td><td class="mono">$229,400</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">NFPA 750 package</td></tr>
             <tr><td class="mono dim">RFQ-007</td><td>Turbotect Ltd.</td><td>Neil Ashford</td><td>Compressor Washing</td><td class="dim">8–12 wk</td><td class="mono">$132,300</td><td><span class="badge bp">Drafted</span></td><td class="dim" style="font-size:10px">Online + offline W-frame</td></tr>
-            <tr style="background:var(--bg-raised)"><td colspan="5" style="font-size:11px;color:var(--text-secondary);font-weight:600;padding:10px 14px">TOTAL PIPELINE VALUE</td><td class="mono" style="font-size:13px;color:var(--warning);font-weight:600">$9,898,000</td><td colspan="2"></td></tr>
+            <tr style="background:var(--bg-raised)"><td colspan="5" style="font-size:11px;color:var(--text-secondary);font-weight:600;padding:10px 14px">TOTAL PIPELINE VALUE</td><td class="mono" style="font-family:var(--font-mono);font-size:13px;color:var(--t-0);font-weight:300">$9,898,000</td><td colspan="2"></td></tr>
           </tbody>
         </table>
       </div>
@@ -669,9 +698,9 @@ function buildCostTable(){
   BOP.forEach((r,i)=>{
     const v=r.conf==='RFQ_VERIFIED';
     const tb_=r.tier==='strategic'?'<span class="badge bs" style="font-size:8px">Strategic</span>':r.tier==='targeted'?'<span class="badge bp" style="font-size:8px">Targeted</span>':'<span style="font-size:9px;color:var(--text-dim)">Standard</span>';
-    const cb=v?'<span class="badge bv">Verified</span>':'<span class="badge be">Estimated</span>';
+    const cb=v?'<span class="badge bv-on">Verified</span>':'<span class="badge be">Estimated</span>';
     const qv=r.quoted?fmt(r.quoted):'—';
-    const vv=r.vp?`<span style="color:#F87171">+${r.vp}%</span>`:'<span class="dim">—</span>';
+    const vv=r.vp?`<span style="color:var(--act-red)">+${r.vp}%</span>`:'<span class="dim">—</span>';
     const tr=document.createElement('tr');
     if(v)tr.style.background='rgba(16,185,129,.04)';
     tr.innerHTML=`<td class="mono dim">${i+1}</td><td>${r.cat}</td><td class="mono dim" style="font-size:10px">${r.code}</td><td>${tb_}</td><td class="mono dim">${fmt(r.low)}</td><td class="mono" style="font-weight:500">${fmt(r.mid)}</td><td class="mono dim">${fmt(r.high)}</td><td class="mono">${qv}</td><td>${vv}</td><td class="dim" style="font-size:10px">${r.sup}</td><td>${cb}</td>`;
