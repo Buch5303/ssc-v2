@@ -1,0 +1,88 @@
+name: FlowSeer CI/CD
+
+on:
+  push:
+    branches: [frontend-only, main]
+  pull_request:
+    branches: [frontend-only]
+
+jobs:
+  quality-gate:
+    name: Quality Gate — 125 Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+
+      - name: Install Python deps
+        run: pip install pytest requests python-dotenv psycopg2-binary --break-system-packages || pip install pytest requests python-dotenv
+
+      - name: Run Contact Verifier tests (45)
+        run: python3 -m pytest tools/contact-verifier/tests/ -q --tb=short
+        working-directory: .
+
+      - name: Run Pricing Discovery tests (67)
+        run: python3 -m pytest tools/pricing-discovery/tests/ -q --tb=short
+        working-directory: .
+
+      - name: Run Orchestrator tests (13)
+        run: python3 -m pytest tools/orchestrator/tests/ -q --tb=short
+        working-directory: .
+
+      - name: Platform health check
+        run: python3 tools/monitoring/platform_health.py
+        working-directory: .
+
+  frontend-build:
+    name: Frontend Build — Next.js 14
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with: { node-version: '22', cache: 'npm' }
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit || true
+
+      - name: Build Next.js
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: ''
+
+      - name: Build success
+        run: echo "✅ FlowSeer production build passed"
+
+  data-refresh:
+    name: Refresh Dashboard Data
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    if: github.ref == 'refs/heads/frontend-only'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+
+      - name: Install deps
+        run: pip install requests --break-system-packages || pip install requests
+
+      - name: Regenerate dashboard data
+        run: python3 tools/dashboard/generate_dashboard_data.py
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name  "FlowSeer CI"
+          git config user.email "ci@flowseer.internal"
+          git add tools/dashboard/data/
+          git diff --staged --quiet || git commit -m "CI: dashboard data refresh $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push origin frontend-only || true

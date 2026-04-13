@@ -1,55 +1,96 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { clsx } from 'clsx';
 
-const navItems = [
-  { href: '/dashboard/overview',        label: 'Overview',          icon: '◈' },
-  { href: '/dashboard/cost-intel',      label: 'Cost Intel',        icon: '◉' },
-  { href: '/dashboard/supplier-network',label: 'Supplier Network',  icon: '◎' },
-  { href: '/dashboard/rfq-pipeline',    label: 'RFQ Pipeline',      icon: '◇' },
+const nav = [
+  { href: '/dashboard/overview',         label: 'Overview',         dot: true  },
+  { href: '/dashboard/cost-intel',        label: 'Cost Intelligence',dot: false },
+  { href: '/dashboard/supplier-network',  label: 'Supplier Network', dot: false },
+  { href: '/dashboard/rfq-pipeline',      label: 'RFQ Pipeline',     dot: true  },
 ];
+
+// FlowSeer F-mark SVG
+function FMark() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="28" height="28" rx="4" fill="#0B1220"/>
+      <path d="M6 5h13l-2.5 4H9v3h6.5l-2.5 4h-4v8H6V5z" fill="#1E6FCC"/>
+      <path d="M14 5h5l-7 18h-3.5z" fill="#DCE8F6" opacity="0.8"/>
+      <path d="M17.5 5H22l-7 18h-3.5z" fill="#CC2020"/>
+    </svg>
+  );
+}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
+
   return (
-    <div className="flex h-screen overflow-hidden bg-[#0a0e1a]">
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg0)' }}>
+
       {/* Sidebar */}
-      <aside className="w-56 flex-shrink-0 flex flex-col bg-[#0f1524] border-r border-white/[0.06]">
-        {/* Logo */}
-        <div className="px-5 py-5 border-b border-white/[0.06]">
-          <div className="text-[11px] font-mono font-bold text-cyan-400 tracking-widest uppercase">FlowSeer</div>
-          <div className="text-[9px] font-mono text-slate-500 mt-0.5">SSC V2 Intelligence</div>
+      <aside className="w-52 flex-shrink-0 flex flex-col" style={{
+        background: 'var(--bg1)',
+        borderRight: '1px solid var(--line)',
+      }}>
+
+        {/* Brand */}
+        <div className="px-4 py-4" style={{ borderBottom: '1px solid var(--line)' }}>
+          <div className="flex items-center gap-2.5">
+            <FMark />
+            <div>
+              <div className="text-[13px] font-bold tracking-[-0.2px]">
+                <span style={{ color: 'var(--t0)' }}>Flow</span>
+                <span style={{ color: 'var(--brand-red)' }}>Seer</span>
+              </div>
+              <div className="font-mono text-[9px] mt-[1px]" style={{ color: 'var(--brand-blue2)', opacity: 0.8, letterSpacing: '0.5px' }}>
+                TG20/W251 · BORDERPLEX
+              </div>
+            </div>
+          </div>
         </div>
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {navItems.map((item) => {
-            const active = path.startsWith(item.href);
+
+        {/* Navigation */}
+        <nav className="flex-1 px-2 py-3 space-y-[2px]">
+          {nav.map(({ href, label, dot }) => {
+            const active = path.startsWith(href);
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-md text-[10px] font-mono font-medium transition-all ${
-                  active
-                    ? 'bg-cyan-500/10 border border-cyan-500/20 text-cyan-400'
-                    : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.03]'
-                }`}
-              >
-                <span className="text-sm">{item.icon}</span>
-                {item.label}
+              <Link key={href} href={href} className={clsx(
+                'flex items-center gap-2.5 px-3 py-[8px] text-[11px] font-medium transition-all',
+                'font-[IBM_Plex_Sans]',
+                active
+                  ? 'bg-[#1E6FCC]/10 border border-[#1E6FCC]/20 text-[--t0]'
+                  : 'text-[--t2] hover:text-[--t1] hover:bg-[--bg3] border border-transparent',
+              )}>
+                {dot && (
+                  <span className={clsx(
+                    'w-[4px] h-[4px] rounded-full flex-shrink-0',
+                    active ? 'bg-[--t2]' : 'bg-[--red]',
+                  )} />
+                )}
+                {!dot && <span className="w-[4px] flex-shrink-0" />}
+                {label}
               </Link>
             );
           })}
         </nav>
+
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-white/[0.06]">
-          <div className="text-[8px] font-mono text-slate-600">TWP / Project Jupiter</div>
-          <div className="text-[8px] font-mono text-slate-600 mt-0.5">W251 TG20B7-8 · $10.1M BOP</div>
+        <div className="px-4 py-3" style={{ borderTop: '1px solid var(--line)' }}>
+          <div className="font-mono text-[8px] leading-[1.6]" style={{ color: 'var(--t3)' }}>
+            <div>Trans World Power LLC</div>
+            <div>Client: Borderplex</div>
+            <div>Santa Teresa, NM</div>
+          </div>
         </div>
+
       </aside>
-      {/* Main */}
+
+      {/* Main content */}
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>
+
     </div>
   );
 }

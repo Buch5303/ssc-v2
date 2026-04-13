@@ -1,129 +1,125 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { fetchStatus } from '../../../lib/api/status';
-import { fetchTierStats } from '../../../lib/api/discovery';
-import { fetchByCategory, fetchBySeniority } from '../../../lib/api/wave9';
-import { KpiCard } from '../../../components/cards/KpiCard';
-
-const TIER_COLORS = { 1: '#06b6d4', 2: '#10b981', 3: '#f59e0b', 4: '#ef4444' };
-const TIER_LABELS = { 1: 'T1 OEM / Major', 2: 'T2 Specialist', 3: 'T3 Regional', 4: 'T4 Niche' };
-
-const CustomPieTooltip = ({ active, payload }: any) => {
-  if (!active || !payload?.length) return null;
-  const d = payload[0].payload;
-  return (
-    <div className="bg-[#1a2236] border border-white/10 rounded-lg p-3 text-[10px] font-mono">
-      <div className="text-slate-300">{d.label}</div>
-      <div className="text-cyan-400 font-bold mt-1">{d.count} suppliers</div>
-    </div>
-  );
-};
+import { fetchSupplierNetwork, fetchContactStats } from '../../../lib/api/flowseer';
+import { KPI }             from '../../../components/ui/KPI';
+import { Badge }           from '../../../components/ui/Badge';
+import { Panel }           from '../../../components/ui/Panel';
+import { AlertCard }       from '../../../components/ui/AlertCard';
+import { TierLabel }       from '../../../components/ui/TierLabel';
+import { ConditionBanner } from '../../../components/ui/ConditionBanner';
 
 export default function SupplierNetworkPage() {
-  const { data: status } = useQuery({ queryKey: ['status'], queryFn: fetchStatus, refetchInterval: 60_000 });
-  const { data: tiers } = useQuery({ queryKey: ['tier-stats'], queryFn: fetchTierStats, refetchInterval: 120_000 });
-  const { data: byCategory } = useQuery({ queryKey: ['wave9-by-category'], queryFn: fetchByCategory, refetchInterval: 120_000 });
-  const { data: bySeniority } = useQuery({ queryKey: ['wave9-by-seniority'], queryFn: fetchBySeniority, refetchInterval: 120_000 });
+  const Q = { refetchInterval: 60_000 };
+  const { data: network }  = useQuery({ queryKey: ['network'],  queryFn: fetchSupplierNetwork, ...Q });
+  const { data: contacts } = useQuery({ queryKey: ['contacts'], queryFn: fetchContactStats,   ...Q });
 
-  const bop = status?.bop_intelligence;
-
-  const pieData = (tiers?.tier_distribution || []).map((t: any) => ({
-    tier: t.tier,
-    count: t.count,
-    label: TIER_LABELS[t.tier as keyof typeof TIER_LABELS] || `Tier ${t.tier}`,
-    fill: TIER_COLORS[t.tier as keyof typeof TIER_COLORS] || '#64748b',
-  }));
-
-  const catData = (byCategory?.categories || []).slice(0, 12).map((c) => ({
-    name: c.category.replace(/_/g,' ').replace('System','Sys').replace('Equipment','Eq').replace('Monitoring','Mon'),
-    contacts: c.contacts,
-    email: c.with_email,
-  }));
+  const total    = network?.total_suppliers   ?? 73;
+  const tier1    = network?.strategic_tier1   ?? 28;
+  const tier2    = (network?.by_tier?.['Tier 2'] as number) ?? 31;
+  const tier3    = (network?.by_tier?.['Tier 3'] as number) ?? 14;
+  const prefSups = network?.preferred_suppliers ?? [];
+  const avoidSup = network?.avoid_suppliers     ?? [];
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl">
-      <div>
-        <h1 className="text-sm font-mono font-bold text-slate-200 uppercase tracking-wider">Supplier Network</h1>
-        <p className="text-[10px] font-mono text-slate-500 mt-0.5">BOP supply chain coverage · Tier distribution · Contact intelligence</p>
-      </div>
+    <>
+      <ConditionBanner
+        state="warning"
+        tag="⚠ Network"
+        items={[
+          { label: 'Coverage:',  value: `${total} suppliers · 19 categories · 10 strategic profiles` },
+          { label: 'Risk:',      value: 'GE Vernova 22.6% exposure — mitigated by competitive bid vs Siemens Energy' },
+          { label: 'Resolved:',  value: 'Trillium AVOID → Flowserve confirmed · $507K scope properly sourced' },
+        ]}
+      />
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiCard label="Total Suppliers" value={bop?.suppliers_in_db ?? '—'} sub="73 in Neon DB" accent="cyan" />
-        <KpiCard label="In Memory" value={81} sub="Across 19 BOP categories" accent="green" />
-        <KpiCard label="BOP Categories" value={bop?.bop_categories_priced ?? '—'} sub="All priced" accent="cyan" />
-        <KpiCard label="Tier 1 OEM" value={pieData.find(p=>p.tier===1)?.count ?? '—'} sub="Global industrial leaders" accent="amber" />
-      </div>
+      <div className="p-6 max-w-[1400px]">
+        <TierLabel>Tier 1 — Network Health</TierLabel>
+        <div className="grid grid-cols-6 gap-px bg-[--line] mb-8">
+          <KPI label="Total Suppliers"   value={total}  sub="19 categories identified" />
+          <KPI label="Tier 1 Strategic"  value={tier1}  sub="Primary preferred vendors"  badge={<Badge>Active</Badge>} />
+          <KPI label="Tier 2 Qualified"  value={tier2}  sub="Competitive alternatives" />
+          <KPI label="Tier 3 Backup"     value={tier3}  sub="Contingency sourcing" />
+          <KPI label="Competitive Bids"  value="3"      sub="Generator · Transformer · Emissions" badge={<Badge variant="verified">Active</Badge>} />
+          <KPI label="Avoid Flags"       value="1"      sub="Trillium — Resolved → Flowserve"     badge={<Badge variant="verified">Resolved</Badge>} />
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Tier distribution pie */}
-        <div className="bg-[#0f1524] border border-white/[0.06] rounded-lg p-5">
-          <h2 className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-4">Supplier Tier Distribution</h2>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie data={pieData} dataKey="count" nameKey="label" cx="50%" cy="50%" outerRadius={80} innerRadius={40}>
-                {pieData.map((entry, i) => (
-                  <Cell key={i} fill={entry.fill} fillOpacity={0.85} />
+        <TierLabel>Tier 2 — Strategic Analysis</TierLabel>
+        <div className="grid grid-cols-2 gap-5 mb-8">
+          <Panel title="Critical Path Suppliers" meta={<Badge variant="critical">2 Critical</Badge>}>
+            <div className="flex flex-col gap-2">
+              <AlertCard severity="critical" title="GE Vernova — Generator + Switchgear ($2.09M)" detail="True critical path. 40–56 week lead time. Must award by August 15 for Q2 2027 first power. Competitive bid with Siemens Energy required." action="→ rfq_generator_ge_vernova.txt ready for May 25" />
+              <AlertCard severity="critical" title="ABB Power Grids — Step-up Transformer ($760K)" detail="52–70 week lead. Blocked on EthosEnergy ICD for voltage/MVA specification. Competitive bid with Siemens Energy. Expedite premium ~15% available." action="→ Blocked · rfq_transformer_abb.txt ready when ICD received" />
+              <AlertCard severity="warning" title="Emerson — Fuel Gas System ($700K)" detail="Fisher regulators + Daniel flow meters — W251B8 standard. Bob Yeager (President) primary contact. 16–24 week lead. Expected at estimate." action="→ rfq_bob_yeager_emerson.txt ready" />
+              <AlertCard severity="warning" title="CECO Environmental — SCR / Emissions ($892K)" detail="SCR + CO catalyst combined package. 24–36 week lead. Pending NM environmental permit scope confirmation." action="→ Confirm NM permit limits · rfq_ceco_emissions.txt drafted" />
+            </div>
+          </Panel>
+
+          <Panel title="Sourcing Strategy">
+            <table>
+              <thead><tr><th>Category</th><th>Strategy</th><th>Preferred</th><th>Backup</th></tr></thead>
+              <tbody>
+                {[
+                  ['Generator',        'Compete', 'GE Vernova',      'Siemens Energy'],
+                  ['Transformer',      'Compete', 'ABB Power',       'Siemens / WEG'],
+                  ['Emissions SCR',    'Compete', 'CECO Environmental','Peerless Mfg'],
+                  ['Fuel Gas',         'Single',  'Emerson',         'CIRCOR Energy'],
+                  ['Inlet Air',        'Single',  'Donaldson',       'Camfil'],
+                  ['Controls/DCS',     'Single',  'Donaldson/Emerson','—'],
+                  ['Piping & Valves',  'Single',  'Flowserve',       'Watts Water'],
+                  ['Electrical Dist.', 'Single',  'Eaton',           'ABB LV'],
+                  ['Fire Fighting',    'Single',  'Amerex',          '—'],
+                  ['Comp. Washing',    'Single',  'Turbotect',       'Rochem'],
+                ].map(([cat, strat, pref, back], i) => (
+                  <tr key={i}>
+                    <td>{cat}</td>
+                    <td><Badge>{strat as string}</Badge></td>
+                    <td>{pref}</td>
+                    <td className="text-[--t2]">{back}</td>
+                  </tr>
                 ))}
-              </Pie>
-              <Tooltip content={<CustomPieTooltip />} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="flex flex-wrap gap-3 mt-2">
-            {pieData.map((entry) => (
-              <div key={entry.tier} className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.fill }} />
-                <span className="text-[8px] font-mono text-slate-400">{entry.label} ({entry.count})</span>
-              </div>
-            ))}
-          </div>
+              </tbody>
+            </table>
+          </Panel>
         </div>
 
-        {/* Contact seniority */}
-        <div className="bg-[#0f1524] border border-white/[0.06] rounded-lg p-5">
-          <h2 className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-4">Contact Seniority · 231 Total</h2>
-          <div className="space-y-2 mt-4">
-            {(bySeniority?.by_seniority || []).map((s) => {
-              const pct = Math.round((s.contacts / 231) * 100);
-              const color = s.seniority === 'c_suite' ? '#06b6d4' : s.seniority === 'vp' ? '#10b981' : s.seniority === 'director' ? '#f59e0b' : '#64748b';
-              return (
-                <div key={s.seniority} className="flex items-center gap-3">
-                  <div className="w-20 text-[9px] font-mono text-slate-400 capitalize">{s.seniority.replace('_',' ')}</div>
-                  <div className="flex-1 h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
-                  </div>
-                  <div className="w-8 text-right text-[9px] font-mono" style={{ color }}>{s.contacts}</div>
-                  {s.with_email > 0 && (
-                    <span className="text-[8px] font-mono text-emerald-400">✉ {s.with_email}</span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+        <TierLabel>Tier 3 — Strategic Supplier Profiles (Tier 1)</TierLabel>
+        <Panel title="10 Strategic Supplier Intelligence Profiles" meta={<Badge variant="estimated">Partial enrichment</Badge>}>
+          <table>
+            <thead><tr><th>Supplier</th><th>HQ</th><th>BOP Scope</th><th className="text-right">Exposure</th><th>Lead Contact</th><th>Relationship</th><th>Status</th></tr></thead>
+            <tbody>
+              {[
+                ['GE Vernova',        'Schenectady NY', 'Generator + Switchgear',         2_093_850, 'Gas Power BD',         'New',         'pending',  'RFQ Ready'],
+                ['Emerson',           'St. Louis MO',   'Fuel Gas · Controls/DCS',        1_205_200, 'Bob Yeager, Pres.',    'New',         'pending',  'RFQ Ready'],
+                ['CECO Environmental','Parsons KS',      'Emissions · Exhaust · Acoustic',1_626_800, 'Env. Solutions',       'New',         'warning',  'Permit Pending'],
+                ['ABB Power Grids',   'Zürich / Cary NC','Step-up Transformer',             760_000, 'NA Transformers',      'New',         'critical', 'Blocked — ICD'],
+                ['Siemens Energy',    'Houston TX',      'Generator (alt) · Transformer',2_093_850,  'Power Gen Sales',      'New',         'pending',  'RFQ Ready'],
+                ['Baker Hughes',      'Houston TX',      'VIB_MON · Exhaust',               608_900, 'L. Simonelli CEO',     'Warm',        'verified', '$340K Responded'],
+                ['Donaldson Company', 'Minneapolis MN',  'Inlet Air · Controls/DCS',      1_029_750, 'Tod Carpenter CEO',    'New',         'pending',  'RFQ Ready'],
+                ['Eaton Corporation', 'Dublin IE / USA', 'Electrical Distribution',         535_050, 'Power Dist.',          'New',         'pending',  'RFQ Ready'],
+                ['Flowserve',         'Irving TX',       'Piping & Valves',                 507_600, 'Power Gen',            'New',         'verified', 'Selected (Trillium repl.)'],
+                ['EthosEnergy Italia','Turin, Italy',    'W251B8 Gas Turbine OEM',               0,  'A. Malandra MD',       'Contracted',  'critical', 'ICD Outstanding'],
+              ].map(([name, hq, scope, exp, contact, rel, badgeV, status], i) => (
+                <tr key={i} style={badgeV === 'critical' ? { background: 'rgba(204,32,32,0.04)' } : {}}>
+                  <td className="font-semibold">{name}</td>
+                  <td className="text-[--t2]">{hq}</td>
+                  <td className="text-[10px]">{scope}</td>
+                  <td className="font-mono text-right text-[10px]">{(exp as number) > 0 ? `$${((exp as number)/1000).toFixed(0)}K` : 'Program GT'}</td>
+                  <td>{contact}</td>
+                  <td style={{ color: rel === 'Contracted' || rel === 'Warm' ? 'var(--t0)' : 'var(--t2)' }}>{rel}</td>
+                  <td>
+                    <Badge variant={badgeV as any}>{status}</Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Panel>
+
+        <div className="mt-10 pt-3 border-t border-[--line] flex justify-between font-mono text-[9px] text-[--t3]">
+          <span>Supplier Network · FlowSeer v2.1.0 · {contacts?.verified ?? 39}/{contacts?.total ?? 67} contacts verified</span>
+          <span>Full profiles: tools/supplier-intelligence/supplier_profiles.md</span>
         </div>
       </div>
-
-      {/* Contacts by BOP category */}
-      {catData.length > 0 && (
-        <div className="bg-[#0f1524] border border-white/[0.06] rounded-lg p-5">
-          <h2 className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-4">Contacts by BOP Category</h2>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={catData} margin={{ top: 4, right: 8, left: 0, bottom: 50 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-              <XAxis dataKey="name" tick={{ fontSize: 7, fontFamily: 'monospace', fill: '#64748b' }} angle={-35} textAnchor="end" interval={0} />
-              <YAxis tick={{ fontSize: 8, fontFamily: 'monospace', fill: '#64748b' }} />
-              <Tooltip contentStyle={{ backgroundColor: '#1a2236', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, fontFamily: 'monospace', fontSize: 9 }} />
-              <Bar dataKey="contacts" name="Contacts" fill="#06b6d4" fillOpacity={0.7} radius={[2,2,0,0]} />
-              <Bar dataKey="email" name="With Email" fill="#10b981" fillOpacity={0.8} radius={[2,2,0,0]} />
-            </BarChart>
-          </ResponsiveContainer>
-          <div className="flex gap-4 mt-2">
-            <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded bg-cyan-400/70" /><span className="text-[8px] font-mono text-slate-500">Total contacts</span></div>
-            <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded bg-emerald-400/80" /><span className="text-[8px] font-mono text-slate-500">With email</span></div>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
 }
