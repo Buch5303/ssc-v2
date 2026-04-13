@@ -389,7 +389,7 @@ body { font-family:var(--font-ui); background:var(--bg-0); color:var(--t-0); fon
       </div>
     </div>
   </div>
-  <div class="pf"><span>FlowSeer v2.1.0 · Trans World Power LLC · Project: TG20/W251 W251B8 · Santa Teresa NM</span><span>ESTIMATED confidence on 18 of 19 categories · VERIFIED: VIB_MON only</span><span id="ft1">—</span></div>
+  <div class="pf"><span>FlowSeer v2.1.0 · Trans World Power LLC · Project: TG20/W251 W251B8 · Santa Teresa NM</span><span>ESTIMATED confidence on 18 of 19 categories · VERIFIED: VIB_MON only</span><span id="ft1">—</span> <span class="data-freshness" style="color:var(--t-3)"></span></div>
 </div>
 
 <!-- ═══ PAGE: COST INTEL ═══ -->
@@ -457,7 +457,7 @@ body { font-family:var(--font-ui); background:var(--bg-0); color:var(--t-0); fon
       <div class="pb0"><table class="dt"><thead><tr><th>#</th><th>Category</th><th>Code</th><th>Tier</th><th>Low</th><th>Mid Est.</th><th>High</th><th>RFQ Quoted</th><th>Variance</th><th>Preferred Supplier</th><th>Confidence</th></tr></thead><tbody id="cost-tbody"></tbody></table></div>
     </div>
   </div>
-  <div class="pf"><span>Cost Intelligence · FlowSeer v2.1.0 · BOM build-up · ENR CCI normalized 2024 USD</span><span>18 of 19 categories carry ESTIMATED confidence — upgrades to VERIFIED as responses arrive</span><span id="ft2">—</span></div>
+  <div class="pf"><span>Cost Intelligence · FlowSeer v2.1.0 · BOM build-up · ENR CCI normalized 2024 USD</span><span>18 of 19 categories carry ESTIMATED confidence — upgrades to VERIFIED as responses arrive</span><span id="ft2">—</span> <span class="data-freshness" style="color:var(--t-3)"></span></div>
 </div>
 
 <!-- ═══ PAGE: SUPPLIERS ═══ -->
@@ -538,7 +538,7 @@ body { font-family:var(--font-ui); background:var(--bg-0); color:var(--t-0); fon
       </div>
     </div>
   </div>
-  <div class="pf"><span>Supplier Network · FlowSeer v2.1.0 · 10 of 73 suppliers at strategic detail</span><span>Full profiles: tools/supplier-intelligence/supplier_profiles.md</span><span id="ft3">—</span></div>
+  <div class="pf"><span>Supplier Network · FlowSeer v2.1.0 · 10 of 73 suppliers at strategic detail</span><span>Full profiles: tools/supplier-intelligence/supplier_profiles.md</span><span id="ft3">—</span> <span class="data-freshness" style="color:var(--t-3)"></span></div>
 </div>
 
 <!-- ═══ PAGE: RFQ PIPELINE ═══ -->
@@ -628,10 +628,129 @@ body { font-family:var(--font-ui); background:var(--bg-0); color:var(--t-0); fon
       </div>
     </div>
   </div>
-  <div class="pf"><span>RFQ Pipeline · FlowSeer v2.1.0 · 13 packages · $9,898,000 total</span><span>Ingest responses: tools/rfq-generator/ingest_response.py · Send plan: tools/scheduling/rfq_send_plan.md</span><span id="ft4">—</span></div>
+  <div class="pf"><span>RFQ Pipeline · FlowSeer v2.1.0 · 13 packages · $9,898,000 total</span><span>Ingest responses: tools/rfq-generator/ingest_response.py · Send plan: tools/scheduling/rfq_send_plan.md</span><span id="ft4">—</span> <span class="data-freshness" style="color:var(--t-3)"></span></div>
 </div>
 
 <script>
+
+/* ════════════════════════════════════════════════════════════
+   LIVE DATA LOADER — fetches from GitHub on every page load
+   When tools/flowseer.py refresh is run and pushed,
+   the dashboard automatically reflects the update.
+════════════════════════════════════════════════════════════ */
+
+const GH = 'https://raw.githubusercontent.com/Buch5303/ssc-v2/frontend-only/tools/dashboard/data';
+const CACHE_MS = 60000; // 60s browser cache
+let _data = {};
+
+async function loadJson(filename) {
+  const url = `${GH}/${filename}?_=${Math.floor(Date.now()/CACHE_MS)}`;
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch(e) {
+    console.warn('FlowSeer: failed to load', filename, e);
+    return null;
+  }
+}
+
+async function loadAllData() {
+  const [summary, rfqs, pricing, contacts, kpi, suppliers] = await Promise.all([
+    loadJson('program_summary.json'),
+    loadJson('rfq_pipeline.json'),
+    loadJson('pricing_data.json'),
+    loadJson('contact_stats.json'),
+    loadJson('kpi_band.json'),
+    loadJson('supplier_network.json'),
+  ]);
+
+  if (summary) _data.summary = summary;
+  if (rfqs)    _data.rfqs    = rfqs;
+  if (pricing) _data.pricing = pricing;
+  if (contacts)_data.contacts= contacts;
+  if (kpi)     _data.kpi     = kpi;
+  if (suppliers)_data.suppliers = suppliers;
+
+  updateFromLiveData();
+}
+
+function updateFromLiveData() {
+  const s = _data.summary;
+  const r = _data.rfqs;
+  const p = _data.pricing;
+  const c = _data.contacts;
+
+  if (!s) return; // Fallback to embedded data if fetch fails
+
+  // ── Overview KPIs ──
+  const bopEl = document.getElementById('live-bop');
+  if (bopEl) bopEl.textContent = '$' + (s.total_bop_mid/1000000).toFixed(2) + 'M';
+
+  const rqEl = document.getElementById('live-rfq-val');
+  if (rqEl && r) rqEl.textContent = '$' + (r.pipeline_value/1000000).toFixed(2) + 'M';
+
+  const rqSub = document.getElementById('live-rfq-sub');
+  if (rqSub && r) rqSub.textContent = r.total + ' packages · ' + r.responded + ' responded · ' + r.drafted + ' drafted';
+
+  const ctEl = document.getElementById('live-contacts');
+  if (ctEl && c) ctEl.textContent = c.total;
+  const ctSub = document.getElementById('live-contacts-sub');
+  if (ctSub && c) ctSub.textContent = c.total + ' contacts · ' + c.verified + ' verified';
+
+  const bhEl = document.getElementById('live-bh');
+  if (bhEl && s) bhEl.textContent = '$' + (s.baker_hughes_quote/1000).toFixed(0) + 'K';
+
+  // ── RFQ page KPIs ──
+  const rpvEl = document.getElementById('live-rfq-total');
+  if (rpvEl && r) rpvEl.textContent = '$' + (r.pipeline_value/1000000).toFixed(2) + 'M';
+
+  const rpdEl = document.getElementById('live-rfq-responded');
+  if (rpdEl && r) rpdEl.textContent = r.responded + ' / ' + r.total;
+
+  // ── ICD Status ──
+  const icdEl = document.getElementById('live-icd-val');
+  if (icdEl && s) {
+    // Will update if ICD flag ever appears in summary
+    const icdReceived = s.icd_received || false;
+    if (icdReceived) {
+      icdEl.textContent = 'Received';
+      icdEl.closest('.kpi').classList.remove('act-red');
+    }
+  }
+
+  // ── Cost page ──
+  const bopMidEl = document.getElementById('live-cost-bop');
+  if (bopMidEl && p) bopMidEl.textContent = '$' + (p.total_mid/1000000).toFixed(2) + 'M';
+
+  const verifEl = document.getElementById('live-verified-count');
+  if (verifEl && p) verifEl.textContent = p.verified + ' / ' + (p.verified + p.estimated);
+
+  // ── Last updated stamp ──
+  if (s && s.last_updated) {
+    const d = new Date(s.last_updated);
+    const stamp = 'Data: ' + d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) +
+                  ' ' + d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) + ' UTC';
+    document.querySelectorAll('.data-freshness').forEach(el => el.textContent = stamp);
+  }
+
+  // ── Condition banner ──
+  const icdBanner = document.getElementById('icd-banner-val');
+  if (icdBanner && r) {
+    const blockedRFQs = r.rfqs ? r.rfqs.filter(q => q.status === 'BLOCKED' || q.notes?.includes('Blocked')).length : 2;
+    if (blockedRFQs === 0 && _data.summary?.icd_received) {
+      icdBanner.textContent = 'EthosEnergy ICD received — Transformer + Exhaust + Electrical RFQs unblocked';
+    }
+  }
+
+  console.log('[FlowSeer] Live data loaded:', Object.keys(_data).join(', '));
+}
+
+// Load on startup
+loadAllData();
+// Refresh every 5 minutes while tab is open
+setInterval(loadAllData, 300000);
+
 const BOP=[
   {cat:'Generator and Electrical Switchgear',code:'GENERATOR',tier:'strategic',low:1781273,mid:2093850,high:2408628,sup:'GE Vernova',conf:'ESTIMATED'},
   {cat:'Emissions Control (SCR / CO Catalyst)',code:'EMISSIONS',tier:'strategic',low:757988,mid:891750,high:1025513,sup:'CECO Environmental',conf:'ESTIMATED'},
