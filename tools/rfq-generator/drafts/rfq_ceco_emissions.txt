@@ -1,34 +1,49 @@
-Subject: Project Jupiter — W251B8 Emissions Control (SCR + CO Catalyst) — Request for Budgetary Pricing
+Subject: TG20/W251 — Emissions Control System (SCR + CO Catalyst) — Request for Budgetary Pricing
 
 Dear CECO Environmental — Power Generation Solutions,
 
-Trans World Power LLC is procuring the Emissions Control package for Project Jupiter —
-a 50MW W251B8 power island in Santa Teresa, New Mexico.
+Trans World Power LLC is the program manager for a 50MW W251B8 natural gas power island
+being developed for Borderplex in Santa Teresa, New Mexico (Project TG20/W251).
+
+We are soliciting budgetary pricing for the Emissions Control package.
 
 SCOPE OF SUPPLY:
-- Selective Catalytic Reduction (SCR) system — NOx reduction
+- Selective Catalytic Reduction (SCR) system — NOx reduction to permit limits
 - CO Catalyst system — CO oxidation
-- Ammonia injection grid (AIG) and ammonia storage/vaporization
-- Ductwork, expansion joints, and structural support
-- Instrumentation, controls, and integration to plant DCS
+- Ammonia injection grid (AIG), ammonia storage and vaporization system
+- Interconnecting ductwork, expansion joints, and structural support
+- All instrumentation, controls integration, and DCS tie-in
+- Commissioning support and performance testing
 
-PROGRAM:
-- Fuel: Natural gas (primary), fuel oil (backup/startup)
-- Emissions limits: Per New Mexico Environment Department permit (to be confirmed)
-- Standards: EPA MACT, BACT requirements for NM
-- Site: Santa Teresa, NM — high desert environment
+PROGRAM DETAILS:
+- Site: Santa Teresa, NM (elevation ~4,100 ft, high desert environment)
+- Fuel: Natural gas primary, fuel oil backup
+- GT: Westinghouse W251B8, 50MW class, EthosEnergy Italia
+- Standards: EPA MACT, New Mexico Environment Department permit limits
+- Permit basis: NM AQMD permit (limits TBD — to be confirmed with response)
 
-NOTE: NM environmental permit scope is being confirmed. We will provide permit limits
-with confirmed scope before PO award. Budgetary proposal may be based on typical
-NOx/CO limits for natural gas combined-cycle applications.
+NOTE ON PERMIT LIMITS:
+The NM Air Quality permit scope is being finalized. Budgetary pricing may be
+based on typical 40–60MW natural gas GT installations. We will provide confirmed
+permit limits prior to final scope and PO award.
+
+Typical basis for budgetary purposes:
+- NOx: ≤ 9 ppm @ 15% O2 (or best achievable technology)
+- CO:  ≤ 10 ppm @ 15% O2
+- PM:  per NM AQMD requirements
 
 REQUEST:
-1. Budgetary price (±20%)
-2. Lead time from PO to delivery
-3. Key technical assumptions
-4. References for similar 40-60MW GT installations
+1. Budgetary price (±20%) based on typical 50MW GT SCR+CO system
+2. Lead time from PO to delivery at Santa Teresa NM
+3. Clarification if price is significantly affected by permit limits
+4. Reference list — similar 40–60MW GT installations (last 5 years)
+5. Dimensional and weight data for civil/structural design
 
-Response by June 15, 2026.
+Note: We are issuing this RFQ to CECO Environmental and Peerless Manufacturing
+simultaneously. Award based on price, technical merit, lead time, and references.
 
-Greg Buchanan | CEO, Trans World Power LLC
+Response required by: June 15, 2026.
+
+Greg Buchanan
+CEO, Trans World Power LLC
 buch5303@gmail.com
