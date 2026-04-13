@@ -2,12 +2,15 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
+import { TopBar } from './TopBar';
 
 const nav = [
   { href: '/dashboard/overview',         label: 'Overview',         dot: true  },
   { href: '/dashboard/cost-intel',        label: 'Cost Intelligence',dot: false },
   { href: '/dashboard/supplier-network',  label: 'Supplier Network', dot: false },
   { href: '/dashboard/rfq-pipeline',      label: 'RFQ Pipeline',     dot: true  },
+  { href: '/dashboard/analytics',          label: 'Analytics',        dot: false },
+  { href: '/dashboard/log-response',        label: 'Log Response',     dot: false },
 ];
 
 // FlowSeer F-mark SVG
@@ -87,8 +90,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
-        {children}
+      <main className="flex-1 overflow-y-auto flex flex-col">
+        <TopBar />
+        <div className="flex-1 overflow-y-auto">
+          {children}
+        </div>
       </main>
 
     </div>
