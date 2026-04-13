@@ -1,0 +1,45 @@
+Subject: TG20/W251 — 50MW Generator + Electrical Switchgear — Request for Budgetary Pricing
+
+Dear Siemens Energy — Power Generation,
+
+Trans World Power LLC (TWP) is the program manager for a 50MW W251B8 natural gas power island
+being developed for Borderplex in Santa Teresa, New Mexico. EthosEnergy (Italia) is the gas turbine 
+supplier under a trilateral MOU signed March 13, 2026. This is designated internal project TG20/W251.
+
+We are soliciting competitive budgetary pricing for the Generator and Main Electrical Switchgear package.
+
+SCOPE OF SUPPLY (budgetary):
+- SGen air-cooled synchronous generator, rated for W251B8 output (~50MW)
+- Terminal voltage per EthosEnergy interface spec (preliminary: 13.8kV)
+- SIPROTEC 5 protection relay and static excitation system
+- Generator circuit breaker (GCB), 13.8kV class
+- Isolated phase bus duct, generator terminals to GSU
+- Neutral grounding unit
+- All instrumentation, documentation, and commissioning support
+
+PROGRAM DETAILS:
+- Client: Borderplex — Santa Teresa, NM (elevation ~4,100 ft, high desert)
+- GT: Westinghouse W251B8, 50MW class, EthosEnergy Italia manufacture
+- Power factor: 0.85 lagging minimum
+- Standards: ANSI/IEEE, NEMA, applicable NEC
+- Target: Q2 2027 first power
+
+LEAD TIME IS BINDING:
+We require a firm delivery commitment. If awarded by August 15, 2026, we need 
+delivery no later than Q4 2026 to support Q2 2027 commissioning. Please confirm 
+your earliest realistic delivery date with your response.
+
+REQUEST:
+1. Budgetary price (±20%) for above scope
+2. Confirmed lead time from PO to site delivery at Santa Teresa NM
+3. Reference projects at 40–60MW rating (last 5 years)
+4. Key assumptions and exclusions
+
+This RFQ is issued simultaneously to GE Vernova. Award will be based on price, 
+lead time, technical merit, and references. Competitive bid — pricing matters.
+
+Response required by: June 15, 2026.
+
+Greg Buchanan
+CEO, Trans World Power LLC
+buch5303@gmail.com
