@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "echo Static site",
-    "build": "echo Static build - no compilation needed",
+    "build": "next build",
     "start": "next start -p 3001",
     "lint": "next lint"
   },
