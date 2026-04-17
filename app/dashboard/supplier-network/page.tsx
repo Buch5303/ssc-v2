@@ -8,6 +8,7 @@ import { Panel }           from '../../../components/ui/Panel';
 import { AlertCard }       from '../../../components/ui/AlertCard';
 import { TierLabel }       from '../../../components/ui/TierLabel';
 import { ConditionBanner } from '../../../components/ui/ConditionBanner';
+import { RiskMatrixPanel } from '../../../components/ui/RiskMatrixPanel';
 import { TableFilter }     from '../../../components/ui/TableFilter';
 import { SupplierDrawer }  from '../../../components/suppliers/SupplierDrawer';
 
@@ -155,6 +156,11 @@ export default function SupplierNetworkPage() {
             </tbody>
           </table>
         </Panel>
+
+        {/* AI Risk Assessment */}
+        <div className="mt-6 mb-6">
+          <RiskMatrixPanel />
+        </div>
 
         <div className="mt-10 pt-3 border-t border-[--line] flex justify-between font-mono text-[9px] text-[--t3]">
           <span>Supplier Network · FlowSeer v2.1.0 · {contacts?.verified ?? 39}/{contacts?.total ?? 67} contacts verified</span>

@@ -12,6 +12,7 @@ import { StatRow }        from '../../../components/ui/StatRow';
 import { TierLabel }      from '../../../components/ui/TierLabel';
 import { ConditionBanner } from '../../../components/ui/ConditionBanner';
 import { AIBriefingPanel } from '../../../components/ui/AIBriefingPanel';
+import { ICDTracker } from '../../../components/ui/ICDTracker';
 
 export default function OverviewPage() {
   const Q = { refetchInterval: 60_000 };
@@ -162,6 +163,12 @@ export default function OverviewPage() {
               <StatRow label="Latest commit"       value="52b956f"       />
             </Panel>
           </div>
+        </div>
+
+        {/* ICD Blocker Tracker */}
+        <TierLabel>Program Blocker</TierLabel>
+        <div className="mb-8">
+          <ICDTracker />
         </div>
 
         {/* AI Executive Intelligence */}

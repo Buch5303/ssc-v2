@@ -192,7 +192,7 @@ export function AIBriefingPanel() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                       <span>{catIcon[ins.category] || '📊'}</span>
                       <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--t3)', textTransform: 'uppercase' as const }}>{ins.category}</span>
-                      <Badge variant={ins.confidence === 'HIGH' ? 'verified' : ins.confidence === 'MEDIUM' ? 'estimated' : 'default'}>
+                      <Badge variant={ins.confidence === 'HIGH' ? 'verified' : ins.confidence === 'MEDIUM' ? 'estimated' : 'silent'}>
                         {ins.confidence}
                       </Badge>
                     </div>
