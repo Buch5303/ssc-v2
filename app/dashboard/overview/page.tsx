@@ -11,6 +11,7 @@ import { Panel }          from '../../../components/ui/Panel';
 import { StatRow }        from '../../../components/ui/StatRow';
 import { TierLabel }      from '../../../components/ui/TierLabel';
 import { ConditionBanner } from '../../../components/ui/ConditionBanner';
+import { AIBriefingPanel } from '../../../components/ui/AIBriefingPanel';
 
 export default function OverviewPage() {
   const Q = { refetchInterval: 60_000 };
@@ -161,6 +162,12 @@ export default function OverviewPage() {
               <StatRow label="Latest commit"       value="52b956f"       />
             </Panel>
           </div>
+        </div>
+
+        {/* AI Executive Intelligence */}
+        <TierLabel>AI Intelligence Layer</TierLabel>
+        <div className="mb-8">
+          <AIBriefingPanel />
         </div>
 
         {/* Tier 3: Timeline */}
