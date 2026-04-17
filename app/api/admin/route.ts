@@ -140,7 +140,51 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const action = url.searchParams.get("action");
+  const token = url.searchParams.get("token");
+
+  // Bootstrap via GET — only works if VERCEL_TOKEN is NOT already set (one-time setup)
+  if (action === "bootstrap" && token) {
+    if (process.env.VERCEL_TOKEN) {
+      return NextResponse.json({ error: "Already bootstrapped", status: "ACTIVE" });
+    }
+
+    try {
+      // Verify the token
+      const verify = await fetch(`${VERCEL_API}/v2/user`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const userData = await verify.json();
+      if (!userData.user) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+
+      // Set VERCEL_TOKEN
+      const setToken = await fetch(
+        `${VERCEL_API}/v10/projects/${PROJECT_ID}/env?teamId=${TEAM_ID}&upsert=true`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            key: "VERCEL_TOKEN", value: token, type: "encrypted",
+            target: ["production", "preview", "development"],
+            comment: "FlowSeer self-management — set via bootstrap",
+          }),
+        }
+      );
+      const setResult = await setToken.json();
+
+      return NextResponse.json({
+        action: "bootstrap", success: true,
+        user: { username: userData.user.username, email: userData.user.email },
+        note: "VERCEL_TOKEN set. Triggering redeploy...",
+        setResult,
+      });
+    } catch (e: any) {
+      return NextResponse.json({ error: e.message }, { status: 500 });
+    }
+  }
+
   const hasToken = !!process.env.VERCEL_TOKEN;
   return NextResponse.json({
     endpoint: "/api/admin",
