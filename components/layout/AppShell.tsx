@@ -12,6 +12,7 @@ const nav = [
   { href: '/dashboard/analytics',          label: 'Analytics',        dot: false },
   { href: '/dashboard/log-response',        label: 'Log Response',     dot: false },
   { href: '/dashboard/send-rfq',             label: 'Send RFQs',        dot: false },
+  { href: '/dashboard/automation',           label: 'Automation',       dot: true  },
 ];
 
 // FlowSeer F-mark SVG
