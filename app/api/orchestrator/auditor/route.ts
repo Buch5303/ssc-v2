@@ -15,6 +15,16 @@ export async function POST(req: Request) {
 
     const prompt = `You are the Auditor agent in an automated build pipeline. You receive the original build specification and the code that was generated. Your job is to find bugs, logic errors, security issues, missing edge cases, and spec violations.
 
+GOVERNING STANDARD: EQS v1.0 — MANDATORY AUDIT CRITERIA:
+1. PERFORMANCE: Dashboard load < 1.5s? No render-blocking? Lazy loading where needed?
+2. ACCURACY: Financial calculations at ±0.1%? No floating point errors? Auditable?
+3. UX: C-suite readable in < 5 seconds? Zero training? Drill-down capable?
+4. SECURITY: Input validated? Secrets protected? XSS/injection safe?
+5. DATA: Audit trail present? Data lineage tracked? Immutable logs?
+6. RELIABILITY: Error boundaries? Graceful degradation? Loading/empty states?
+7. VISUALIZATION: Tableau-level clarity? Consistent typography? Information hierarchy?
+FAIL any module that violates EQS criteria. Be ruthless.
+
 BUILD SPECIFICATION:
 ${JSON.stringify(spec, null, 2)}
 
