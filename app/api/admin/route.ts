@@ -145,6 +145,53 @@ export async function GET(req: Request) {
   const action = url.searchParams.get("action");
   const token = url.searchParams.get("token");
 
+  // Set env var via GET — only works when VERCEL_TOKEN is already bootstrapped
+  if (action === "set_env") {
+    const key = url.searchParams.get("key");
+    const value = url.searchParams.get("value");
+    const vercelToken = process.env.VERCEL_TOKEN;
+    if (!vercelToken) return NextResponse.json({ error: "VERCEL_TOKEN not set" }, { status: 500 });
+    if (!key || !value) return NextResponse.json({ error: "key and value params required" }, { status: 400 });
+
+    try {
+      const res = await fetch(
+        `${VERCEL_API}/v10/projects/${PROJECT_ID}/env?teamId=${TEAM_ID}&upsert=true`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${vercelToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ key, value, type: "encrypted", target: ["production", "preview", "development"] }),
+        }
+      );
+      const result = await res.json();
+      return NextResponse.json({ action: "set_env", key, success: !result.error, result: result.error ? result : { id: result.created?.id } });
+    } catch (e: any) {
+      return NextResponse.json({ error: e.message }, { status: 500 });
+    }
+  }
+
+  // Redeploy via GET
+  if (action === "redeploy") {
+    const vercelToken = process.env.VERCEL_TOKEN;
+    if (!vercelToken) return NextResponse.json({ error: "VERCEL_TOKEN not set" }, { status: 500 });
+    try {
+      const deps = await fetch(`${VERCEL_API}/v6/deployments?projectId=${PROJECT_ID}&teamId=${TEAM_ID}&limit=1&target=production`, {
+        headers: { Authorization: `Bearer ${vercelToken}` },
+      });
+      const depsData = await deps.json();
+      const latest = depsData.deployments?.[0];
+      if (!latest) return NextResponse.json({ error: "No deployment found" });
+      const res = await fetch(`${VERCEL_API}/v13/deployments?teamId=${TEAM_ID}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${vercelToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "ssc-v2", deploymentId: latest.uid, target: "production" }),
+      });
+      const result = await res.json();
+      return NextResponse.json({ action: "redeploy", id: result.id, url: result.url });
+    } catch (e: any) {
+      return NextResponse.json({ error: e.message }, { status: 500 });
+    }
+  }
+
   // Bootstrap via GET — only works if VERCEL_TOKEN is NOT already set (one-time setup)
   if (action === "bootstrap" && token) {
     if (process.env.VERCEL_TOKEN) {
