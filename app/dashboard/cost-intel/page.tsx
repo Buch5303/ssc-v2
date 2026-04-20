@@ -133,7 +133,7 @@ export default function CostIntelPage() {
             onFilter={(key, val) => { if (key === 'Tier') setTierFilter(val); else setConfFilter(val); }}
             filters={[
               { label: 'Tier', options: [{ label: 'Strategic', value: 'STRATEGIC' }, { label: 'Targeted', value: 'TARGETED' }, { label: 'Standard', value: 'STANDARD' }] },
-              { label: 'Conf', options: [{ label: 'Verified', value: 'RFQ_VERIFIED' }, { label: 'Estimated', value: 'ESTIMATED' }] },
+              { label: 'Conf', options: [{ label: 'Verified', value: 'RFQ_VERIFIED' }, { label: 'Estimated', value: 'COMPONENT_BUILDUPS' }, { label: 'Market', value: 'MARKET_ANCHOR' }] },
             ]}
             count={filtered.length}
             total={cats.length}

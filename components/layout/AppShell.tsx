@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
 import { TopBar } from './TopBar';
+import { ErrorBoundary } from '../ui/ErrorBoundary';
 
 const nav = [
   { href: '/dashboard/overview',         label: 'Overview',         dot: true  },
@@ -16,6 +17,7 @@ const nav = [
   { href: '/dashboard/threat-radar',         label: 'Threat Radar',     dot: true  },
   { href: '/dashboard/incentive-radar',      label: 'Incentive Radar',  dot: true  },
   { href: '/dashboard/automation',           label: 'Automation',       dot: true  },
+  { href: '/dashboard/settings',             label: 'Settings',         dot: false },
 ];
 
 // FlowSeer F-mark SVG
@@ -98,7 +100,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1 overflow-y-auto flex flex-col">
         <TopBar />
         <div className="flex-1 overflow-y-auto">
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </div>
       </main>
 
