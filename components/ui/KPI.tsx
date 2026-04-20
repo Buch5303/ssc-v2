@@ -1,4 +1,5 @@
 import { clsx } from 'clsx';
+import { memo } from 'react';
 
 type Accent = 'none' | 'critical' | 'warning';
 
@@ -23,7 +24,7 @@ const accentValue: Record<Accent, string> = {
   warning:  'text-[--amb]',
 };
 
-export function KPI({ label, value, sub, badge, accent = 'none', className }: KPIProps) {
+export const KPI = memo(function KPI({ label, value, sub, badge, accent = 'none', className }: KPIProps) {
   return (
     <div className={clsx(
       'relative bg-[--bg1] border border-[--line] p-[18px_16px_14px] overflow-hidden',
@@ -41,4 +42,4 @@ export function KPI({ label, value, sub, badge, accent = 'none', className }: KP
       {sub && <div className="text-[10px] text-[--t2] leading-[1.4]">{sub}</div>}
     </div>
   );
-}
+});

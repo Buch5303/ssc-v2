@@ -1,4 +1,5 @@
 import { clsx } from 'clsx';
+import { memo } from 'react';
 
 type ValueStyle = 'default' | 'ok' | 'critical' | 'warning';
 
@@ -15,11 +16,11 @@ interface StatRowProps {
   valueStyle?: ValueStyle;
 }
 
-export function StatRow({ label, value, valueStyle = 'default' }: StatRowProps) {
+export const StatRow = memo(function StatRow({ label, value, valueStyle = 'default' }: StatRowProps) {
   return (
     <div className="flex justify-between items-baseline py-[9px] border-b border-[--line] text-[11px] last:border-b-0">
       <span className="text-[--t2]">{label}</span>
       <span className={clsx('font-mono', valueStyles[valueStyle])}>{value}</span>
     </div>
   );
-}
+});

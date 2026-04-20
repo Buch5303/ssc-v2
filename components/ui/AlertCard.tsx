@@ -1,4 +1,5 @@
 import { clsx } from 'clsx';
+import { memo } from 'react';
 
 type Severity = 'critical' | 'warning' | 'resolved';
 
@@ -28,7 +29,7 @@ interface AlertCardProps {
   aside?:   React.ReactNode;
 }
 
-export function AlertCard({ severity, title, detail, action, aside }: AlertCardProps) {
+export const AlertCard = memo(function AlertCard({ severity, title, detail, action, aside }: AlertCardProps) {
   const s = styles[severity];
   return (
     <div className={clsx('flex items-start gap-3 px-[18px] py-[14px]', s.wrap, s.borderL)}>
@@ -42,4 +43,4 @@ export function AlertCard({ severity, title, detail, action, aside }: AlertCardP
       {aside && <div className="flex flex-col items-end gap-1 flex-shrink-0">{aside}</div>}
     </div>
   );
-}
+});
