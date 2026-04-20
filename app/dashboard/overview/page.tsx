@@ -13,6 +13,7 @@ import { TierLabel }      from '../../../components/ui/TierLabel';
 import { ConditionBanner } from '../../../components/ui/ConditionBanner';
 import { AIBriefingPanel } from '../../../components/ui/AIBriefingPanel';
 import { ICDTracker } from '../../../components/ui/ICDTracker';
+import { ProgramTimeline } from '../../../components/ui/ProgramTimeline';
 
 export default function OverviewPage() {
   const Q = { refetchInterval: 60_000 };
@@ -179,6 +180,7 @@ export default function OverviewPage() {
 
         {/* Tier 3: Timeline */}
         <TierLabel>Tier 3 — Program Timeline</TierLabel>
+        <div className="grid grid-cols-[2fr_1fr] gap-5 mb-8">
         <Panel title="Phase Timeline — TG20/W251" meta={<Badge>Phase 1 Active</Badge>}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
@@ -207,6 +209,10 @@ export default function OverviewPage() {
             </tbody>
           </table>
         </Panel>
+        <Panel title="Key Milestones" meta={<Badge variant="silent">Visual</Badge>}>
+          <ProgramTimeline />
+        </Panel>
+        </div>
 
         {/* Footer */}
         <div className="mt-10 pt-3 border-t border-[--line] flex justify-between font-mono text-[9px] text-[--t3]">
