@@ -17,6 +17,7 @@ const nav = [
   { href: '/dashboard/threat-radar',         label: 'Threat Radar',     dot: true  },
   { href: '/dashboard/incentive-radar',      label: 'Incentive Radar',  dot: true  },
   { href: '/dashboard/automation',           label: 'Automation',       dot: true  },
+  { href: '/dashboard/audit-trail',          label: 'Audit Trail',      dot: false },
   { href: '/dashboard/settings',             label: 'Settings',         dot: false },
 ];
 
