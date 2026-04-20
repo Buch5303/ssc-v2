@@ -149,6 +149,34 @@ export async function GET(req: Request) {
   }, baseUrl);
   log.push(`[AUDITOR] Verdict: ${auditResult?.audit?.verdict || "UNKNOWN"}`);
 
+  // Step 5: Auto-commit if auditor passes
+  let commitResult = null;
+  const verdict = auditResult?.audit?.verdict || "UNKNOWN";
+  if ((verdict === "PASS" || verdict === "CONDITIONAL") && buildResult.build?.files?.length > 0) {
+    log.push(`[COMMIT] Auditor passed — committing ${buildResult.build.files.length} files to GitHub...`);
+    try {
+      const commitRes = await fetch(`${baseUrl}/api/github-commit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          files: buildResult.build.files.map((f: any) => ({ path: f.path, content: f.content })),
+          message: `${next.id}: ${next.title}`,
+          directive_id: next.id,
+        }),
+      });
+      commitResult = await commitRes.json();
+      log.push(`[COMMIT] ${commitResult.status} — ${commitResult.committed || 0} files committed, ${commitResult.failed || 0} failed`);
+      if (commitResult.committed > 0) {
+        log.push(`[DEPLOY] Vercel will auto-deploy within 60 seconds`);
+      }
+    } catch (e: any) {
+      log.push(`[COMMIT] Error: ${e.message}`);
+      commitResult = { status: "error", error: e.message };
+    }
+  } else if (verdict === "FAIL") {
+    log.push(`[COMMIT] Skipped — auditor rejected. Code not committed.`);
+  }
+
   const elapsed = (Date.now() - startTime) / 1000;
 
   return NextResponse.json({
@@ -162,6 +190,7 @@ export async function GET(req: Request) {
     },
     build_output: buildResult.build,
     audit: auditResult?.audit,
+    commit: commitResult,
     log,
     elapsed_seconds: elapsed,
     timestamp: new Date().toISOString(),
