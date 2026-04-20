@@ -1,6 +1,7 @@
 'use client';
 import { useHealthCheck } from '../../lib/hooks/useLiveData';
 import { useEffect, useState } from 'react';
+import { NotificationBell } from '../ui/NotificationBell';
 
 export function TopBar() {
   const { data: health } = useHealthCheck();
@@ -41,7 +42,7 @@ export function TopBar() {
       </div>
 
       {/* Right: health + timestamp */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <div style={{
             width: 5, height: 5, borderRadius: '50%',
@@ -52,6 +53,7 @@ export function TopBar() {
             {isHealthy ? '25/25 HEALTHY' : 'DEGRADED'}
           </span>
         </div>
+        <NotificationBell />
         <span style={{ fontFamily: 'IBM Plex Mono, monospace', fontSize: 9, color: 'var(--t3)' }}>
           {ts}
         </span>

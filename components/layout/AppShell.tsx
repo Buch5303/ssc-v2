@@ -13,6 +13,8 @@ const nav = [
   { href: '/dashboard/log-response',        label: 'Log Response',     dot: false },
   { href: '/dashboard/send-rfq',             label: 'Send RFQs',        dot: false },
   { href: '/dashboard/risk',                 label: 'Risk Assessment',  dot: true  },
+  { href: '/dashboard/threat-radar',         label: 'Threat Radar',     dot: true  },
+  { href: '/dashboard/incentive-radar',      label: 'Incentive Radar',  dot: true  },
   { href: '/dashboard/automation',           label: 'Automation',       dot: true  },
 ];
 
