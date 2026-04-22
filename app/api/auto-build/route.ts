@@ -63,9 +63,10 @@ async function runAgent(agentPath: string, body: any, baseUrl: string): Promise<
 
 export async function GET(req: Request) {
   const startTime = Date.now();
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "https://ssc-v2.vercel.app";
+  // Always use the production alias — VERCEL_URL returns the ephemeral
+  // per-deployment hostname which is gated by Vercel Deployment Protection
+  // and returns HTML to server-to-server calls. Production alias is public.
+  const baseUrl = "https://ssc-v2.vercel.app";
 
   // Verify this is a legitimate cron call or has the secret
   const authHeader = req.headers.get("authorization");
