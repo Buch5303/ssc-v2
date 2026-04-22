@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/auto-build?force=true",
-      "schedule": "0 * * * *"
+      "schedule": "0 7 * * *"
     }
   ]
 }
