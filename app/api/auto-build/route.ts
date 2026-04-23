@@ -61,6 +61,95 @@ async function runAgent(agentPath: string, body: any, baseUrl: string): Promise<
   }
 }
 
+/**
+ * Layer 1 — Drift Watchdog.
+ * Compares the SHA at GitHub HEAD (main) to the SHA of the current Vercel
+ * production deployment. If they diverge, triggers a force redeploy via the
+ * Vercel REST API so production catches up to HEAD.
+ *
+ * Returns {drifted: false} when in sync, {drifted: true, action: "..."} when
+ * a corrective deploy has been requested.
+ */
+async function checkAndHealDrift(): Promise<{
+  drifted: boolean;
+  githubSha?: string;
+  vercelSha?: string;
+  action?: string;
+  error?: string;
+}> {
+  try {
+    const owner = "Buch5303";
+    const repo = "ssc-v2";
+    const ghPat = process.env.GITHUB_PAT;
+    const vercelToken = process.env.VERCEL_TOKEN;
+    const vercelProjectId = "prj_xkkc4f5HDNmz8r2NSowGeXG97tCe";
+    const vercelTeamId = "team_YC8EeZxkrZ7q7TcsHM1KXekk";
+
+    if (!ghPat || !vercelToken) {
+      return { drifted: false, error: "GITHUB_PAT or VERCEL_TOKEN missing — drift check skipped" };
+    }
+
+    // Get GitHub main HEAD SHA
+    const ghRes = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/commits/main`,
+      {
+        headers: {
+          Authorization: `Bearer ${ghPat}`,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      }
+    );
+    const ghData = await ghRes.json();
+    const githubSha = ghData?.sha;
+    if (!githubSha) return { drifted: false, error: "Could not read GitHub HEAD" };
+
+    // Get latest READY production deployment SHA from Vercel
+    const vRes = await fetch(
+      `https://api.vercel.com/v6/deployments?projectId=${vercelProjectId}&teamId=${vercelTeamId}&target=production&state=READY&limit=1`,
+      { headers: { Authorization: `Bearer ${vercelToken}` } }
+    );
+    const vData = await vRes.json();
+    const vercelSha = vData?.deployments?.[0]?.meta?.githubCommitSha;
+    if (!vercelSha) return { drifted: false, error: "Could not read Vercel production SHA" };
+
+    if (githubSha === vercelSha) {
+      return { drifted: false, githubSha, vercelSha };
+    }
+
+    // DRIFT DETECTED — trigger Vercel redeploy of HEAD
+    const redeployRes = await fetch(
+      `https://api.vercel.com/v13/deployments?teamId=${vercelTeamId}&forceNew=1`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${vercelToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "ssc-v2",
+          target: "production",
+          gitSource: {
+            type: "github",
+            repoId: "1193314065",
+            ref: "main",
+            sha: githubSha,
+          },
+        }),
+      }
+    );
+    const redeployData = await redeployRes.json();
+    const action =
+      redeployData?.id
+        ? `Force-deploy queued (${redeployData.id})`
+        : `Redeploy request failed: ${JSON.stringify(redeployData).slice(0, 200)}`;
+
+    return { drifted: true, githubSha, vercelSha, action };
+  } catch (e: any) {
+    return { drifted: false, error: e?.message || "drift check exception" };
+  }
+}
+
 export async function GET(req: Request) {
   const startTime = Date.now();
   // Always use the production alias — VERCEL_URL returns the ephemeral
@@ -77,6 +166,27 @@ export async function GET(req: Request) {
   // Allow: cron calls (have auth header matching secret), force param, or no secret configured
   if (cronSecret && authHeader !== `Bearer ${cronSecret}` && !force) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // ============================================================
+  // LAYER 1 — DRIFT WATCHDOG
+  // Before processing any directive: verify GitHub HEAD SHA matches
+  // Vercel production deploy SHA. If drifted, force-deploy HEAD and
+  // exit. Directive processing resumes on the next cron fire with a
+  // clean production state.
+  // Per Autonomous Build Directive v1.0 Section III, Layer 1.
+  // ============================================================
+  const driftCheck = await checkAndHealDrift();
+  if (driftCheck.drifted) {
+    return NextResponse.json({
+      status: "drift_healed",
+      stage: "watchdog",
+      github_head: driftCheck.githubSha,
+      vercel_production: driftCheck.vercelSha,
+      action: driftCheck.action,
+      timestamp: new Date().toISOString(),
+      note: "Force-deploy triggered. Directive processing will resume on next cron fire.",
+    });
   }
 
   // Find next pending directive
