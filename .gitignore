@@ -6,3 +6,4 @@ data/*.db
 coverage/
 .next/
 node_modules/
+tsconfig.tsbuildinfo
