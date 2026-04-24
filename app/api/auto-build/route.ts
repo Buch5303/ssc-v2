@@ -125,14 +125,15 @@ async function loadQueue(ghPat: string): Promise<LoadResult> {
     errors.push(`contents-api: ${e?.message || "exception"}`);
   }
 
-  // Path 2 — raw.githubusercontent.com fallback (public repo, no auth required)
+  // Path 2 — raw.githubusercontent.com anonymous fallback.
+  // Deliberately does NOT send Authorization header: raw.githubusercontent.com
+  // serves public repos anonymously, and sending an INVALID Authorization causes
+  // the CDN to reject with 404. This path is our safety net when the PAT is
+  // stale/missing — it must not depend on the same credential that's broken.
   try {
     const res = await fetch(
       `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${QUEUE_PATH}`,
-      {
-        headers: pat ? { Authorization: `Bearer ${pat}` } : {},
-        cache: "no-store",
-      }
+      { cache: "no-store" }
     );
     if (res.ok) {
       const text = await res.text();
