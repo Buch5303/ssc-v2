@@ -464,6 +464,34 @@ export async function GET(req: Request) {
   const pendingCount = queue.directives.filter(d => d.status === "pending").length;
   log.push(`[QUEUE] Loaded via ${queueResult.source}. Pending: ${pendingCount}, total: ${queue.directives.length}`);
 
+  // ----------------------------------------------------------------------
+  // Stuck-recovery sweep
+  // ----------------------------------------------------------------------
+  // A directive in_progress for >30 min almost certainly hit a lambda timeout
+  // mid-pipeline (previous 504 before we shipped maxDuration, or Builder
+  // exceeding 60s on Hobby plan). Without this sweep, such a directive
+  // permanently occupies the active slot and starves the queue. Resetting to
+  // pending with an incremented attempts counter lets the next cycle retry
+  // (and the counter lets us auto-fail after N retries if we wire that up).
+  const STUCK_MS = 30 * 60 * 1000;
+  const now = Date.now();
+  let recoveredStuck = 0;
+  for (const d of queue.directives) {
+    if (d.status === "in_progress" && d.started_at) {
+      const startedMs = Date.parse(d.started_at);
+      if (!Number.isNaN(startedMs) && now - startedMs > STUCK_MS) {
+        d.status = "pending";
+        d.started_at = null;
+        (d as any).attempts = ((d as any).attempts || 0) + 1;
+        recoveredStuck++;
+        log.push(`[RECOVERY] ${d.id} stuck in_progress for >30min — reset to pending (attempt #${(d as any).attempts})`);
+      }
+    }
+  }
+  if (recoveredStuck > 0) {
+    await saveQueue(queue, `[RECOVERY] Reset ${recoveredStuck} stuck directive(s) to pending`, baseUrl).catch(() => {});
+  }
+
   // Layer 2 — Self-extend queue if low
   if (pendingCount < 2) {
     log.push(`[GENERATOR] Queue low (pending=${pendingCount}). Invoking Directive Generator...`);

@@ -64,6 +64,17 @@ ${retry_context ? `PREVIOUS AUDIT FINDINGS (fix these):\n${retry_context}` : ""}
 
 Build the code now. Output ONLY JSON with the files array.`;
 
+    // Model + token budget is tuned for Vercel Hobby plan's 60s function ceiling.
+    // Sonnet 4 at 8K tokens can take 60–120s for complex generations, which blows
+    // past the budget. Two levers:
+    //   1. BUILDER_MODEL env var to swap to Haiku 4.5 (~3–5x faster, lower quality)
+    //   2. BUILDER_MAX_TOKENS to cap output size
+    // Defaults chosen to fit comfortably in 60s for typical FlowSeer directives
+    // (1–3 files, 500–2500 tokens). Upgrade to Vercel Pro (300s ceiling) to lift
+    // both: BUILDER_MODEL=claude-sonnet-4-20250514 BUILDER_MAX_TOKENS=8192.
+    const model = process.env.BUILDER_MODEL || "claude-sonnet-4-20250514";
+    const maxTokens = parseInt(process.env.BUILDER_MAX_TOKENS || "4096", 10);
+
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -72,8 +83,8 @@ Build the code now. Output ONLY JSON with the files array.`;
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 8192,
+        model,
+        max_tokens: maxTokens,
         system: SYSTEM,
         messages: [{ role: "user", content: userMsg }],
       }),
@@ -90,7 +101,13 @@ Build the code now. Output ONLY JSON with the files array.`;
       build = { raw: text, parse_error: true };
     }
 
-    return NextResponse.json({ agent: "builder", model: "claude-sonnet", status: "complete", build });
+    return NextResponse.json({
+      agent: "builder",
+      model,
+      max_tokens: maxTokens,
+      status: "complete",
+      build,
+    });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
