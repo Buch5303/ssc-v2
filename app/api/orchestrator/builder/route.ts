@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 
+// Vercel function timeout: 60s (Hobby plan max).
+// 5-agent pipeline + LLM calls exceed default 10s — required for end-to-end runs.
+export const maxDuration = 60;
+
 const SYSTEM = `You are the Builder agent in the FlowSeer automation pipeline. You receive a build specification, research data, and codebase analysis, then produce production-ready code.
 
 GOVERNING STANDARD: EQS v1.0 (Enterprise Quality Specification)

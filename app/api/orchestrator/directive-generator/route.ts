@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 
+// Vercel function timeout: 60s (Hobby plan max).
+// 5-agent pipeline + LLM calls exceed default 10s — required for end-to-end runs.
+export const maxDuration = 60;
+
 /**
  * Layer 2 — Directive Generator
  *
