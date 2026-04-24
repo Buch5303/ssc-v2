@@ -115,10 +115,55 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-  const hasToken = !!process.env.GITHUB_PAT;
+  const raw = process.env.GITHUB_PAT || "";
+  const token = raw.trim();
+  const hasToken = !!token;
+
+  if (!hasToken) {
+    return NextResponse.json({
+      endpoint: "/api/github-commit",
+      status: "NEEDS GITHUB_PAT env var",
+      auth: "missing",
+      repo: `${REPO_OWNER}/${REPO_NAME}`,
+      branch: BRANCH,
+    });
+  }
+
+  // Actually hit GitHub with the token — don't just check it's present.
+  // This catches trailing-whitespace PATs, expired tokens, and scope issues.
+  let auth: "ok" | "failed" = "failed";
+  let authError: string | undefined;
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+        cache: "no-store",
+      }
+    );
+    if (res.ok) {
+      auth = "ok";
+    } else {
+      const body = await res.text().catch(() => "");
+      authError = `HTTP ${res.status}: ${body.slice(0, 200)}`;
+    }
+  } catch (e: any) {
+    authError = e?.message || "fetch exception";
+  }
+
+  // Flag if raw value had whitespace (common paste error in Vercel env UI)
+  const hadWhitespace = raw !== token;
+
   return NextResponse.json({
     endpoint: "/api/github-commit",
-    status: hasToken ? "ACTIVE — Can commit files to repo" : "NEEDS GITHUB_PAT env var",
+    status: auth === "ok" ? "ACTIVE — Can commit files to repo" : "AUTH FAILED — see auth_error",
+    auth,
+    auth_error: authError,
+    pat_had_whitespace: hadWhitespace,
     repo: `${REPO_OWNER}/${REPO_NAME}`,
     branch: BRANCH,
   });
