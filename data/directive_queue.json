@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "updated_at": "2026-04-24T14:16:02.528733Z",
-  "description": "FlowSeer Directive Queue \u2014 source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending \u2192 in_progress \u2192 complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
+  "updated_at": "2026-04-25T05:33:57.671Z",
+  "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
       "id": "AUTO-001",
       "title": "Neon DB write endpoints",
       "directive": "Create POST endpoints for /api/data/pricing, /api/data/contacts, and /api/data/rfq that accept JSON payloads and write to the existing Neon PostgreSQL database. Each endpoint must validate input, compute audit metadata (timestamp, source, before/after snapshot), and return the updated record. Use the DATABASE_URL environment variable for connection.",
       "priority": 1,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "seed",
       "created_at": "2026-04-21T00:00:00Z",
-      "started_at": null,
+      "started_at": "2026-04-25T05:33:57.671Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null,
@@ -20,7 +20,7 @@
     {
       "id": "AUTO-002",
       "title": "Loading skeletons for all dashboard pages",
-      "directive": "Add animated loading skeleton components to all 14 dashboard pages. Each page should show a skeleton that matches its layout structure (KPI strip skeleton, table skeleton, panel skeleton) while data is fetching. Use CSS animations only \u2014 no external libraries. Skeletons must feel fast and controlled per EQS v1.0 standards.",
+      "directive": "Add animated loading skeleton components to all 14 dashboard pages. Each page should show a skeleton that matches its layout structure (KPI strip skeleton, table skeleton, panel skeleton) while data is fetching. Use CSS animations only — no external libraries. Skeletons must feel fast and controlled per EQS v1.0 standards.",
       "priority": 2,
       "status": "pending",
       "origin": "seed",
