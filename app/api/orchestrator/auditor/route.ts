@@ -41,6 +41,7 @@ ${JSON.stringify(research || [], null, 2)}
 Audit this code. Output ONLY valid JSON:
 {
   "verdict": "PASS|FAIL|CONDITIONAL",
+  "score": 87,
   "issues": [
     {
       "severity": "CRITICAL|HIGH|MEDIUM|LOW",
@@ -56,6 +57,16 @@ Audit this code. Output ONLY valid JSON:
 }
 
 Rules:
+- score MUST be a number from 0 to 100 (integer). NOT a string. NOT a percentage. Just a number.
+- score reflects overall EQS v1.0 quality. Anchor points:
+    100 = flawless, no issues
+    90  = minor improvements possible, ship it
+    80  = a few medium issues, conditional ship
+    65  = significant issues, must fix before merge
+    40  = broken/incomplete, reject
+    0   = no useful output
+- score 65 is the hard floor — anything below blocks the commit
+- score and verdict must be consistent: PASS >= 80, CONDITIONAL >= 65, FAIL < 65
 - PASS = code is production-ready, ship it
 - CONDITIONAL = minor issues, can ship with fixes noted
 - FAIL = critical issues, must fix before shipping
@@ -102,6 +113,35 @@ Rules:
       audit = JSON.parse(text.replace(/```json|```/g, "").trim());
     } catch {
       audit = { raw: text, parse_error: true, verdict: "CONDITIONAL" };
+    }
+
+    // Defensive normalization — guarantee `score` is a number for Layer 4 gate.
+    // Models occasionally return score as a string ("87") or omit it and only
+    // populate spec_compliance ("87%"). Both are coerced to numeric here so
+    // the gate's strict typeof check doesn't reject otherwise-valid audits.
+    if (audit && !audit.parse_error) {
+      const rawScore = audit.score;
+      if (typeof rawScore === "string") {
+        const parsed = parseFloat(rawScore.replace(/[^\d.]/g, ""));
+        audit.score = Number.isFinite(parsed) ? Math.round(parsed) : null;
+      } else if (typeof rawScore !== "number" || !Number.isFinite(rawScore)) {
+        // No score field — try spec_compliance fallback ("95%" → 95)
+        const sc = audit.spec_compliance;
+        if (typeof sc === "string") {
+          const parsed = parseFloat(sc.replace(/[^\d.]/g, ""));
+          audit.score = Number.isFinite(parsed) ? Math.round(parsed) : null;
+          audit.score_source = "spec_compliance_fallback";
+        } else if (typeof sc === "number" && Number.isFinite(sc)) {
+          audit.score = Math.round(sc);
+          audit.score_source = "spec_compliance_fallback";
+        } else {
+          audit.score = null;
+        }
+      }
+      // Clamp to 0-100 range
+      if (typeof audit.score === "number") {
+        audit.score = Math.max(0, Math.min(100, audit.score));
+      }
     }
 
     return NextResponse.json({ 
