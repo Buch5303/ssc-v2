@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-// Vercel function timeout: 60s (Hobby plan max).
-// 5-agent pipeline + LLM calls exceed default 10s — required for end-to-end runs.
-export const maxDuration = 60;
+// Vercel function timeout: 300s (Pro plan max). Was 60 on Hobby.
+// Pro upgrade lifted ceiling so full Sonnet 4 + 8K-token Builder fits cleanly.
+export const maxDuration = 300;
 
 /**
  * FlowSeer Auto-Builder — Autonomous Build Directive v1.0
