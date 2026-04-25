@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-04-25T05:41:14.479Z",
+  "updated_at": "2026-04-25T07:00:43.183Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -22,10 +22,10 @@
       "title": "Loading skeletons for all dashboard pages",
       "directive": "Add animated loading skeleton components to all 14 dashboard pages. Each page should show a skeleton that matches its layout structure (KPI strip skeleton, table skeleton, panel skeleton) while data is fetching. Use CSS animations only — no external libraries. Skeletons must feel fast and controlled per EQS v1.0 standards.",
       "priority": 2,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "seed",
       "created_at": "2026-04-21T00:00:00Z",
-      "started_at": null,
+      "started_at": "2026-04-25T07:00:43.183Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
