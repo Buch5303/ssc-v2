@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-04-26T07:02:37.907Z",
+  "updated_at": "2026-04-27T07:00:03.349Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -48,10 +48,10 @@
       "title": "Dashboard performance optimization",
       "directive": "Add React.memo to all expensive components (KPI, Badge, Panel, StatRow, AlertCard). Add dynamic imports with next/dynamic for heavy dashboard pages. Add route prefetching on sidebar hover. Compress all inline styles to CSS modules where possible. Target: all pages loading under 1.5 seconds per EQS v1.0 (Section II.A).",
       "priority": 4,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "seed",
       "created_at": "2026-04-21T00:00:00Z",
-      "started_at": null,
+      "started_at": "2026-04-27T07:00:03.348Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
