@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FlowSeer Secret Rotator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    background: #0B1220;
+    color: #DCE8F6;
+    padding: 24px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 {
+    font-size: 18px;
+    color: #fff;
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+  h1 .red { color: #CC2020; }
+  .sub {
+    font-size: 11px;
+    color: #6B829F;
+    margin-bottom: 24px;
+    letter-spacing: 0.5px;
+  }
+  .panel {
+    background: #0F1A2D;
+    border: 1px solid #1E2D45;
+    border-radius: 6px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .panel-title {
+    font-size: 12px;
+    color: #fff;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .panel-desc {
+    font-size: 12px;
+    color: #8FA8C7;
+    margin-bottom: 14px;
+  }
+  button {
+    background: #1E6FCC;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  button:hover { background: #2580E0; }
+  button:disabled { background: #2A3B58; cursor: not-allowed; }
+  button.danger { background: #CC2020; }
+  button.danger:hover { background: #E03030; }
+  button.ghost { background: transparent; border: 1px solid #2A3B58; color: #8FA8C7; }
+  button.ghost:hover { background: #1E2D45; color: #fff; }
+  .log {
+    background: #06101F;
+    border: 1px solid #1E2D45;
+    border-radius: 4px;
+    padding: 12px;
+    font-size: 11px;
+    color: #8FA8C7;
+    margin-top: 14px;
+    min-height: 60px;
+    max-height: 260px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .log .ok { color: #4ADE80; }
+  .log .err { color: #FF6B6B; }
+  .log .info { color: #60A5FA; }
+  .log .ts { color: #4A6385; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 9px;
+    background: #1E2D45;
+    color: #8FA8C7;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .badge.live { background: #0E3A1F; color: #4ADE80; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Flow<span class="red">Seer</span> Secret Rotator</h1>
+  <div class="sub">SSC-V2 · Internal Admin · <span class="badge live" id="status">Checking…</span></div>
+
+  <div class="panel">
+    <div class="panel-title">1 · Health Check</div>
+    <div class="panel-desc">Confirms the /api/admin endpoint is bootstrapped and ready.</div>
+    <button onclick="checkHealth()">Run Check</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">2 · Rotate JWT Secrets</div>
+    <div class="panel-desc">
+      Generates new 64-byte random values for JWT_SECRET and JWT_REFRESH_SECRET in your browser, then sets them in Vercel via /api/admin.
+      The secrets never leave your browser except as the encrypted POST body to your own endpoint.
+      <strong style="color:#FFB84D">Will invalidate any existing login sessions.</strong>
+    </div>
+    <button onclick="rotateJWT()" id="rotateBtn">Rotate JWT Secrets</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">3 · Trigger Production Redeploy</div>
+    <div class="panel-desc">Required for new env vars to take effect. Uses the latest production deployment's source.</div>
+    <button onclick="redeploy()" class="danger" id="redeployBtn">Redeploy Production</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Activity Log</div>
+    <div class="log" id="log">Ready.</div>
+    <div style="margin-top:10px"><button class="ghost" onclick="clearLog()">Clear Log</button></div>
+  </div>
+</div>
+
+<script>
+const API = "https://ssc-v2.vercel.app/api/admin";
+
+function ts() {
+  return new Date().toLocaleTimeString();
+}
+
+function log(msg, cls) {
+  const el = document.getElementById("log");
+  if (el.textContent === "Ready.") el.innerHTML = "";
+  const line = document.createElement("div");
+  line.innerHTML = `<span class="ts">[${ts()}]</span> <span class="${cls||''}">${msg}</span>`;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+function clearLog() {
+  document.getElementById("log").textContent = "Ready.";
+}
+
+// Generate cryptographically strong random hex string in browser
+function genSecret(bytes) {
+  const arr = new Uint8Array(bytes);
+  crypto.getRandomValues(arr);
+  return Array.from(arr).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function callAdmin(body) {
+  // text/plain avoids CORS preflight; server still parses body as JSON
+  const res = await fetch(API, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
+
+async function checkHealth() {
+  log("Checking /api/admin status…", "info");
+  try {
+    const res = await fetch(API);
+    const data = await res.json();
+    if (data.status && data.status.includes("ACTIVE")) {
+      log("✓ Endpoint ACTIVE — full self-management enabled", "ok");
+      document.getElementById("status").textContent = "ACTIVE";
+      document.getElementById("status").className = "badge live";
+    } else {
+      log("⚠ Endpoint not active: " + JSON.stringify(data), "err");
+    }
+  } catch (e) {
+    log("✗ Failed: " + e.message, "err");
+  }
+}
+
+async function rotateJWT() {
+  const btn = document.getElementById("rotateBtn");
+  btn.disabled = true;
+  btn.textContent = "Rotating…";
+
+  log("Generating 64 bytes of cryptographic randomness for JWT_SECRET…", "info");
+  const newJwt = genSecret(64);
+  log("✓ JWT_SECRET generated (128 hex chars, never displayed)", "ok");
+
+  log("Generating 64 bytes for JWT_REFRESH_SECRET…", "info");
+  const newRefresh = genSecret(64);
+  log("✓ JWT_REFRESH_SECRET generated (128 hex chars, never displayed)", "ok");
+
+  log("POSTing to /api/admin with action=set_env_batch…", "info");
+  try {
+    const result = await callAdmin({
+      action: "set_env_batch",
+      keys: [
+        { key: "JWT_SECRET", value: newJwt },
+        { key: "JWT_REFRESH_SECRET", value: newRefresh }
+      ]
+    });
+
+    if (result.error) {
+      log("✗ Server error: " + result.error, "err");
+    } else if (result.results) {
+      result.results.forEach(r => {
+        if (r.result.error) {
+          log(`✗ ${r.key}: ${r.result.error}`, "err");
+        } else {
+          log(`✓ ${r.key} updated in Vercel`, "ok");
+        }
+      });
+      log("→ NEXT STEP: click 'Redeploy Production' so the new values take effect.", "info");
+    } else {
+      log("Unexpected response: " + JSON.stringify(result), "err");
+    }
+  } catch (e) {
+    log("✗ Network error: " + e.message, "err");
+  }
+
+  btn.disabled = false;
+  btn.textContent = "Rotate JWT Secrets";
+}
+
+async function redeploy() {
+  const btn = document.getElementById("redeployBtn");
+  btn.disabled = true;
+  btn.textContent = "Triggering…";
+
+  log("Triggering production redeploy…", "info");
+  try {
+    const result = await callAdmin({ action: "redeploy" });
+    if (result.error) {
+      log("✗ Redeploy failed: " + result.error, "err");
+    } else if (result.result) {
+      log("✓ Redeploy queued: " + (result.result.url || result.result.id), "ok");
+      log("Build typically takes 30-60 seconds. Check vercel.com/deployments.", "info");
+    } else {
+      log("Response: " + JSON.stringify(result), "info");
+    }
+  } catch (e) {
+    log("✗ Network error: " + e.message, "err");
+  }
+
+  btn.disabled = false;
+  btn.textContent = "Redeploy Production";
+}
+
+// Auto-check health on load
+checkHealth();
+</script>
+</body>
+</html>
