@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-04-27T07:02:04.087Z",
+  "updated_at": "2026-04-28T07:00:16.261Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -64,6 +64,48 @@
       "status": "pending",
       "origin": "seed",
       "created_at": "2026-04-21T00:00:00Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
+    },
+    {
+      "id": "AUTO-006",
+      "title": "Neon DB connection and basic table creation",
+      "directive": "Establish Neon PostgreSQL database connection in the FlowSeer platform. Create database client configuration in /lib/db.ts using @neondatabase/serverless driver. Create initial tables: users, companies, rfqs, quotes, audit_logs with proper indexes and constraints. Include connection pooling and error handling. Must support the financial accuracy ±0.1% requirement from EQS §2.2 and auditable data requirement from EQS §4.1.",
+      "priority": 1,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "Week 1 roadmap priority requires Neon DB migration. Previous AUTO-001 failed on write endpoints - need to establish basic connection and schema first before attempting writes.",
+      "created_at": "2026-04-28T07:00:16.242Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
+    },
+    {
+      "id": "AUTO-007",
+      "title": "RFQ data model and API endpoints",
+      "directive": "Create RFQ (Request for Quote) data model and CRUD API endpoints. Implement /api/rfqs with GET, POST, PUT operations. Include proper TypeScript interfaces for RFQ structure with fields: id, company_id, title, description, budget, deadline, status, created_at, updated_at. Add Zod validation schemas and error handling. Must advance EQS §1.1 dashboard load performance by providing efficient data access patterns.",
+      "priority": 1,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "Week 2 roadmap includes RFQ response lifecycle. Need core RFQ data structure and APIs established to support the quote management workflow that differentiates FlowSeer platform.",
+      "created_at": "2026-04-28T07:00:16.242Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
+    },
+    {
+      "id": "AUTO-008",
+      "title": "Basic authentication setup with NextAuth",
+      "directive": "Implement basic authentication system using NextAuth.js. Configure email/password provider in /lib/auth.ts with session management. Create sign-in and sign-up pages at /auth/signin and /auth/signup with proper form validation. Include session persistence and protected route middleware. Must support the Zero Trust orientation requirement from EQS §4.3 by ensuring all routes are authenticated by default.",
+      "priority": 2,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "RBAC is Week 2 roadmap priority but requires basic auth foundation first. Multiple failed directives suggest need to establish core authentication before attempting advanced features.",
+      "created_at": "2026-04-28T07:00:16.242Z",
       "started_at": null,
       "completed_at": null,
       "commit_sha": null,
