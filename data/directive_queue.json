@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-04-28T07:02:19.754Z",
+  "updated_at": "2026-04-29T07:00:18.586Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -88,11 +88,11 @@
       "title": "RFQ data model and API endpoints",
       "directive": "Create RFQ (Request for Quote) data model and CRUD API endpoints. Implement /api/rfqs with GET, POST, PUT operations. Include proper TypeScript interfaces for RFQ structure with fields: id, company_id, title, description, budget, deadline, status, created_at, updated_at. Add Zod validation schemas and error handling. Must advance EQS §1.1 dashboard load performance by providing efficient data access patterns.",
       "priority": 1,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "Week 2 roadmap includes RFQ response lifecycle. Need core RFQ data structure and APIs established to support the quote management workflow that differentiates FlowSeer platform.",
       "created_at": "2026-04-28T07:00:16.242Z",
-      "started_at": null,
+      "started_at": "2026-04-29T07:00:18.585Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
