@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-04-29T07:02:18.663Z",
+  "updated_at": "2026-04-30T07:00:26.143Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -102,11 +102,11 @@
       "title": "Basic authentication setup with NextAuth",
       "directive": "Implement basic authentication system using NextAuth.js. Configure email/password provider in /lib/auth.ts with session management. Create sign-in and sign-up pages at /auth/signin and /auth/signup with proper form validation. Include session persistence and protected route middleware. Must support the Zero Trust orientation requirement from EQS §4.3 by ensuring all routes are authenticated by default.",
       "priority": 2,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "RBAC is Week 2 roadmap priority but requires basic auth foundation first. Multiple failed directives suggest need to establish core authentication before attempting advanced features.",
       "created_at": "2026-04-28T07:00:16.242Z",
-      "started_at": null,
+      "started_at": "2026-04-30T07:00:26.143Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
