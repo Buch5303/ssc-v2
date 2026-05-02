@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-02T07:00:18.416Z",
+  "updated_at": "2026-05-02T07:02:10.480Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -130,14 +130,14 @@
       "title": "Basic RFQ list and detail pages with static data",
       "directive": "Create /rfqs page with table listing RFQs and /rfqs/[id] detail page. Use static mock data initially. Implement basic table with columns: Title, Status, Created Date, Actions. Detail page shows full RFQ information including description, requirements, timeline. Include loading states and error boundaries. Style with existing Tailwind theme. This advances EQS §2.2 (C-suite clarity in < 5 seconds) by providing core RFQ visibility.",
       "priority": 1,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "auto",
       "rationale": "Need working UI foundation before connecting to database. Static implementation allows frontend development to proceed while database issues are resolved.",
       "created_at": "2026-05-01T07:00:34.237Z",
       "started_at": "2026-05-02T07:00:18.415Z",
-      "completed_at": null,
+      "completed_at": "2026-05-02T07:02:10.480Z",
       "commit_sha": null,
-      "auditor_score": null
+      "auditor_score": 40
     },
     {
       "id": "AUTO-011",
