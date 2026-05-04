@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-03T07:02:08.444Z",
+  "updated_at": "2026-05-04T07:00:55.764Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -152,6 +152,48 @@
       "completed_at": "2026-05-03T07:02:08.444Z",
       "commit_sha": null,
       "auditor_score": 55
+    },
+    {
+      "id": "AUTO-012",
+      "title": "Database schema foundation with Drizzle ORM",
+      "directive": "Establish core database schema using Drizzle ORM with PostgreSQL. Create tables for users, companies, rfqs, and audit_logs with proper relationships and constraints. Include migration setup and connection pooling configuration. Must support EQS §3.4 (100% auditable data) and §2.1 (financial accuracy ±0.1%). Focus on schema-first approach before building endpoints.",
+      "priority": 1,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "Multiple database-related directives have failed. Need stable schema foundation before API endpoints or data operations can succeed. This addresses Week 1 priority of live data pipeline.",
+      "created_at": "2026-05-04T07:00:55.753Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
+    },
+    {
+      "id": "AUTO-013",
+      "title": "Static RFQ dashboard with mock data structure",
+      "directive": "Create static RFQ dashboard pages (/dashboard, /rfqs, /rfqs/[id]) using consistent mock data structure that matches planned database schema. Implement basic layout, navigation, and data display components. Must support EQS §2.2 (C-suite clarity < 5s) and §4.1 (Tableau-level visualization). No API calls - focus on UI/UX foundation.",
+      "priority": 1,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "UI components need stable foundation before connecting to database. Static implementation allows parallel development while database layer stabilizes. Addresses dashboard performance requirements.",
+      "created_at": "2026-05-04T07:00:55.753Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
+    },
+    {
+      "id": "AUTO-014",
+      "title": "Basic error boundary and logging infrastructure",
+      "directive": "Implement React error boundaries for all major page components and establish centralized logging system using structured JSON logs. Include client-side error capture and basic performance metrics collection. Must support EQS §3.4 (auditable operations) and §1.3 (real-time latency monitoring). Essential for debugging failed directive patterns.",
+      "priority": 2,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "High failure rate (10/11 directives) suggests need for better error visibility and debugging capabilities. Error boundaries and logging will help identify failure root causes and improve directive success rate.",
+      "created_at": "2026-05-04T07:00:55.753Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
     }
   ]
 }
