@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-07T07:01:06.907Z",
+  "updated_at": "2026-05-07T07:03:13.204Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -200,14 +200,14 @@
       "title": "Neon DB schema setup with Drizzle ORM foundation",
       "directive": "Establish Neon PostgreSQL database connection and create core schema tables using Drizzle ORM. Create companies, rfqs, users, and audit_logs tables with proper types, constraints, and relationships. Add connection pooling configuration and basic seed data. Implement in lib/db/ with schema definitions, migrations, and connection utilities. Must achieve sub-2s query response times per EQS Performance Standard §2.1 and support 100% auditable data per EQS Compliance §4.1.",
       "priority": 1,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "auto",
       "rationale": "Database foundation is blocking all other development. 13 consecutive failures indicate need for simplified, focused database setup approach starting with core schema only.",
       "created_at": "2026-05-07T07:01:05.560Z",
       "started_at": "2026-05-07T07:01:06.907Z",
-      "completed_at": null,
+      "completed_at": "2026-05-07T07:03:13.204Z",
       "commit_sha": null,
-      "auditor_score": null
+      "auditor_score": 55
     },
     {
       "id": "AUTO-016",
