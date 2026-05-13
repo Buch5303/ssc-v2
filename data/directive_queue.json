@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-13T07:00:22.991Z",
+  "updated_at": "2026-05-13T07:00:24.160Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -284,11 +284,11 @@
       "title": "Database connection layer with environment validation",
       "directive": "Create robust database connection infrastructure in /lib/db/ with connection pooling, retry logic, and environment variable validation. Implement connection health checks and graceful degradation patterns. Must satisfy EQS §3.1 (financial accuracy) and §4.2 (100% auditable data) by ensuring reliable data persistence foundation.",
       "priority": 1,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "19 failed directives indicate fundamental database connectivity issues blocking all data-dependent features. Must establish stable foundation before any business logic can succeed.",
       "created_at": "2026-05-13T07:00:22.979Z",
-      "started_at": null,
+      "started_at": "2026-05-13T07:00:24.160Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
