@@ -1,0 +1,78 @@
+{
+  "timestamp": "2026-05-14T20:54:18.770Z",
+  "directive": {
+    "id": "AUTO-007",
+    "title": "RFQ data model and API endpoints",
+    "status": "failed"
+  },
+  "elapsed_seconds": 94.965,
+  "pipeline": {
+    "architect": {
+      "status": "complete",
+      "spec_keys": [
+        "directive_id",
+        "title",
+        "objective",
+        "research_queries",
+        "build_spec",
+        "acceptance_criteria",
+        "audit_focus",
+        "estimated_complexity"
+      ],
+      "acceptance_criteria_count": 7,
+      "research_queries_count": 3,
+      "spec_parse_error": false
+    },
+    "researcher": {
+      "results_count": 0
+    },
+    "analyst": {
+      "status": "complete",
+      "approval": "PROCEED"
+    },
+    "builder": {
+      "status": "complete",
+      "files_count": 0,
+      "parse_error": true,
+      "raw_preview": "```json\n{\n  \"files\": [\n    {\n      \"path\": \"src/types/rfq.ts\",\n      \"action\": \"create\",\n      \"content\": \"export interface RFQ {\\n  id: string;\\n  title: string;\\n  description: string;\\n  company_id: string;\\n  status: RFQStatus;\\n  priority: RFQPriority;\\n  budget_min?: number;\\n  budget_max?: number;\\n  currency: string;\\n  deadline?: Date;\\n  created_at: Date;\\n  updated_at: Date;\\n  created_"
+    },
+    "auditor": {
+      "status": "complete",
+      "verdict": "FAIL",
+      "score": 0,
+      "summary": "Builder produced parse error — output was not valid JSON",
+      "pre_check_failed": true,
+      "issue_count": 1,
+      "top_issues": [
+        {
+          "severity": "CRITICAL",
+          "description": "Builder produced parse error — output was not valid JSON"
+        }
+      ]
+    },
+    "gate": {
+      "allowed": false,
+      "effective_verdict": "FAIL",
+      "reason": "Auditor rejected (score 0)"
+    }
+  },
+  "log": [
+    "[2026-05-14T20:52:43.805Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ c1e277a",
+    "[WATCHDOG] In sync at c1e277a",
+    "[QUEUE] Loaded via contents-api. Pending: 17, total: 23",
+    "[2026-05-14T20:52:44.474Z] Processing: AUTO-007 — RFQ data model and API endpoints",
+    "[ARCHITECT] Decomposing directive...",
+    "[ARCHITECT] Complete",
+    "[ANALYST] Reviewing codebase...",
+    "[ANALYST] complete",
+    "[RESEARCHER] Running 3 queries...",
+    "[RESEARCHER] skipped — 0 result(s)",
+    "[BUILDER] Generating code...",
+    "[BUILDER] Complete — 0 files",
+    "[AUDITOR] Reviewing code...",
+    "[AUDITOR] Raw verdict: FAIL (0/100)",
+    "[GATE] Auditor rejected (score 0) → FAIL",
+    "[COMMIT] Skipped — gate blocked: Auditor rejected (score 0)"
+  ]
+}
