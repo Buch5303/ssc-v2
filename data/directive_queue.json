@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-14T07:00:29.495Z",
+  "updated_at": "2026-05-14T07:01:56.408Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -298,12 +298,12 @@
       "title": "Basic application shell with navigation structure",
       "directive": "Implement core application layout in /components/layout/ with header, sidebar navigation, and main content area. Include basic routing structure for dashboard, RFQs, and settings pages with loading states. Must advance EQS §2.2 (C-suite clarity < 5s) through intuitive navigation and §1.1 (dashboard load < 1.5s) through optimized shell architecture.",
       "priority": 1,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "auto",
       "rationale": "Multiple failed dashboard attempts suggest missing foundational UI structure. Need stable navigation shell before implementing complex dashboard features.",
       "created_at": "2026-05-13T07:00:22.979Z",
       "started_at": "2026-05-14T07:00:29.495Z",
-      "completed_at": null,
+      "completed_at": "2026-05-14T07:01:56.408Z",
       "commit_sha": null,
       "auditor_score": null
     },
