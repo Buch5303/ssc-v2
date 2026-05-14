@@ -17,19 +17,59 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No auditor API key available", agent: "auditor", status: "skipped", audit: { verdict: "PASS", issues: [], note: "No auditor key — auto-passing" } }, { status: 200 });
     }
 
-    const prompt = `You are the Auditor agent in an automated build pipeline. You receive the original build specification and the code that was generated. Your job is to find bugs, logic errors, security issues, missing edge cases, and spec violations.
+    // Extract spec scope so the auditor evaluates against the directive's own
+    // acceptance criteria, not the universal EQS surface. Foundational and
+    // scaffolding directives (db connection layers, env validation, error
+    // boundaries) physically cannot satisfy criteria designed for finished
+    // dashboards (load time, financial accuracy ±0.1%, Tableau visualization),
+    // so universal-EQS auditing produced a persistent ~55 score and gridlocked
+    // the queue (AUTO-016 through AUTO-021 all rejected). Scope-aware auditing
+    // only applies EQS criteria that meaningfully fit the directive.
+    const acceptanceCriteria = Array.isArray(spec?.acceptance_criteria)
+      ? spec.acceptance_criteria
+      : (Array.isArray(spec?.spec?.acceptance_criteria) ? spec.spec.acceptance_criteria : []);
+    const auditFocus = spec?.audit_focus || spec?.spec?.audit_focus || "";
+    const directiveTitle = spec?.title || spec?.spec?.title || "";
+    const directiveObjective = spec?.objective || spec?.spec?.objective || "";
+    const complexity = spec?.estimated_complexity || spec?.spec?.estimated_complexity || "UNKNOWN";
 
-GOVERNING STANDARD: EQS v1.0 — MANDATORY AUDIT CRITERIA:
-1. PERFORMANCE: Dashboard load < 1.5s? No render-blocking? Lazy loading where needed?
-2. ACCURACY: Financial calculations at ±0.1%? No floating point errors? Auditable?
-3. UX: C-suite readable in < 5 seconds? Zero training? Drill-down capable?
-4. SECURITY: Input validated? Secrets protected? XSS/injection safe?
-5. DATA: Audit trail present? Data lineage tracked? Immutable logs?
-6. RELIABILITY: Error boundaries? Graceful degradation? Loading/empty states?
-7. VISUALIZATION: Tableau-level clarity? Consistent typography? Information hierarchy?
-FAIL any module that violates EQS criteria. Be ruthless.
+    const prompt = `You are the Auditor agent in an automated build pipeline. You receive the original build specification and the code that was generated. Your job is to verify the build meets THIS DIRECTIVE'S acceptance criteria, then check for bugs, logic errors, security issues, and spec violations.
 
-BUILD SPECIFICATION:
+DIRECTIVE SCOPE (primary evaluation surface):
+- Title: ${directiveTitle || "(unspecified)"}
+- Objective: ${directiveObjective || "(unspecified)"}
+- Complexity: ${complexity}
+- Audit Focus: ${auditFocus || "(unspecified)"}
+- Acceptance Criteria (MUST evaluate each):
+${acceptanceCriteria.length > 0 ? acceptanceCriteria.map((c: string, i: number) => `  ${i + 1}. ${c}`).join("\n") : "  (none provided — evaluate against objective and spec only)"}
+
+GOVERNING STANDARD: EQS v1.0 — APPLY ONLY CRITERIA RELEVANT TO THIS DIRECTIVE'S SCOPE.
+The EQS surface below is a filter, not a universal mandate. Score the build against
+the SUBSET of EQS criteria that meaningfully apply given the directive's scope.
+A directive for a "database connection layer" must NOT be penalized for not having
+a dashboard load time. A directive for "error boundary infrastructure" must NOT be
+penalized for missing financial-accuracy logic. Apply each EQS lens only if it
+would have produced an artifact in this directive's scope:
+
+1. PERFORMANCE (apply when UI/render code is in scope): Dashboard load < 1.5s,
+   no render-blocking, lazy loading where needed.
+2. ACCURACY (apply when financial/numeric calculation code is in scope): ±0.1%
+   tolerance, no floating point drift, auditable math.
+3. UX (apply when user-facing UI is in scope): C-suite readable in < 5s, zero
+   training, drill-down capable.
+4. SECURITY (apply UNIVERSALLY to any code touching input, secrets, or output):
+   Input validated, secrets protected, XSS/injection safe, no exposed credentials.
+5. DATA (apply when data mutation, persistence, or lineage is in scope): Audit
+   trail on mutations, data lineage metadata, immutable logs where appropriate.
+6. RELIABILITY (apply UNIVERSALLY): Error handling, graceful degradation, retries
+   on transient failures, sensible defaults; loading/empty states only when UI in scope.
+7. VISUALIZATION (apply when chart/dashboard render code is in scope): Tableau-
+   level clarity, consistent typography, information hierarchy.
+
+For each EQS lens, decide first whether it APPLIES to this scope. If it does
+not apply, do not penalize on it and do not list it as an issue.
+
+BUILD SPECIFICATION (full context):
 ${JSON.stringify(spec, null, 2)}
 
 GENERATED CODE:
@@ -42,6 +82,10 @@ Audit this code. Output ONLY valid JSON:
 {
   "verdict": "PASS|FAIL|CONDITIONAL",
   "score": 87,
+  "acceptance_criteria_results": [
+    {"criterion": "the criterion text", "result": "PASS|FAIL|PARTIAL", "evidence": "where in the code"}
+  ],
+  "applicable_eqs_lenses": ["SECURITY", "RELIABILITY", "..."],
   "issues": [
     {
       "severity": "CRITICAL|HIGH|MEDIUM|LOW",
@@ -56,21 +100,25 @@ Audit this code. Output ONLY valid JSON:
   "summary": "brief audit summary"
 }
 
-Rules:
-- score MUST be a number from 0 to 100 (integer). NOT a string. NOT a percentage. Just a number.
-- score reflects overall EQS v1.0 quality. Anchor points:
-    100 = flawless, no issues
-    90  = minor improvements possible, ship it
-    80  = a few medium issues, conditional ship
-    65  = significant issues, must fix before merge
-    40  = broken/incomplete, reject
-    0   = no useful output
+Scoring rules:
+- score MUST be a number from 0 to 100 (integer). NOT a string. NOT a percentage.
+- Primary input to score: how many acceptance criteria are satisfied, weighted by severity of remaining issues.
+- Secondary input: applicable EQS lens violations (do NOT count non-applicable lenses).
+- Anchor points:
+    100 = all acceptance criteria PASS, no issues
+    90  = all acceptance criteria PASS, only LOW-severity issues
+    80  = all acceptance criteria PASS or PARTIAL, a few MEDIUM issues
+    65  = some acceptance criteria FAIL but build is recoverable
+    40  = most acceptance criteria FAIL, build is broken
+    0   = no useful output, parse error, or empty files array
+- A build that satisfies its acceptance criteria with only out-of-scope EQS gaps
+  (e.g. a db-connection-layer with no dashboard load metric) MUST score >= 80.
 - score 65 is the hard floor — anything below blocks the commit
 - score and verdict must be consistent: PASS >= 80, CONDITIONAL >= 65, FAIL < 65
-- PASS = code is production-ready, ship it
-- CONDITIONAL = minor issues, can ship with fixes noted
-- FAIL = critical issues, must fix before shipping
-- Be thorough but practical — don't nitpick style`;
+- PASS = code satisfies the directive's acceptance criteria, ship it
+- CONDITIONAL = minor issues on applicable criteria, can ship with fixes noted
+- FAIL = critical issues on applicable criteria, must fix before shipping
+- Be thorough but practical — don't nitpick style, don't penalize for out-of-scope concerns`;
 
     let text = "";
 

@@ -568,10 +568,28 @@ export async function GET(req: Request) {
   const analysisResult = await runAgent("analyst", { spec: archResult.spec || archResult }, baseUrl);
   log.push(`[ANALYST] ${analysisResult?.status || "complete"}`);
 
+  // Run Researcher in parallel-equivalent if the Architect produced research_queries.
+  // Previously this was hardcoded to [] which meant the Builder never got real
+  // research context. Researcher is a no-op (returns []) when PERPLEXITY_API_KEY
+  // is unset or queries are empty, so this is safe to always call.
+  const researchQueries = archResult?.spec?.research_queries || archResult?.research_queries || [];
+  let researchResults: any[] = [];
+  if (Array.isArray(researchQueries) && researchQueries.length > 0) {
+    log.push(`[RESEARCHER] Running ${researchQueries.length} quer${researchQueries.length === 1 ? "y" : "ies"}...`);
+    const resResult = await runAgent("researcher", {
+      queries: researchQueries,
+      context: "FlowSeer W251 BOP procurement platform. Santa Teresa NM. Next.js 14.",
+    }, baseUrl);
+    researchResults = Array.isArray(resResult?.results) ? resResult.results : [];
+    log.push(`[RESEARCHER] ${resResult?.status || "complete"} — ${researchResults.length} result(s)`);
+  } else {
+    log.push(`[RESEARCHER] Skipped — no research_queries in spec`);
+  }
+
   log.push(`[BUILDER] Generating code...`);
   const buildResult = await runAgent("builder", {
     spec: archResult.spec || archResult,
-    research: [],
+    research: researchResults,
     analysis: analysisResult?.analysis || {},
   }, baseUrl);
   if (!buildResult?.build) {
@@ -590,6 +608,7 @@ export async function GET(req: Request) {
   const auditResult = await runAgent("auditor", {
     spec: archResult.spec || archResult,
     build: buildResult.build,
+    research: researchResults,
   }, baseUrl);
   const rawVerdict = auditResult?.audit?.verdict || "UNKNOWN";
   const score = auditResult?.audit?.score ?? null;
