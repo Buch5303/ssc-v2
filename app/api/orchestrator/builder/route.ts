@@ -64,16 +64,14 @@ ${retry_context ? `PREVIOUS AUDIT FINDINGS (fix these):\n${retry_context}` : ""}
 
 Build the code now. Output ONLY JSON with the files array.`;
 
-    // Model + token budget is tuned for Vercel Hobby plan's 60s function ceiling.
-    // Sonnet 4 at 8K tokens can take 60–120s for complex generations, which blows
-    // past the budget. Two levers:
-    //   1. BUILDER_MODEL env var to swap to Haiku 4.5 (~3–5x faster, lower quality)
-    //   2. BUILDER_MAX_TOKENS to cap output size
-    // Defaults chosen to fit comfortably in 60s for typical FlowSeer directives
-    // (1–3 files, 500–2500 tokens). Upgrade to Vercel Pro (300s ceiling) to lift
-    // both: BUILDER_MODEL=claude-sonnet-4-20250514 BUILDER_MAX_TOKENS=8192.
+    // Builder is on Vercel Pro (300s function ceiling), so we run the full
+    // Sonnet 4 + 8192-token budget. Prior default of 4096 was a Hobby-plan
+    // workaround and caused mid-string truncation on complex directives
+    // (e.g. AUTO-007 produced valid-looking JSON that ran out of tokens
+    // mid-content string, leaving the JSON unparseable). Override per-env
+    // via BUILDER_MAX_TOKENS if a directive needs even more.
     const model = process.env.BUILDER_MODEL || "claude-sonnet-4-20250514";
-    const maxTokens = parseInt(process.env.BUILDER_MAX_TOKENS || "4096", 10);
+    const maxTokens = parseInt(process.env.BUILDER_MAX_TOKENS || "8192", 10);
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -94,11 +92,55 @@ Build the code now. Output ONLY JSON with the files array.`;
     if (data.error) return NextResponse.json({ error: data.error.message }, { status: 500 });
 
     const text = data.content?.[0]?.text || "";
+    const stopReason = data.stop_reason;
     let build;
+    let parseRecovery: string | undefined;
+    const cleaned = text.replace(/```json|```/g, "").trim();
     try {
-      build = JSON.parse(text.replace(/```json|```/g, "").trim());
+      build = JSON.parse(cleaned);
     } catch {
-      build = { raw: text, parse_error: true };
+      // Truncation recovery: when stop_reason is "max_tokens" the JSON usually
+      // breaks mid-string. Try to salvage the complete file objects from the
+      // `files` array up to the last fully-closed entry. Each file is shaped
+      // like {"path":"...","action":"...","content":"...","description":"..."}
+      // and complete entries are followed by either `},{` or `}]`. Scanning
+      // for those boundaries lets us recover N-1 files when the Nth was the
+      // one that got cut off.
+      const recovered: any[] = [];
+      const filesStart = cleaned.indexOf('"files"');
+      if (filesStart >= 0) {
+        const arrStart = cleaned.indexOf("[", filesStart);
+        if (arrStart >= 0) {
+          let depth = 0;
+          let entryStart = -1;
+          let inString = false;
+          let escape = false;
+          for (let i = arrStart + 1; i < cleaned.length; i++) {
+            const c = cleaned[i];
+            if (escape) { escape = false; continue; }
+            if (c === "\\") { escape = true; continue; }
+            if (c === '"') { inString = !inString; continue; }
+            if (inString) continue;
+            if (c === "{") { if (depth === 0) entryStart = i; depth++; }
+            else if (c === "}") {
+              depth--;
+              if (depth === 0 && entryStart >= 0) {
+                try {
+                  recovered.push(JSON.parse(cleaned.slice(entryStart, i + 1)));
+                } catch { /* skip malformed entry */ }
+                entryStart = -1;
+              }
+            }
+            else if (c === "]" && depth === 0) break;
+          }
+        }
+      }
+      if (recovered.length > 0) {
+        build = { files: recovered, recovered_from_truncation: true, original_stop_reason: stopReason };
+        parseRecovery = `recovered ${recovered.length} file(s) from truncated JSON (stop_reason=${stopReason || "unknown"})`;
+      } else {
+        build = { raw: text, parse_error: true, stop_reason: stopReason };
+      }
     }
 
     return NextResponse.json({
@@ -107,6 +149,7 @@ Build the code now. Output ONLY JSON with the files array.`;
       max_tokens: maxTokens,
       status: "complete",
       build,
+      ...(parseRecovery ? { parse_recovery: parseRecovery } : {}),
     });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
