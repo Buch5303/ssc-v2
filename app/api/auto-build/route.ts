@@ -619,10 +619,13 @@ export async function GET(req: Request) {
   log.push(`[GATE] ${gate.reason} → ${gate.effective_verdict}`);
   const effectiveVerdict = gate.effective_verdict;
 
-  // Commit if gate allowed
+  // Commit if gate allowed AND builder actually produced files
   let commitResult: any = null;
-  if (gate.allowed && buildResult.build?.files?.length > 0) {
-    log.push(`[COMMIT] Committing ${buildResult.build.files.length} file(s) + queue status...`);
+  const builderFileCount = buildResult.build?.files?.length || 0;
+  const builderParseError = buildResult.build?.parse_error === true;
+
+  if (gate.allowed && builderFileCount > 0) {
+    log.push(`[COMMIT] Committing ${builderFileCount} file(s) + queue status...`);
 
     next.status = "complete";
     next.completed_at = new Date().toISOString();
@@ -645,14 +648,82 @@ export async function GET(req: Request) {
       next.status = "failed";
     }
   } else {
-    log.push(`[COMMIT] Skipped — gate blocked (${gate.reason})`);
+    // Build the most accurate reason for why we skipped, so the commit message
+    // and the queue's failure record actually tell us what happened. The prior
+    // unconditional "gated out: <gate.reason>" wording was misleading when the
+    // gate had actually allowed the build and the real cause was empty Builder
+    // output.
+    let skipReason: string;
+    if (!gate.allowed) {
+      skipReason = `gate blocked: ${gate.reason}`;
+    } else if (builderParseError) {
+      skipReason = `Builder parse error — output was not valid JSON`;
+    } else if (builderFileCount === 0) {
+      skipReason = `Builder produced zero files (verdict ${rawVerdict}, score ${score})`;
+    } else {
+      skipReason = `unknown skip condition (gate.allowed=${gate.allowed}, files=${builderFileCount})`;
+    }
+    log.push(`[COMMIT] Skipped — ${skipReason}`);
     next.status = "failed";
     next.completed_at = new Date().toISOString();
     next.auditor_score = score;
-    await saveQueue(queue, `[QUEUE] ${next.id} gated out: ${gate.reason}`, baseUrl).catch(() => {});
+    (next as any).skip_reason = skipReason;
+    await saveQueue(queue, `[QUEUE] ${next.id} skipped: ${skipReason}`, baseUrl).catch(() => {});
   }
 
   const elapsed = (Date.now() - startTime) / 1000;
+
+  // Always write a last-run snapshot so we have post-hoc visibility into what
+  // each agent returned, even when the cycle fails before commit. The snapshot
+  // is git-tracked (under data/) but kept small — truncated content previews
+  // only, no full file bodies — so it's safe to commit on every cycle.
+  const runSnapshot = {
+    timestamp: new Date().toISOString(),
+    directive: { id: next.id, title: next.title, status: next.status },
+    elapsed_seconds: elapsed,
+    pipeline: {
+      architect: {
+        status: archResult?.status || "complete",
+        spec_keys: archResult?.spec ? Object.keys(archResult.spec) : [],
+        acceptance_criteria_count: Array.isArray(archResult?.spec?.acceptance_criteria) ? archResult.spec.acceptance_criteria.length : 0,
+        research_queries_count: Array.isArray(archResult?.spec?.research_queries) ? archResult.spec.research_queries.length : 0,
+        spec_parse_error: archResult?.spec?.parse_error === true,
+      },
+      researcher: {
+        results_count: researchResults.length,
+      },
+      analyst: {
+        status: analysisResult?.status || "complete",
+        approval: analysisResult?.analysis?.approval,
+      },
+      builder: {
+        status: buildResult?.status || "complete",
+        files_count: builderFileCount,
+        parse_error: builderParseError,
+        first_file_path: buildResult?.build?.files?.[0]?.path,
+        raw_preview: typeof buildResult?.build?.raw === "string" ? buildResult.build.raw.slice(0, 400) : undefined,
+      },
+      auditor: {
+        status: auditResult?.status || "complete",
+        verdict: rawVerdict,
+        score,
+        summary: auditResult?.audit?.summary,
+        pre_check_failed: auditResult?.audit?.pre_check_failed === true,
+        issue_count: Array.isArray(auditResult?.audit?.issues) ? auditResult.audit.issues.length : 0,
+        top_issues: Array.isArray(auditResult?.audit?.issues)
+          ? auditResult.audit.issues.slice(0, 3).map((i: any) => ({ severity: i.severity, description: i.description }))
+          : [],
+      },
+      gate: { allowed: gate.allowed, effective_verdict: effectiveVerdict, reason: gate.reason },
+    },
+    log,
+  };
+  await saveQueue(
+    queue, // no-op queue payload; we use the extraFiles slot to write snapshot
+    `[DEBUG] last_run snapshot for ${next.id}`,
+    baseUrl,
+    [{ path: "data/last_run.json", content: JSON.stringify(runSnapshot, null, 2) + "\n" }]
+  ).catch(() => {});
 
   return NextResponse.json({
     status: next.status === "complete" ? "complete" : "failed",
@@ -662,8 +733,8 @@ export async function GET(req: Request) {
       watchdog: { drifted: false, sha: driftCheck.githubSha?.slice(0, 7) || "unknown" },
       architect: { status: archResult.status || "complete" },
       analyst: { status: analysisResult?.status || "complete", approval: analysisResult?.analysis?.approval },
-      builder: { status: buildResult.status || "complete", files: buildResult.build?.files?.length || 0 },
-      auditor: { status: auditResult?.status || "complete", raw_verdict: rawVerdict, score },
+      builder: { status: buildResult.status || "complete", files: builderFileCount, parse_error: builderParseError },
+      auditor: { status: auditResult?.status || "complete", raw_verdict: rawVerdict, score, pre_check_failed: auditResult?.audit?.pre_check_failed === true },
       gate: { allowed: gate.allowed, effective_verdict: effectiveVerdict, reason: gate.reason },
     },
     commit: commitResult,

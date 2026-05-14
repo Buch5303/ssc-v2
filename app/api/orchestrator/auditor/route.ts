@@ -122,6 +122,46 @@ Scoring rules:
 
     let text = "";
 
+    // Hard pre-check: if the Builder produced no files or a parse error, the
+    // Auditor must fail deterministically without calling the LLM. Otherwise
+    // the model can hallucinate a passing-ish score off the spec alone (we
+    // saw 72/CONDITIONAL on builds with zero files), which then trips the
+    // Layer 4 gate's allowed=true path but the commit is silently skipped
+    // because files.length === 0 — producing misleading "gated out" commits.
+    const builderFiles = Array.isArray(build?.files) ? build.files : [];
+    const builderParseError = build?.parse_error === true;
+    if (builderParseError || builderFiles.length === 0) {
+      const reason = builderParseError
+        ? "Builder produced parse error — output was not valid JSON"
+        : "Builder produced zero files";
+      return NextResponse.json({
+        agent: "auditor",
+        model: "pre-check",
+        status: "complete",
+        audit: {
+          verdict: "FAIL",
+          score: 0,
+          acceptance_criteria_results: acceptanceCriteria.map((c: string) => ({
+            criterion: c,
+            result: "FAIL",
+            evidence: "No build output to evaluate",
+          })),
+          applicable_eqs_lenses: [],
+          issues: [{
+            severity: "CRITICAL",
+            file: "(none)",
+            description: reason,
+            fix: "Builder must return a non-empty files array as valid JSON. Check Builder model availability, token limits, and prompt parse path.",
+          }],
+          spec_compliance: "0%",
+          security_flags: [],
+          missing_tests: [],
+          summary: reason,
+          pre_check_failed: true,
+        },
+      });
+    }
+
     if (useDeepSeek) {
       const res = await fetch("https://api.deepseek.com/v1/chat/completions", {
         method: "POST",
