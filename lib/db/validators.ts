@@ -25,24 +25,24 @@ export function sanitizeString(input: string): string {
 
 // Deep sanitize object recursively
 export function sanitizeObject<T extends Record<string, any>>(obj: T): T {
-  const sanitized = { ...obj };
-  
+  const sanitized: Record<string, any> = { ...obj };
+
   Object.keys(sanitized).forEach(key => {
     const value = sanitized[key];
-    
+
     if (typeof value === 'string') {
       sanitized[key] = sanitizeString(value);
     } else if (Array.isArray(value)) {
-      sanitized[key] = value.map(item => 
+      sanitized[key] = value.map(item =>
         typeof item === 'string' ? sanitizeString(item) :
-        typeof item === 'object' ? sanitizeObject(item) : item
+        typeof item === 'object' && item !== null ? sanitizeObject(item as Record<string, any>) : item
       );
     } else if (typeof value === 'object' && value !== null) {
-      sanitized[key] = sanitizeObject(value);
+      sanitized[key] = sanitizeObject(value as Record<string, any>);
     }
   });
-  
-  return sanitized;
+
+  return sanitized as T;
 }
 
 // Validate and sanitize input data
