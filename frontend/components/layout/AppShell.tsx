@@ -23,7 +23,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-1">
           {navItems.map((item) => {
-            const active = path.startsWith(item.href);
+            const active = path?.startsWith(item.href) ?? false;
             return (
               <Link
                 key={item.href}

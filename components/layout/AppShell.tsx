@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Navigation */}
         <nav className="flex-1 px-2 py-3 space-y-[2px]">
           {nav.map(({ href, label, dot }) => {
-            const active = path.startsWith(href);
+            const active = path?.startsWith(href) ?? false;
             return (
               <Link key={href} href={href} className={clsx(
                 'flex items-center gap-2.5 px-3 py-[8px] text-[11px] font-medium transition-all',
