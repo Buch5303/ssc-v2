@@ -65,13 +65,15 @@ ${retry_context ? `PREVIOUS AUDIT FINDINGS (fix these):\n${retry_context}` : ""}
 Build the code now. Output ONLY JSON with the files array.`;
 
     // Builder is on Vercel Pro (300s function ceiling), so we run the full
-    // Sonnet 4 + 8192-token budget. Prior default of 4096 was a Hobby-plan
-    // workaround and caused mid-string truncation on complex directives
-    // (e.g. AUTO-007 produced valid-looking JSON that ran out of tokens
-    // mid-content string, leaving the JSON unparseable). Override per-env
-    // via BUILDER_MAX_TOKENS if a directive needs even more.
+    // Sonnet 4 + 16384-token budget. Prior defaults of 4096 (Hobby) and
+    // 8192 (Pro v1) both caused mid-string truncation on multi-file
+    // directives — AUTO-006 / AUTO-007 emitted 3-of-5 files and the
+    // remaining 2 were lost mid-JSON, dropping audit scores to 72/100
+    // CONDITIONAL and shipping incomplete RFQ CRUD (missing PUT + queries).
+    // 16384 gives headroom for 5-6 file directives in one pass. Override
+    // per-env via BUILDER_MAX_TOKENS if a directive needs even more.
     const model = process.env.BUILDER_MODEL || "claude-sonnet-4-20250514";
-    const maxTokens = parseInt(process.env.BUILDER_MAX_TOKENS || "8192", 10);
+    const maxTokens = parseInt(process.env.BUILDER_MAX_TOKENS || "16384", 10);
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",

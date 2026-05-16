@@ -586,52 +586,104 @@ export async function GET(req: Request) {
     log.push(`[RESEARCHER] Skipped — no research_queries in spec`);
   }
 
-  log.push(`[BUILDER] Generating code...`);
-  const buildResult = await runAgent("builder", {
-    spec: archResult.spec || archResult,
-    research: researchResults,
-    analysis: analysisResult?.analysis || {},
-  }, baseUrl);
-  if (!buildResult?.build) {
-    log.push(`[BUILDER] FAILED: ${buildResult?.error || "No build returned"}`);
-    next.status = "failed";
-    next.completed_at = new Date().toISOString();
-    await saveQueue(queue, `[QUEUE] ${next.id} failed at builder`, baseUrl).catch(() => {});
-    return NextResponse.json({
-      status: "failed", directive: next.id, stage: "builder",
-      error: buildResult?.error, log, elapsed: (Date.now() - startTime) / 1000,
-    });
+  // ----- Builder + Auditor with retry loop -----
+  //
+  // Prior single-shot flow allowed CONDITIONAL (score 65–79) verdicts to
+  // commit, which shipped half-built directives (AUTO-006/007 landed at
+  // 72/100 with missing PUT endpoints and DB query files). The retry loop
+  // requires a clean PASS before commit — on CONDITIONAL we feed the
+  // auditor's top issues back to the Builder as `retry_context` and
+  // re-run. After MAX_BUILD_ATTEMPTS without PASS, the directive is
+  // marked failed so the queue advances rather than shipping junk.
+  const MAX_BUILD_ATTEMPTS = 3;
+  let buildResult: any = null;
+  let auditResult: any = null;
+  let rawVerdict = "UNKNOWN";
+  let score: number | null = null;
+  let gate: GateResult = { allowed: false, reason: "no build attempted", effective_verdict: "FAIL" };
+  let buildAttempts = 0;
+  let retryContext: string | undefined;
+  const attemptHistory: Array<{ attempt: number; verdict: string; score: number | null; effective: string }> = [];
+
+  for (let attempt = 1; attempt <= MAX_BUILD_ATTEMPTS; attempt++) {
+    buildAttempts = attempt;
+    log.push(`[BUILDER] Attempt ${attempt}/${MAX_BUILD_ATTEMPTS} — generating code...`);
+    buildResult = await runAgent("builder", {
+      spec: archResult.spec || archResult,
+      research: researchResults,
+      analysis: analysisResult?.analysis || {},
+      ...(retryContext ? { retry_context: retryContext } : {}),
+    }, baseUrl);
+
+    if (!buildResult?.build) {
+      log.push(`[BUILDER] Attempt ${attempt} FAILED: ${buildResult?.error || "No build returned"}`);
+      if (attempt === MAX_BUILD_ATTEMPTS) {
+        next.status = "failed";
+        next.completed_at = new Date().toISOString();
+        await saveQueue(queue, `[QUEUE] ${next.id} failed at builder after ${attempt} attempts`, baseUrl).catch(() => {});
+        return NextResponse.json({
+          status: "failed", directive: next.id, stage: "builder",
+          error: buildResult?.error, log, elapsed: (Date.now() - startTime) / 1000,
+        });
+      }
+      retryContext = `Previous attempt produced no parseable build output. Emit valid JSON with a complete files array.`;
+      continue;
+    }
+    log.push(`[BUILDER] Attempt ${attempt} complete — ${buildResult.build.files?.length || 0} files`);
+
+    log.push(`[AUDITOR] Reviewing attempt ${attempt}...`);
+    auditResult = await runAgent("auditor", {
+      spec: archResult.spec || archResult,
+      build: buildResult.build,
+      research: researchResults,
+    }, baseUrl);
+    rawVerdict = auditResult?.audit?.verdict || "UNKNOWN";
+    score = auditResult?.audit?.score ?? null;
+    log.push(`[AUDITOR] Attempt ${attempt} verdict: ${rawVerdict}${score !== null ? ` (${score}/100)` : ""}`);
+
+    gate = scoreGate(rawVerdict, score);
+    attemptHistory.push({ attempt, verdict: rawVerdict, score, effective: gate.effective_verdict });
+    log.push(`[GATE] Attempt ${attempt}: ${gate.reason} → ${gate.effective_verdict}`);
+
+    // Clean PASS — break out of retry loop and commit.
+    if (gate.effective_verdict === "PASS") {
+      break;
+    }
+    // CONDITIONAL with attempts remaining — feed auditor issues back to Builder.
+    if (attempt < MAX_BUILD_ATTEMPTS && gate.effective_verdict === "CONDITIONAL") {
+      const issues: any[] = Array.isArray(auditResult?.audit?.issues) ? auditResult.audit.issues : [];
+      const topIssues = issues.slice(0, 5).map((i: any, idx: number) =>
+        `${idx + 1}. [${i.severity || "?"}] ${i.description || JSON.stringify(i)}`
+      ).join("\n");
+      retryContext = [
+        `Previous attempt scored ${score}/100 (${rawVerdict}).`,
+        `You MUST fix these issues and re-emit the COMPLETE set of files (do not omit any file from the spec):`,
+        topIssues || "(auditor returned no structured issues — re-emit complete spec)",
+      ].join("\n");
+      log.push(`[RETRY] Re-running Builder with auditor feedback (next attempt ${attempt + 1}/${MAX_BUILD_ATTEMPTS})`);
+      continue;
+    }
+    // FAIL verdict or no attempts left — exit loop, will fail below.
+    break;
   }
-  log.push(`[BUILDER] Complete — ${buildResult.build.files?.length || 0} files`);
 
-  log.push(`[AUDITOR] Reviewing code...`);
-  const auditResult = await runAgent("auditor", {
-    spec: archResult.spec || archResult,
-    build: buildResult.build,
-    research: researchResults,
-  }, baseUrl);
-  const rawVerdict = auditResult?.audit?.verdict || "UNKNOWN";
-  const score = auditResult?.audit?.score ?? null;
-  log.push(`[AUDITOR] Raw verdict: ${rawVerdict}${score !== null ? ` (${score}/100)` : ""}`);
-
-  // Layer 4 — Score Gate
-  const gate = scoreGate(rawVerdict, score);
-  log.push(`[GATE] ${gate.reason} → ${gate.effective_verdict}`);
   const effectiveVerdict = gate.effective_verdict;
+  const builderFileCount = buildResult?.build?.files?.length || 0;
+  const builderParseError = buildResult?.build?.parse_error === true;
 
-  // Commit if gate allowed AND builder actually produced files
+  // Only commit on a clean PASS. CONDITIONAL/FAIL after retries → mark
+  // failed so the queue advances rather than shipping incomplete work.
   let commitResult: any = null;
-  const builderFileCount = buildResult.build?.files?.length || 0;
-  const builderParseError = buildResult.build?.parse_error === true;
+  const shouldCommit = effectiveVerdict === "PASS" && builderFileCount > 0;
 
-  if (gate.allowed && builderFileCount > 0) {
-    log.push(`[COMMIT] Committing ${builderFileCount} file(s) + queue status...`);
-
+  if (shouldCommit) {
+    log.push(`[COMMIT] Committing ${builderFileCount} file(s) + queue status (PASS ${score}/100 on attempt ${buildAttempts}/${MAX_BUILD_ATTEMPTS})...`);
     next.status = "complete";
     next.completed_at = new Date().toISOString();
     next.auditor_score = score;
+    (next as any).build_attempts = buildAttempts;
 
-    const commitMsg = `[${next.id}] ${next.title} — Auditor: ${rawVerdict} ${score}/100 — Gate: ${effectiveVerdict}${gate.reason.includes("downgraded") ? " (downgraded)" : ""}`;
+    const commitMsg = `[${next.id}] ${next.title} — PASS ${score}/100 (attempt ${buildAttempts}/${MAX_BUILD_ATTEMPTS})`;
 
     const persist = await saveQueue(
       queue,
@@ -648,14 +700,11 @@ export async function GET(req: Request) {
       next.status = "failed";
     }
   } else {
-    // Build the most accurate reason for why we skipped, so the commit message
-    // and the queue's failure record actually tell us what happened. The prior
-    // unconditional "gated out: <gate.reason>" wording was misleading when the
-    // gate had actually allowed the build and the real cause was empty Builder
-    // output.
     let skipReason: string;
     if (!gate.allowed) {
-      skipReason = `gate blocked: ${gate.reason}`;
+      skipReason = `gate blocked after ${buildAttempts} attempt(s): ${gate.reason}`;
+    } else if (effectiveVerdict !== "PASS") {
+      skipReason = `did not reach PASS after ${buildAttempts} attempt(s) — final ${effectiveVerdict} (${rawVerdict} ${score}/100)`;
     } else if (builderParseError) {
       skipReason = `Builder parse error — output was not valid JSON`;
     } else if (builderFileCount === 0) {
@@ -668,6 +717,8 @@ export async function GET(req: Request) {
     next.completed_at = new Date().toISOString();
     next.auditor_score = score;
     (next as any).skip_reason = skipReason;
+    (next as any).build_attempts = buildAttempts;
+    (next as any).attempt_history = attemptHistory;
     await saveQueue(queue, `[QUEUE] ${next.id} skipped: ${skipReason}`, baseUrl).catch(() => {});
   }
 
@@ -715,6 +766,8 @@ export async function GET(req: Request) {
           : [],
       },
       gate: { allowed: gate.allowed, effective_verdict: effectiveVerdict, reason: gate.reason },
+      build_attempts: buildAttempts,
+      attempt_history: attemptHistory,
     },
     log,
   };
@@ -736,6 +789,8 @@ export async function GET(req: Request) {
       builder: { status: buildResult.status || "complete", files: builderFileCount, parse_error: builderParseError },
       auditor: { status: auditResult?.status || "complete", raw_verdict: rawVerdict, score, pre_check_failed: auditResult?.audit?.pre_check_failed === true },
       gate: { allowed: gate.allowed, effective_verdict: effectiveVerdict, reason: gate.reason },
+      build_attempts: buildAttempts,
+      attempt_history: attemptHistory,
     },
     commit: commitResult,
     log,
