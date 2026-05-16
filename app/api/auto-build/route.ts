@@ -42,7 +42,7 @@ interface Directive {
   directive: string;
   priority: number;
   status: "pending" | "in_progress" | "complete" | "failed";
-  origin: "seed" | "auto" | "ceo";
+  origin: "seed" | "auto" | "ceo" | "sentinel";
   rationale?: string;
   created_at: string;
   started_at: string | null;

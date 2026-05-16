@@ -4,6 +4,10 @@
     {
       "path": "/api/auto-build?force=true",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/deploy-sentinel",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
