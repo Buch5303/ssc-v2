@@ -395,15 +395,28 @@ export async function GET(req: Request) {
   if (!latest) {
     return NextResponse.json({ status: "idle", reason: "no recent deployments", log });
   }
+  // Vercel REST API exposes the deployment id as `uid` (not `id`) on
+  // /v6/deployments list responses. Be defensive and fall back to `.id`
+  // in case the wrapper or future API version changes that.
+  const latestId: string | undefined = latest.uid || latest.id;
   const latestState = latest.state;
   const latestSha = latest?.meta?.githubCommitSha || "unknown";
-  log.push(`[VERCEL] Latest: ${latest.id} state=${latestState} sha=${latestSha.slice(0, 7)}`);
+  if (!latestId) {
+    log.push(`[VERCEL] Latest deployment has no uid/id field — cannot fetch build logs`);
+    return NextResponse.json({
+      status: "error",
+      reason: "deployment object missing uid",
+      raw_keys: Object.keys(latest || {}),
+      log,
+    }, { status: 500 });
+  }
+  log.push(`[VERCEL] Latest: ${latestId} state=${latestState} sha=${latestSha.slice(0, 7)}`);
 
   if (latestState !== "ERROR" && !force) {
     return NextResponse.json({
       status: "idle",
       reason: `latest deploy state is ${latestState}, no action needed`,
-      latest: { id: latest.id, sha: latestSha.slice(0, 7), state: latestState },
+      latest: { id: latestId, sha: latestSha.slice(0, 7), state: latestState },
       log,
     });
   }
@@ -411,19 +424,19 @@ export async function GET(req: Request) {
   // 2. Fetch and parse build logs
   let events: any[];
   try {
-    events = await fetchBuildLogs(latest.id);
+    events = await fetchBuildLogs(latestId);
   } catch (e: any) {
     log.push(`[VERCEL] Could not fetch build logs: ${e.message}`);
     return NextResponse.json({ status: "error", reason: e.message, log }, { status: 500 });
   }
-  log.push(`[VERCEL] Loaded ${events.length} build event(s) for ${latest.id}`);
+  log.push(`[VERCEL] Loaded ${events.length} build event(s) for ${latestId}`);
 
   const err = parseBuildError(events);
   if (!err) {
     log.push(`[PARSE] No actionable build error pattern matched — escalating instead of guessing`);
     await appendHistory(baseUrl, log, {
       timestamp: new Date().toISOString(),
-      deploy_id: latest.id,
+      deploy_id: latestId,
       deploy_sha: latestSha,
       action: "escalated",
       reason: "no actionable error pattern matched in build logs",
@@ -431,7 +444,7 @@ export async function GET(req: Request) {
     return NextResponse.json({
       status: "escalated",
       reason: "deploy failed but error not auto-parseable — manual review required",
-      deploy: { id: latest.id, sha: latestSha.slice(0, 7) },
+      deploy: { id: latestId, sha: latestSha.slice(0, 7) },
       log,
     });
   }
@@ -442,7 +455,7 @@ export async function GET(req: Request) {
     log.push(`[GUARDRAIL] ${err.file} is on the protected list — refusing to auto-fix, escalating`);
     await appendHistory(baseUrl, log, {
       timestamp: new Date().toISOString(),
-      deploy_id: latest.id, deploy_sha: latestSha,
+      deploy_id: latestId, deploy_sha: latestSha,
       action: "escalated",
       reason: `protected path: ${err.file}`,
       target_file: err.file, target_line: err.line, error_signature: err.signature,
@@ -476,7 +489,7 @@ export async function GET(req: Request) {
     log.push(`[DEDUPE] ${openSentinel.length} sentinel directive(s) already open: ${openSentinel.map(d => d.id).join(", ")} — skipping`);
     await appendHistory(baseUrl, log, {
       timestamp: new Date().toISOString(),
-      deploy_id: latest.id, deploy_sha: latestSha,
+      deploy_id: latestId, deploy_sha: latestSha,
       action: "skipped",
       reason: `sentinel directive ${openSentinel[0].id} already open`,
       target_file: err.file, error_signature: err.signature,
@@ -502,7 +515,7 @@ export async function GET(req: Request) {
     log.push(`[DEDUPE] Same error signature already attempted in last 24h via ${recentSameSig.map(h => h.directive_id).join(", ")} — escalating`);
     await appendHistory(baseUrl, log, {
       timestamp: new Date().toISOString(),
-      deploy_id: latest.id, deploy_sha: latestSha,
+      deploy_id: latestId, deploy_sha: latestSha,
       action: "escalated",
       reason: `repeat failure on identical error signature — auto-fix did not resolve it`,
       target_file: err.file, target_line: err.line, error_signature: err.signature,
@@ -525,7 +538,7 @@ export async function GET(req: Request) {
     log.push(`[CIRCUIT] ${err.file} has had ${sameFile24h.length} auto-fixes in last 24h (limit ${MAX_FIXES_PER_FILE_24H}) — escalating`);
     await appendHistory(baseUrl, log, {
       timestamp: new Date().toISOString(),
-      deploy_id: latest.id, deploy_sha: latestSha,
+      deploy_id: latestId, deploy_sha: latestSha,
       action: "escalated",
       reason: `circuit breaker tripped — ${err.file} hit ${MAX_FIXES_PER_FILE_24H} fix limit`,
       target_file: err.file, target_line: err.line, error_signature: err.signature,
@@ -539,14 +552,14 @@ export async function GET(req: Request) {
 
   // 5. Build the directive, attach deploy_id to sentinel_meta
   const directive = buildFixDirective(err, latestSha, queue);
-  directive.sentinel_meta!.deploy_id = latest.id;
+  directive.sentinel_meta!.deploy_id = latestId;
   queue.directives.push(directive);
   queue.updated_at = new Date().toISOString();
 
   // 6. Append history entry
   const historyEntry: SentinelHistoryEntry = {
     timestamp: new Date().toISOString(),
-    deploy_id: latest.id,
+    deploy_id: latestId,
     deploy_sha: latestSha,
     action: "directive_queued",
     reason: `${err.errorType} at ${err.file}${err.line ? `:${err.line}` : ""}`,
@@ -595,7 +608,7 @@ export async function GET(req: Request) {
       target_line: err.line,
       error_type: err.errorType,
     },
-    deploy: { id: latest.id, sha: latestSha.slice(0, 7) },
+    deploy: { id: latestId, sha: latestSha.slice(0, 7) },
     commit_sha: commit.sha,
     elapsed_seconds: (Date.now() - startedAt) / 1000,
     log,
