@@ -1,5 +1,13 @@
 {
   "version": 1,
-  "updated_at": "2026-05-16T16:10:00.000Z",
-  "entries": []
+  "updated_at": "2026-05-17T00:46:17.724Z",
+  "entries": [
+    {
+      "timestamp": "2026-05-17T00:46:17.647Z",
+      "deploy_id": "dpl_D3hxrF6VMva7UhFTwyjnLu3mZRiD",
+      "deploy_sha": "011c68364116427da1ad4bc46856fe87c89340bc",
+      "action": "escalated",
+      "reason": "no actionable error pattern matched in build logs"
+    }
+  ]
 }
