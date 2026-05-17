@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-17T07:00:06.036Z",
+  "updated_at": "2026-05-17T07:04:53.161Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -91,15 +91,37 @@
       "title": "RFQ data model and API endpoints",
       "directive": "Create RFQ (Request for Quote) data model and CRUD API endpoints. Implement /api/rfqs with GET, POST, PUT operations. Include proper TypeScript interfaces for RFQ structure with fields: id, company_id, title, description, budget, deadline, status, created_at, updated_at. Add Zod validation schemas and error handling. Must advance EQS §1.1 dashboard load performance by providing efficient data access patterns.",
       "priority": 1,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "auto",
       "rationale": "Week 2 roadmap includes RFQ response lifecycle. Need core RFQ data structure and APIs established to support the quote management workflow that differentiates FlowSeer platform. | Reset 2026-05-16 — previous run truncated mid-build (3 of 5 files); re-running on Builder 16K + retry-gate fix.",
       "created_at": "2026-04-28T07:00:16.242Z",
       "started_at": "2026-05-17T07:00:06.036Z",
-      "completed_at": null,
+      "completed_at": "2026-05-17T07:04:53.161Z",
       "commit_sha": null,
-      "auditor_score": null,
-      "attempts": 4
+      "auditor_score": 72,
+      "attempts": 4,
+      "skip_reason": "did not reach PASS after 3 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
+      "build_attempts": 3,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        },
+        {
+          "attempt": 3,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        }
+      ]
     },
     {
       "id": "AUTO-008",
