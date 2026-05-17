@@ -33,6 +33,33 @@ export async function POST(req: Request) {
     const directiveObjective = spec?.objective || spec?.spec?.objective || "";
     const complexity = spec?.estimated_complexity || spec?.spec?.estimated_complexity || "UNKNOWN";
 
+    // Fetch the live package.json so the auditor can verify every `import`
+    // resolves to an installed package. Without this context the LLM has no
+    // ground truth about what's installed and routinely passes code that
+    // references missing modules (e.g. AUTO-006 shipped lib/db.ts importing
+    // drizzle-orm/neon-serverless / @neondatabase/serverless / ws — none in
+    // package.json — auditor scored 88/100 PASS because the code "looked"
+    // right; Vercel build then failed Module not found and gridlocked deploys).
+    // We pass the manifest as an explicit reference list so the buildability
+    // lens has actual data to check against.
+    let installedPackages: string[] = [];
+    try {
+      const pkgRes = await fetch(
+        "https://raw.githubusercontent.com/Buch5303/ssc-v2/main/package.json",
+        { cache: "no-store" }
+      );
+      if (pkgRes.ok) {
+        const pkg = await pkgRes.json();
+        installedPackages = [
+          ...Object.keys(pkg.dependencies || {}),
+          ...Object.keys(pkg.devDependencies || {}),
+        ].sort();
+      }
+    } catch {
+      // Fall back to empty list — auditor still applies the lens but
+      // without a manifest reference (LLM will be more conservative).
+    }
+
     const prompt = `You are the Auditor agent in an automated build pipeline. You receive the original build specification and the code that was generated. Your job is to verify the build meets THIS DIRECTIVE'S acceptance criteria, then check for bugs, logic errors, security issues, and spec violations.
 
 DIRECTIVE SCOPE (primary evaluation surface):
@@ -65,12 +92,32 @@ would have produced an artifact in this directive's scope:
    on transient failures, sensible defaults; loading/empty states only when UI in scope.
 7. VISUALIZATION (apply when chart/dashboard render code is in scope): Tableau-
    level clarity, consistent typography, information hierarchy.
+8. BUILDABILITY (apply UNIVERSALLY to ANY code change): The build must compile
+   and deploy. Specifically:
+   - Every \`import\` statement must resolve to (a) a relative path that exists
+     in the codebase, OR (b) a package name that is present in package.json
+     dependencies or devDependencies. If a generated file imports a package
+     not in the existing manifest, that is a CRITICAL issue and the directive
+     must NOT pass — score is capped at 60 (CONDITIONAL or below).
+   - A new file at path X.ts must NOT collide with an existing X/ directory
+     (e.g. lib/db.ts alongside lib/db/connection.ts creates an ambiguous
+     module path) — CRITICAL.
+   - TypeScript file additions must not introduce \`any\`, \`@ts-ignore\`, or
+     \`@ts-expect-error\` to silence the underlying type contract — HIGH.
+   - Top-level await, dynamic import of a missing module, or syntax that
+     Next.js 14 cannot statically analyze — CRITICAL.
+   BUILDABILITY violations are NEVER scope-filtered. The lens applies to
+   every directive, every time. A build that does not compile cannot be
+   audited as PASS regardless of how well it satisfies other criteria.
 
 For each EQS lens, decide first whether it APPLIES to this scope. If it does
 not apply, do not penalize on it and do not list it as an issue.
 
 BUILD SPECIFICATION (full context):
 ${JSON.stringify(spec, null, 2)}
+
+INSTALLED PACKAGES (package.json dependencies + devDependencies — every \`import\` in the generated code MUST resolve to one of these OR to a relative path that exists in the repo):
+${installedPackages.length > 0 ? installedPackages.join(", ") : "(could not fetch package.json — apply BUILDABILITY lens conservatively)"}
 
 GENERATED CODE:
 ${JSON.stringify(build, null, 2)}
