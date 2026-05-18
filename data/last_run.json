@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-05-18T11:04:12.622Z",
+  "timestamp": "2026-05-18T14:02:11.496Z",
   "directive": {
-    "id": "AUTO-015",
-    "title": "Neon DB schema setup with Drizzle ORM foundation",
+    "id": "AUTO-016",
+    "title": "Basic RFQ API endpoints with Neon integration",
     "status": "failed"
   },
-  "elapsed_seconds": 224.239,
+  "elapsed_seconds": 130.325,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -20,7 +20,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 3,
+      "research_queries_count": 4,
       "spec_parse_error": false
     },
     "researcher": {
@@ -34,76 +34,63 @@
       "status": "complete",
       "files_count": 5,
       "parse_error": false,
-      "first_file_path": "package.json"
+      "first_file_path": "src/types/rfq.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "CONDITIONAL",
-      "score": 75,
-      "summary": "The build establishes a solid foundation with Drizzle ORM schema, connection management, and TypeScript types. However, it fails to deliver two critical files (seed.ts and migration SQL), has a pool configuration mismatch with acceptance criteria (20 vs 50 connections), lacks audit log immutability enforcement, and is missing the queries layer entirely. The build is recoverable with moderate effort but cannot pass in its current state due to missing required files and architectural gaps.",
+      "verdict": "FAIL",
+      "score": 40,
+      "summary": "The generated code provides a solid foundation with proper types, Zod schemas, database schema, and query functions, but critically fails to deliver the core API route files (src/app/api/rfqs/route.ts and src/app/api/rfqs/[id]/route.ts) that are the primary deliverable of the directive. Additionally, there are critical buildability issues: missing dependencies (decimal.js, @neondatabase/serverless) not in package.json, and a missing file (src/lib/audit/rfq-audit.ts) that is imported but not generated. The code also uses 'any' types in several places. Without the API route files, none of the acceptance criteria can be fully satisfied. The build cannot compile or deploy in its current state.",
       "pre_check_failed": false,
-      "issue_count": 7,
+      "issue_count": 12,
       "top_issues": [
         {
           "severity": "CRITICAL",
-          "description": "Required seed file was not generated despite being in files_to_create. Seed data is essential for development and testing."
+          "description": "Required API route file for GET and POST /api/rfqs was not generated. This is a core requirement of the directive."
         },
         {
           "severity": "CRITICAL",
-          "description": "Required migration SQL file was not generated. Migration system cannot function without initial schema definition."
+          "description": "Required API route file for GET and PUT /api/rfqs/[id] was not generated. This is a core requirement of the directive."
         },
         {
-          "severity": "HIGH",
-          "description": "Connection pool max is set to 20 but acceptance criteria requires handling 50 concurrent requests. Pool may exhaust under load."
+          "severity": "CRITICAL",
+          "description": "Imports '@neondatabase/serverless' which is NOT listed in package.json dependencies. This will cause a build failure."
         }
       ]
     },
     "gate": {
-      "allowed": true,
-      "effective_verdict": "CONDITIONAL",
-      "reason": "Score 75, verdict CONDITIONAL"
+      "allowed": false,
+      "effective_verdict": "FAIL",
+      "reason": "Auditor rejected (score 40)"
     },
-    "build_attempts": 3,
+    "build_attempts": 1,
     "attempt_history": [
       {
         "attempt": 1,
-        "verdict": "CONDITIONAL",
-        "score": 72,
-        "effective": "CONDITIONAL"
-      },
-      {
-        "attempt": 3,
-        "verdict": "CONDITIONAL",
-        "score": 75,
-        "effective": "CONDITIONAL"
+        "verdict": "FAIL",
+        "score": 40,
+        "effective": "FAIL"
       }
     ]
   },
   "log": [
-    "[2026-05-18T11:00:28.384Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ ba3326a",
-    "[WATCHDOG] In sync at ba3326a",
-    "[QUEUE] Loaded via contents-api. Pending: 16, total: 23",
-    "[2026-05-18T11:00:29.215Z] Processing: AUTO-015 — Neon DB schema setup with Drizzle ORM foundation",
+    "[2026-05-18T14:00:01.171Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ e2ffe8a",
+    "[WATCHDOG] In sync at e2ffe8a",
+    "[QUEUE] Loaded via contents-api. Pending: 14, total: 23",
+    "[RECOVERY] AUTO-016 stuck in_progress for >30min — reset to pending (attempt #2)",
+    "[2026-05-18T14:00:04.834Z] Processing: AUTO-016 — Basic RFQ API endpoints with Neon integration",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 3 queries...",
+    "[RESEARCHER] Running 4 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
     "[BUILDER] Attempt 1/3 — generating code...",
-    "[BUILDER] Attempt 1 complete — 3 files",
+    "[BUILDER] Attempt 1 complete — 5 files",
     "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[RETRY] Re-running Builder with auditor feedback (next attempt 2/3)",
-    "[BUILDER] Attempt 2/3 — generating code...",
-    "[BUILDER] Attempt 2 FAILED: [object Object]",
-    "[BUILDER] Attempt 3/3 — generating code...",
-    "[BUILDER] Attempt 3 complete — 5 files",
-    "[AUDITOR] Reviewing attempt 3...",
-    "[AUDITOR] Attempt 3 verdict: CONDITIONAL (75/100)",
-    "[GATE] Attempt 3: Score 75, verdict CONDITIONAL → CONDITIONAL",
-    "[COMMIT] Skipped — did not reach PASS after 3 attempt(s) — final CONDITIONAL (CONDITIONAL 75/100)"
+    "[AUDITOR] Attempt 1 verdict: FAIL (40/100)",
+    "[GATE] Attempt 1: Auditor rejected (score 40) → FAIL",
+    "[COMMIT] Skipped — gate blocked after 1 attempt(s): Auditor rejected (score 40)"
   ]
 }
