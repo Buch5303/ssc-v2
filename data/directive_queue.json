@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-18T02:00:26.252Z",
+  "updated_at": "2026-05-18T02:00:27.350Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -195,11 +195,11 @@
       "title": "Database schema foundation with Drizzle ORM",
       "directive": "Establish core database schema using Drizzle ORM with PostgreSQL. Create tables for users, companies, rfqs, and audit_logs with proper relationships and constraints. Include migration setup and connection pooling configuration. Must support EQS §3.4 (100% auditable data) and §2.1 (financial accuracy ±0.1%). Focus on schema-first approach before building endpoints.",
       "priority": 1,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "Multiple database-related directives have failed. Need stable schema foundation before API endpoints or data operations can succeed. This addresses Week 1 priority of live data pipeline.",
       "created_at": "2026-05-04T07:00:55.753Z",
-      "started_at": null,
+      "started_at": "2026-05-18T02:00:27.350Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null,
