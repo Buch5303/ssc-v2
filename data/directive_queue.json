@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-19T13:00:24.756Z",
+  "updated_at": "2026-05-19T14:00:14.159Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -182,11 +182,11 @@
       "title": "Performance monitoring and bundle analysis setup",
       "directive": "Install and configure @next/bundle-analyzer and web-vitals. Add performance monitoring to _app.tsx to track Core Web Vitals. Create /api/performance endpoint to log client-side metrics. Add bundle size analysis to build process with size limits: total bundle < 500KB, individual pages < 100KB. This advances EQS §1.1 (dashboard load < 1.5s) by establishing performance baseline and monitoring.",
       "priority": 2,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "Previous performance optimization failed. Need monitoring infrastructure to measure and track performance improvements systematically.",
       "created_at": "2026-05-01T07:00:34.237Z",
-      "started_at": null,
+      "started_at": "2026-05-19T14:00:14.159Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
