@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-05-18T16:02:33.764Z",
+  "timestamp": "2026-05-19T00:04:18.766Z",
   "directive": {
-    "id": "AUTO-018",
-    "title": "Foundation data layer with Neon DB and core schema",
+    "id": "AUTO-022",
+    "title": "Basic application shell with navigation structure",
     "status": "failed"
   },
-  "elapsed_seconds": 123.139,
+  "elapsed_seconds": 221.476,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -19,8 +19,8 @@
         "audit_focus",
         "estimated_complexity"
       ],
-      "acceptance_criteria_count": 7,
-      "research_queries_count": 4,
+      "acceptance_criteria_count": 8,
+      "research_queries_count": 0,
       "spec_parse_error": false
     },
     "researcher": {
@@ -32,29 +32,29 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 3,
+      "files_count": 10,
       "parse_error": false,
-      "first_file_path": "lib/db/connection.ts"
+      "first_file_path": "lib/utils.ts"
     },
     "auditor": {
       "status": "complete",
       "verdict": "FAIL",
       "score": 55,
-      "summary": "The generated code provides a solid foundation for database infrastructure with Neon DB and Drizzle ORM, including connection pooling, health monitoring, and a comprehensive schema. However, the build is critically incomplete due to truncation - several required files (rfq-operations.ts, migration SQL, API routes) were not generated. Additionally, there are critical BUILDABILITY issues: imports of non-existent packages (drizzle-orm/neon-http, @neondatabase/serverless) and a missing logger utility will prevent compilation. The schema definition uses invalid TypeScript syntax with object spread. While the connection retry and query monitoring criteria are met, the missing CRUD operations, migration file, and API endpoints mean most acceptance criteria cannot be fully evaluated. The build requires significant fixes before it can be deployed.",
+      "summary": "The build implements the core layout architecture with header, sidebar, and main content areas, along with loading states and responsive design. However, it has two CRITICAL buildability issues: missing dependencies (lucide-react, tailwind-merge) that will prevent TypeScript compilation. Additionally, the use of 'use client' on the entire AppLayout prevents server-side rendering benefits, impacting performance targets. Accessibility is partially addressed but missing focus management. The code structure is sound but requires dependency fixes and architectural adjustments to meet all acceptance criteria.",
       "pre_check_failed": false,
-      "issue_count": 11,
+      "issue_count": 9,
       "top_issues": [
         {
           "severity": "CRITICAL",
-          "description": "Imports 'drizzle-orm/neon-http' and '@neondatabase/serverless' which are NOT in package.json dependencies. This will cause build failure."
+          "description": "Imports from 'lucide-react' which is not in package.json dependencies. This will cause build failure."
         },
         {
           "severity": "CRITICAL",
-          "description": "Imports '@/lib/utils/logger' which does not exist in the codebase. No logger utility was created or specified."
+          "description": "Imports from 'tailwind-merge' which is not in package.json dependencies. This will cause build failure."
         },
         {
-          "severity": "CRITICAL",
-          "description": "Imports '@/lib/utils/logger' which does not exist in the codebase."
+          "severity": "HIGH",
+          "description": "Uses 'use client' directive making the entire layout a client component, preventing server-side rendering of the shell. This negatively impacts initial load performance and the 1500ms Lighthouse target."
         }
       ]
     },
@@ -63,10 +63,16 @@
       "effective_verdict": "FAIL",
       "reason": "Auditor rejected (score 55)"
     },
-    "build_attempts": 1,
+    "build_attempts": 2,
     "attempt_history": [
       {
         "attempt": 1,
+        "verdict": "CONDITIONAL",
+        "score": 72,
+        "effective": "CONDITIONAL"
+      },
+      {
+        "attempt": 2,
         "verdict": "FAIL",
         "score": 55,
         "effective": "FAIL"
@@ -74,23 +80,27 @@
     ]
   },
   "log": [
-    "[2026-05-18T16:00:30.626Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 2706e85",
-    "[WATCHDOG] In sync at 2706e85",
-    "[QUEUE] Loaded via contents-api. Pending: 13, total: 23",
-    "[RECOVERY] AUTO-018 stuck in_progress for >30min — reset to pending (attempt #1)",
-    "[2026-05-18T16:00:33.875Z] Processing: AUTO-018 — Foundation data layer with Neon DB and core schema",
+    "[2026-05-19T00:00:37.291Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ fd93664",
+    "[WATCHDOG] In sync at fd93664",
+    "[QUEUE] Loaded via contents-api. Pending: 12, total: 23",
+    "[2026-05-19T00:00:38.968Z] Processing: AUTO-022 — Basic application shell with navigation structure",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 4 queries...",
-    "[RESEARCHER] skipped — 0 result(s)",
+    "[RESEARCHER] Skipped — no research_queries in spec",
     "[BUILDER] Attempt 1/3 — generating code...",
-    "[BUILDER] Attempt 1 complete — 3 files",
+    "[BUILDER] Attempt 1 complete — 8 files",
     "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: FAIL (55/100)",
-    "[GATE] Attempt 1: Auditor rejected (score 55) → FAIL",
-    "[COMMIT] Skipped — gate blocked after 1 attempt(s): Auditor rejected (score 55)"
+    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
+    "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[RETRY] Re-running Builder with auditor feedback (next attempt 2/3)",
+    "[BUILDER] Attempt 2/3 — generating code...",
+    "[BUILDER] Attempt 2 complete — 10 files",
+    "[AUDITOR] Reviewing attempt 2...",
+    "[AUDITOR] Attempt 2 verdict: FAIL (55/100)",
+    "[GATE] Attempt 2: Auditor rejected (score 55) → FAIL",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): Auditor rejected (score 55)"
   ]
 }
