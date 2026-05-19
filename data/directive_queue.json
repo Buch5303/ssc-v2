@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-19T08:00:03.071Z",
+  "updated_at": "2026-05-19T08:00:04.423Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -432,11 +432,11 @@
       "title": "Environment configuration and build validation",
       "directive": "Create comprehensive environment setup in /lib/config/ with validation for all required environment variables, database URLs, and API keys. Implement build-time checks and runtime configuration validation with clear error messages. Must support EQS §4.3 (SOC 2 orientation) through secure configuration management and §1.3 (real-time latency < 300ms) through optimized config loading.",
       "priority": 1,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "High failure rate suggests configuration or environment setup issues preventing successful builds and deployments. Need robust config foundation for stability.",
       "created_at": "2026-05-13T07:00:22.979Z",
-      "started_at": null,
+      "started_at": "2026-05-19T08:00:04.423Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null,
