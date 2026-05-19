@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CBR Trade Ltd — Where capital is composed.</title>
+<meta name="description" content="CBR Trade Ltd is a global trade finance practice founded by Caren Raphael. Letter of credit structuring, purchase order finance, and capital origination across four continents." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F4EFE6;
+    --paper-deep: #ECE5D7;
+    --ink: #1B1F2A;
+    --ink-soft: #4A4E5A;
+    --ink-mute: #6E7280;
+    --rule: #D6CFC2;
+    --sienna: #B85C38;
+    --sienna-deep: #8E4324;
+    --gold: #A88130;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+    line-height: 1.55;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+  }
+  ::selection { background: var(--sienna); color: var(--paper); }
+  img { display: block; max-width: 100%; }
+
+  .display {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    font-variation-settings: "opsz" 144, "SOFT" 50;
+  }
+  .eyebrow {
+    font-family: 'Manrope', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--sienna-deep);
+  }
+  .lede {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(20px, 2.2vw, 28px);
+    line-height: 1.4;
+    letter-spacing: -0.005em;
+    color: var(--ink);
+  }
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 2;
+  }
+  section { padding: 120px 0; position: relative; }
+  section + section:not(.banner) { border-top: 1px solid var(--rule); }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    padding: 22px 32px;
+    background: rgba(244, 239, 230, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  nav .mark { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 500; letter-spacing: -0.01em; }
+  nav .mark span { color: var(--sienna); font-style: italic; }
+  nav ul { display: flex; gap: 32px; list-style: none; }
+  nav ul a { color: var(--ink-soft); text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 0.04em; transition: color 0.3s ease; }
+  nav ul a:hover { color: var(--sienna); }
+  @media (max-width: 720px) { nav ul { display: none; } }
+
+  .hero {
+    min-height: 100vh;
+    padding: 180px 0 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+  .hero h1 { font-size: clamp(52px, 9vw, 148px); font-weight: 300; margin-bottom: 8px; }
+  .hero h1 .accent { font-style: italic; font-weight: 400; color: var(--sienna); }
+  .signature-mark {
+    width: clamp(120px, 16vw, 220px);
+    height: auto;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fade 1.6s ease 0.9s forwards;
+  }
+  .signature-mark path {
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+    animation: draw 2s cubic-bezier(0.65, 0, 0.35, 1) 1.1s forwards;
+  }
+  .signature-mark circle { opacity: 0; animation: fade 0.6s ease 2.6s forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 48px;
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    align-items: flex-end;
+  }
+  .hero-meta .lede { flex: 1 1 480px; max-width: 640px; }
+  .hero-meta .signature { flex: 0 0 auto; text-align: right; }
+  .hero-meta .signature .role { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 8px; }
+  .hero-meta .signature .name { font-family: 'Fraunces', serif; font-style: italic; font-size: 24px; font-weight: 400; }
+  .ornament {
+    position: absolute;
+    right: 32px;
+    top: 140px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-mute);
+    writing-mode: vertical-rl;
+    letter-spacing: 0.15em;
+  }
+  @media (max-width: 900px) { .ornament { display: none; } }
+
+  .banner {
+    position: relative;
+    width: 100%;
+    height: clamp(420px, 70vh, 720px);
+    overflow: hidden;
+    padding: 0;
+  }
+  .banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    filter: saturate(0.92) contrast(1.02);
+  }
+  .banner .veil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(27,31,42,0.15) 0%, rgba(27,31,42,0.35) 70%, rgba(27,31,42,0.62) 100%);
+    pointer-events: none;
+  }
+  .banner .caption {
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 60px;
+    z-index: 3;
+    color: var(--paper);
+  }
+  .banner .caption .eyebrow { color: rgba(244, 239, 230, 0.75); margin-bottom: 24px; }
+  .banner .caption .quote {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(24px, 3.5vw, 44px);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    max-width: 880px;
+    color: var(--paper);
+  }
+  .banner .credit {
+    position: absolute;
+    right: 32px;
+    bottom: 20px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(244, 239, 230, 0.5);
+    z-index: 3;
+  }
+
+  .section-head {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 80px;
+    margin-bottom: 80px;
+    align-items: baseline;
+  }
+  .section-head .num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 48px;
+    color: var(--sienna);
+    letter-spacing: -0.02em;
+  }
+  .section-head h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(36px, 5vw, 68px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 900px;
+  }
+  .section-head h2 em { color: var(--sienna); font-weight: 400; }
+  @media (max-width: 720px) {
+    .section-head { grid-template-columns: 1fr; gap: 24px; }
+    .section-head .num { font-size: 32px; }
+  }
+
+  .studio-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+  .studio-image {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: var(--paper-deep);
+  }
+  .studio-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.88) contrast(1.02);
+    transition: transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .studio-image:hover img { transform: scale(1.04); }
+  .studio-image .image-num {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--paper);
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    background: rgba(27,31,42,0.4);
+    padding: 6px 12px;
+    backdrop-filter: blur(4px);
+  }
+  .studio-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+  .studio-grid p {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .studio-grid p + p { margin-top: 24px; }
+  @media (max-width: 900px) {
+    .studio-layout { grid-template-columns: 1fr; gap: 40px; }
+    .studio-image { aspect-ratio: 4 / 3; max-width: 520px; }
+    .studio-grid { grid-template-columns: 1fr; gap: 24px; }
+  }
+
+  .cap-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    margin-left: 280px;
+  }
+  .cap-grid .cap {
+    padding: 40px 32px 40px 0;
+    border-bottom: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+  .cap-grid .cap:nth-child(3n) { border-right: none; padding-right: 0; }
+  .cap-grid .cap:nth-child(n+4) { padding-left: 32px; }
+  .cap-grid .cap-num { font-family: 'Fraunces', serif; font-style: italic; color: var(--sienna); font-size: 14px; margin-bottom: 16px; }
+  .cap-grid .cap-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 400; line-height: 1.2; margin-bottom: 12px; letter-spacing: -0.01em; }
+  .cap-grid .cap-body { color: var(--ink-soft); font-size: 14px; line-height: 1.6; }
+  @media (max-width: 900px) {
+    .cap-grid { grid-template-columns: 1fr; margin-left: 0; }
+    .cap-grid .cap { border-right: none !important; padding: 28px 0 !important; }
+  }
+
+  .verticals { margin-left: 280px; columns: 2; column-gap: 60px; }
+  .verticals .v {
+    break-inside: avoid;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+  }
+  .verticals .v-name { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 400; }
+  .verticals .v-mark { font-family: 'Fraunces', serif; font-style: italic; color: var(--sienna); font-size: 13px; letter-spacing: 0.05em; }
+  @media (max-width: 900px) { .verticals { margin-left: 0; columns: 1; } }
+
+  .engagements { margin-top: 40px; }
+  .deal {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px;
+    gap: 80px;
+    padding: 48px 0;
+    border-top: 1px solid var(--rule);
+    align-items: baseline;
+    transition: background 0.4s ease;
+  }
+  .deal:last-child { border-bottom: 1px solid var(--rule); }
+  .deal:hover { background: rgba(184, 92, 56, 0.04); }
+  .deal .deal-num { font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 56px; color: var(--sienna); line-height: 1; letter-spacing: -0.02em; }
+  .deal .deal-title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 400; line-height: 1.2; letter-spacing: -0.015em; margin-bottom: 14px; }
+  .deal .deal-desc { color: var(--ink-soft); font-size: 15.5px; line-height: 1.6; max-width: 640px; }
+  .deal .deal-meta { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); text-align: right; }
+  .deal .deal-meta span { display: block; color: var(--ink); font-family: 'Fraunces', serif; font-style: italic; text-transform: none; letter-spacing: 0; font-size: 15px; margin-top: 4px; }
+  @media (max-width: 900px) {
+    .deal { grid-template-columns: 1fr; gap: 16px; padding: 36px 0; }
+    .deal .deal-num { font-size: 36px; }
+    .deal .deal-meta { text-align: left; }
+  }
+
+  .atlas {
+    margin-left: 280px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .atlas .city {
+    padding: 32px 24px 32px 0;
+    border-bottom: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+  .atlas .city:nth-child(4n) { border-right: none; padding-right: 0; }
+  .atlas .city:nth-child(n+5) { padding-left: 24px; }
+  .atlas .city-num { font-family: 'Fraunces', serif; font-style: italic; font-size: 11px; color: var(--sienna); margin-bottom: 8px; letter-spacing: 0.1em; }
+  .atlas .city-name { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 400; letter-spacing: -0.015em; }
+  .atlas .city-region { font-size: 12px; color: var(--ink-mute); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 6px; }
+  @media (max-width: 900px) {
+    .atlas { grid-template-columns: repeat(2, 1fr); margin-left: 0; }
+    .atlas .city { border-right: none !important; padding: 24px 0 !important; }
+    .atlas .city:nth-child(odd) { border-right: 1px solid var(--rule) !important; padding-right: 24px !important; }
+    .atlas .city:nth-child(even) { padding-left: 24px !important; }
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    margin-left: 280px;
+  }
+  .contact-block .label { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 12px; }
+  .contact-block .value { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 400; letter-spacing: -0.01em; }
+  .contact-block .value a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); padding-bottom: 2px; transition: border-color 0.3s ease, color 0.3s ease; }
+  .contact-block .value a:hover { color: var(--sienna); border-color: var(--sienna); }
+  @media (max-width: 900px) {
+    .contact-grid { grid-template-columns: 1fr; gap: 40px; margin-left: 0; }
+  }
+
+  footer {
+    padding: 40px 32px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--ink-mute);
+    letter-spacing: 0.04em;
+    position: relative;
+    z-index: 2;
+  }
+  footer .colophon { font-family: 'Fraunces', serif; font-style: italic; color: var(--ink-soft); }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  .hero h1 .line { display: block; overflow: hidden; }
+  .hero h1 .line span {
+    display: inline-block;
+    transform: translateY(110%);
+    animation: rise 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .hero h1 .line:nth-child(2) span { animation-delay: 0.15s; }
+  @keyframes rise { to { transform: translateY(0); } }
+  .hero .eyebrow, .hero-meta { opacity: 0; animation: fade 1.2s ease 0.7s forwards; }
+  @keyframes fade { to { opacity: 1; } }
+
+  .pullquote { padding: 160px 0; text-align: center; background: var(--paper-deep); border-top: 1px solid var(--rule); }
+  .pullquote blockquote { font-family: 'Fraunces', serif; font-weight: 300; font-style: italic; font-size: clamp(28px, 4.5vw, 56px); line-height: 1.15; letter-spacing: -0.02em; max-width: 1000px; margin: 0 auto 32px; color: var(--ink); }
+  .pullquote .attribution { font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--sienna-deep); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="mark">CBR Trade<span>—</span>Ltd</div>
+  <ul>
+    <li><a href="#studio">Studio</a></li>
+    <li><a href="#capabilities">Capabilities</a></li>
+    <li><a href="#engagements">Engagements</a></li>
+    <li><a href="#atlas">Atlas</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<header class="hero container">
+  <div class="ornament">Est. New York · Four continents</div>
+  <div class="eyebrow">CBR Trade Ltd · Global Trade Finance</div>
+
+  <svg class="signature-mark" viewBox="0 0 280 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M5,55 C 45,8 80,72 120,40 S 200,12 230,38 L 268,28"
+          stroke="#B85C38" stroke-width="2" fill="none"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="5" cy="55" r="3" fill="#B85C38"/>
+    <circle cx="120" cy="40" r="2.5" fill="#B85C38"/>
+    <circle cx="268" cy="28" r="3.5" fill="#B85C38"/>
+  </svg>
+
+  <h1 class="display">
+    <span class="line"><span>Where capital</span></span>
+    <span class="line"><span>is <em class="accent">composed.</em></span></span>
+  </h1>
+
+  <div class="hero-meta">
+    <p class="lede">
+      A trade finance practice run with the eye of an artist — for composition,
+      for restraint, for the patterns and colors of global commerce that others miss.
+      Twenty-five years. Four continents. One sensibility.
+    </p>
+    <div class="signature">
+      <div class="role">Founder · Principal</div>
+      <div class="name">Caren Raphael</div>
+    </div>
+  </div>
+</header>
+
+<section class="banner">
+  <img src="https://images.unsplash.com/photo-1752519258986-92cf6830692c?w=2400&q=85&auto=format&fit=crop"
+       alt="Abstract painting with sunset colors and brushstrokes" loading="lazy" />
+  <div class="veil"></div>
+  <div class="caption container">
+    <div class="eyebrow">I. The canvas</div>
+    <div class="quote">
+      Every deal begins as a blank canvas — and ends as a composition that holds.
+    </div>
+  </div>
+  <div class="credit">Photograph · Susan Wilkinson</div>
+</section>
+
+<section id="studio">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="num">I.</div>
+      <h2 class="display">The <em>studio</em> behind the ledger.</h2>
+    </div>
+
+    <div class="studio-layout reveal">
+      <div class="studio-image">
+        <img src="https://images.unsplash.com/photo-1578521157034-273977158e71?w=1200&q=85&auto=format&fit=crop"
+             alt="Watercolor paint palette and brush" loading="lazy" />
+        <div class="image-num">Pl. i — Studio</div>
+      </div>
+      <div class="studio-grid">
+        <p>
+          CBR Trade Ltd was founded by Caren Raphael — a working artist whose
+          second practice has, over twenty-five years, become one of the more
+          quietly consequential trade-finance operations in private hands.
+          The same instincts that govern her studio — composition, restraint,
+          an eye for what others overlook — govern her approach to letters of
+          credit, purchase-order finance, and the choreography of international
+          commerce.
+        </p>
+        <p>
+          The firm structures capital for importers, exporters, manufacturers,
+          distributors, and sovereign clients across four continents. It has
+          moved gold and diamonds, gas turbines and rice, personal protective
+          equipment in the worst weeks of a pandemic and clean water into
+          regions that had none. Each engagement is approached the way an
+          artist approaches a canvas: deliberately, with intention, and with
+          attention to the whole composition.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="capabilities">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="num">II.</div>
+      <h2 class="display">A working <em>palette.</em></h2>
+    </div>
+    <div class="cap-grid reveal">
+      <div class="cap"><div class="cap-num">i.</div><div class="cap-title">Letter of Credit Structuring</div><div class="cap-body">Origination, deployment, and management of LC facilities across multiple jurisdictions and currencies.</div></div>
+      <div class="cap"><div class="cap-num">ii.</div><div class="cap-title">Purchase Order Finance</div><div class="cap-body">Pre-shipment capital structured to bridge importers and exporters at the moment of commitment.</div></div>
+      <div class="cap"><div class="cap-num">iii.</div><div class="cap-title">Accounts Receivable Finance</div><div class="cap-body">Post-shipment liquidity that turns invoices into working capital without disturbing the underlying relationship.</div></div>
+      <div class="cap"><div class="cap-num">iv.</div><div class="cap-title">Credit Lines &amp; Capital Raises</div><div class="cap-body">Origination of bank and private facilities for operating businesses, importers, and distributors.</div></div>
+      <div class="cap"><div class="cap-num">v.</div><div class="cap-title">Global Sourcing &amp; Fulfillment</div><div class="cap-body">End-to-end sourcing, contracting, logistics, and delivery for buyers operating in time-critical markets.</div></div>
+      <div class="cap"><div class="cap-num">vi.</div><div class="cap-title">Banking Facility Arrangement</div><div class="cap-body">Structuring of multi-million-dollar banking facilities for exporters of complex industrial equipment.</div></div>
+    </div>
+
+    <div class="section-head reveal" style="margin-top: 140px;">
+      <div class="num">III.</div>
+      <h2 class="display">The <em>verticals.</em></h2>
+    </div>
+    <div class="verticals reveal">
+      <div class="v"><span class="v-name">Precious Metals &amp; Gemstones</span><span class="v-mark">i.</span></div>
+      <div class="v"><span class="v-name">Healthcare &amp; Pharmaceuticals</span><span class="v-mark">ii.</span></div>
+      <div class="v"><span class="v-name">Industrial Power Generation</span><span class="v-mark">iii.</span></div>
+      <div class="v"><span class="v-name">Industrial Machinery &amp; Equipment</span><span class="v-mark">iv.</span></div>
+      <div class="v"><span class="v-name">Commodities — Cement, Lumber, Rice, Sugar</span><span class="v-mark">v.</span></div>
+      <div class="v"><span class="v-name">Copper &amp; Metal Scrap</span><span class="v-mark">vi.</span></div>
+      <div class="v"><span class="v-name">Consumer Goods &amp; Garments</span><span class="v-mark">vii.</span></div>
+      <div class="v"><span class="v-name">Beauty &amp; Personal Care</span><span class="v-mark">viii.</span></div>
+      <div class="v"><span class="v-name">Seafood &amp; Agriculture</span><span class="v-mark">ix.</span></div>
+      <div class="v"><span class="v-name">Chemicals &amp; Distribution</span><span class="v-mark">x.</span></div>
+      <div class="v"><span class="v-name">Used Vehicles &amp; Heavy Equipment</span><span class="v-mark">xi.</span></div>
+      <div class="v"><span class="v-name">Public Infrastructure — Water &amp; Energy</span><span class="v-mark">xii.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="banner">
+  <img src="https://images.unsplash.com/photo-1640529494825-4add7eed660e?w=2400&q=85&auto=format&fit=crop"
+       alt="Aerial view of shipping containers at a global port" loading="lazy" />
+  <div class="veil"></div>
+  <div class="caption container">
+    <div class="eyebrow">II. The ground</div>
+    <div class="quote">
+      Behind every letter of credit is a real ship, a real port, and a real promise to keep.
+    </div>
+  </div>
+  <div class="credit">Photograph · Weichao Deng</div>
+</section>
+
+<section id="engagements">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="num">IV.</div>
+      <h2 class="display">Selected <em>engagements.</em></h2>
+    </div>
+
+    <div class="engagements">
+      <div class="deal reveal">
+        <div class="deal-num">01</div>
+        <div>
+          <div class="deal-title">Trade Finance Operations at Scale</div>
+          <div class="deal-desc">Generated between $200M and $300M in annual sales through deployment of multiple letter-of-credit facilities, operating across offices in New York, Ghana, Nigeria, Brazil, Israel, Cyprus, South Africa, and the United Kingdom.</div>
+        </div>
+        <div class="deal-meta">Ongoing<span>Global</span></div>
+      </div>
+      <div class="deal reveal">
+        <div class="deal-num">02</div>
+        <div>
+          <div class="deal-title">Precious Metals — Gold &amp; Diamonds</div>
+          <div class="deal-desc">Arranged purchase-order and accounts-receivable finance for an importer of gold and diamonds, structuring capital around the unique velocity and security requirements of the precious-metals trade.</div>
+        </div>
+        <div class="deal-meta">Israel<span>PO + AR Finance</span></div>
+      </div>
+      <div class="deal reveal">
+        <div class="deal-num">03</div>
+        <div>
+          <div class="deal-title">Multi-Vertical PO &amp; AR Facilities</div>
+          <div class="deal-desc">Structured purchase-order and receivable finance for clients across garments, consumer goods, beauty, cement, seafood, lumber, rice, sugar, and copper scrap — extending working-capital instruments to industries that conventional finance overlooks.</div>
+        </div>
+        <div class="deal-meta">Cross-Border<span>Multi-Vertical</span></div>
+      </div>
+      <div class="deal reveal">
+        <div class="deal-num">04</div>
+        <div>
+          <div class="deal-title">A First Importation — Peru</div>
+          <div class="deal-desc">Established a credit line that enabled a family enterprise to complete its very first import. The transaction altered the course of a business that has now sustained multiple generations — a quiet, generational outcome from a single line of credit.</div>
+        </div>
+        <div class="deal-meta">Peru<span>Credit Line</span></div>
+      </div>
+      <div class="deal reveal">
+        <div class="deal-num">05</div>
+        <div>
+          <div class="deal-title">State-Level Healthcare Replenishment</div>
+          <div class="deal-desc">Sourced, managed, and fulfilled a significant purchase order replenishing healthcare inventory for a large U.S. state during the COVID-19 pandemic.</div>
+        </div>
+        <div class="deal-meta">United States<span>Sourcing &amp; Fulfillment</span></div>
+      </div>
+      <div class="deal reveal">
+        <div class="deal-num">06</div>
+        <div>
+          <div class="deal-title">Emergency PPE — Multi-State Response</div>
+          <div class="deal-desc">At the onset of the pandemic in 2020 — when the United States was scrambling to import product to hospitals and government facilities — sourced and managed the delivery of personal protective equipment to multiple states facing acute shortages.</div>
+        </div>
+        <div class="deal-meta">2020<span>Crisis Response</span></div>
+      </div>
+      <div class="deal reveal">
+        <div class="deal-num">07</div>
+        <div>
+          <div class="deal-title">Pandemic Healthcare Finance</div>
+          <div class="deal-desc">Sourced and arranged financing for a continuous pipeline of pandemic-related healthcare products throughout the COVID-19 crisis, sustaining supply lines through the most volatile months of the international healthcare market.</div>
+        </div>
+        <div class="deal-meta">2020–2022<span>Healthcare</span></div>
+      </div>
+      <div class="deal reveal">
+        <div class="deal-num">08</div>
+        <div>
+          <div class="deal-title">Industrial Machinery — Export Facilities</div>
+          <div class="deal-desc">Arranged banking facilities to handle multi-million-dollar letter-of-credit transactions for a U.S. exporter of industrial machines, structuring instruments matched to the cadence of heavy manufacturing.</div>
+        </div>
+        <div class="deal-meta">United States<span>LC Facilities</span></div>
+      </div>
+      <div class="deal reveal">
+        <div class="deal-num">09</div>
+        <div>
+          <div class="deal-title">100 Trucks to Vietnam</div>
+          <div class="deal-desc">Sourced and facilitated the financing and export of one hundred used trucks to a major importer in Vietnam — an end-to-end transaction spanning origination, capital, and logistics.</div>
+        </div>
+        <div class="deal-meta">Vietnam<span>Vehicle Export</span></div>
+      </div>
+      <div class="deal reveal">
+        <div class="deal-num">10</div>
+        <div>
+          <div class="deal-title">Chemical Distribution — Credit &amp; Capital</div>
+          <div class="deal-desc">Arranged credit lines and raised capital for a U.S. chemical distributor, structuring both working capital and longer-term growth financing in a single composed engagement.</div>
+        </div>
+        <div class="deal-meta">United States<span>Credit + Equity</span></div>
+      </div>
+      <div class="deal reveal">
+        <div class="deal-num">11</div>
+        <div>
+          <div class="deal-title">Clean Water — East Africa</div>
+          <div class="deal-desc">Arranged credit lines supporting a government-backed clean water project serving an impoverished region of East Africa — a sovereign-touching engagement built around real public-health outcomes.</div>
+        </div>
+        <div class="deal-meta">East Africa<span>Public Infrastructure</span></div>
+      </div>
+      <div class="deal reveal">
+        <div class="deal-num">12</div>
+        <div>
+          <div class="deal-title">Utility-Scale Power Generation</div>
+          <div class="deal-desc">Sourced and structured a utility-scale gas-turbine transaction supporting balance-of-plant for an emerging electricity infrastructure program — extending the firm's capabilities into the energy transition's hard, real-asset core.</div>
+        </div>
+        <div class="deal-meta">Current<span>Power Generation</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pullquote">
+  <div class="container">
+    <blockquote class="reveal">
+      <span style="color: var(--sienna);">&ldquo;</span>An artist learns early that what appears to be empty space is, in fact, the most important part of the composition.<span style="color: var(--sienna);">&rdquo;</span>
+    </blockquote>
+    <div class="attribution reveal">Caren Raphael · Founder</div>
+  </div>
+</section>
+
+<section id="atlas">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="num">V.</div>
+      <h2 class="display">An <em>atlas</em> of operations.</h2>
+    </div>
+    <div class="atlas reveal">
+      <div class="city"><div class="city-num">i.</div><div class="city-name">New York</div><div class="city-region">United States</div></div>
+      <div class="city"><div class="city-num">ii.</div><div class="city-name">London</div><div class="city-region">United Kingdom</div></div>
+      <div class="city"><div class="city-num">iii.</div><div class="city-name">Tel Aviv</div><div class="city-region">Israel</div></div>
+      <div class="city"><div class="city-num">iv.</div><div class="city-name">Nicosia</div><div class="city-region">Cyprus</div></div>
+      <div class="city"><div class="city-num">v.</div><div class="city-name">Accra</div><div class="city-region">Ghana</div></div>
+      <div class="city"><div class="city-num">vi.</div><div class="city-name">Lagos</div><div class="city-region">Nigeria</div></div>
+      <div class="city"><div class="city-num">vii.</div><div class="city-name">Johannesburg</div><div class="city-region">South Africa</div></div>
+      <div class="city"><div class="city-num">viii.</div><div class="city-name">São Paulo</div><div class="city-region">Brazil</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="num">VI.</div>
+      <h2 class="display">Begin a <em>conversation.</em></h2>
+    </div>
+    <div class="contact-grid reveal">
+      <div class="contact-block">
+        <div class="label">Principal</div>
+        <div class="value">Caren Raphael</div>
+        <div style="margin-top: 20px; color: var(--ink-soft); font-size: 15px; line-height: 1.6; max-width: 420px;">
+          Inquiries regarding trade-finance engagements, sourcing, capital
+          origination, and bespoke transactions are welcome. Each conversation
+          begins privately.
+        </div>
+      </div>
+      <div class="contact-block">
+        <div class="label">Direct</div>
+        <div class="value"><a href="mailto:caren@cbrtradeltd.com">caren@cbrtradeltd.com</a></div>
+        <div class="label" style="margin-top: 32px;">Telephone</div>
+        <div class="value"><a href="tel:+19144737773">+1 (914) 473-7773</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>© CBR Trade Ltd · All rights reserved</div>
+  <div class="colophon">Composed in New York · Operations across four continents</div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
