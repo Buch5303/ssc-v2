@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-19T17:00:25.618Z",
+  "updated_at": "2026-05-19T17:00:27.549Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -321,12 +321,12 @@
       "title": "RFQ dashboard with live data integration",
       "directive": "Build responsive RFQ dashboard page at /dashboard/rfqs displaying live data from Neon database via API endpoints. Include sortable table, status filters, search functionality, and detail view modal. Implement with React Server Components for initial load performance and client-side interactivity for filtering. Must achieve <1.5s dashboard load time per EQS Performance Standard §2.1 and Tableau-level visualization clarity per EQS Presentation §1.4.",
       "priority": 2,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "auto",
       "rationale": "Core dashboard functionality needed to demonstrate working platform. Builds on database and API foundation to deliver user-visible value aligned with Week 1 roadmap priorities.",
       "created_at": "2026-05-07T07:01:05.560Z",
       "started_at": "2026-05-19T17:00:25.618Z",
-      "completed_at": null,
+      "completed_at": "2026-05-19T17:00:27.549Z",
       "commit_sha": null,
       "auditor_score": null
     },
