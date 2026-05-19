@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-19T22:00:36.477Z",
+  "updated_at": "2026-05-19T22:00:37.836Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -62,11 +62,11 @@
       "title": "Mobile responsive pass",
       "directive": "Make all 14 dashboard pages fully responsive. On mobile (< 768px): collapse the sidebar into a hamburger menu, stack KPI grids from 6-column to 2-column, make tables horizontally scrollable, ensure all text is readable at 14px minimum on mobile, and ensure touch targets are at least 44x44px. Test against iPhone 14 Pro viewport (393x852).",
       "priority": 5,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "seed",
       "created_at": "2026-04-21T00:00:00Z",
       "started_at": "2026-05-19T22:00:36.477Z",
-      "completed_at": null,
+      "completed_at": "2026-05-19T22:00:37.836Z",
       "commit_sha": null,
       "auditor_score": null
     },
