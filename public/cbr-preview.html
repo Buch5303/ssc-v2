@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>CBR Trade Ltd — Where capital is composed.</title>
-<meta name="description" content="CBR Trade Ltd is a global trade finance practice founded by Caren Raphael. Letter of credit structuring, purchase order finance, and capital origination across four continents." />
+<title>CBR Trade Ltd — Bespoke trade finance for global commerce.</title>
+<meta name="description" content="CBR Trade Ltd structures bespoke trade finance for international commerce that institutional capital won't reach. Letter-of-credit facilities, purchase-order finance, and capital origination across eight cities and four continents. Twenty-five years. $200M–$300M annual deal flow." />
+<meta property="og:title" content="CBR Trade Ltd — Where capital is composed." />
+<meta property="og:description" content="Bespoke trade finance for international commerce that institutional capital won't structure, can't reach, or won't move quickly enough on. Twenty-five years. Four continents." />
+<meta property="og:type" content="website" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://images.unsplash.com">
@@ -13,12 +16,15 @@
   :root {
     --paper: #F4EFE6;
     --paper-deep: #ECE5D7;
+    --paper-warm: #EDE4D2;
     --ink: #1B1F2A;
-    --ink-soft: #4A4E5A;
+    --ink-soft: #3D4250;
     --ink-mute: #6E7280;
     --rule: #D6CFC2;
+    --rule-soft: #E2DCCE;
     --sienna: #B85C38;
     --sienna-deep: #8E4324;
+    --sienna-mute: #C77A55;
     --gold: #A88130;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -41,17 +47,31 @@
     inset: 0;
     pointer-events: none;
     z-index: 1;
-    opacity: 0.35;
+    opacity: 0.32;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     mix-blend-mode: multiply;
   }
   ::selection { background: var(--sienna); color: var(--paper); }
   img { display: block; max-width: 100%; }
+  a { color: inherit; }
 
+  /* Scroll progress bar */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    width: 0;
+    background: var(--sienna);
+    z-index: 60;
+    transition: width 0.1s linear;
+    pointer-events: none;
+  }
+
+  /* Type */
   .display {
     font-family: 'Fraunces', Georgia, serif;
     font-weight: 400;
-    line-height: 0.95;
+    line-height: 0.96;
     letter-spacing: -0.025em;
     font-variation-settings: "opsz" 144, "SOFT" 50;
   }
@@ -66,8 +86,8 @@
   .lede {
     font-family: 'Fraunces', serif;
     font-weight: 300;
-    font-size: clamp(20px, 2.2vw, 28px);
-    line-height: 1.4;
+    font-size: clamp(20px, 2.1vw, 26px);
+    line-height: 1.45;
     letter-spacing: -0.005em;
     color: var(--ink);
   }
@@ -79,37 +99,90 @@
     z-index: 2;
   }
   section { padding: 120px 0; position: relative; }
-  section + section:not(.banner) { border-top: 1px solid var(--rule); }
+  section + section:not(.banner):not(.market):not(.ledger):not(.pullquote) { border-top: 1px solid var(--rule); }
 
+  /* CTA Button */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 24px 14px 26px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    text-transform: uppercase;
+    border: 1px solid var(--ink);
+    transition: background 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s, transform 0.4s;
+  }
+  .btn:hover { background: var(--sienna); border-color: var(--sienna); transform: translateY(-1px); }
+  .btn .arrow { display: inline-block; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  .btn:hover .arrow { transform: translateX(4px); }
+  .btn.ghost { background: transparent; color: var(--ink); }
+  .btn.ghost:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  /* Nav */
   nav {
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 50;
-    padding: 22px 32px;
-    background: rgba(244, 239, 230, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    padding: 18px 32px;
+    background: rgba(244, 239, 230, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--rule);
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
   }
-  nav .mark { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 500; letter-spacing: -0.01em; }
-  nav .mark span { color: var(--sienna); font-style: italic; }
-  nav ul { display: flex; gap: 32px; list-style: none; }
-  nav ul a { color: var(--ink-soft); text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 0.04em; transition: color 0.3s ease; }
+  nav .mark {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  nav .mark .sep { color: var(--sienna); font-style: italic; padding: 0 2px; }
+  nav .nav-right { display: flex; align-items: center; gap: 28px; }
+  nav ul { display: flex; gap: 28px; list-style: none; align-items: center; }
+  nav ul a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    transition: color 0.3s ease;
+  }
   nav ul a:hover { color: var(--sienna); }
-  @media (max-width: 720px) { nav ul { display: none; } }
+  nav .nav-cta {
+    padding: 9px 16px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.3s ease;
+  }
+  nav .nav-cta:hover { background: var(--sienna); }
+  @media (max-width: 900px) {
+    nav ul { display: none; }
+    nav .nav-cta { font-size: 10px; padding: 8px 12px; letter-spacing: 0.1em; }
+  }
 
+  /* Hero */
   .hero {
     min-height: 100vh;
-    padding: 180px 0 100px;
+    padding: 160px 0 80px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     position: relative;
   }
-  .hero h1 { font-size: clamp(52px, 9vw, 148px); font-weight: 300; margin-bottom: 8px; }
+  .hero h1 { font-size: clamp(52px, 9.2vw, 156px); font-weight: 300; margin-bottom: 4px; }
   .hero h1 .accent { font-style: italic; font-weight: 400; color: var(--sienna); }
   .signature-mark {
     width: clamp(120px, 16vw, 220px);
@@ -125,32 +198,65 @@
   }
   .signature-mark circle { opacity: 0; animation: fade 0.6s ease 2.6s forwards; }
   @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes fade { to { opacity: 1; } }
+
   .hero-meta {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 60px;
+    margin-top: 72px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    align-items: end;
+  }
+  .hero-meta .lede { max-width: 640px; }
+  .hero-meta .signature { text-align: right; }
+  .hero-meta .signature .role { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 8px; }
+  .hero-meta .signature .name { font-family: 'Fraunces', serif; font-style: italic; font-size: 24px; font-weight: 400; }
+  @media (max-width: 800px) {
+    .hero-meta { grid-template-columns: 1fr; gap: 32px; }
+    .hero-meta .signature { text-align: left; }
+  }
+
+  .hero-flags {
     display: flex;
     flex-wrap: wrap;
     gap: 48px;
-    margin-top: 80px;
-    padding-top: 32px;
+    margin-top: 48px;
+    padding-top: 28px;
     border-top: 1px solid var(--rule);
-    align-items: flex-end;
   }
-  .hero-meta .lede { flex: 1 1 480px; max-width: 640px; }
-  .hero-meta .signature { flex: 0 0 auto; text-align: right; }
-  .hero-meta .signature .role { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 8px; }
-  .hero-meta .signature .name { font-family: 'Fraunces', serif; font-style: italic; font-size: 24px; font-weight: 400; }
+  .hero-flags .flag { display: flex; flex-direction: column; gap: 2px; }
+  .hero-flags .flag-num {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+  }
+  .hero-flags .flag-num .unit { color: var(--sienna); font-style: italic; }
+  .hero-flags .flag-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .hero-cta { margin-top: 56px; display: flex; gap: 16px; flex-wrap: wrap; }
+
   .ornament {
     position: absolute;
     right: 32px;
-    top: 140px;
+    top: 130px;
     font-family: 'Fraunces', serif;
     font-style: italic;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--ink-mute);
     writing-mode: vertical-rl;
     letter-spacing: 0.15em;
   }
-  @media (max-width: 900px) { .ornament { display: none; } }
+  @media (max-width: 1100px) { .ornament { display: none; } }
 
+  /* Banner image bands */
   .banner {
     position: relative;
     width: 100%;
@@ -164,7 +270,9 @@
     object-fit: cover;
     object-position: center;
     filter: saturate(0.92) contrast(1.02);
+    transition: transform 8s cubic-bezier(0.16, 1, 0.3, 1);
   }
+  .banner:hover img { transform: scale(1.04); }
   .banner .veil {
     position: absolute;
     inset: 0;
@@ -178,7 +286,7 @@
     z-index: 3;
     color: var(--paper);
   }
-  .banner .caption .eyebrow { color: rgba(244, 239, 230, 0.75); margin-bottom: 24px; }
+  .banner .caption .eyebrow { color: rgba(244, 239, 230, 0.78); margin-bottom: 24px; }
   .banner .caption .quote {
     font-family: 'Fraunces', serif;
     font-style: italic;
@@ -200,35 +308,112 @@
     z-index: 3;
   }
 
+  /* Section header */
   .section-head {
     display: grid;
     grid-template-columns: 200px 1fr;
     gap: 80px;
-    margin-bottom: 80px;
+    margin-bottom: 72px;
     align-items: baseline;
   }
   .section-head .num {
     font-family: 'Fraunces', serif;
     font-style: italic;
     font-weight: 300;
-    font-size: 48px;
+    font-size: 44px;
     color: var(--sienna);
     letter-spacing: -0.02em;
   }
+  .section-head .head-text { max-width: 900px; }
+  .section-head .eyebrow { margin-bottom: 20px; }
   .section-head h2 {
     font-family: 'Fraunces', serif;
     font-weight: 300;
-    font-size: clamp(36px, 5vw, 68px);
+    font-size: clamp(36px, 4.8vw, 64px);
     line-height: 1.05;
     letter-spacing: -0.02em;
-    max-width: 900px;
   }
   .section-head h2 em { color: var(--sienna); font-weight: 400; }
+  .section-head .subhead {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-style: italic;
+    font-size: clamp(18px, 1.8vw, 22px);
+    line-height: 1.45;
+    color: var(--ink-soft);
+    margin-top: 18px;
+    max-width: 760px;
+  }
   @media (max-width: 720px) {
-    .section-head { grid-template-columns: 1fr; gap: 24px; }
+    .section-head { grid-template-columns: 1fr; gap: 16px; margin-bottom: 48px; }
     .section-head .num { font-size: 32px; }
   }
 
+  /* MARKET section */
+  .market {
+    background: var(--paper-deep);
+    padding: 140px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .market-body {
+    margin-left: 280px;
+    display: grid;
+    gap: 56px;
+  }
+  .market-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .market-stat {
+    padding: 36px 32px 36px 0;
+    border-right: 1px solid var(--rule);
+  }
+  .market-stat:last-child { border-right: none; padding-right: 0; }
+  .market-stat:nth-child(n+2) { padding-left: 32px; }
+  .market-stat .stat-num {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(40px, 5vw, 64px);
+    line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .market-stat .stat-num em { color: var(--sienna); font-style: italic; font-weight: 400; }
+  .market-stat .stat-label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+  }
+  .market-prose {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(18px, 1.6vw, 21px);
+    line-height: 1.6;
+    color: var(--ink);
+    max-width: 760px;
+  }
+  .market-prose strong { font-weight: 500; color: var(--ink); }
+  .market-source {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-top: 4px;
+  }
+  @media (max-width: 900px) {
+    .market-body { margin-left: 0; }
+    .market-stats { grid-template-columns: 1fr; }
+    .market-stat { border-right: none; border-bottom: 1px solid var(--rule); padding: 28px 0 !important; }
+    .market-stat:last-child { border-bottom: none; }
+  }
+
+  /* Studio */
   .studio-layout {
     display: grid;
     grid-template-columns: 320px 1fr;
@@ -271,16 +456,64 @@
     font-family: 'Fraunces', serif;
     font-weight: 300;
     font-size: 19px;
-    line-height: 1.55;
+    line-height: 1.6;
     color: var(--ink);
   }
-  .studio-grid p + p { margin-top: 24px; }
+  .studio-grid p + p { margin-top: 22px; }
+  .studio-grid strong { font-weight: 500; color: var(--ink); }
   @media (max-width: 900px) {
     .studio-layout { grid-template-columns: 1fr; gap: 40px; }
     .studio-image { aspect-ratio: 4 / 3; max-width: 520px; }
     .studio-grid { grid-template-columns: 1fr; gap: 24px; }
   }
 
+  /* APPROACH (principles) */
+  .approach-grid {
+    margin-left: 280px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .principle {
+    padding: 44px 40px 44px 0;
+    border-bottom: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .principle:nth-child(2n) { border-right: none; padding-right: 0; padding-left: 40px; }
+  .principle:nth-last-child(-n+2) { border-bottom: none; }
+  .principle-num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 32px;
+    color: var(--sienna);
+    line-height: 1;
+  }
+  .principle-title {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    margin-bottom: 14px;
+  }
+  .principle-body {
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  @media (max-width: 900px) {
+    .approach-grid { margin-left: 0; grid-template-columns: 1fr; }
+    .principle { border-right: none !important; padding: 32px 0 !important; }
+    .principle:last-child { border-bottom: none; }
+  }
+
+  /* Capabilities */
   .cap-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -288,21 +521,23 @@
     border-top: 1px solid var(--rule);
     margin-left: 280px;
   }
-  .cap-grid .cap {
+  .cap {
     padding: 40px 32px 40px 0;
     border-bottom: 1px solid var(--rule);
     border-right: 1px solid var(--rule);
   }
-  .cap-grid .cap:nth-child(3n) { border-right: none; padding-right: 0; }
-  .cap-grid .cap:nth-child(n+4) { padding-left: 32px; }
-  .cap-grid .cap-num { font-family: 'Fraunces', serif; font-style: italic; color: var(--sienna); font-size: 14px; margin-bottom: 16px; }
-  .cap-grid .cap-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 400; line-height: 1.2; margin-bottom: 12px; letter-spacing: -0.01em; }
-  .cap-grid .cap-body { color: var(--ink-soft); font-size: 14px; line-height: 1.6; }
+  .cap:nth-child(3n) { border-right: none; padding-right: 0; }
+  .cap:nth-child(n+4) { padding-left: 32px; }
+  .cap:nth-child(3n+2), .cap:nth-child(3n+3) { padding-left: 32px; }
+  .cap-num { font-family: 'Fraunces', serif; font-style: italic; color: var(--sienna); font-size: 14px; margin-bottom: 14px; }
+  .cap-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 400; line-height: 1.2; margin-bottom: 10px; letter-spacing: -0.01em; }
+  .cap-body { color: var(--ink-soft); font-size: 14px; line-height: 1.65; }
   @media (max-width: 900px) {
     .cap-grid { grid-template-columns: 1fr; margin-left: 0; }
-    .cap-grid .cap { border-right: none !important; padding: 28px 0 !important; }
+    .cap { border-right: none !important; padding: 28px 0 !important; }
   }
 
+  /* Verticals */
   .verticals { margin-left: 280px; columns: 2; column-gap: 60px; }
   .verticals .v {
     break-inside: avoid;
@@ -317,29 +552,94 @@
   .verticals .v-mark { font-family: 'Fraunces', serif; font-style: italic; color: var(--sienna); font-size: 13px; letter-spacing: 0.05em; }
   @media (max-width: 900px) { .verticals { margin-left: 0; columns: 1; } }
 
+  /* Engagements */
   .engagements { margin-top: 40px; }
   .deal {
     display: grid;
     grid-template-columns: 200px 1fr 200px;
     gap: 80px;
-    padding: 48px 0;
+    padding: 42px 0;
     border-top: 1px solid var(--rule);
     align-items: baseline;
     transition: background 0.4s ease;
   }
   .deal:last-child { border-bottom: 1px solid var(--rule); }
   .deal:hover { background: rgba(184, 92, 56, 0.04); }
-  .deal .deal-num { font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 56px; color: var(--sienna); line-height: 1; letter-spacing: -0.02em; }
-  .deal .deal-title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 400; line-height: 1.2; letter-spacing: -0.015em; margin-bottom: 14px; }
-  .deal .deal-desc { color: var(--ink-soft); font-size: 15.5px; line-height: 1.6; max-width: 640px; }
-  .deal .deal-meta { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); text-align: right; }
-  .deal .deal-meta span { display: block; color: var(--ink); font-family: 'Fraunces', serif; font-style: italic; text-transform: none; letter-spacing: 0; font-size: 15px; margin-top: 4px; }
+  .deal-num { font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 52px; color: var(--sienna); line-height: 1; letter-spacing: -0.02em; }
+  .deal-title { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 400; line-height: 1.2; letter-spacing: -0.015em; margin-bottom: 12px; }
+  .deal-desc { color: var(--ink-soft); font-size: 15px; line-height: 1.6; max-width: 640px; }
+  .deal-outcome { color: var(--ink); font-size: 13px; line-height: 1.5; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--rule); }
+  .deal-outcome strong { color: var(--sienna-deep); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; font-size: 10px; }
+  .deal-meta { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); text-align: right; }
+  .deal-meta span { display: block; color: var(--ink); font-family: 'Fraunces', serif; font-style: italic; text-transform: none; letter-spacing: 0; font-size: 15px; margin-top: 4px; }
   @media (max-width: 900px) {
-    .deal { grid-template-columns: 1fr; gap: 16px; padding: 36px 0; }
-    .deal .deal-num { font-size: 36px; }
-    .deal .deal-meta { text-align: left; }
+    .deal { grid-template-columns: 1fr; gap: 16px; padding: 32px 0; }
+    .deal-num { font-size: 36px; }
+    .deal-meta { text-align: left; }
   }
 
+  /* LEDGER (proof stats) */
+  .ledger {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 140px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .ledger::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 0 0.9 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: screen;
+    pointer-events: none;
+  }
+  .ledger .section-head { margin-bottom: 80px; }
+  .ledger .section-head .num { color: var(--sienna-mute); }
+  .ledger .section-head h2 { color: var(--paper); }
+  .ledger .section-head h2 em { color: var(--sienna-mute); }
+  .ledger .section-head .subhead { color: rgba(244, 239, 230, 0.7); }
+  .ledger .eyebrow { color: var(--sienna-mute); }
+  .ledger-grid {
+    margin-left: 280px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    border-top: 1px solid rgba(244, 239, 230, 0.15);
+    border-bottom: 1px solid rgba(244, 239, 230, 0.15);
+  }
+  .ledger-cell {
+    padding: 36px 24px 36px 0;
+    border-right: 1px solid rgba(244, 239, 230, 0.15);
+  }
+  .ledger-cell:last-child { border-right: none; padding-right: 0; }
+  .ledger-cell:nth-child(n+2) { padding-left: 24px; }
+  .ledger-num {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(36px, 4vw, 52px);
+    line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--paper);
+    margin-bottom: 14px;
+  }
+  .ledger-num em { color: var(--sienna-mute); font-style: italic; font-weight: 400; }
+  .ledger-label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(244, 239, 230, 0.6);
+    line-height: 1.5;
+  }
+  @media (max-width: 900px) {
+    .ledger-grid { margin-left: 0; grid-template-columns: 1fr 1fr; }
+    .ledger-cell { border-right: none !important; border-bottom: 1px solid rgba(244, 239, 230, 0.15); padding: 24px 0 !important; }
+    .ledger-cell:nth-child(2n) { padding-left: 24px !important; }
+    .ledger-cell:last-child { border-bottom: none; }
+  }
+
+  /* Atlas */
   .atlas {
     margin-left: 280px;
     display: grid;
@@ -354,6 +654,7 @@
   }
   .atlas .city:nth-child(4n) { border-right: none; padding-right: 0; }
   .atlas .city:nth-child(n+5) { padding-left: 24px; }
+  .atlas .city:nth-child(4n+2), .atlas .city:nth-child(4n+3), .atlas .city:nth-child(4n+4) { padding-left: 24px; }
   .atlas .city-num { font-family: 'Fraunces', serif; font-style: italic; font-size: 11px; color: var(--sienna); margin-bottom: 8px; letter-spacing: 0.1em; }
   .atlas .city-name { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 400; letter-spacing: -0.015em; }
   .atlas .city-region { font-size: 12px; color: var(--ink-mute); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 6px; }
@@ -364,6 +665,46 @@
     .atlas .city:nth-child(even) { padding-left: 24px !important; }
   }
 
+  /* WHY CBR (differentiation) */
+  .why-grid {
+    margin-left: 280px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .why-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 1fr;
+    gap: 48px;
+    padding: 36px 0;
+    border-top: 1px solid var(--rule);
+    align-items: baseline;
+  }
+  .why-row:last-child { border-bottom: 1px solid var(--rule); }
+  .why-row .why-num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--sienna);
+    font-size: 20px;
+  }
+  .why-row .why-title {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+  }
+  .why-row .why-body {
+    color: var(--ink-soft);
+    font-size: 15.5px;
+    line-height: 1.65;
+  }
+  @media (max-width: 900px) {
+    .why-grid { margin-left: 0; }
+    .why-row { grid-template-columns: 1fr; gap: 12px; padding: 28px 0; }
+  }
+
+  /* Contact */
   .contact-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -374,10 +715,52 @@
   .contact-block .value { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 400; letter-spacing: -0.01em; }
   .contact-block .value a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); padding-bottom: 2px; transition: border-color 0.3s ease, color 0.3s ease; }
   .contact-block .value a:hover { color: var(--sienna); border-color: var(--sienna); }
+  .contact-note {
+    margin-top: 56px;
+    margin-left: 280px;
+    padding: 24px 28px;
+    background: var(--paper-deep);
+    border-left: 2px solid var(--sienna);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 16px;
+    color: var(--ink-soft);
+    max-width: 720px;
+    line-height: 1.55;
+  }
   @media (max-width: 900px) {
-    .contact-grid { grid-template-columns: 1fr; gap: 40px; margin-left: 0; }
+    .contact-grid, .contact-note { margin-left: 0; }
+    .contact-grid { grid-template-columns: 1fr; gap: 40px; }
   }
 
+  /* Pullquote */
+  .pullquote {
+    padding: 140px 0;
+    text-align: center;
+    background: var(--paper-deep);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .pullquote blockquote {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-style: italic;
+    font-size: clamp(28px, 4.4vw, 54px);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    max-width: 1000px;
+    margin: 0 auto 32px;
+    color: var(--ink);
+  }
+  .pullquote .attribution {
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--sienna-deep);
+  }
+
+  /* Footer */
   footer {
     padding: 40px 32px;
     border-top: 1px solid var(--rule);
@@ -393,13 +776,13 @@
   }
   footer .colophon { font-family: 'Fraunces', serif; font-style: italic; color: var(--ink-soft); }
 
+  /* Animations */
   .reveal {
     opacity: 0;
     transform: translateY(24px);
     transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .reveal.in { opacity: 1; transform: translateY(0); }
-
   .hero h1 .line { display: block; overflow: hidden; }
   .hero h1 .line span {
     display: inline-block;
@@ -408,29 +791,31 @@
   }
   .hero h1 .line:nth-child(2) span { animation-delay: 0.15s; }
   @keyframes rise { to { transform: translateY(0); } }
-  .hero .eyebrow, .hero-meta { opacity: 0; animation: fade 1.2s ease 0.7s forwards; }
-  @keyframes fade { to { opacity: 1; } }
-
-  .pullquote { padding: 160px 0; text-align: center; background: var(--paper-deep); border-top: 1px solid var(--rule); }
-  .pullquote blockquote { font-family: 'Fraunces', serif; font-weight: 300; font-style: italic; font-size: clamp(28px, 4.5vw, 56px); line-height: 1.15; letter-spacing: -0.02em; max-width: 1000px; margin: 0 auto 32px; color: var(--ink); }
-  .pullquote .attribution { font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--sienna-deep); }
+  .hero .eyebrow, .hero-meta, .hero-flags, .hero-cta { opacity: 0; animation: fade 1.2s ease 0.7s forwards; }
+  .hero-flags { animation-delay: 0.9s; }
+  .hero-cta { animation-delay: 1.1s; }
 </style>
 </head>
 <body>
 
+<div class="progress-bar" id="progress"></div>
+
 <nav>
-  <div class="mark">CBR Trade<span>—</span>Ltd</div>
-  <ul>
-    <li><a href="#studio">Studio</a></li>
-    <li><a href="#capabilities">Capabilities</a></li>
-    <li><a href="#engagements">Engagements</a></li>
-    <li><a href="#atlas">Atlas</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
+  <div class="mark">CBR Trade<span class="sep">—</span>Ltd</div>
+  <div class="nav-right">
+    <ul>
+      <li><a href="#market">Market</a></li>
+      <li><a href="#studio">Studio</a></li>
+      <li><a href="#approach">Approach</a></li>
+      <li><a href="#engagements">Engagements</a></li>
+      <li><a href="#atlas">Atlas</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">Begin</a>
+  </div>
 </nav>
 
 <header class="hero container">
-  <div class="ornament">Est. New York · Four continents</div>
+  <div class="ornament">Est. New York · Four continents · Twenty-five years</div>
   <div class="eyebrow">CBR Trade Ltd · Global Trade Finance</div>
 
   <svg class="signature-mark" viewBox="0 0 280 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -449,23 +834,91 @@
 
   <div class="hero-meta">
     <p class="lede">
-      A trade finance practice run with the eye of an artist — for composition,
-      for restraint, for the patterns and colors of global commerce that others miss.
-      Twenty-five years. Four continents. One sensibility.
+      Bespoke trade finance for international commerce that institutional capital
+      won't structure, can't reach, or won't move quickly enough on. Twenty-five
+      years. Four continents. One sensibility.
     </p>
     <div class="signature">
       <div class="role">Founder · Principal</div>
       <div class="name">Caren Raphael</div>
     </div>
   </div>
+
+  <div class="hero-flags">
+    <div class="flag">
+      <div class="flag-num">$200M<span class="unit"> – </span>$300M</div>
+      <div class="flag-label">Annual deal flow</div>
+    </div>
+    <div class="flag">
+      <div class="flag-num">8 <span class="unit">offices</span></div>
+      <div class="flag-label">Four continents</div>
+    </div>
+    <div class="flag">
+      <div class="flag-num">12 <span class="unit">verticals</span></div>
+      <div class="flag-label">Active categories</div>
+    </div>
+    <div class="flag">
+      <div class="flag-num">25 <span class="unit">years</span></div>
+      <div class="flag-label">Continuous practice</div>
+    </div>
+  </div>
+
+  <div class="hero-cta">
+    <a href="#contact" class="btn">Begin a conversation <span class="arrow">→</span></a>
+    <a href="#market" class="btn ghost">Why we exist <span class="arrow">↓</span></a>
+  </div>
 </header>
 
+<!-- MARKET (strategic framing) -->
+<section class="market" id="market">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="num">I.</div>
+      <div class="head-text">
+        <div class="eyebrow">The Market</div>
+        <h2 class="display">Two-and-a-half trillion dollars sits in the global trade finance <em>gap.</em></h2>
+        <p class="subhead">And it widens with every tariff, every new compliance regime, every supply chain rerouted by geopolitics.</p>
+      </div>
+    </div>
+
+    <div class="market-body reveal">
+      <div class="market-stats">
+        <div class="market-stat">
+          <div class="stat-num"><em>$2.5T</em></div>
+          <div class="stat-label">Global trade finance gap — the unmet demand for working-capital instruments behind international commerce.</div>
+        </div>
+        <div class="market-stat">
+          <div class="stat-num"><em>41%</em></div>
+          <div class="stat-label">Of trade finance requests from small- and mid-sized businesses are rejected outright by conventional banks.</div>
+        </div>
+        <div class="market-stat">
+          <div class="stat-num"><em>~10%</em></div>
+          <div class="stat-label">Of global merchandise trade goes unfinanced — a structural shortfall, not a cyclical one.</div>
+        </div>
+      </div>
+
+      <p class="market-prose">
+        Conventional banks have pulled back. Compliance regimes have thickened.
+        Emerging-market commerce has grown faster than institutional risk
+        appetite. The result is a <strong>structural shortage of working capital</strong>
+        at precisely the points where global commerce now happens — the
+        cross-border, the cross-currency, the underbanked, the urgent. CBR
+        Trade Ltd was built for that gap. We structure the deals institutional
+        finance won't, in the jurisdictions it can't, on the timeline it wishes
+        it could.
+      </p>
+      <p class="market-source">Source · Asian Development Bank, Global Trade Finance Gap Survey, 2025</p>
+    </div>
+  </div>
+</section>
+
+<!-- BANNER 1 -->
 <section class="banner">
   <img src="https://images.unsplash.com/photo-1752519258986-92cf6830692c?w=2400&q=85&auto=format&fit=crop"
        alt="Abstract painting with sunset colors and brushstrokes" loading="lazy" />
   <div class="veil"></div>
   <div class="caption container">
-    <div class="eyebrow">I. The canvas</div>
+    <div class="eyebrow">The canvas</div>
     <div class="quote">
       Every deal begins as a blank canvas — and ends as a composition that holds.
     </div>
@@ -473,11 +926,16 @@
   <div class="credit">Photograph · Susan Wilkinson</div>
 </section>
 
+<!-- STUDIO -->
 <section id="studio">
   <div class="container">
     <div class="section-head reveal">
-      <div class="num">I.</div>
-      <h2 class="display">The <em>studio</em> behind the ledger.</h2>
+      <div class="num">II.</div>
+      <div class="head-text">
+        <div class="eyebrow">The Studio</div>
+        <h2 class="display"><em>Composition</em> is the discipline. Trade is the canvas.</h2>
+        <p class="subhead">An artist's instincts — for structure, for restraint, for what is left out — applied for twenty-five years to the architecture of international commerce.</p>
+      </div>
     </div>
 
     <div class="studio-layout reveal">
@@ -488,13 +946,13 @@
       </div>
       <div class="studio-grid">
         <p>
-          CBR Trade Ltd was founded by Caren Raphael — a working artist whose
-          second practice has, over twenty-five years, become one of the more
-          quietly consequential trade-finance operations in private hands.
-          The same instincts that govern her studio — composition, restraint,
-          an eye for what others overlook — govern her approach to letters of
-          credit, purchase-order finance, and the choreography of international
-          commerce.
+          CBR Trade Ltd was founded by <strong>Caren Raphael</strong> — a working
+          artist whose second practice has, over twenty-five years, become one
+          of the more quietly consequential trade-finance operations in private
+          hands. The same instincts that govern her studio — composition,
+          restraint, an eye for what others overlook — govern her approach to
+          letters of credit, purchase-order finance, and the choreography of
+          international commerce.
         </p>
         <p>
           The firm structures capital for importers, exporters, manufacturers,
@@ -502,32 +960,126 @@
           moved gold and diamonds, gas turbines and rice, personal protective
           equipment in the worst weeks of a pandemic and clean water into
           regions that had none. Each engagement is approached the way an
-          artist approaches a canvas: deliberately, with intention, and with
-          attention to the whole composition.
+          artist approaches a canvas: <strong>deliberately, with intention,
+          and with attention to the whole composition.</strong>
         </p>
       </div>
     </div>
   </div>
 </section>
 
+<!-- APPROACH -->
+<section id="approach">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="num">III.</div>
+      <div class="head-text">
+        <div class="eyebrow">The Approach</div>
+        <h2 class="display">Four <em>principles.</em> No exceptions.</h2>
+        <p class="subhead">A practice built on what we choose not to do, as much as what we do.</p>
+      </div>
+    </div>
+
+    <div class="approach-grid reveal">
+      <div class="principle">
+        <div class="principle-num">01</div>
+        <div>
+          <div class="principle-title">Composition over scale.</div>
+          <div class="principle-body">
+            Every engagement is structured as bespoke architecture, never as a
+            product to be sold. We accept fewer engagements so that each one is
+            structured with care — and so that none compromises the rest.
+          </div>
+        </div>
+      </div>
+      <div class="principle">
+        <div class="principle-num">02</div>
+        <div>
+          <div class="principle-title">Relationship over volume.</div>
+          <div class="principle-body">
+            We work with a deliberately limited number of clients. Every
+            transaction is led by a principal who knows the counterparty by
+            name, by jurisdiction, and by track record.
+          </div>
+        </div>
+      </div>
+      <div class="principle">
+        <div class="principle-num">03</div>
+        <div>
+          <div class="principle-title">Multi-jurisdiction by design.</div>
+          <div class="principle-body">
+            Eight offices across four continents — from Lagos to Tel Aviv,
+            Accra to São Paulo. We originate where the deal lives, not from a
+            remote desk in a single financial capital.
+          </div>
+        </div>
+      </div>
+      <div class="principle">
+        <div class="principle-num">04</div>
+        <div>
+          <div class="principle-title">Patient capital, decisive execution.</div>
+          <div class="principle-body">
+            We wait for the right structure, never the easy one. But once a
+            structure is right, we move at the speed international commerce
+            actually requires — which is faster than most institutions can.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CAPABILITIES -->
 <section id="capabilities">
   <div class="container">
     <div class="section-head reveal">
-      <div class="num">II.</div>
-      <h2 class="display">A working <em>palette.</em></h2>
+      <div class="num">IV.</div>
+      <div class="head-text">
+        <div class="eyebrow">Capabilities</div>
+        <h2 class="display">A working <em>palette.</em></h2>
+        <p class="subhead">Six core instruments. Each deployed only where it is the right one — and only after the underlying composition is understood.</p>
+      </div>
     </div>
     <div class="cap-grid reveal">
-      <div class="cap"><div class="cap-num">i.</div><div class="cap-title">Letter of Credit Structuring</div><div class="cap-body">Origination, deployment, and management of LC facilities across multiple jurisdictions and currencies.</div></div>
-      <div class="cap"><div class="cap-num">ii.</div><div class="cap-title">Purchase Order Finance</div><div class="cap-body">Pre-shipment capital structured to bridge importers and exporters at the moment of commitment.</div></div>
-      <div class="cap"><div class="cap-num">iii.</div><div class="cap-title">Accounts Receivable Finance</div><div class="cap-body">Post-shipment liquidity that turns invoices into working capital without disturbing the underlying relationship.</div></div>
-      <div class="cap"><div class="cap-num">iv.</div><div class="cap-title">Credit Lines &amp; Capital Raises</div><div class="cap-body">Origination of bank and private facilities for operating businesses, importers, and distributors.</div></div>
-      <div class="cap"><div class="cap-num">v.</div><div class="cap-title">Global Sourcing &amp; Fulfillment</div><div class="cap-body">End-to-end sourcing, contracting, logistics, and delivery for buyers operating in time-critical markets.</div></div>
-      <div class="cap"><div class="cap-num">vi.</div><div class="cap-title">Banking Facility Arrangement</div><div class="cap-body">Structuring of multi-million-dollar banking facilities for exporters of complex industrial equipment.</div></div>
+      <div class="cap">
+        <div class="cap-num">i.</div>
+        <div class="cap-title">Letter of Credit Structuring</div>
+        <div class="cap-body">Origination, deployment, and management of LC facilities across multiple jurisdictions and currencies — including the structures conventional banks no longer offer.</div>
+      </div>
+      <div class="cap">
+        <div class="cap-num">ii.</div>
+        <div class="cap-title">Purchase Order Finance</div>
+        <div class="cap-body">Pre-shipment capital structured to bridge importers and exporters at the moment of commitment — the point at which most working-capital gaps actually open.</div>
+      </div>
+      <div class="cap">
+        <div class="cap-num">iii.</div>
+        <div class="cap-title">Accounts Receivable Finance</div>
+        <div class="cap-body">Post-shipment liquidity that turns invoices into working capital without disturbing the underlying customer relationship.</div>
+      </div>
+      <div class="cap">
+        <div class="cap-num">iv.</div>
+        <div class="cap-title">Credit Lines &amp; Capital Raises</div>
+        <div class="cap-body">Origination of bank and private facilities for operating businesses, importers, and distributors — including capital for growth-stage companies banks have not yet learned to underwrite.</div>
+      </div>
+      <div class="cap">
+        <div class="cap-num">v.</div>
+        <div class="cap-title">Global Sourcing &amp; Fulfillment</div>
+        <div class="cap-body">End-to-end sourcing, contracting, logistics, and delivery for buyers operating in time-critical markets — including crisis-response procurement at sovereign scale.</div>
+      </div>
+      <div class="cap">
+        <div class="cap-num">vi.</div>
+        <div class="cap-title">Banking Facility Arrangement</div>
+        <div class="cap-body">Structuring of multi-million-dollar banking facilities for exporters of complex industrial equipment, including energy, machinery, and infrastructure.</div>
+      </div>
     </div>
 
     <div class="section-head reveal" style="margin-top: 140px;">
-      <div class="num">III.</div>
-      <h2 class="display">The <em>verticals.</em></h2>
+      <div class="num">V.</div>
+      <div class="head-text">
+        <div class="eyebrow">Verticals</div>
+        <h2 class="display">Where the <em>palette</em> is applied.</h2>
+        <p class="subhead">Twelve categories. Each chosen for the same reason — they are the verticals where conventional finance under-serves the commerce that actually drives them.</p>
+      </div>
     </div>
     <div class="verticals reveal">
       <div class="v"><span class="v-name">Precious Metals &amp; Gemstones</span><span class="v-mark">i.</span></div>
@@ -546,12 +1098,13 @@
   </div>
 </section>
 
+<!-- BANNER 2 -->
 <section class="banner">
   <img src="https://images.unsplash.com/photo-1640529494825-4add7eed660e?w=2400&q=85&auto=format&fit=crop"
        alt="Aerial view of shipping containers at a global port" loading="lazy" />
   <div class="veil"></div>
   <div class="caption container">
-    <div class="eyebrow">II. The ground</div>
+    <div class="eyebrow">The ground</div>
     <div class="quote">
       Behind every letter of credit is a real ship, a real port, and a real promise to keep.
     </div>
@@ -559,11 +1112,16 @@
   <div class="credit">Photograph · Weichao Deng</div>
 </section>
 
+<!-- ENGAGEMENTS -->
 <section id="engagements">
   <div class="container">
     <div class="section-head reveal">
-      <div class="num">IV.</div>
-      <h2 class="display">Selected <em>engagements.</em></h2>
+      <div class="num">VI.</div>
+      <div class="head-text">
+        <div class="eyebrow">Selected Engagements</div>
+        <h2 class="display">A <em>catalogue raisonné</em> of work.</h2>
+        <p class="subhead">Twelve engagements drawn from twenty-five years. Many of the firm's most consequential transactions remain confidential by design and do not appear here.</p>
+      </div>
     </div>
 
     <div class="engagements">
@@ -571,15 +1129,17 @@
         <div class="deal-num">01</div>
         <div>
           <div class="deal-title">Trade Finance Operations at Scale</div>
-          <div class="deal-desc">Generated between $200M and $300M in annual sales through deployment of multiple letter-of-credit facilities, operating across offices in New York, Ghana, Nigeria, Brazil, Israel, Cyprus, South Africa, and the United Kingdom.</div>
+          <div class="deal-desc">Multiple letter-of-credit facilities deployed across offices in New York, Ghana, Nigeria, Brazil, Israel, Cyprus, South Africa, and the United Kingdom.</div>
+          <div class="deal-outcome"><strong>Outcome</strong> &nbsp; $200M–$300M in annual sales generated. Ongoing.</div>
         </div>
-        <div class="deal-meta">Ongoing<span>Global</span></div>
+        <div class="deal-meta">Continuous<span>Global</span></div>
       </div>
       <div class="deal reveal">
         <div class="deal-num">02</div>
         <div>
           <div class="deal-title">Precious Metals — Gold &amp; Diamonds</div>
           <div class="deal-desc">Arranged purchase-order and accounts-receivable finance for an importer of gold and diamonds, structuring capital around the unique velocity and security requirements of the precious-metals trade.</div>
+          <div class="deal-outcome"><strong>Structure</strong> &nbsp; PO + AR facility, multi-jurisdiction settlement.</div>
         </div>
         <div class="deal-meta">Israel<span>PO + AR Finance</span></div>
       </div>
@@ -588,6 +1148,7 @@
         <div>
           <div class="deal-title">Multi-Vertical PO &amp; AR Facilities</div>
           <div class="deal-desc">Structured purchase-order and receivable finance for clients across garments, consumer goods, beauty, cement, seafood, lumber, rice, sugar, and copper scrap — extending working-capital instruments to industries that conventional finance overlooks.</div>
+          <div class="deal-outcome"><strong>Scope</strong> &nbsp; Nine verticals, four continents.</div>
         </div>
         <div class="deal-meta">Cross-Border<span>Multi-Vertical</span></div>
       </div>
@@ -595,7 +1156,8 @@
         <div class="deal-num">04</div>
         <div>
           <div class="deal-title">A First Importation — Peru</div>
-          <div class="deal-desc">Established a credit line that enabled a family enterprise to complete its very first import. The transaction altered the course of a business that has now sustained multiple generations — a quiet, generational outcome from a single line of credit.</div>
+          <div class="deal-desc">Established a credit line that enabled a family enterprise to complete its very first import.</div>
+          <div class="deal-outcome"><strong>Outcome</strong> &nbsp; A generational business now sustaining multiple generations — from a single line of credit.</div>
         </div>
         <div class="deal-meta">Peru<span>Credit Line</span></div>
       </div>
@@ -604,6 +1166,7 @@
         <div>
           <div class="deal-title">State-Level Healthcare Replenishment</div>
           <div class="deal-desc">Sourced, managed, and fulfilled a significant purchase order replenishing healthcare inventory for a large U.S. state during the COVID-19 pandemic.</div>
+          <div class="deal-outcome"><strong>Scope</strong> &nbsp; Sovereign-grade procurement on commercial timelines.</div>
         </div>
         <div class="deal-meta">United States<span>Sourcing &amp; Fulfillment</span></div>
       </div>
@@ -612,6 +1175,7 @@
         <div>
           <div class="deal-title">Emergency PPE — Multi-State Response</div>
           <div class="deal-desc">At the onset of the pandemic in 2020 — when the United States was scrambling to import product to hospitals and government facilities — sourced and managed the delivery of personal protective equipment to multiple states facing acute shortages.</div>
+          <div class="deal-outcome"><strong>Outcome</strong> &nbsp; Critical inventory delivered during the most volatile weeks of the global PPE market.</div>
         </div>
         <div class="deal-meta">2020<span>Crisis Response</span></div>
       </div>
@@ -620,6 +1184,7 @@
         <div>
           <div class="deal-title">Pandemic Healthcare Finance</div>
           <div class="deal-desc">Sourced and arranged financing for a continuous pipeline of pandemic-related healthcare products throughout the COVID-19 crisis, sustaining supply lines through the most volatile months of the international healthcare market.</div>
+          <div class="deal-outcome"><strong>Duration</strong> &nbsp; Multi-year continuous facility, 2020–2022.</div>
         </div>
         <div class="deal-meta">2020–2022<span>Healthcare</span></div>
       </div>
@@ -628,14 +1193,16 @@
         <div>
           <div class="deal-title">Industrial Machinery — Export Facilities</div>
           <div class="deal-desc">Arranged banking facilities to handle multi-million-dollar letter-of-credit transactions for a U.S. exporter of industrial machines, structuring instruments matched to the cadence of heavy manufacturing.</div>
+          <div class="deal-outcome"><strong>Structure</strong> &nbsp; LC facility built for shop-floor production cycles, not banking quarters.</div>
         </div>
         <div class="deal-meta">United States<span>LC Facilities</span></div>
       </div>
       <div class="deal reveal">
         <div class="deal-num">09</div>
         <div>
-          <div class="deal-title">100 Trucks to Vietnam</div>
+          <div class="deal-title">One Hundred Trucks to Vietnam</div>
           <div class="deal-desc">Sourced and facilitated the financing and export of one hundred used trucks to a major importer in Vietnam — an end-to-end transaction spanning origination, capital, and logistics.</div>
+          <div class="deal-outcome"><strong>Scope</strong> &nbsp; Sourcing, finance, export, and delivery in a single composed engagement.</div>
         </div>
         <div class="deal-meta">Vietnam<span>Vehicle Export</span></div>
       </div>
@@ -644,6 +1211,7 @@
         <div>
           <div class="deal-title">Chemical Distribution — Credit &amp; Capital</div>
           <div class="deal-desc">Arranged credit lines and raised capital for a U.S. chemical distributor, structuring both working capital and longer-term growth financing in a single composed engagement.</div>
+          <div class="deal-outcome"><strong>Structure</strong> &nbsp; Working capital and growth capital, structured together.</div>
         </div>
         <div class="deal-meta">United States<span>Credit + Equity</span></div>
       </div>
@@ -652,6 +1220,7 @@
         <div>
           <div class="deal-title">Clean Water — East Africa</div>
           <div class="deal-desc">Arranged credit lines supporting a government-backed clean water project serving an impoverished region of East Africa — a sovereign-touching engagement built around real public-health outcomes.</div>
+          <div class="deal-outcome"><strong>Impact</strong> &nbsp; Public infrastructure for an under-served region, financed where institutional capital would not go.</div>
         </div>
         <div class="deal-meta">East Africa<span>Public Infrastructure</span></div>
       </div>
@@ -660,6 +1229,7 @@
         <div>
           <div class="deal-title">Utility-Scale Power Generation</div>
           <div class="deal-desc">Sourced and structured a utility-scale gas-turbine transaction supporting balance-of-plant for an emerging electricity infrastructure program — extending the firm's capabilities into the energy transition's hard, real-asset core.</div>
+          <div class="deal-outcome"><strong>Scope</strong> &nbsp; Current. Multi-party industrial structure across U.S., Italy, and Mexico.</div>
         </div>
         <div class="deal-meta">Current<span>Power Generation</span></div>
       </div>
@@ -667,20 +1237,53 @@
   </div>
 </section>
 
-<section class="pullquote">
+<!-- LEDGER (proof stats) -->
+<section class="ledger">
   <div class="container">
-    <blockquote class="reveal">
-      <span style="color: var(--sienna);">&ldquo;</span>An artist learns early that what appears to be empty space is, in fact, the most important part of the composition.<span style="color: var(--sienna);">&rdquo;</span>
-    </blockquote>
-    <div class="attribution reveal">Caren Raphael · Founder</div>
+    <div class="section-head reveal">
+      <div class="num">VII.</div>
+      <div class="head-text">
+        <div class="eyebrow">The Ledger</div>
+        <h2 class="display">Twenty-five years. The <em>numbers.</em></h2>
+        <p class="subhead">A practice measured not by deal velocity, but by what is left standing twenty-five years on.</p>
+      </div>
+    </div>
+
+    <div class="ledger-grid reveal">
+      <div class="ledger-cell">
+        <div class="ledger-num"><em>$200M–$300M</em></div>
+        <div class="ledger-label">Annual deal flow</div>
+      </div>
+      <div class="ledger-cell">
+        <div class="ledger-num">25 <em>yrs</em></div>
+        <div class="ledger-label">Continuous practice</div>
+      </div>
+      <div class="ledger-cell">
+        <div class="ledger-num">4 <em>continents</em></div>
+        <div class="ledger-label">Operating jurisdictions</div>
+      </div>
+      <div class="ledger-cell">
+        <div class="ledger-num">8 <em>offices</em></div>
+        <div class="ledger-label">From Lagos to São Paulo</div>
+      </div>
+      <div class="ledger-cell">
+        <div class="ledger-num">12 <em>verticals</em></div>
+        <div class="ledger-label">Active categories</div>
+      </div>
+    </div>
   </div>
 </section>
 
+<!-- ATLAS -->
 <section id="atlas">
   <div class="container">
     <div class="section-head reveal">
-      <div class="num">V.</div>
-      <h2 class="display">An <em>atlas</em> of operations.</h2>
+      <div class="num">VIII.</div>
+      <div class="head-text">
+        <div class="eyebrow">Atlas</div>
+        <h2 class="display">An <em>atlas</em> of operations.</h2>
+        <p class="subhead">Eight cities. Real desks. Real principals. The geography of the firm is the geography of the deals.</p>
+      </div>
     </div>
     <div class="atlas reveal">
       <div class="city"><div class="city-num">i.</div><div class="city-name">New York</div><div class="city-region">United States</div></div>
@@ -695,38 +1298,104 @@
   </div>
 </section>
 
-<section id="contact">
+<!-- PULL QUOTE -->
+<section class="pullquote">
+  <div class="container">
+    <blockquote class="reveal">
+      <span style="color: var(--sienna);">&ldquo;</span>An artist learns early that what appears to be empty space is, in fact, the most important part of the composition.<span style="color: var(--sienna);">&rdquo;</span>
+    </blockquote>
+    <div class="attribution reveal">Caren Raphael · Founder</div>
+  </div>
+</section>
+
+<!-- WHY CBR (differentiation) -->
+<section id="why">
   <div class="container">
     <div class="section-head reveal">
-      <div class="num">VI.</div>
-      <h2 class="display">Begin a <em>conversation.</em></h2>
-    </div>
-    <div class="contact-grid reveal">
-      <div class="contact-block">
-        <div class="label">Principal</div>
-        <div class="value">Caren Raphael</div>
-        <div style="margin-top: 20px; color: var(--ink-soft); font-size: 15px; line-height: 1.6; max-width: 420px;">
-          Inquiries regarding trade-finance engagements, sourcing, capital
-          origination, and bespoke transactions are welcome. Each conversation
-          begins privately.
-        </div>
+      <div class="num">IX.</div>
+      <div class="head-text">
+        <div class="eyebrow">Why CBR Trade Ltd</div>
+        <h2 class="display">Most trade finance is a transaction. We treat each one as a <em>composition.</em></h2>
+        <p class="subhead">Four reasons firms, families, and sovereigns return to this practice — and why a single line of credit, properly composed, can alter a generation.</p>
       </div>
-      <div class="contact-block">
-        <div class="label">Direct</div>
-        <div class="value"><a href="mailto:caren@cbrtradeltd.com">caren@cbrtradeltd.com</a></div>
-        <div class="label" style="margin-top: 32px;">Telephone</div>
-        <div class="value"><a href="tel:+19144737773">+1 (914) 473-7773</a></div>
+    </div>
+
+    <div class="why-grid reveal">
+      <div class="why-row">
+        <div class="why-num">i.</div>
+        <div class="why-title">The composer's eye.</div>
+        <div class="why-body">Caren Raphael's artistic practice is the firm's intellectual foundation, not its decoration. The instinct for composition — what to include, what to leave out, what holds and what doesn't — is the same instinct that produces deal structures that survive contact with reality.</div>
+      </div>
+      <div class="why-row">
+        <div class="why-num">ii.</div>
+        <div class="why-title">Twenty-five years of pattern recognition.</div>
+        <div class="why-body">Across $200M–$300M in annual flow, twelve verticals, four continents. The patterns most institutions are still learning to model, this practice has been compounding intuition on since the late 1990s.</div>
+      </div>
+      <div class="why-row">
+        <div class="why-num">iii.</div>
+        <div class="why-title">Real ground in eight cities.</div>
+        <div class="why-body">Lagos. Accra. Tel Aviv. Nicosia. São Paulo. Johannesburg. London. New York. Real desks, real principals, real history with counterparties — not partners-of-partners reached by introduction.</div>
+      </div>
+      <div class="why-row">
+        <div class="why-num">iv.</div>
+        <div class="why-title">Confidential by construction.</div>
+        <div class="why-body">Every conversation begins privately. Many engagements remain there. The firm has been retained to do work it will never describe in public — and that discretion is part of why it is retained at all.</div>
       </div>
     </div>
   </div>
 </section>
 
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="num">X.</div>
+      <div class="head-text">
+        <div class="eyebrow">Begin a Conversation</div>
+        <h2 class="display">Each engagement begins <em>privately.</em></h2>
+        <p class="subhead">A single line of inquiry is enough. We respond to every serious inquiry within twenty-four hours.</p>
+      </div>
+    </div>
+
+    <div class="contact-grid reveal">
+      <div class="contact-block">
+        <div class="label">Principal</div>
+        <div class="value">Caren Raphael</div>
+        <div style="margin-top: 18px; color: var(--ink-soft); font-size: 15px; line-height: 1.65; max-width: 420px;">
+          Inquiries regarding trade-finance engagements, sourcing, capital
+          origination, and bespoke transactions are welcome from operating
+          companies, investors, sovereign counterparties, and trusted
+          intermediaries.
+        </div>
+      </div>
+      <div class="contact-block">
+        <div class="label">Direct</div>
+        <div class="value"><a href="mailto:caren@cbrtradeltd.com">caren@cbrtradeltd.com</a></div>
+        <div class="label" style="margin-top: 28px;">Telephone</div>
+        <div class="value"><a href="tel:+19144737773">+1 (914) 473-7773</a></div>
+        <div style="margin-top: 32px;">
+          <a href="mailto:caren@cbrtradeltd.com?subject=Inquiry%20-%20CBR%20Trade%20Ltd" class="btn">Send an inquiry <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact-note reveal">
+      A note on confidentiality. Every conversation with the firm begins under
+      an implicit non-disclosure — and a formal one, if helpful. Names, deals,
+      and structures discussed here are never shared elsewhere without the
+      counterparty's explicit permission. This standard has held for
+      twenty-five years.
+    </div>
+  </div>
+</section>
+
 <footer>
-  <div>© CBR Trade Ltd · All rights reserved</div>
+  <div>© CBR Trade Ltd · All rights reserved · A privately held practice</div>
   <div class="colophon">Composed in New York · Operations across four continents</div>
 </footer>
 
 <script>
+  // Reveal on scroll
   const io = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
@@ -736,6 +1405,16 @@
     });
   }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Scroll progress bar
+  const progress = document.getElementById('progress');
+  const onScroll = () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+    progress.style.width = Math.min(100, Math.max(0, pct)) + '%';
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 </script>
 
 </body>
