@@ -1,27 +1,21 @@
 {
-  "timestamp": "2026-05-31T09:04:58.496Z",
+  "timestamp": "2026-05-31T09:19:47.607Z",
   "directive": {
-    "id": "AUTO-018",
-    "title": "Foundation data layer with Neon DB and core schema",
+    "id": "AUTO-021",
+    "title": "Database connection layer with environment validation",
     "status": "failed"
   },
-  "elapsed_seconds": 294.274,
+  "elapsed_seconds": 286.303,
   "pipeline": {
     "architect": {
       "status": "complete",
       "spec_keys": [
-        "directive_id",
-        "title",
-        "objective",
-        "research_queries",
-        "build_spec",
-        "acceptance_criteria",
-        "audit_focus",
-        "estimated_complexity"
+        "raw",
+        "parse_error"
       ],
-      "acceptance_criteria_count": 20,
-      "research_queries_count": 5,
-      "spec_parse_error": false
+      "acceptance_criteria_count": 0,
+      "research_queries_count": 0,
+      "spec_parse_error": true
     },
     "researcher": {
       "results_count": 0
@@ -32,36 +26,36 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 5,
+      "files_count": 6,
       "parse_error": false,
-      "first_file_path": "lib/db/index.ts"
+      "first_file_path": "lib/db/types.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "FAIL",
-      "score": 55,
-      "summary": "The generated code provides a solid foundation with the database schema, type definitions, error handling, and audit query module. However, it is critically incomplete — missing all API route handlers (api/rfqs/route.ts, api/rfqs/[id]/route.ts, api/health/db/route.ts), the RFQ queries module (lib/db/queries/rfqs.ts), user/company query modules, seed script, and Drizzle configuration file. The schema has a critical violation where rfq_number is not implemented as a computed column. The code also has buildability issues with require('ws') usage incompatible with Next.js 14. Only 3 of 20 acceptance criteria fully pass, with 2 partial passes. The build cannot be shipped in its current state.",
+      "verdict": "CONDITIONAL",
+      "score": 72,
+      "summary": "The generated code provides a solid foundation for the database connection layer with proper pooling, retry logic, circuit breaker, and audit logging. However, there are several critical issues that prevent this from being production-ready. The most significant problems are: (1) circular dependency risks from dynamic imports across multiple files, (2) missing health check implementation (lib/db/health.ts and /app/api/health/db/route.ts are not generated), (3) memory leak in circuit breaker timeout handling, and (4) potential build-time execution issues with env-validator. The code also has several medium-severity issues including type mismatches, inefficient dynamic imports, and Node.js-specific APIs that may not work in all serverless environments. The build is recoverable with fixes, hence CONDITIONAL verdict.",
       "pre_check_failed": false,
-      "issue_count": 15,
+      "issue_count": 12,
       "top_issues": [
         {
           "severity": "CRITICAL",
-          "description": "rfq_number column is defined as a regular text column with unique constraint, but the specification requires it to be a GENERATED ALWAYS AS computed column using the expression: 'RFQ-'||to_char(created_at,'YYYYMMDD')||'-'||substring(id::text,1,6). This is a critical schema violation that breaks the RFQ numbering system."
+          "description": "Dynamic import of './audit-log' inside logEvent method creates a circular dependency risk and breaks the singleton pattern. The import is called asynchronously and may fail if audit-log.ts imports from circuit-breaker.ts."
         },
         {
           "severity": "CRITICAL",
-          "description": "API route files for RFQ CRUD operations (api/rfqs/route.ts, api/rfqs/[id]/route.ts, api/health/db/route.ts) are missing from the generated code. These are required for acceptance criteria 5-12, 14-15."
+          "description": "Dynamic import of './audit-log' inside logRetryEvent function creates same circular dependency risk as circuit-breaker.ts."
         },
         {
           "severity": "CRITICAL",
-          "description": "Health check module (lib/db/health.ts) is missing from generated code. Required for acceptance criteria 10-11."
+          "description": "Dynamic import of './circuit-breaker' inside pool error handler creates circular dependency risk."
         }
       ]
     },
     "gate": {
-      "allowed": false,
-      "effective_verdict": "FAIL",
-      "reason": "Auditor rejected (score 55)"
+      "allowed": true,
+      "effective_verdict": "CONDITIONAL",
+      "reason": "Score 72, verdict CONDITIONAL"
     },
     "build_attempts": 2,
     "attempt_history": [
@@ -73,36 +67,35 @@
       },
       {
         "attempt": 2,
-        "verdict": "FAIL",
-        "score": 55,
-        "effective": "FAIL"
+        "verdict": "CONDITIONAL",
+        "score": 72,
+        "effective": "CONDITIONAL"
       }
     ]
   },
   "log": [
-    "[2026-05-31T09:00:04.223Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 9d9b02e",
-    "[WATCHDOG] In sync at 9d9b02e",
-    "[QUEUE] Loaded via contents-api. Pending: 13, total: 23",
+    "[2026-05-31T09:15:01.305Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ 5646860",
+    "[WATCHDOG] In sync at 5646860",
+    "[QUEUE] Loaded via contents-api. Pending: 12, total: 23",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-05-31T09:00:06.039Z] Processing: AUTO-018 — Foundation data layer with Neon DB and core schema",
+    "[2026-05-31T09:15:03.234Z] Processing: AUTO-021 — Database connection layer with environment validation",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 5 queries...",
-    "[RESEARCHER] skipped — 0 result(s)",
+    "[RESEARCHER] Skipped — no research_queries in spec",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 6 files",
+    "[BUILDER] Attempt 1 complete — 7 files",
     "[AUDITOR] Reviewing attempt 1...",
     "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
     "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 5 files",
+    "[BUILDER] Attempt 2 complete — 6 files",
     "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: FAIL (55/100)",
-    "[GATE] Attempt 2: Auditor rejected (score 55) → FAIL",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): Auditor rejected (score 55)"
+    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
+    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)"
   ]
 }
