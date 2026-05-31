@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-31T12:45:02.166Z",
+  "updated_at": "2026-05-31T12:48:10.061Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -630,14 +630,15 @@
       "title": "Core RFQ schema migration with Drizzle and seed script",
       "directive": "Depends on AUTO-024 health check returning 200. Using Drizzle ORM, define the core schema in `lib/db/schema.ts` with three tables only: `rfqs` (id uuid PK, title text NOT NULL, status enum['draft','pending','awarded','closed'], created_at timestamptz default now(), updated_at timestamptz default now()), `rfq_line_items` (id uuid PK, rfq_id uuid FK->rfqs.id ON DELETE CASCADE, description text, quantity numeric(12,4), unit_price numeric(12,4)), and `audit_log` (id uuid PK, table_name text, record_id uuid, action text, changed_by text, changed_at timestamptz default now(), payload jsonb). Generate the migration file via `drizzle-kit generate` into `drizzle/migrations/`. Create `scripts/seed.ts` that inserts 3 sample RFQs with 2 line items each. Add `db:migrate` and `db:seed` npm scripts. Do NOT drop or rename any existing columns. Advances EQS clauses: financial accuracy ±0.1% (numeric precision on prices), 100% auditable data (audit_log table), immutable audit log orientation.",
       "priority": 1,
-      "status": "in_progress",
+      "status": "complete",
       "origin": "auto",
       "rationale": "Every previous schema attempt (AUTO-012, AUTO-015, AUTO-018, AUTO-021) bundled connection setup with schema creation, causing cascading failures. With AUTO-024 isolating the connection layer, this directive can assume a working client and focus solely on schema definition and migration — matching the Week 1 roadmap priority for Neon DB migration with the smallest safe scope increment.",
       "created_at": "2026-05-31T12:30:44.440Z",
       "started_at": "2026-05-31T12:45:02.166Z",
-      "completed_at": null,
+      "completed_at": "2026-05-31T12:48:10.061Z",
       "commit_sha": null,
-      "auditor_score": null
+      "auditor_score": 92,
+      "build_attempts": 2
     }
   ]
 }
