@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-05-31T08:04:59.436Z",
+  "timestamp": "2026-05-31T08:17:55.398Z",
   "directive": {
-    "id": "AUTO-012",
-    "title": "Database schema foundation with Drizzle ORM",
+    "id": "AUTO-013",
+    "title": "Static RFQ dashboard with mock data structure",
     "status": "failed"
   },
-  "elapsed_seconds": 289.141,
+  "elapsed_seconds": 172.057,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -19,8 +19,8 @@
         "audit_focus",
         "estimated_complexity"
       ],
-      "acceptance_criteria_count": 16,
-      "research_queries_count": 6,
+      "acceptance_criteria_count": 20,
+      "research_queries_count": 8,
       "spec_parse_error": false
     },
     "researcher": {
@@ -32,77 +32,51 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 3,
+      "files_count": 8,
       "parse_error": false,
-      "first_file_path": "package.json"
+      "first_file_path": "tailwind.config.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "FAIL",
-      "score": 40,
-      "summary": "The generated code is critically incomplete. Only 3 files were provided (package.json, .env.example, drizzle.config.ts) out of the 14+ files required by the build specification. The package.json introduces dependencies (drizzle-orm, postgres, bcryptjs, drizzle-kit, tsx) that are not in the INSTALLED PACKAGES list, which is a CRITICAL BUILDABILITY violation. No schema definitions, migration scripts, seed scripts, database connection code, or type definitions were generated. The build fails 14 out of 16 acceptance criteria. The only passing criteria are the presence of scripts in package.json and the absence of DATABASE_URL in logs (since no code was generated that could log it). This build cannot be deployed and requires complete re-generation of all missing files.",
+      "verdict": "CONDITIONAL",
+      "score": null,
       "pre_check_failed": false,
-      "issue_count": 9,
-      "top_issues": [
-        {
-          "severity": "CRITICAL",
-          "description": "The generated code is severely incomplete. Only 3 files were provided (package.json, .env.example, drizzle.config.ts) out of the 14+ files required by the build specification. No schema files, no migration script, no seed script, no database connection code, no type definitions were generated."
-        },
-        {
-          "severity": "CRITICAL",
-          "description": "Missing required dependencies: drizzle-orm, postgres, bcryptjs, zod are listed but not in the INSTALLED PACKAGES list. The INSTALLED PACKAGES list only includes @supabase/supabase-js, @tanstack/react-query, @types/node, @types/pg, @types/react, @types/react-dom, @types/uuid, autoprefixer, clsx, eslint, eslint-config-next, isomorphic-dompurify, next, next-auth, pg, postcss, react, react-dom, tailwindcss, typescript, uuid, zod. The generated package.json adds dependencies not in the allowed list."
-        },
-        {
-          "severity": "CRITICAL",
-          "description": "BUILDABILITY violation: The generated package.json includes dependencies (drizzle-orm, postgres, bcryptjs, drizzle-kit, tsx) that are NOT present in the INSTALLED PACKAGES list. Any import of these packages would fail to resolve. This is a CRITICAL issue that caps the score at 60."
-        }
-      ]
+      "issue_count": 0,
+      "top_issues": []
     },
     "gate": {
       "allowed": false,
       "effective_verdict": "FAIL",
-      "reason": "Auditor rejected (score 40)"
+      "reason": "No numeric score — EQS v1.0 requires quantitative quality gate"
     },
-    "build_attempts": 2,
+    "build_attempts": 1,
     "attempt_history": [
       {
         "attempt": 1,
         "verdict": "CONDITIONAL",
-        "score": 72,
-        "effective": "CONDITIONAL"
-      },
-      {
-        "attempt": 2,
-        "verdict": "FAIL",
-        "score": 40,
+        "score": null,
         "effective": "FAIL"
       }
     ]
   },
   "log": [
-    "[2026-05-31T08:00:10.296Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 9949cfa",
-    "[WATCHDOG] In sync at 9949cfa",
-    "[QUEUE] Loaded via contents-api. Pending: 17, total: 23",
+    "[2026-05-31T08:15:03.341Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ 40e450a",
+    "[WATCHDOG] In sync at 40e450a",
+    "[QUEUE] Loaded via contents-api. Pending: 16, total: 23",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-05-31T08:00:12.513Z] Processing: AUTO-012 — Database schema foundation with Drizzle ORM",
+    "[2026-05-31T08:15:05.649Z] Processing: AUTO-013 — Static RFQ dashboard with mock data structure",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 6 queries...",
+    "[RESEARCHER] Running 8 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 15 files",
+    "[BUILDER] Attempt 1 complete — 8 files",
     "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
-    "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 3 files",
-    "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: FAIL (40/100)",
-    "[GATE] Attempt 2: Auditor rejected (score 40) → FAIL",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): Auditor rejected (score 40)"
+    "[AUDITOR] Attempt 1 verdict: CONDITIONAL",
+    "[GATE] Attempt 1: No numeric score — EQS v1.0 requires quantitative quality gate → FAIL",
+    "[COMMIT] Skipped — gate blocked after 1 attempt(s): No numeric score — EQS v1.0 requires quantitative quality gate"
   ]
 }
