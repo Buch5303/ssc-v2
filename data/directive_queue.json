@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-31T11:15:18.506Z",
+  "updated_at": "2026-05-31T11:20:13.729Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -472,15 +472,31 @@
       "title": "Error handling and logging infrastructure setup",
       "directive": "Implement comprehensive error handling system: 1) Global error boundary with user-friendly fallbacks, 2) Structured logging with error tracking, 3) API error standardization with proper HTTP codes, 4) Client-side error reporting mechanism. Must support audit trail requirements per EQS §4.1 and enable rapid issue diagnosis. Files: lib/errors/, components/ErrorBoundary.tsx, middleware.ts (non-auth portions).",
       "priority": 2,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "auto",
       "rationale": "High failure rate suggests insufficient error handling infrastructure. Critical for debugging ongoing issues and maintaining system reliability per EQS standards.",
       "created_at": "2026-05-10T07:00:50.355Z",
       "started_at": "2026-05-31T11:15:18.506Z",
-      "completed_at": null,
+      "completed_at": "2026-05-31T11:20:13.729Z",
       "commit_sha": null,
-      "auditor_score": null,
-      "attempts": 1
+      "auditor_score": 72,
+      "attempts": 1,
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        }
+      ]
     },
     {
       "id": "AUTO-021",
