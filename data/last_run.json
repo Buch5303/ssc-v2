@@ -1,21 +1,27 @@
 {
-  "timestamp": "2026-05-31T09:19:47.607Z",
+  "timestamp": "2026-05-31T09:35:00.695Z",
   "directive": {
-    "id": "AUTO-021",
-    "title": "Database connection layer with environment validation",
+    "id": "AUTO-022",
+    "title": "Basic application shell with navigation structure",
     "status": "failed"
   },
-  "elapsed_seconds": 286.303,
+  "elapsed_seconds": 294.375,
   "pipeline": {
     "architect": {
       "status": "complete",
       "spec_keys": [
-        "raw",
-        "parse_error"
+        "directive_id",
+        "title",
+        "objective",
+        "research_queries",
+        "build_spec",
+        "acceptance_criteria",
+        "audit_focus",
+        "estimated_complexity"
       ],
-      "acceptance_criteria_count": 0,
+      "acceptance_criteria_count": 20,
       "research_queries_count": 0,
-      "spec_parse_error": true
+      "spec_parse_error": false
     },
     "researcher": {
       "results_count": 0
@@ -26,36 +32,36 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 6,
+      "files_count": 21,
       "parse_error": false,
-      "first_file_path": "lib/db/types.ts"
+      "first_file_path": "components/layout/AppShell.tsx"
     },
     "auditor": {
       "status": "complete",
       "verdict": "CONDITIONAL",
-      "score": 72,
-      "summary": "The generated code provides a solid foundation for the database connection layer with proper pooling, retry logic, circuit breaker, and audit logging. However, there are several critical issues that prevent this from being production-ready. The most significant problems are: (1) circular dependency risks from dynamic imports across multiple files, (2) missing health check implementation (lib/db/health.ts and /app/api/health/db/route.ts are not generated), (3) memory leak in circuit breaker timeout handling, and (4) potential build-time execution issues with env-validator. The code also has several medium-severity issues including type mismatches, inefficient dynamic imports, and Node.js-specific APIs that may not work in all serverless environments. The build is recoverable with fixes, hence CONDITIONAL verdict.",
+      "score": 78,
+      "summary": "The generated code implements the core application shell with AppShell, Header, Sidebar, routing, and loading states as specified. The architecture follows Next.js 14 App Router patterns with proper code-splitting, Suspense boundaries, and accessibility features. Key issues: (1) HIGH - LucideIcon type imported from barrel violates constraint, (2) MEDIUM - Header missing 'use client' directive will cause hydration errors, (3) MEDIUM - Navigation audit trail 'from' field uses unreliable document.referrer, (4) LOW - Skeleton card count mismatch, header layout issue with collapsed sidebar. The build is recoverable with fixes. Score 78/100 reflects these issues against the 20 acceptance criteria.",
       "pre_check_failed": false,
-      "issue_count": 12,
+      "issue_count": 7,
       "top_issues": [
         {
-          "severity": "CRITICAL",
-          "description": "Dynamic import of './audit-log' inside logEvent method creates a circular dependency risk and breaks the singleton pattern. The import is called asynchronously and may fail if audit-log.ts imports from circuit-breaker.ts."
+          "severity": "HIGH",
+          "description": "Imports LucideIcon type from 'lucide-react' barrel export. Constraint explicitly prohibits barrel imports from lucide-react. This violates acceptance criterion #20 and the constraint 'lucide-react imports must be individual named imports (not barrel) to enable tree-shaking'."
         },
         {
-          "severity": "CRITICAL",
-          "description": "Dynamic import of './audit-log' inside logRetryEvent function creates same circular dependency risk as circuit-breaker.ts."
+          "severity": "MEDIUM",
+          "description": "Navigation event 'from' field uses document.referrer which is unreliable for client-side navigation. It will be empty or show previous full URL, not the previous route within the app. This makes the audit trail incomplete."
         },
         {
-          "severity": "CRITICAL",
-          "description": "Dynamic import of './circuit-breaker' inside pool error handler creates circular dependency risk."
+          "severity": "MEDIUM",
+          "description": "Header component is not a client component ('use client' directive missing) but uses interactive elements (buttons with onClick). This will cause a hydration error in Next.js 14 App Router."
         }
       ]
     },
     "gate": {
       "allowed": true,
       "effective_verdict": "CONDITIONAL",
-      "reason": "Score 72, verdict CONDITIONAL"
+      "reason": "Score 78, verdict CONDITIONAL"
     },
     "build_attempts": 2,
     "attempt_history": [
@@ -68,34 +74,34 @@
       {
         "attempt": 2,
         "verdict": "CONDITIONAL",
-        "score": 72,
+        "score": 78,
         "effective": "CONDITIONAL"
       }
     ]
   },
   "log": [
-    "[2026-05-31T09:15:01.305Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 5646860",
-    "[WATCHDOG] In sync at 5646860",
-    "[QUEUE] Loaded via contents-api. Pending: 12, total: 23",
+    "[2026-05-31T09:30:06.321Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ a4aea8a",
+    "[WATCHDOG] In sync at a4aea8a",
+    "[QUEUE] Loaded via contents-api. Pending: 11, total: 23",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-05-31T09:15:03.234Z] Processing: AUTO-021 — Database connection layer with environment validation",
+    "[2026-05-31T09:30:08.389Z] Processing: AUTO-022 — Basic application shell with navigation structure",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
     "[RESEARCHER] Skipped — no research_queries in spec",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 7 files",
+    "[BUILDER] Attempt 1 complete — 15 files",
     "[AUDITOR] Reviewing attempt 1...",
     "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
     "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 6 files",
+    "[BUILDER] Attempt 2 complete — 21 files",
     "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)"
+    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (78/100)",
+    "[GATE] Attempt 2: Score 78, verdict CONDITIONAL → CONDITIONAL",
+    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 78/100)"
   ]
 }
