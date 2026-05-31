@@ -21,7 +21,17 @@ async function vercelFetch(path: string, method: string, body?: any) {
 
 export async function POST(req: Request) {
   try {
-    const { action, key, value, keys } = await req.json();
+    const { action, key, value, keys, token } = await req.json();
+
+    // --- Auth gate (added 2026-05-31) ---------------------------------
+    // All mutating/info actions require ADMIN_SECRET (body `token` or
+    // x-admin-token header). `bootstrap` is excluded — it self-guards by
+    // only running when VERCEL_TOKEN is not yet set.
+    const ADMIN_SECRET = (process.env.ADMIN_SECRET || "").trim();
+    const providedToken = (token || req.headers.get("x-admin-token") || "").trim();
+    if (action !== "bootstrap" && (!ADMIN_SECRET || providedToken !== ADMIN_SECRET)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     switch (action) {
       // Set a single env var
@@ -144,6 +154,19 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const action = url.searchParams.get("action");
   const token = url.searchParams.get("token");
+
+  // --- Auth gate (added 2026-05-31) -----------------------------------
+  // This endpoint was previously UNAUTHENTICATED: anyone could set env
+  // vars or trigger redeploys. Privileged actions now require ?token= (or
+  // x-admin-token header) matching ADMIN_SECRET. Fails closed if the secret
+  // is unset. `bootstrap` keeps its own one-time guard (only runs when
+  // VERCEL_TOKEN is absent), so it is intentionally excluded here.
+  const ADMIN_SECRET = (process.env.ADMIN_SECRET || "").trim();
+  const providedToken = (token || req.headers.get("x-admin-token") || "").trim();
+  const privilegedGet = action === "set_env" || action === "redeploy";
+  if (privilegedGet && (!ADMIN_SECRET || providedToken !== ADMIN_SECRET)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   // Set env var via GET — only works when VERCEL_TOKEN is already bootstrapped
   if (action === "set_env") {
