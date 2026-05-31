@@ -72,7 +72,7 @@ Build the code now. Output ONLY JSON with the files array.`;
     // CONDITIONAL and shipping incomplete RFQ CRUD (missing PUT + queries).
     // 16384 gives headroom for 5-6 file directives in one pass. Override
     // per-env via BUILDER_MAX_TOKENS if a directive needs even more.
-    const model = process.env.BUILDER_MODEL || "claude-sonnet-4-20250514";
+    const model = process.env.BUILDER_MODEL || "claude-sonnet-4-6";
     const maxTokens = parseInt(process.env.BUILDER_MAX_TOKENS || "16384", 10);
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
