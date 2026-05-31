@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-31T12:05:22.078Z",
+  "updated_at": "2026-05-31T12:30:44.450Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -600,6 +600,34 @@
       "commit_sha": null,
       "auditor_score": null,
       "attempts": 7
+    },
+    {
+      "id": "AUTO-024",
+      "title": "Minimal viable DB connection with health check endpoint",
+      "directive": "Create a single, self-contained database connection module at `lib/db/connection.ts` that: (1) reads DATABASE_URL from environment using a hard fail with a clear error message if absent, (2) exports a tested Neon/Postgres client using the `@neondatabase/serverless` package, (3) implements a connection pool with max 10 connections and 30s idle timeout. Then create a GET handler at `app/api/health/db/route.ts` that executes `SELECT 1` and returns `{ status: 'ok', latency_ms: number }` on success or `{ status: 'error', message: string }` with HTTP 503 on failure. Include a Jest test at `__tests__/lib/db/connection.test.ts` that mocks the Neon client and asserts both success and failure paths. No schema creation, no migrations — connection only. Advances EQS clauses: real-time latency baseline establishment, 100% auditable data pipeline foundation, Zero Trust orientation (fail-closed on missing secrets).",
+      "priority": 1,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "19 consecutive failures share a common root cause pattern: directives attempt too much (schema + ORM + endpoints + dashboard) in one pass. The entire Week 1 Neon DB migration goal remains unmet. This directive isolates the single hardest-failing primitive — a verified DB connection — with the smallest possible surface area to break the failure streak and give subsequent directives a proven foundation to build on.",
+      "created_at": "2026-05-31T12:30:44.440Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
+    },
+    {
+      "id": "AUTO-025",
+      "title": "Core RFQ schema migration with Drizzle and seed script",
+      "directive": "Depends on AUTO-024 health check returning 200. Using Drizzle ORM, define the core schema in `lib/db/schema.ts` with three tables only: `rfqs` (id uuid PK, title text NOT NULL, status enum['draft','pending','awarded','closed'], created_at timestamptz default now(), updated_at timestamptz default now()), `rfq_line_items` (id uuid PK, rfq_id uuid FK->rfqs.id ON DELETE CASCADE, description text, quantity numeric(12,4), unit_price numeric(12,4)), and `audit_log` (id uuid PK, table_name text, record_id uuid, action text, changed_by text, changed_at timestamptz default now(), payload jsonb). Generate the migration file via `drizzle-kit generate` into `drizzle/migrations/`. Create `scripts/seed.ts` that inserts 3 sample RFQs with 2 line items each. Add `db:migrate` and `db:seed` npm scripts. Do NOT drop or rename any existing columns. Advances EQS clauses: financial accuracy ±0.1% (numeric precision on prices), 100% auditable data (audit_log table), immutable audit log orientation.",
+      "priority": 1,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "Every previous schema attempt (AUTO-012, AUTO-015, AUTO-018, AUTO-021) bundled connection setup with schema creation, causing cascading failures. With AUTO-024 isolating the connection layer, this directive can assume a working client and focus solely on schema definition and migration — matching the Week 1 roadmap priority for Neon DB migration with the smallest safe scope increment.",
+      "created_at": "2026-05-31T12:30:44.440Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
     }
   ]
 }
