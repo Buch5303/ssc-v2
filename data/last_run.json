@@ -1,21 +1,27 @@
 {
-  "timestamp": "2026-05-31T10:34:58.388Z",
+  "timestamp": "2026-05-31T10:48:45.265Z",
   "directive": {
-    "id": "AUTO-011",
-    "title": "Performance monitoring and bundle analysis setup",
+    "id": "AUTO-017",
+    "title": "RFQ dashboard with live data integration",
     "status": "failed"
   },
-  "elapsed_seconds": 295.814,
+  "elapsed_seconds": 180.011,
   "pipeline": {
     "architect": {
       "status": "complete",
       "spec_keys": [
-        "raw",
-        "parse_error"
+        "directive_id",
+        "title",
+        "objective",
+        "research_queries",
+        "build_spec",
+        "acceptance_criteria",
+        "audit_focus",
+        "estimated_complexity"
       ],
-      "acceptance_criteria_count": 0,
-      "research_queries_count": 0,
-      "spec_parse_error": true
+      "acceptance_criteria_count": 25,
+      "research_queries_count": 6,
+      "spec_parse_error": false
     },
     "researcher": {
       "results_count": 0
@@ -26,76 +32,65 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 8,
+      "files_count": 7,
       "parse_error": false,
-      "first_file_path": "package.json"
+      "first_file_path": "lib/types/rfq.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "CONDITIONAL",
-      "score": 72,
-      "summary": "The build implements the performance monitoring infrastructure as specified, with bundle analyzer integration, web vitals instrumentation, and a metrics ingestion endpoint. Most acceptance criteria are satisfied. However, there are two critical issues: (1) the _app.tsx modification destroys existing provider/layout structure, violating the constraint to preserve it, and (2) the vitals instrumentation has a closure bug that may cause stale reporter references. The rate limiting cleanup interval is inappropriate for serverless environments. The build is recoverable with fixes but cannot ship in current state.",
+      "verdict": "FAIL",
+      "score": 55,
+      "summary": "The generated code provides a solid foundation with proper TypeScript types, parameterized queries (except for the critical ORDER BY vulnerability), and API route structure. However, it fails to deliver the majority of the required UI components (table, filters, search, modal, stats bar, loading/empty/error states) and contains a critical SQL injection vulnerability in the ORDER BY clause. The build is also broken due to missing @neondatabase/serverless package. The code achieves approximately 35% of the specification requirements. Major issues include: (1) CRITICAL SQL injection in ORDER BY clause, (2) Missing all UI components, (3) Missing required package dependency, (4) Floating point arithmetic on monetary values, (5) Audit logging not persisted to database. The code cannot be shipped in its current state.",
       "pre_check_failed": false,
-      "issue_count": 6,
+      "issue_count": 11,
       "top_issues": [
         {
-          "severity": "HIGH",
-          "description": "Existing Provider wrapping, CSS imports, and layout structure are not preserved. The generated code replaces the entire component return with just <Component {...pageProps} />, removing any existing providers, layouts, or global CSS imports that were in the original _app.tsx."
+          "severity": "CRITICAL",
+          "description": "SQL injection vulnerability in ORDER BY clause. String interpolation used: `ORDER BY ${sort_by} ${sort_dir.toUpperCase()}`. This bypasses the whitelist validation in rfq-params.ts because the validation only runs in the API route, not in the query function itself."
         },
         {
-          "severity": "MEDIUM",
-          "description": "The `flushMetrics` function is called inside `createReporter`'s returned callback, but `reporter` is defined inside the same callback, creating a closure that redefines the reporter function on every metric. This means the reporter passed to `scheduleFlush` and event listeners may reference a stale closure."
+          "severity": "CRITICAL",
+          "description": "Missing @neondatabase/serverless package in package.json dependencies. The code imports from '@neondatabase/serverless' but this package is not listed in the installed packages. This will cause build failure."
         },
         {
-          "severity": "MEDIUM",
-          "description": "The cleanup interval for rate limiting uses a module-level variable `cleanupInterval` that may not be properly cleaned up in serverless environments. In Vercel serverless functions, this interval will persist across invocations and may cause memory leaks."
+          "severity": "CRITICAL",
+          "description": "BUILDABILITY violation: The generated code imports from '@neondatabase/serverless' which is not in the installed packages list. This is a CRITICAL issue that prevents compilation."
         }
       ]
     },
     "gate": {
-      "allowed": true,
-      "effective_verdict": "CONDITIONAL",
-      "reason": "Score 72, verdict CONDITIONAL"
+      "allowed": false,
+      "effective_verdict": "FAIL",
+      "reason": "Auditor rejected (score 55)"
     },
-    "build_attempts": 2,
+    "build_attempts": 1,
     "attempt_history": [
       {
         "attempt": 1,
-        "verdict": "CONDITIONAL",
-        "score": 72,
-        "effective": "CONDITIONAL"
-      },
-      {
-        "attempt": 2,
-        "verdict": "CONDITIONAL",
-        "score": 72,
-        "effective": "CONDITIONAL"
+        "verdict": "FAIL",
+        "score": 55,
+        "effective": "FAIL"
       }
     ]
   },
   "log": [
-    "[2026-05-31T10:30:02.575Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 3333be0",
-    "[WATCHDOG] In sync at 3333be0",
-    "[QUEUE] Loaded via contents-api. Pending: 7, total: 23",
+    "[2026-05-31T10:45:45.254Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ 98ef079",
+    "[WATCHDOG] In sync at 98ef079",
+    "[QUEUE] Loaded via contents-api. Pending: 6, total: 23",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-05-31T10:30:04.363Z] Processing: AUTO-011 — Performance monitoring and bundle analysis setup",
+    "[2026-05-31T10:45:46.761Z] Processing: AUTO-017 — RFQ dashboard with live data integration",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Skipped — no research_queries in spec",
+    "[RESEARCHER] Running 6 queries...",
+    "[RESEARCHER] skipped — 0 result(s)",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 9 files",
+    "[BUILDER] Attempt 1 complete — 7 files",
     "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
-    "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 8 files",
-    "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)"
+    "[AUDITOR] Attempt 1 verdict: FAIL (55/100)",
+    "[GATE] Attempt 1: Auditor rejected (score 55) → FAIL",
+    "[COMMIT] Skipped — gate blocked after 1 attempt(s): Auditor rejected (score 55)"
   ]
 }
