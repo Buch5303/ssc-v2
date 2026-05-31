@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-05-31T11:05:33.246Z",
+  "timestamp": "2026-05-31T11:20:14.586Z",
   "directive": {
-    "id": "AUTO-019",
-    "title": "Static RFQ dashboard with performance budget enforcement",
+    "id": "AUTO-020",
+    "title": "Error handling and logging infrastructure setup",
     "status": "failed"
   },
-  "elapsed_seconds": 288.019,
+  "elapsed_seconds": 298.123,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -26,29 +26,29 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 4,
+      "files_count": 5,
       "parse_error": false,
-      "first_file_path": "types/rfq.ts"
+      "first_file_path": "lib/errors/types.ts"
     },
     "auditor": {
       "status": "complete",
       "verdict": "CONDITIONAL",
       "score": 72,
-      "summary": "The generated code provides a solid foundation for the RFQ dashboard with proper TypeScript types, mock data covering all permutations, and performance monitoring infrastructure. However, there are critical buildability issues: the performance.ts file imports React hooks (useEffect) which will cause build failures when imported by Server Components. The PerformanceMonitor.mark() call in the server component page.tsx is architecturally incorrect. These issues must be resolved before the build can compile. The code structure otherwise follows the spec well with dynamic imports, skeleton loading, and proper formatting. Score is reduced due to build-breaking issues that prevent verification of acceptance criteria.",
+      "summary": "The generated code provides a solid foundation for the error handling system with proper TypeScript types, RFC 7807 API error responses, and structured logging. However, the build is incomplete due to truncation (recovered_from_truncation: true), missing critical components like ErrorBoundary, client-reporter, and the full audit trail implementation. Several security and reliability issues need addressing: the audit hash uses a simple hash instead of SHA-256, the request context storage is not thread-safe, and the AUDIT_SECRET handling is insecure. The build is CONDITIONAL with a score of 72, meaning it can ship with the noted fixes, but the missing components must be completed before production deployment.",
       "pre_check_failed": false,
-      "issue_count": 8,
+      "issue_count": 10,
       "top_issues": [
         {
           "severity": "CRITICAL",
-          "description": "Import of 'react' (useEffect) in a file that is used in server components (page.tsx imports PerformanceMonitor). This will cause a build error because 'react' cannot be imported in a module that is imported by a Server Component unless it's a Client Component boundary."
+          "description": "The audit hash uses a synchronous simple hash (createSimpleHash) instead of the SHA-256 hash specified in the build spec. The async createHash function is defined but never used. This violates the EQS §4.1 requirement for SHA-256 based audit hashing."
         },
         {
-          "severity": "HIGH",
-          "description": "PerformanceMonitor.mark('dashboard-render-start') is called at the top of a Server Component. PerformanceMonitor.mark() checks typeof window, but the import of PerformanceMonitor itself may cause issues if it imports from 'react' (see above). Additionally, performance.mark() in a server component is meaningless."
+          "severity": "CRITICAL",
+          "description": "The audit chain implementation uses an in-memory array (auditChain) that is not persisted and will be lost on server restart. This violates the immutable logging requirement. Additionally, the chain hash computation is a simple hash, not SHA-256."
         },
         {
-          "severity": "HIGH",
-          "description": "The usePerformanceMark hook uses useEffect but the file is imported by server components. This violates Next.js 14 rules about importing hooks in server components."
+          "severity": "CRITICAL",
+          "description": "The request context storage uses globalThis.requestContext which is not thread-safe and will cause race conditions in concurrent request handling. The AsyncLocalStorage-based approach specified in the build spec is not implemented."
         }
       ]
     },
@@ -74,25 +74,25 @@
     ]
   },
   "log": [
-    "[2026-05-31T11:00:45.228Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ af01231",
-    "[WATCHDOG] In sync at af01231",
-    "[QUEUE] Loaded via contents-api. Pending: 5, total: 23",
+    "[2026-05-31T11:15:16.463Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ 04bcc8c",
+    "[WATCHDOG] In sync at 04bcc8c",
+    "[QUEUE] Loaded via contents-api. Pending: 4, total: 23",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-05-31T11:00:47.071Z] Processing: AUTO-019 — Static RFQ dashboard with performance budget enforcement",
+    "[2026-05-31T11:15:18.506Z] Processing: AUTO-020 — Error handling and logging infrastructure setup",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
     "[RESEARCHER] Skipped — no research_queries in spec",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 8 files",
+    "[BUILDER] Attempt 1 complete — 5 files",
     "[AUDITOR] Reviewing attempt 1...",
     "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
     "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 4 files",
+    "[BUILDER] Attempt 2 complete — 5 files",
     "[AUDITOR] Reviewing attempt 2...",
     "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
     "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
