@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-31T12:30:44.450Z",
+  "updated_at": "2026-05-31T12:30:45.416Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -606,11 +606,11 @@
       "title": "Minimal viable DB connection with health check endpoint",
       "directive": "Create a single, self-contained database connection module at `lib/db/connection.ts` that: (1) reads DATABASE_URL from environment using a hard fail with a clear error message if absent, (2) exports a tested Neon/Postgres client using the `@neondatabase/serverless` package, (3) implements a connection pool with max 10 connections and 30s idle timeout. Then create a GET handler at `app/api/health/db/route.ts` that executes `SELECT 1` and returns `{ status: 'ok', latency_ms: number }` on success or `{ status: 'error', message: string }` with HTTP 503 on failure. Include a Jest test at `__tests__/lib/db/connection.test.ts` that mocks the Neon client and asserts both success and failure paths. No schema creation, no migrations — connection only. Advances EQS clauses: real-time latency baseline establishment, 100% auditable data pipeline foundation, Zero Trust orientation (fail-closed on missing secrets).",
       "priority": 1,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "19 consecutive failures share a common root cause pattern: directives attempt too much (schema + ORM + endpoints + dashboard) in one pass. The entire Week 1 Neon DB migration goal remains unmet. This directive isolates the single hardest-failing primitive — a verified DB connection — with the smallest possible surface area to break the failure streak and give subsequent directives a proven foundation to build on.",
       "created_at": "2026-05-31T12:30:44.440Z",
-      "started_at": null,
+      "started_at": "2026-05-31T12:30:45.416Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
