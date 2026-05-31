@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-05-31T07:35:02.219Z",
+  "timestamp": "2026-05-31T07:49:56.798Z",
   "directive": {
-    "id": "AUTO-007",
-    "title": "RFQ data model and API endpoints",
+    "id": "AUTO-010",
+    "title": "Basic RFQ list and detail pages with static data",
     "status": "failed"
   },
-  "elapsed_seconds": 264.826,
+  "elapsed_seconds": 264.423,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -19,8 +19,8 @@
         "audit_focus",
         "estimated_complexity"
       ],
-      "acceptance_criteria_count": 17,
-      "research_queries_count": 5,
+      "acceptance_criteria_count": 25,
+      "research_queries_count": 0,
       "spec_parse_error": false
     },
     "researcher": {
@@ -32,36 +32,36 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 9,
+      "files_count": 4,
       "parse_error": false,
       "first_file_path": "types/rfq.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "FAIL",
-      "score": 55,
-      "summary": "The generated code provides a solid foundation for the RFQ CRUD API with proper TypeScript types, Zod validation, and repository pattern. However, it fails on several critical acceptance criteria: missing migration SQL file, empty test files (both unit and integration), missing Prisma dependency in package.json, budget serialization returning Number instead of String, and missing error handling for PrismaNotFoundError. The build is not shippable in its current state due to these gaps. Primary fixes needed: generate the migration SQL, implement all test files, add Prisma dependencies, fix budget serialization to return string, and add proper error handling for missing records.",
+      "verdict": "CONDITIONAL",
+      "score": 72,
+      "summary": "The generated code is incomplete, with only 4 of 15 required files created. The existing files (types/rfq.ts, lib/mock-data/rfqs.ts, components/ui/ErrorBoundary.tsx, components/rfqs/RFQStatusBadge.tsx) are well-structured and follow TypeScript best practices with no 'any' types. The mock data contains 12 RFQ objects covering all 5 status types as required. However, the core page components (list page, detail page, loading states, error boundaries, table, detail card, requirements, timeline) are missing entirely. This results in 12 of 25 acceptance criteria being FAIL, 7 PARTIAL, and only 6 PASS. The build cannot function as a complete application without the missing files. The code that exists is of good quality and follows the specified patterns, but the truncation of generation left critical gaps that prevent the directive from being satisfied.",
       "pre_check_failed": false,
-      "issue_count": 11,
+      "issue_count": 5,
       "top_issues": [
         {
           "severity": "CRITICAL",
-          "description": "Required migration SQL file was not generated. The build spec explicitly lists this file in files_to_create but it is missing from the output."
+          "description": "Generated code is incomplete — only 4 of 15 required files were created. Missing: app/rfqs/page.tsx, app/rfqs/[id]/page.tsx, app/rfqs/loading.tsx, app/rfqs/[id]/loading.tsx, app/rfqs/error.tsx, app/rfqs/[id]/error.tsx, components/rfqs/RFQTable.tsx, components/rfqs/RFQDetailCard.tsx, components/rfqs/RFQRequirements.tsx, components/rfqs/RFQTimeline.tsx. Build cannot function without these files."
         },
         {
-          "severity": "CRITICAL",
-          "description": "Test file is empty - no test content was generated. Acceptance criteria require integration tests covering all endpoints."
+          "severity": "HIGH",
+          "description": "Error boundary has retry button but no back link to /rfqs as required by acceptance criterion 15 and constraints. Also missing ISO8601 timestamp logging as specified in audit_focus."
         },
         {
-          "severity": "CRITICAL",
-          "description": "Test file is empty - no unit tests for Zod schemas were generated. Acceptance criteria require 100% coverage of edge cases."
+          "severity": "MEDIUM",
+          "description": "Component is missing 'use client' directive. While it's a pure presentational component, the build spec requires all client components to be explicitly marked. However, this component has no hooks or state, so it could remain a server component. The spec says 'RFQStatusBadge must be a pure presentational component with no internal state' which is satisfied."
         }
       ]
     },
     "gate": {
-      "allowed": false,
-      "effective_verdict": "FAIL",
-      "reason": "Auditor rejected (score 55)"
+      "allowed": true,
+      "effective_verdict": "CONDITIONAL",
+      "reason": "Score 72, verdict CONDITIONAL"
     },
     "build_attempts": 2,
     "attempt_history": [
@@ -73,36 +73,35 @@
       },
       {
         "attempt": 2,
-        "verdict": "FAIL",
-        "score": 55,
-        "effective": "FAIL"
+        "verdict": "CONDITIONAL",
+        "score": 72,
+        "effective": "CONDITIONAL"
       }
     ]
   },
   "log": [
-    "[2026-05-31T07:30:37.394Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 4db76b1",
-    "[WATCHDOG] In sync at 4db76b1",
-    "[QUEUE] Loaded via contents-api. Pending: 19, total: 23",
+    "[2026-05-31T07:45:32.376Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ f222a1d",
+    "[WATCHDOG] In sync at f222a1d",
+    "[QUEUE] Loaded via contents-api. Pending: 18, total: 23",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-05-31T07:30:39.167Z] Processing: AUTO-007 — RFQ data model and API endpoints",
+    "[2026-05-31T07:45:35.390Z] Processing: AUTO-010 — Basic RFQ list and detail pages with static data",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 5 queries...",
-    "[RESEARCHER] skipped — 0 result(s)",
+    "[RESEARCHER] Skipped — no research_queries in spec",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 10 files",
+    "[BUILDER] Attempt 1 complete — 4 files",
     "[AUDITOR] Reviewing attempt 1...",
     "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
     "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 9 files",
+    "[BUILDER] Attempt 2 complete — 4 files",
     "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: FAIL (55/100)",
-    "[GATE] Attempt 2: Auditor rejected (score 55) → FAIL",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): Auditor rejected (score 55)"
+    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
+    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)"
   ]
 }
