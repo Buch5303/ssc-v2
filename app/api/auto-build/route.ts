@@ -520,7 +520,7 @@ export async function GET(req: Request) {
   // permanently occupies the active slot and starves the queue. Resetting to
   // pending with an incremented attempts counter lets the next cycle retry
   // (and the counter lets us auto-fail after N retries if we wire that up).
-  const STUCK_MS = 30 * 60 * 1000;
+  const STUCK_MS = 15 * 60 * 1000;
   const now = Date.now();
   let recoveredStuck = 0;
   for (const d of queue.directives) {
@@ -678,7 +678,12 @@ export async function GET(req: Request) {
   // auditor's top issues back to the Builder as `retry_context` and
   // re-run. After MAX_BUILD_ATTEMPTS without PASS, the directive is
   // marked failed so the queue advances rather than shipping junk.
-  const MAX_BUILD_ATTEMPTS = 3;
+  // Capped at 2 (was 3): a full 3-attempt cycle runs ~300s+ and gets killed
+  // by the Vercel function timeout mid-build, orphaning the directive
+  // in_progress and (on retry) looping while burning credits with no result.
+  // Two attempts complete in ~220s — safely under the 300s ceiling — so the
+  // directive always reaches a definite pass/fail instead of timing out.
+  const MAX_BUILD_ATTEMPTS = 2;
   let buildResult: any = null;
   let auditResult: any = null;
   let rawVerdict = "UNKNOWN";
