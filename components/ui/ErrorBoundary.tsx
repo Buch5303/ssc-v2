@@ -1,5 +1,5 @@
 'use client';
-import { Component, ReactNode } from 'react';
+import { Component, ReactNode, ErrorInfo } from 'react';
 
 interface Props {
   children: ReactNode;
@@ -19,6 +19,29 @@ export class ErrorBoundary extends Component<Props, State> {
 
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    // Structured error logging — emitted to the console, which Vercel
+    // captures as runtime logs (readable via the dashboard / Vercel MCP).
+    // Stable JSON shape so failures can be searched/aggregated later.
+    // Zero external dependencies by design.
+    try {
+      // eslint-disable-next-line no-console
+      console.error(
+        JSON.stringify({
+          type: 'react_error_boundary',
+          ts: new Date().toISOString(),
+          section: this.props.fallbackTitle || 'unknown',
+          message: error?.message || String(error),
+          stack: error?.stack?.split('\n').slice(0, 4).join(' | '),
+          componentStack: info?.componentStack?.split('\n').slice(0, 4).join(' | '),
+        })
+      );
+    } catch {
+      // eslint-disable-next-line no-console
+      console.error('[ErrorBoundary]', error);
+    }
   }
 
   render() {
