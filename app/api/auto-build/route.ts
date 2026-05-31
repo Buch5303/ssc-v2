@@ -1,8 +1,50 @@
 import { NextResponse } from "next/server";
+import { sendAlert, classifyApiError } from "@/lib/notify";
 
 // Vercel function timeout: 300s (Pro plan max). Was 60 on Hobby.
 // Pro upgrade lifted ceiling so full Sonnet 4 + 8K-token Builder fits cleanly.
 export const maxDuration = 300;
+
+const ALERT_COOLDOWN_MIN = 360; // 6h between identical alerts
+
+/**
+ * Cheap Anthropic reachability probe (1 output token). Catches the exact
+ * failure mode that silently drained the queue on 2026-05-19: when the API
+ * credit balance hit zero, every agent call failed instantly and each cron
+ * fire burned one directive to "failed" until the queue was empty. Running
+ * this BEFORE we touch the queue lets us pause cleanly and alert instead of
+ * marking real work as failed.
+ */
+async function anthropicHealthCheck(
+  apiKey: string
+): Promise<{ ok: boolean; error?: string; kind?: ReturnType<typeof classifyApiError> }> {
+  if (!apiKey) return { ok: false, error: "ANTHROPIC_API_KEY not set", kind: "auth" };
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1,
+        messages: [{ role: "user", content: "ping" }],
+      }),
+    });
+    const data: any = await res.json().catch(() => ({}));
+    if (data?.error) {
+      return { ok: false, error: data.error.message || "unknown API error", kind: classifyApiError(data.error.message) };
+    }
+    if (!res.ok) {
+      return { ok: false, error: `HTTP ${res.status}`, kind: "other" };
+    }
+    return { ok: true };
+  } catch (e: any) {
+    return { ok: false, error: e?.message || "health check exception", kind: "other" };
+  }
+}
 
 /**
  * FlowSeer Auto-Builder — Autonomous Build Directive v1.0
@@ -407,6 +449,11 @@ export async function GET(req: Request) {
   const heal = await selfHealPreflight();
   log.push(`[SELF-HEAL] ${heal.action}${heal.current_sha ? ` @ ${heal.current_sha}` : ""}${heal.error ? ` (${heal.error})` : ""}`);
   if (heal.action === "rolled_back") {
+    await sendAlert(
+      "self_heal_rollback",
+      `Production deploy was broken and auto-rolled-back (${heal.current_sha} → ${heal.rolled_back_to}). Site is healthy on the prior good build; the bad change needs a look.`,
+      { baseUrl, cooldownMinutes: 60 }
+    );
     return NextResponse.json({
       status: "rolled_back",
       stage: "self_heal",
@@ -492,6 +539,37 @@ export async function GET(req: Request) {
     await saveQueue(queue, `[RECOVERY] Reset ${recoveredStuck} stuck directive(s) to pending`, baseUrl).catch(() => {});
   }
 
+  // ----------------------------------------------------------------------
+  // Layer 0 — API health preflight (added after the 2026-05-19 credit
+  // outage). If the Anthropic API is unreachable for a PERSISTENT reason
+  // (credit exhausted / bad key), pause WITHOUT consuming any directive and
+  // text the operator. Transient reasons (rate limit / overloaded) also pause
+  // this cycle — the next cron retries — but don't page, since they self-heal.
+  // This is the single guard that prevents another silent queue burn.
+  // ----------------------------------------------------------------------
+  const anthropicKey = (process.env.ANTHROPIC_API_KEY || "").trim();
+  const health = await anthropicHealthCheck(anthropicKey);
+  if (!health.ok) {
+    const persistent = health.kind === "credit" || health.kind === "auth";
+    log.push(`[PREFLIGHT] Anthropic API ${health.kind}: ${health.error} — pausing cycle, no directives consumed`);
+    if (persistent) {
+      await sendAlert(
+        `infra_anthropic_${health.kind}`,
+        `Build pipeline PAUSED — Anthropic API ${health.kind} error: "${health.error}". No directives were consumed. It resumes automatically once resolved (Console → Plans & Billing for credit issues).`,
+        { baseUrl, cooldownMinutes: ALERT_COOLDOWN_MIN }
+      );
+    }
+    return NextResponse.json({
+      status: "paused",
+      stage: "preflight",
+      kind: health.kind,
+      reason: health.error,
+      note: "Anthropic API unreachable. Queue left intact; next cron will retry.",
+      log,
+    });
+  }
+  log.push(`[PREFLIGHT] Anthropic API healthy`);
+
   // Layer 2 — Self-extend queue if low
   if (pendingCount < 2) {
     log.push(`[GENERATOR] Queue low (pending=${pendingCount}). Invoking Directive Generator...`);
@@ -529,6 +607,11 @@ export async function GET(req: Request) {
   const next = candidates[0];
 
   if (!next) {
+    await sendAlert(
+      "queue_idle",
+      `Build queue is empty — no pending directives and the generator produced none. The pipeline is idle until new work is added.`,
+      { baseUrl, cooldownMinutes: 720 }
+    );
     return NextResponse.json({
       status: "idle",
       message: "No pending directives and generator produced none",

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sendAlert } from "@/lib/notify";
 
 /**
  * FlowSeer Deploy Sentinel — Layer 6 of the autonomous build governance loop.
@@ -625,6 +626,16 @@ async function appendHistory(
   log: string[],
   entry: SentinelHistoryEntry
 ): Promise<void> {
+  // An "escalated" action means the sentinel hit a deploy failure it can't
+  // safely auto-fix (unparseable error, protected path, repeat failure, or a
+  // tripped circuit breaker) — i.e. it needs a human. Text on those.
+  if (entry.action === "escalated") {
+    await sendAlert(
+      `sentinel_escalation_${entry.target_file || "build"}`,
+      `Production deploy failed and needs manual review: ${entry.reason}${entry.target_file ? ` (${entry.target_file}${entry.target_line ? `:${entry.target_line}` : ""})` : ""}.`,
+      { baseUrl, cooldownMinutes: 120 }
+    );
+  }
   try {
     const history = (await loadJsonFromRepo<SentinelHistory>(HISTORY_PATH)) || {
       version: 1, updated_at: new Date().toISOString(), entries: [],
