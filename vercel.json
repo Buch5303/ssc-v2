@@ -2,7 +2,7 @@
   "framework": "nextjs",
   "crons": [
     {
-      "path": "/api/auto-build?force=true",
+      "path": "/api/auto-build",
       "schedule": "*/15 * * * *"
     },
     {

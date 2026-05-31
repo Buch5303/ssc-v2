@@ -433,12 +433,22 @@ export async function GET(req: Request) {
   const startTime = Date.now();
   const baseUrl = "https://ssc-v2.vercel.app";
 
-  const authHeader = req.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
+  const authHeader = req.headers.get("authorization") || "";
+  const cronSecret = (process.env.CRON_SECRET || "").trim();
   const url = new URL(req.url);
-  const force = url.searchParams.get("force") === "true";
+  const queryToken = (url.searchParams.get("token") || "").trim();
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}` && !force) {
+  // Auth gate (hardened 2026-05-31). Previously `?force=true` let ANYONE on
+  // the internet trigger a full build cycle — spending API credits and
+  // committing to the repo. Now a caller must be a Vercel Cron invocation
+  // (Vercel sets x-vercel-cron and strips it from external requests) or
+  // present CRON_SECRET, either via the Authorization header Vercel injects
+  // into cron calls or a ?token= param for authorized manual runs.
+  const isVercelCron = req.headers.get("x-vercel-cron") !== null;
+  const secretOk =
+    cronSecret.length > 0 &&
+    (authHeader === `Bearer ${cronSecret}` || queryToken === cronSecret);
+  if (!isVercelCron && !secretOk) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
