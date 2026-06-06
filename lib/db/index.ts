@@ -1,9 +1,6 @@
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import * as schema from './schema';
-import type { DrizzleDatabase } from 'drizzle-orm/pg-core';
-
-type DrizzlePostgresDatabase = DrizzleDatabase<typeof schema>;
 
 // Create connection pool
 export const pool = new Pool({
@@ -12,7 +9,7 @@ export const pool = new Pool({
 });
 
 // Create singleton db instance
-export const db: DrizzlePostgresDatabase = drizzle(pool, { schema });
+export const db: NodePgDatabase<typeof schema> = drizzle(pool, { schema });
 
 // Graceful shutdown helper
 export async function closePool() {
