@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-31T12:48:14.636Z",
+  "updated_at": "2026-06-06T04:16:08.151Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -639,6 +639,48 @@
       "commit_sha": null,
       "auditor_score": 92,
       "build_attempts": 2
+    },
+    {
+      "id": "AUTO-026",
+      "title": "RFQ list API endpoint with Neon DB query layer",
+      "directive": "Create a single, minimal, verifiably working GET /api/rfq endpoint that: (1) imports the Drizzle client established in AUTO-025, (2) executes a SELECT on the rfq table with limit/offset pagination params, (3) returns JSON { data: RFQ[], total: number, page: number } with proper HTTP status codes, (4) includes a /api/health/db endpoint that returns { connected: boolean, latency_ms: number } by running a SELECT 1 query and measuring round-trip time. No authentication required on these endpoints for this directive — that is handled by middleware.ts. Constraints: response must complete in <500ms on cold start; use try/catch with structured error logging compatible with the logging infrastructure from AUTO-014; do not introduce new dependencies beyond what AUTO-025 already installed. Advances EQS clauses: real-time latency <300ms, 100% auditable data pipeline.",
+      "priority": 1,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "AUTO-025 completed the core RFQ schema and seed script, establishing a stable DB foundation. The pattern of 20 failed directives shows complexity and dependency drift as root causes — this directive is intentionally minimal and tightly scoped to a single working API layer. Without a functioning data endpoint, all dashboard and visualization work is blocked. The /api/health/db endpoint provides immediate observability to confirm Neon connectivity before further build steps proceed.",
+      "created_at": "2026-06-06T04:16:08.145Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
+    },
+    {
+      "id": "AUTO-027",
+      "title": "Static RFQ dashboard page consuming /api/rfq endpoint",
+      "directive": "Create app/rfq/page.tsx (Next.js App Router) that: (1) fetches data from /api/rfq (built in AUTO-026) using server-side fetch with cache: 'no-store', (2) renders a simple HTML table with columns: id, title, status, created_at, value — no external chart libraries required at this stage, (3) includes a loading.tsx skeleton (simple gray placeholder rows, no animation libraries), (4) includes an error.tsx boundary that displays the error message and a retry button, (5) ships with a Playwright or Jest test (one file: rfq-page.test.ts) that mocks /api/rfq and asserts the table renders with seeded data. Performance constraint: Largest Contentful Paint must be measurable via next build output and page must not import any module >50kb uncompressed. Advances EQS clauses: Dashboard load <1.5s, C-suite clarity <5 seconds, Tableau-level visualization groundwork.",
+      "priority": 2,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "AUTO-002, AUTO-010, AUTO-013, AUTO-017, AUTO-019 all failed attempting RFQ dashboard pages — analysis shows they attempted too much (live DB + auth + charts + animations) in one pass. This directive deliberately constrains scope to a server-rendered table consuming a known-good API, with an explicit test requirement to prevent silent failures. Building on AUTO-026's endpoint makes this directive's dependency chain concrete and short.",
+      "created_at": "2026-06-06T04:16:08.145Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
+    },
+    {
+      "id": "AUTO-028",
+      "title": "Environment validation guard and CI pre-flight check script",
+      "directive": "Create scripts/preflight.ts that: (1) reads all required environment variables (DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL, and any others declared in a new src/config/env.ts zod schema), (2) attempts a Neon DB ping via the Drizzle client, (3) exits with code 1 and a human-readable error message listing every missing or invalid variable if validation fails, (4) exits with code 0 and prints a summary table of all validated vars (values masked) on success. Add 'preflight': 'tsx scripts/preflight.ts' to package.json scripts. Add a Jest unit test (env-validation.test.ts) that asserts the zod schema rejects configs missing DATABASE_URL. This script must not touch .github/workflows/** — it is invoked manually or by Builder agents before running migrations. Advances EQS clauses: 100% auditable data, Zero Trust orientation (no silent misconfiguration), SOC 2 readiness.",
+      "priority": 2,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "AUTO-021 and AUTO-023 both failed on environment configuration and database connection validation. The 20 cumulative failures strongly suggest environment misconfiguration is silently breaking Builder agent runs — directives start executing against missing or wrong DATABASE_URL values and fail mid-run with cryptic errors. A reusable, testable preflight script eliminates this failure mode for all future directives and is a one-time investment that will unblock the entire pipeline.",
+      "created_at": "2026-06-06T04:16:08.145Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
     }
   ]
 }
