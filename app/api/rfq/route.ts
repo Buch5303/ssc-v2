@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { rfq } from '@/lib/db/schema';
+import { rfqs } from '@/lib/db/schema';
 import { sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
-type RFQRecord = typeof rfq.$inferSelect;
+// Reads request.url and queries the DB on each call — never prerender.
+export const dynamic = 'force-dynamic';
+
+type RFQRecord = typeof rfqs.$inferSelect;
 
 export async function GET(request: NextRequest) {
   try {
@@ -44,8 +47,8 @@ export async function GET(request: NextRequest) {
     
     // Execute queries in parallel for better performance
     const [data, totalResult] = await Promise.all([
-      db.select().from(rfq).limit(limit).offset(offset),
-      db.select({ count: sql<number>`count(*)` }).from(rfq)
+      db.select().from(rfqs).limit(limit).offset(offset),
+      db.select({ count: sql<number>`count(*)` }).from(rfqs)
     ]);
     
     const total = Number(totalResult[0].count);

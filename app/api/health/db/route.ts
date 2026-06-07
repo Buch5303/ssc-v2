@@ -3,6 +3,9 @@ import { db } from '@/lib/db';
 import { sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
+// Live DB connectivity check — must run per request, never at build time.
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const start = performance.now();
