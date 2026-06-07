@@ -48,7 +48,7 @@ from agents.auditor    import AuditorAgent
 from state.session_state   import StateManager, DirectiveState
 from state.directive_queue import DirectiveQueue, Directive
 from state.audit_log       import AuditLog
-from outputs.file_writer   import write_build_output, run_tests, validate_no_frontend_changes
+from outputs.file_writer   import write_build_output, run_tests, validate_no_frontend_changes, verify_build
 from outputs.git_ops       import commit_and_push
 from config.loop_config    import (
     MAX_CORRECTION_PASSES, AUTO_COMMIT, BRANCH,
@@ -331,6 +331,42 @@ class Orchestrator:
             if not clean:
                 log.error("[%s] REGRESSION: %s", directive.id, clean_msg)
 
+            # ── BUILDABILITY GATE (hard, deterministic) ───────────────────────
+            # Closes the lens the Auditor lacked: code must actually compile
+            # before it can PASS or be committed. Catches missing modules and
+            # bad exports — the failures that broke AUTO-025 / AUTO-026.
+            build_status, build_detail = verify_build(repo_root=REPO_ROOT)
+            log.info("[%s] Buildability: %s", directive.id, build_status)
+
+            if build_status == "fail":
+                if attempt <= MAX_CORRECTION_PASSES:
+                    log.error("[%s] BUILD FAILED — correcting (attempt %d)", directive.id, attempt)
+                    self.log.log_correction_loop(directive.id, attempt, "buildability")
+                    correction = {
+                        "verdict": "BUILD_FAILED",
+                        "issues":  ["Project does not compile — must build cleanly before audit"],
+                        "correction_directive": (
+                            "The build FAILED type-checking. Fix EXACTLY these compiler "
+                            "errors so `tsc --noEmit` passes. Do not introduce new files "
+                            "or imports that do not exist:\n\n" + build_detail
+                        ),
+                        "previous_output": build_output,
+                    }
+                    continue
+                reason = f"Buildability gate failed after {attempt} attempt(s)"
+                log.error("[%s] Escalating: %s", directive.id, reason)
+                self.log.log_escalation(directive.id, reason)
+                self.state.mark_escalated(directive.id, reason)
+                return False
+
+            if build_status == "unavailable":
+                # Cannot verify the build → never auto-ship. Escalate to human.
+                reason = f"Buildability gate could not run: {build_detail}"
+                log.error("[%s] Escalating: %s", directive.id, reason)
+                self.log.log_escalation(directive.id, reason)
+                self.state.mark_escalated(directive.id, reason)
+                return False
+
             # Audit
             log.info("[%s] Auditing (attempt %d)...", directive.id, attempt)
             ds.status = "AUDITING"
@@ -345,10 +381,12 @@ class Orchestrator:
                     "test_output":    test_output[:200],
                     "frontend_clean": clean,
                     "self_edited":    True,
+                    "build_verified": True,
                     "audit_instruction": (
+                        "Build has ALREADY passed a deterministic tsc --noEmit gate "
+                        "(build_verified=True), so the code compiles. "
                         "PASS if files_written > 0 and frontend_clean=True. "
-                        "Builder has already self-reviewed the output. "
-                        "Only FAIL if files_written=0 or frontend regression detected."
+                        "FAIL only if files_written=0 or a frontend regression is detected."
                     ),
                 },
                 acceptance_criteria=criteria,
