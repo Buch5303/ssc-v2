@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-06T04:17:35.581Z",
+  "updated_at": "2026-06-07T22:45:33.321Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -660,11 +660,11 @@
       "title": "Static RFQ dashboard page consuming /api/rfq endpoint",
       "directive": "Create app/rfq/page.tsx (Next.js App Router) that: (1) fetches data from /api/rfq (built in AUTO-026) using server-side fetch with cache: 'no-store', (2) renders a simple HTML table with columns: id, title, status, created_at, value — no external chart libraries required at this stage, (3) includes a loading.tsx skeleton (simple gray placeholder rows, no animation libraries), (4) includes an error.tsx boundary that displays the error message and a retry button, (5) ships with a Playwright or Jest test (one file: rfq-page.test.ts) that mocks /api/rfq and asserts the table renders with seeded data. Performance constraint: Largest Contentful Paint must be measurable via next build output and page must not import any module >50kb uncompressed. Advances EQS clauses: Dashboard load <1.5s, C-suite clarity <5 seconds, Tableau-level visualization groundwork.",
       "priority": 2,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "AUTO-002, AUTO-010, AUTO-013, AUTO-017, AUTO-019 all failed attempting RFQ dashboard pages — analysis shows they attempted too much (live DB + auth + charts + animations) in one pass. This directive deliberately constrains scope to a server-rendered table consuming a known-good API, with an explicit test requirement to prevent silent failures. Building on AUTO-026's endpoint makes this directive's dependency chain concrete and short.",
       "created_at": "2026-06-06T04:16:08.145Z",
-      "started_at": null,
+      "started_at": "2026-06-07T22:45:33.321Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
