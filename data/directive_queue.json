@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-08T12:00:32.893Z",
+  "updated_at": "2026-06-08T12:03:59.440Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -688,26 +688,42 @@
     {
       "id": "AUTO-029",
       "title": "RFQ detail page with live data from /api/rfq/[id]",
-      "directive": "Create a dynamic route at /app/rfq/[id]/page.tsx that fetches a single RFQ record from a new GET /api/rfq/[id] endpoint. The API handler must query the Neon DB via the established Drizzle query layer (from AUTO-025/AUTO-026), returning fields: id, title, status, created_at, due_date, vendor_name, line_items (JSON), total_value. The page must render a structured detail view with: status badge, financial summary (total_value formatted to ±0.1% precision per EQS Financial Accuracy clause), line-items table, and a back-navigation link to /rfq. Page must achieve server-side render with no client waterfalls; target Time-to-Interactive < 1.5s per EQS Dashboard Performance clause. Return 404 with a graceful error state if the record does not exist. No auth required at this stage — add a TODO comment referencing RBAC Week-2 work.",
+      "directive": "Create a dynamic route at /app/rfq/[id]/page.tsx that fetches and renders a single RFQ record from a new GET /api/rfq/[id] endpoint. The API endpoint must query the Neon DB via the existing Drizzle query layer (established in AUTO-025/AUTO-026), returning all RFQ fields including status, line items, supplier info, and timestamps. The page must: (1) render within the 1.5s dashboard load budget (EQS §Perf-1) by using Next.js server components with no client-side waterfall fetches; (2) display a structured detail card with labeled fields achieving C-suite clarity in <5 seconds (EQS §Clarity-1); (3) handle 404 via notFound() for unknown IDs; (4) include a back-navigation link to the RFQ list. No new DB tables or destructive migrations. Reuse existing schema types from the Drizzle schema file.",
       "priority": 1,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "auto",
-      "rationale": "AUTO-027 delivered the RFQ list page consuming /api/rfq. The natural next step in the RFQ response lifecycle (Week 1-2 roadmap) is drill-down detail. This is a low-risk, tightly scoped directive that builds directly on the completed schema, query layer, and list endpoint, avoiding the integration pitfalls that caused the AUTO-016/AUTO-017 failures.",
-      "created_at": "2026-06-08T12:00:31.550Z",
-      "started_at": "2026-06-08T12:00:32.893Z",
-      "completed_at": null,
+      "rationale": "AUTO-027 delivered the RFQ list page consuming live data. The natural next step in the RFQ response lifecycle (Week 2 roadmap) is drill-down detail view. Without it, the list is a dead end and no downstream lifecycle actions (status updates, responses) can be scaffolded. This is a low-risk, additive directive building directly on three recently completed directives.",
+      "created_at": "2026-06-08T12:00:32.614Z",
+      "started_at": "2026-06-08T12:00:33.201Z",
+      "completed_at": "2026-06-08T12:03:59.440Z",
       "commit_sha": null,
-      "auditor_score": null
+      "auditor_score": 72,
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        }
+      ]
     },
     {
       "id": "AUTO-030",
-      "title": "Immutable audit log table and POST /api/audit endpoint",
-      "directive": "Add an audit_logs table to the existing Drizzle schema (do NOT drop or rename any existing tables or columns — additive migration only). Schema: id (uuid pk), entity_type (varchar), entity_id (varchar), action (varchar: created|updated|viewed|status_changed), actor_id (varchar, nullable for system), payload (jsonb), created_at (timestamptz default now()). Set the table as INSERT-only at the application layer: the API route POST /api/audit must accept {entity_type, entity_id, action, actor_id?, payload} and write a record — no UPDATE or DELETE handlers may be implemented. Run the migration via Drizzle push. Wire the RFQ list endpoint (AUTO-026) and RFQ detail endpoint (AUTO-029) to emit a 'viewed' audit event on each successful response. This directly advances EQS clause: 100% auditable data, immutable audit logs (Week 3 audit trail wiring).",
-      "priority": 2,
+      "title": "RFQ status update API with immutable audit log entry",
+      "directive": "Implement a PATCH /api/rfq/[id]/status endpoint that accepts a JSON body of { status: 'pending' | 'reviewing' | 'responded' | 'closed' } and updates the RFQ record in Neon DB via Drizzle. On every successful status transition, write an immutable audit log row to an rfq_audit_log table (columns: id uuid, rfq_id uuid FK, previous_status, new_status, changed_at timestamptz default now(), actor text). Create this table via a new Drizzle migration file — additive only, no destructive changes. The endpoint must: (1) validate input with Zod, returning 422 on invalid status; (2) return 404 for unknown RFQ IDs; (3) return the updated RFQ record on success. This directly satisfies EQS §Audit-1 (100% auditable data, immutable audit logs) and EQS §Accuracy-1 (financial/state accuracy ±0.1%). Do not modify /api/auth/** or middleware.ts.",
+      "priority": 1,
       "status": "pending",
       "origin": "auto",
-      "rationale": "Audit trail wiring is a Week-3 roadmap priority and an explicit EQS hard requirement. Introducing the audit_logs table now as an additive migration while the schema surface is small reduces future rework. The INSERT-only constraint at the application layer establishes the immutability pattern before more entities are wired in.",
-      "created_at": "2026-06-08T12:00:31.550Z",
+      "rationale": "Week 2 roadmap requires RFQ response lifecycle and Week 3 requires audit trail wiring. Establishing the audit log table and status-change pattern now unblocks both concerns simultaneously. The immutable audit log is a hard EQS requirement and a SOC 2 / ISO 27001 prerequisite — deferring it further increases compliance debt.",
+      "created_at": "2026-06-08T12:00:32.614Z",
       "started_at": null,
       "completed_at": null,
       "commit_sha": null,
@@ -715,13 +731,13 @@
     },
     {
       "id": "AUTO-031",
-      "title": "Dashboard performance instrumentation and budget assertion",
-      "directive": "Implement a lightweight server-timing and performance budget instrumentation layer. In /lib/perf.ts, create a measureAsync(label: string, fn: () => Promise<T>) utility that wraps async operations and emits Server-Timing headers (per W3C spec) on API responses. Instrument /api/rfq and /api/rfq/[id] with this utility, measuring DB query duration. Add a /api/health/perf endpoint that returns a JSON report: {dashboard_ttfb_budget_ms: 1500, ai_inference_budget_ms: 2000, realtime_budget_ms: 300, db_query_last_ms: number, status: 'ok'|'degraded'}. In the CI pre-flight script (AUTO-028), add a step that calls /api/health/perf and fails the build if db_query_last_ms exceeds 500ms (a conservative sub-budget gate). This advances EQS Dashboard Performance clause (< 1.5s load) and provides the observability baseline required before Week-3 performance hardening.",
+      "title": "Dashboard performance instrumentation with server timing headers",
+      "directive": "Add server-side performance instrumentation to the existing RFQ list and detail API routes (/api/rfq and /api/rfq/[id]). Use the Node.js performance.now() API to measure DB query duration and total handler duration, then emit these as Server-Timing response headers (e.g., Server-Timing: db;dur=42, total;dur=95). In the RFQ dashboard page component (AUTO-027), read the server timing data where available and log a structured console warning if total response time exceeds 1000ms (leaving headroom under the 1.5s EQS §Perf-1 budget). Additionally, create a lightweight /api/health endpoint returning { status: 'ok', db: 'connected', ts: <ISO timestamp> } with a Neon DB ping query to confirm connectivity — this reuses the connection layer from AUTO-024/AUTO-025 and serves as a CI/CD readiness probe. No new DB tables required.",
       "priority": 2,
       "status": "pending",
       "origin": "auto",
-      "rationale": "AUTO-004, AUTO-011, and AUTO-019 all failed attempting large-scope performance work. This directive takes a minimal, additive approach: a single utility file, two instrumented endpoints, and one health check — no bundler config changes, no webpack plugins. It establishes the measurement infrastructure that makes Week-3 performance optimization tractable and gives the CI pipeline an objective quality gate.",
-      "created_at": "2026-06-08T12:00:31.550Z",
+      "rationale": "Twenty prior directives failed, many likely due to undetected environmental or latency issues. Instrumentation closes the observability gap — without timing data, the Builder agent cannot detect regressions against the 1.5s EQS performance budget. The health endpoint also provides a reliable smoke-test target for the CI pre-flight check established in AUTO-028.",
+      "created_at": "2026-06-08T12:00:32.614Z",
       "started_at": null,
       "completed_at": null,
       "commit_sha": null,
