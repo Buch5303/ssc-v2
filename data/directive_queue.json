@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-08T09:49:06.246Z",
+  "updated_at": "2026-06-08T12:00:31.561Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -684,6 +684,48 @@
       "commit_sha": null,
       "auditor_score": 92,
       "build_attempts": 2
+    },
+    {
+      "id": "AUTO-029",
+      "title": "RFQ detail page with live data from /api/rfq/[id]",
+      "directive": "Create a dynamic route at /app/rfq/[id]/page.tsx that fetches a single RFQ record from a new GET /api/rfq/[id] endpoint. The API handler must query the Neon DB via the established Drizzle query layer (from AUTO-025/AUTO-026), returning fields: id, title, status, created_at, due_date, vendor_name, line_items (JSON), total_value. The page must render a structured detail view with: status badge, financial summary (total_value formatted to ±0.1% precision per EQS Financial Accuracy clause), line-items table, and a back-navigation link to /rfq. Page must achieve server-side render with no client waterfalls; target Time-to-Interactive < 1.5s per EQS Dashboard Performance clause. Return 404 with a graceful error state if the record does not exist. No auth required at this stage — add a TODO comment referencing RBAC Week-2 work.",
+      "priority": 1,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "AUTO-027 delivered the RFQ list page consuming /api/rfq. The natural next step in the RFQ response lifecycle (Week 1-2 roadmap) is drill-down detail. This is a low-risk, tightly scoped directive that builds directly on the completed schema, query layer, and list endpoint, avoiding the integration pitfalls that caused the AUTO-016/AUTO-017 failures.",
+      "created_at": "2026-06-08T12:00:31.550Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
+    },
+    {
+      "id": "AUTO-030",
+      "title": "Immutable audit log table and POST /api/audit endpoint",
+      "directive": "Add an audit_logs table to the existing Drizzle schema (do NOT drop or rename any existing tables or columns — additive migration only). Schema: id (uuid pk), entity_type (varchar), entity_id (varchar), action (varchar: created|updated|viewed|status_changed), actor_id (varchar, nullable for system), payload (jsonb), created_at (timestamptz default now()). Set the table as INSERT-only at the application layer: the API route POST /api/audit must accept {entity_type, entity_id, action, actor_id?, payload} and write a record — no UPDATE or DELETE handlers may be implemented. Run the migration via Drizzle push. Wire the RFQ list endpoint (AUTO-026) and RFQ detail endpoint (AUTO-029) to emit a 'viewed' audit event on each successful response. This directly advances EQS clause: 100% auditable data, immutable audit logs (Week 3 audit trail wiring).",
+      "priority": 2,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "Audit trail wiring is a Week-3 roadmap priority and an explicit EQS hard requirement. Introducing the audit_logs table now as an additive migration while the schema surface is small reduces future rework. The INSERT-only constraint at the application layer establishes the immutability pattern before more entities are wired in.",
+      "created_at": "2026-06-08T12:00:31.550Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
+    },
+    {
+      "id": "AUTO-031",
+      "title": "Dashboard performance instrumentation and budget assertion",
+      "directive": "Implement a lightweight server-timing and performance budget instrumentation layer. In /lib/perf.ts, create a measureAsync(label: string, fn: () => Promise<T>) utility that wraps async operations and emits Server-Timing headers (per W3C spec) on API responses. Instrument /api/rfq and /api/rfq/[id] with this utility, measuring DB query duration. Add a /api/health/perf endpoint that returns a JSON report: {dashboard_ttfb_budget_ms: 1500, ai_inference_budget_ms: 2000, realtime_budget_ms: 300, db_query_last_ms: number, status: 'ok'|'degraded'}. In the CI pre-flight script (AUTO-028), add a step that calls /api/health/perf and fails the build if db_query_last_ms exceeds 500ms (a conservative sub-budget gate). This advances EQS Dashboard Performance clause (< 1.5s load) and provides the observability baseline required before Week-3 performance hardening.",
+      "priority": 2,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "AUTO-004, AUTO-011, and AUTO-019 all failed attempting large-scope performance work. This directive takes a minimal, additive approach: a single utility file, two instrumented endpoints, and one health check — no bundler config changes, no webpack plugins. It establishes the measurement infrastructure that makes Week-3 performance optimization tractable and gives the CI pipeline an objective quality gate.",
+      "created_at": "2026-06-08T12:00:31.550Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
     }
   ]
 }
