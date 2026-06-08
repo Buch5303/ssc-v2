@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-08T12:46:05.692Z",
+  "updated_at": "2026-06-08T12:46:06.761Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -780,11 +780,11 @@
       "title": "RFQ detail API route and detail page with live data",
       "directive": "Create GET /api/rfq/[id]/route.ts that queries the rfq_requests table by primary key using the existing Drizzle query layer established in AUTO-026. Return 404 JSON { error: 'Not found' } when the record does not exist. Create app/rfq/[id]/page.tsx as a server component that calls this endpoint (or queries directly via the shared db client), renders all RFQ fields in a structured card layout, and includes a back-navigation link to /rfq. Page must render with no client-side waterfalls; use React Suspense with a skeleton fallback limited to 3 lines of placeholder UI. Hard-fail the build if the route file is missing by adding a jest test in __tests__/api/rfq-detail.test.ts that asserts a 200 for a seeded record and a 404 for an unknown UUID. EQS clauses advanced: dashboard load < 1.5s (server-rendered, no waterfall), 100% auditable data (all reads are traceable through the shared DB client), C-suite clarity in < 5 seconds (structured detail view).",
       "priority": 1,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "AUTO-029 failed twice attempting this. The pattern is now de-risked: the Drizzle query layer (AUTO-026), schema (AUTO-025), and env guard (AUTO-028) are all complete. Scoping strictly to a single API route + server component with a test gate removes the surface area that caused prior failures.",
       "created_at": "2026-06-08T12:46:05.660Z",
-      "started_at": null,
+      "started_at": "2026-06-08T12:46:06.761Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
