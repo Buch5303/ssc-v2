@@ -1,7 +1,23 @@
 import { db } from '@/lib/db';
-import { rfqRequests } from '@/lib/db/schema';
+import { rfqs as rfqsTable } from '@/lib/db/schema';
 import { desc } from 'drizzle-orm';
 import Link from 'next/link';
+
+interface RfqView {
+  id: string;
+  title: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  rfq_number?: string | null;
+  vendor_name?: string | null;
+  due_date?: string | Date | null;
+  category?: string | null;
+  currency?: string | null;
+  estimated_value?: number | string | null;
+}
+
+export const dynamic = 'force-dynamic';
 
 function getStatusBadgeClass(status: string): string {
   switch (status?.toLowerCase()) {
@@ -18,8 +34,8 @@ function getStatusBadgeClass(status: string): string {
   }
 }
 
-function formatCurrency(value: number | string, currency: string = 'USD'): string {
-  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+function formatCurrency(value?: number | string | null, currency: string = 'USD'): string {
+  const numValue = typeof value === 'string' ? parseFloat(value) : (value ?? NaN);
   if (isNaN(numValue)) return '—';
   
   return new Intl.NumberFormat('en-US', {
@@ -30,7 +46,7 @@ function formatCurrency(value: number | string, currency: string = 'USD'): strin
   }).format(numValue);
 }
 
-function formatDate(date: string | Date): string {
+function formatDate(date?: string | Date | null): string {
   if (!date) return '—';
   
   const dateObj = typeof date === 'string' ? new Date(date) : date;
@@ -46,8 +62,8 @@ function formatDate(date: string | Date): string {
 export default async function RFQListPage() {
   const rfqs = await db
     .select()
-    .from(rfqRequests)
-    .orderBy(desc(rfqRequests.created_at));
+    .from(rfqsTable)
+    .orderBy(desc(rfqsTable.createdAt));
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -82,7 +98,7 @@ export default async function RFQListPage() {
                   </td>
                 </tr>
               ) : (
-                rfqs.map((rfq) => (
+                rfqs.map((rfq: RfqView) => (
                   <tr key={rfq.id} className="border-b border-border hover:bg-muted/25 transition-colors">
                     <td className="p-4">
                       <Link

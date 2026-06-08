@@ -1,7 +1,9 @@
 import { db } from '@/lib/db';
-import { rfqRequests } from '@/lib/db/schema';
+import { rfqs } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -27,8 +29,8 @@ export async function GET(
 
   const record = await db
     .select()
-    .from(rfqRequests)
-    .where(eq(rfqRequests.id, id))
+    .from(rfqs)
+    .where(eq(rfqs.id, id))
     .limit(1);
 
   if (record.length === 0) {

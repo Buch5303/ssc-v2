@@ -1,9 +1,27 @@
 import { db } from '@/lib/db';
-import { rfqRequests } from '@/lib/db/schema';
+import { rfqs } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';
+
+interface RfqView {
+  id: string;
+  title: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  rfq_number?: string | null;
+  vendor_name?: string | null;
+  issue_date?: string | Date | null;
+  due_date?: string | Date | null;
+  category?: string | null;
+  currency?: string | null;
+  estimated_value?: number | string | null;
+  description?: string | null;
+}
+
+export const dynamic = 'force-dynamic';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -32,8 +50,8 @@ function getStatusBadgeClass(status: string): string {
   }
 }
 
-function formatCurrency(value: number | string, currency: string = 'USD'): string {
-  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+function formatCurrency(value?: number | string | null, currency: string = 'USD'): string {
+  const numValue = typeof value === 'string' ? parseFloat(value) : (value ?? NaN);
   if (isNaN(numValue)) return '—';
   
   return new Intl.NumberFormat('en-US', {
@@ -44,7 +62,7 @@ function formatCurrency(value: number | string, currency: string = 'USD'): strin
   }).format(numValue);
 }
 
-function formatDate(date: string | Date): string {
+function formatDate(date?: string | Date | null): string {
   if (!date) return '—';
   
   const dateObj = typeof date === 'string' ? new Date(date) : date;
@@ -66,15 +84,15 @@ async function RFQDetailContent({ id }: { id: string }) {
 
   const record = await db
     .select()
-    .from(rfqRequests)
-    .where(eq(rfqRequests.id, id))
+    .from(rfqs)
+    .where(eq(rfqs.id, id))
     .limit(1);
 
   if (record.length === 0) {
     notFound();
   }
 
-  const rfq = record[0];
+  const rfq: RfqView = record[0];
 
   return (
     <article role="region" aria-label="RFQ Detail" className="bg-card border border-border rounded-lg p-6">
@@ -145,14 +163,14 @@ async function RFQDetailContent({ id }: { id: string }) {
             <label className="block text-sm font-medium text-muted-foreground mb-1">
               Created
             </label>
-            <p className="text-fg font-mono text-sm">{formatDate(rfq.created_at)}</p>
+            <p className="text-fg font-mono text-sm">{formatDate(rfq.createdAt)}</p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-1">
               Updated
             </label>
-            <p className="text-fg font-mono text-sm">{formatDate(rfq.updated_at)}</p>
+            <p className="text-fg font-mono text-sm">{formatDate(rfq.updatedAt)}</p>
           </div>
         </div>
       </div>
