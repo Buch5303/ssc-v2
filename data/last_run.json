@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-08T09:49:06.246Z",
+  "timestamp": "2026-06-08T12:04:00.493Z",
   "directive": {
-    "id": "AUTO-028",
-    "title": "Environment validation guard and CI pre-flight check script",
-    "status": "complete"
+    "id": "AUTO-029",
+    "title": "RFQ detail page with live data from /api/rfq/[id]",
+    "status": "failed"
   },
-  "elapsed_seconds": 232.905,
+  "elapsed_seconds": 234.727,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -19,7 +19,7 @@
         "audit_focus",
         "estimated_complexity"
       ],
-      "acceptance_criteria_count": 22,
+      "acceptance_criteria_count": 19,
       "research_queries_count": 0,
       "spec_parse_error": false
     },
@@ -32,36 +32,36 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 5,
+      "files_count": 2,
       "parse_error": false,
-      "first_file_path": "src/config/env.ts"
+      "first_file_path": "app/api/rfq/[id]/route.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "PASS",
-      "score": 92,
-      "summary": "The generated code successfully implements a zero-trust environment preflight validation system with Zod schema validation, Neon DB connectivity checking, masked variable summary tables, and comprehensive Jest test coverage. All 22 acceptance criteria are satisfied. The code follows security best practices with proper secret masking, no process.exit in the validation module, and proper error output routing. Minor issues include potential port exposure in DATABASE_URL masking and dotenv load order. The build is ready for deployment with high confidence in its correctness and security posture.",
+      "verdict": "CONDITIONAL",
+      "score": 72,
+      "summary": "The implementation correctly creates the API endpoint and server component page with proper error handling, headers, and data formatting. However, there are two HIGH-severity issues: (1) generateMetadata uses the database ID instead of the RFQ number for the page title, violating the spec requirement, and (2) the error handling in the page component may cause TypeScript strict mode issues and loses original error context. Additionally, there are MEDIUM concerns about import path validity and overly strict type guards. The test file is incomplete with placeholder tests. The build is recoverable with fixes, hence CONDITIONAL verdict.",
       "pre_check_failed": false,
-      "issue_count": 3,
+      "issue_count": 7,
       "top_issues": [
         {
-          "severity": "LOW",
-          "description": "The maskValue function for DATABASE_URL uses url.host which includes port if present. For standard PostgreSQL ports this is fine, but non-standard ports would be exposed. Also, the function doesn't handle the case where DATABASE_URL might have query parameters or fragments that could leak info."
+          "severity": "HIGH",
+          "description": "generateMetadata uses params.id instead of fetching the actual RFQ number from the database. The spec requires the title to contain the RFQ number (rfq.rfqNumber), not the database ID. This means the metadata title will show 'RFQ test-id-123 | FlowSeer' instead of 'RFQ RFQ-2024-001 | FlowSeer'."
         },
         {
-          "severity": "LOW",
-          "description": "The script uses 'import 'dotenv/config'' which loads .env files automatically. However, the spec mentions loading .env.local then .env. The dotenv/config approach loads .env by default, not .env.local first. This could cause issues if .env.local overrides are expected."
+          "severity": "HIGH",
+          "description": "The error catch clause uses 'unknown' type which may cause TypeScript strict mode issues. The error is logged but then a new Error is thrown with a generic message, losing the original error context. This violates EQS RELIABILITY requirements for proper error propagation."
         },
         {
-          "severity": "LOW",
-          "description": "Test 7 'applies NODE_ENV default of development when absent' uses the same validBase which already has NODE_ENV absent. This is correct but the test name is slightly misleading - it's testing the same scenario as test 6 for the NODE_ENV default."
+          "severity": "MEDIUM",
+          "description": "The lineItems type guard function isValidLineItems() is overly strict and may reject valid data from the database. It requires all fields to be present and of specific types, but the schema might have optional fields or different types (e.g., unitPrice could be stored as string in JSON). This could cause valid line items to be silently dropped."
         }
       ]
     },
     "gate": {
       "allowed": true,
-      "effective_verdict": "PASS",
-      "reason": "Score 92, verdict PASS"
+      "effective_verdict": "CONDITIONAL",
+      "reason": "Score 72, verdict CONDITIONAL"
     },
     "build_attempts": 2,
     "attempt_history": [
@@ -73,36 +73,37 @@
       },
       {
         "attempt": 2,
-        "verdict": "PASS",
-        "score": 92,
-        "effective": "PASS"
+        "verdict": "CONDITIONAL",
+        "score": 72,
+        "effective": "CONDITIONAL"
       }
     ]
   },
   "log": [
-    "[2026-06-08T09:45:13.341Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ a1c4f23",
-    "[WATCHDOG] In sync at a1c4f23",
-    "[QUEUE] Loaded via contents-api. Pending: 2, total: 28",
+    "[2026-06-08T12:00:05.766Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ 9aecdb2",
+    "[WATCHDOG] In sync at 9aecdb2",
+    "[QUEUE] Loaded via contents-api. Pending: 1, total: 28",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-08T09:45:15.396Z] Processing: AUTO-028 — Environment validation guard and CI pre-flight check script",
+    "[GENERATOR] Queue low (pending=1). Invoking Directive Generator...",
+    "[GENERATOR] Generated but failed to persist: commit status=failed committed=0",
+    "[2026-06-08T12:00:33.201Z] Processing: AUTO-029 — RFQ detail page with live data from /api/rfq/[id]",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
     "[RESEARCHER] Skipped — no research_queries in spec",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 4 files",
+    "[BUILDER] Attempt 1 complete — 2 files",
     "[AUDITOR] Reviewing attempt 1...",
     "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
     "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 5 files",
+    "[BUILDER] Attempt 2 complete — 2 files",
     "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: PASS (92/100)",
-    "[GATE] Attempt 2: Score 92, verdict PASS → PASS",
-    "[COMMIT] Committing 5 file(s) + queue status (PASS 92/100 on attempt 2/2)...",
-    "[COMMIT] OK"
+    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
+    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)"
   ]
 }
