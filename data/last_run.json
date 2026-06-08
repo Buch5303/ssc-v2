@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-08T12:19:03.940Z",
+  "timestamp": "2026-06-08T12:35:07.979Z",
   "directive": {
-    "id": "AUTO-030",
-    "title": "Immutable audit log table and POST /api/audit endpoint",
+    "id": "AUTO-031",
+    "title": "Dashboard performance instrumentation and budget assertion",
     "status": "failed"
   },
-  "elapsed_seconds": 209.543,
+  "elapsed_seconds": 268.781,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -19,8 +19,8 @@
         "audit_focus",
         "estimated_complexity"
       ],
-      "acceptance_criteria_count": 18,
-      "research_queries_count": 0,
+      "acceptance_criteria_count": 20,
+      "research_queries_count": 5,
       "spec_parse_error": false
     },
     "researcher": {
@@ -32,76 +32,77 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 9,
+      "files_count": 4,
       "parse_error": false,
-      "first_file_path": "db/schema/audit-logs.ts"
+      "first_file_path": "lib/perf.ts"
     },
     "auditor": {
       "status": "complete",
       "verdict": "CONDITIONAL",
-      "score": 72,
-      "summary": "The build implements the core requirements for the immutable audit log system: schema definition, INSERT-only semantics, API route with validation and timeout, and RFQ endpoint wiring with fire-and-forget audit events. However, there are several issues that prevent a PASS verdict: the extractActorId helper may cause TypeScript compilation issues due to its use of cookies() and potentially incorrect import paths; the synchronous call to extractActorId before fire-and-forget emit could add latency to RFQ endpoints; and the API route duplicates insert logic instead of reusing emitAuditEvent. The build is recoverable with moderate fixes and scores CONDITIONAL at 72.",
+      "score": 78,
+      "summary": "The generated code successfully implements the core performance instrumentation library (lib/perf.ts), modifies both RFQ routes with Server-Timing headers and PerfStore integration, and creates the health/perf endpoint. However, two critical files were not generated due to truncation: scripts/ci-perf-gate.sh and modifications to scripts/preflight.sh. These are required for CI gating and preflight integration. The code that was generated is well-structured, type-safe, and follows the spec closely. The build is recoverable with the addition of the missing files. Score is reduced due to missing critical acceptance criteria (criteria 14-19).",
       "pre_check_failed": false,
-      "issue_count": 6,
+      "issue_count": 5,
       "top_issues": [
         {
-          "severity": "HIGH",
-          "description": "Uses cookies() from next/headers which is a dynamic server-side API that may cause issues in static analysis or certain Next.js runtime contexts. Also, the import path @/db may not resolve correctly if the db module is not at the expected location."
+          "severity": "CRITICAL",
+          "description": "File was not generated due to truncation. This is a required file per the build spec. The CI gate logic cannot be verified."
+        },
+        {
+          "severity": "CRITICAL",
+          "description": "File was not modified to include the AUTO-029 step. Required step '# AUTO-029: EQS DB query performance gate' is missing."
         },
         {
           "severity": "MEDIUM",
-          "description": "The RFQ list endpoint uses void emitAuditEvent(...) which is fire-and-forget, but the extractActorId function is called synchronously before the response is returned, potentially adding latency. The spec says to use fire-and-forget for the entire audit emit, but extractActorId is called inline."
-        },
-        {
-          "severity": "MEDIUM",
-          "description": "Same issue as above - extractActorId is called synchronously before the response, potentially adding latency to the RFQ detail endpoint."
+          "description": "serializeServerTiming uses toFixed(1) which may produce unexpected rounding. For dur=42.5, toFixed(1) returns '42.5' which matches expected. However, for values like 42.55, toFixed(1) returns '42.5' (rounds down) which could cause precision issues. The spec expects exact values."
         }
       ]
     },
     "gate": {
       "allowed": true,
       "effective_verdict": "CONDITIONAL",
-      "reason": "Score 72, verdict CONDITIONAL"
+      "reason": "Score 78, verdict CONDITIONAL"
     },
     "build_attempts": 2,
     "attempt_history": [
       {
         "attempt": 1,
         "verdict": "CONDITIONAL",
-        "score": 72,
+        "score": 78,
         "effective": "CONDITIONAL"
       },
       {
         "attempt": 2,
         "verdict": "CONDITIONAL",
-        "score": 72,
+        "score": 78,
         "effective": "CONDITIONAL"
       }
     ]
   },
   "log": [
-    "[2026-06-08T12:15:34.398Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 14c4f7e",
-    "[WATCHDOG] In sync at 14c4f7e",
-    "[QUEUE] Loaded via contents-api. Pending: 3, total: 31",
+    "[2026-06-08T12:30:39.199Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ 18c3d3e",
+    "[WATCHDOG] In sync at 18c3d3e",
+    "[QUEUE] Loaded via contents-api. Pending: 2, total: 31",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-08T12:15:36.276Z] Processing: AUTO-030 — Immutable audit log table and POST /api/audit endpoint",
+    "[2026-06-08T12:30:41.199Z] Processing: AUTO-031 — Dashboard performance instrumentation and budget assertion",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Skipped — no research_queries in spec",
+    "[RESEARCHER] Running 5 queries...",
+    "[RESEARCHER] skipped — 0 result(s)",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 8 files",
+    "[BUILDER] Attempt 1 complete — 6 files",
     "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (78/100)",
+    "[GATE] Attempt 1: Score 78, verdict CONDITIONAL → CONDITIONAL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 9 files",
+    "[BUILDER] Attempt 2 complete — 4 files",
     "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)"
+    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (78/100)",
+    "[GATE] Attempt 2: Score 78, verdict CONDITIONAL → CONDITIONAL",
+    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 78/100)"
   ]
 }
