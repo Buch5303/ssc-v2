@@ -6,8 +6,10 @@ export interface RFQ {
   id: string
   title: string
   status: string
-  created_at: string
-  value: number
+  // Mirror the /api/rfq response: Drizzle $inferSelect yields camelCase.
+  createdAt: string
+  // rfqs has no monetary column yet — optional until the schema carries one.
+  value?: number | null
 }
 
 export function RFQTable({ rfqs }: { rfqs: RFQ[] }) {
@@ -49,11 +51,15 @@ export function RFQTable({ rfqs }: { rfqs: RFQ[] }) {
                   {rfq.status}
                 </span>
               </td>
-              <td className="border border-gray-300 px-4 py-2 font-mono" data-testid={`rfq-created_at-${rfq.id}`}>
-                {new Date(rfq.created_at).toLocaleDateString('en-US')}
+              <td className="border border-gray-300 px-4 py-2 font-mono" data-testid={`rfq-createdAt-${rfq.id}`}>
+                {rfq.createdAt && !Number.isNaN(new Date(rfq.createdAt).getTime())
+                  ? new Date(rfq.createdAt).toLocaleDateString('en-US')
+                  : '—'}
               </td>
               <td className="border border-gray-300 px-4 py-2 font-mono" data-testid={`rfq-value-${rfq.id}`}>
-                {Number(rfq.value).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                {typeof rfq.value === 'number' && Number.isFinite(rfq.value)
+                  ? rfq.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+                  : '—'}
               </td>
             </tr>
           ))}
