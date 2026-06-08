@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-08T12:04:25.243Z",
+  "timestamp": "2026-06-08T12:19:03.940Z",
   "directive": {
-    "id": "AUTO-029",
-    "title": "RFQ detail page with live data from /api/rfq/[id]",
+    "id": "AUTO-030",
+    "title": "Immutable audit log table and POST /api/audit endpoint",
     "status": "failed"
   },
-  "elapsed_seconds": 262.897,
+  "elapsed_seconds": 209.543,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -19,7 +19,7 @@
         "audit_focus",
         "estimated_complexity"
       ],
-      "acceptance_criteria_count": 17,
+      "acceptance_criteria_count": 18,
       "research_queries_count": 0,
       "spec_parse_error": false
     },
@@ -34,27 +34,27 @@
       "status": "complete",
       "files_count": 9,
       "parse_error": false,
-      "first_file_path": "types/rfq.ts"
+      "first_file_path": "db/schema/audit-logs.ts"
     },
     "auditor": {
       "status": "complete",
       "verdict": "CONDITIONAL",
       "score": 72,
-      "summary": "The implementation is architecturally sound and satisfies most acceptance criteria. The critical issues are the use of `any` type in the API route (violating both TypeScript strict mode and the explicit 'no any' constraint) and the potentially incorrect import path for the Drizzle db instance. These issues will cause TypeScript compilation and ESLint failures. The financial accuracy chain is properly implemented with traceable numeric(14,4) → parseFloat → Intl.NumberFormat conversion. UUID validation prevents malformed DB queries. The RBAC TODO comments are correctly placed. Score is reduced due to the TypeScript/ESLint violations which are HIGH severity issues that must be fixed before the build can pass.",
+      "summary": "The build implements the core requirements for the immutable audit log system: schema definition, INSERT-only semantics, API route with validation and timeout, and RFQ endpoint wiring with fire-and-forget audit events. However, there are several issues that prevent a PASS verdict: the extractActorId helper may cause TypeScript compilation issues due to its use of cookies() and potentially incorrect import paths; the synchronous call to extractActorId before fire-and-forget emit could add latency to RFQ endpoints; and the API route duplicates insert logic instead of reusing emitAuditEvent. The build is recoverable with moderate fixes and scores CONDITIONAL at 72.",
       "pre_check_failed": false,
       "issue_count": 6,
       "top_issues": [
         {
           "severity": "HIGH",
-          "description": "Uses `catch (error: any)` which violates the 'no any types' constraint and will cause ESLint/TypeScript errors"
-        },
-        {
-          "severity": "HIGH",
-          "description": "Import path '@/lib/db' may not resolve correctly. The build spec says to import from the path established in AUTO-025/AUTO-026, but no such path is confirmed in the codebase"
+          "description": "Uses cookies() from next/headers which is a dynamic server-side API that may cause issues in static analysis or certain Next.js runtime contexts. Also, the import path @/db may not resolve correctly if the db module is not at the expected location."
         },
         {
           "severity": "MEDIUM",
-          "description": "The InvalidUuidError class is defined but not exported, making it inaccessible to the API route for proper type checking"
+          "description": "The RFQ list endpoint uses void emitAuditEvent(...) which is fire-and-forget, but the extractActorId function is called synchronously before the response is returned, potentially adding latency. The spec says to use fire-and-forget for the entire audit emit, but extractActorId is called inline."
+        },
+        {
+          "severity": "MEDIUM",
+          "description": "Same issue as above - extractActorId is called synchronously before the response, potentially adding latency to the RFQ detail endpoint."
         }
       ]
     },
@@ -68,7 +68,7 @@
       {
         "attempt": 1,
         "verdict": "CONDITIONAL",
-        "score": 78,
+        "score": 72,
         "effective": "CONDITIONAL"
       },
       {
@@ -80,24 +80,22 @@
     ]
   },
   "log": [
-    "[2026-06-08T12:00:02.347Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 9aecdb2",
-    "[WATCHDOG] In sync at 9aecdb2",
-    "[QUEUE] Loaded via contents-api. Pending: 1, total: 28",
+    "[2026-06-08T12:15:34.398Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ 14c4f7e",
+    "[WATCHDOG] In sync at 14c4f7e",
+    "[QUEUE] Loaded via contents-api. Pending: 3, total: 31",
     "[PREFLIGHT] Anthropic API healthy",
-    "[GENERATOR] Queue low (pending=1). Invoking Directive Generator...",
-    "[GENERATOR] Appended 3: AUTO-029, AUTO-030, AUTO-031",
-    "[2026-06-08T12:00:32.893Z] Processing: AUTO-029 — RFQ detail page with live data from /api/rfq/[id]",
+    "[2026-06-08T12:15:36.276Z] Processing: AUTO-030 — Immutable audit log table and POST /api/audit endpoint",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
     "[RESEARCHER] Skipped — no research_queries in spec",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 9 files",
+    "[BUILDER] Attempt 1 complete — 8 files",
     "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (78/100)",
-    "[GATE] Attempt 1: Score 78, verdict CONDITIONAL → CONDITIONAL",
+    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
+    "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
     "[BUILDER] Attempt 2 complete — 9 files",
