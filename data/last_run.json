@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-07T22:47:17.939Z",
+  "timestamp": "2026-06-08T09:49:06.246Z",
   "directive": {
-    "id": "AUTO-027",
-    "title": "Static RFQ dashboard page consuming /api/rfq endpoint",
+    "id": "AUTO-028",
+    "title": "Environment validation guard and CI pre-flight check script",
     "status": "complete"
   },
-  "elapsed_seconds": 106.392,
+  "elapsed_seconds": 232.905,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -19,7 +19,7 @@
         "audit_focus",
         "estimated_complexity"
       ],
-      "acceptance_criteria_count": 18,
+      "acceptance_criteria_count": 22,
       "research_queries_count": 0,
       "spec_parse_error": false
     },
@@ -32,61 +32,77 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 3,
+      "files_count": 5,
       "parse_error": false,
-      "first_file_path": "app/rfq/page.tsx"
+      "first_file_path": "src/config/env.ts"
     },
     "auditor": {
       "status": "complete",
       "verdict": "PASS",
-      "score": 95,
-      "summary": "The generated code fully satisfies all 18 acceptance criteria for the RFQ Dashboard Page directive. The implementation includes a proper async server component with no-store fetch, a named RFQTable export with typed interface, loading skeleton with 5 skeleton rows, error boundary with retry functionality, and comprehensive test coverage with all 6 required assertions. Two minor issues identified: (1) the try/catch in page.tsx is slightly redundant but functionally correct, and (2) the test file imports @testing-library/jest-dom which may need to be added to package.json. The build is production-ready with no critical or high-severity issues.",
+      "score": 92,
+      "summary": "The generated code successfully implements a zero-trust environment preflight validation system with Zod schema validation, Neon DB connectivity checking, masked variable summary tables, and comprehensive Jest test coverage. All 22 acceptance criteria are satisfied. The code follows security best practices with proper secret masking, no process.exit in the validation module, and proper error output routing. Minor issues include potential port exposure in DATABASE_URL masking and dotenv load order. The build is ready for deployment with high confidence in its correctness and security posture.",
       "pre_check_failed": false,
-      "issue_count": 2,
+      "issue_count": 3,
       "top_issues": [
         {
           "severity": "LOW",
-          "description": "The catch block re-throws a new Error with the same message, which is acceptable but slightly redundant since the original error is already thrown from the fetch failure path"
+          "description": "The maskValue function for DATABASE_URL uses url.host which includes port if present. For standard PostgreSQL ports this is fine, but non-standard ports would be exposed. Also, the function doesn't handle the case where DATABASE_URL might have query parameters or fragments that could leak info."
         },
         {
           "severity": "LOW",
-          "description": "Test file imports '@testing-library/jest-dom' but this package is not listed in the project's package.json dependencies or devDependencies"
+          "description": "The script uses 'import 'dotenv/config'' which loads .env files automatically. However, the spec mentions loading .env.local then .env. The dotenv/config approach loads .env by default, not .env.local first. This could cause issues if .env.local overrides are expected."
+        },
+        {
+          "severity": "LOW",
+          "description": "Test 7 'applies NODE_ENV default of development when absent' uses the same validBase which already has NODE_ENV absent. This is correct but the test name is slightly misleading - it's testing the same scenario as test 6 for the NODE_ENV default."
         }
       ]
     },
     "gate": {
       "allowed": true,
       "effective_verdict": "PASS",
-      "reason": "Score 95, verdict PASS"
+      "reason": "Score 92, verdict PASS"
     },
-    "build_attempts": 1,
+    "build_attempts": 2,
     "attempt_history": [
       {
         "attempt": 1,
+        "verdict": "CONDITIONAL",
+        "score": 72,
+        "effective": "CONDITIONAL"
+      },
+      {
+        "attempt": 2,
         "verdict": "PASS",
-        "score": 95,
+        "score": 92,
         "effective": "PASS"
       }
     ]
   },
   "log": [
-    "[2026-06-07T22:45:31.548Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 5945ffe",
-    "[WATCHDOG] In sync at 5945ffe",
-    "[QUEUE] Loaded via contents-api. Pending: 3, total: 28",
+    "[2026-06-08T09:45:13.341Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ a1c4f23",
+    "[WATCHDOG] In sync at a1c4f23",
+    "[QUEUE] Loaded via contents-api. Pending: 2, total: 28",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-07T22:45:33.321Z] Processing: AUTO-027 — Static RFQ dashboard page consuming /api/rfq endpoint",
+    "[2026-06-08T09:45:15.396Z] Processing: AUTO-028 — Environment validation guard and CI pre-flight check script",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
     "[RESEARCHER] Skipped — no research_queries in spec",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 3 files",
+    "[BUILDER] Attempt 1 complete — 4 files",
     "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: PASS (95/100)",
-    "[GATE] Attempt 1: Score 95, verdict PASS → PASS",
-    "[COMMIT] Committing 3 file(s) + queue status (PASS 95/100 on attempt 1/2)...",
+    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
+    "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
+    "[BUILDER] Attempt 2/2 — generating code...",
+    "[BUILDER] Attempt 2 complete — 5 files",
+    "[AUDITOR] Reviewing attempt 2...",
+    "[AUDITOR] Attempt 2 verdict: PASS (92/100)",
+    "[GATE] Attempt 2: Score 92, verdict PASS → PASS",
+    "[COMMIT] Committing 5 file(s) + queue status (PASS 92/100 on attempt 2/2)...",
     "[COMMIT] OK"
   ]
 }
