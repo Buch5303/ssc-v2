@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-08T12:19:03.941Z",
+  "updated_at": "2026-06-08T12:30:41.199Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -750,11 +750,11 @@
       "title": "Dashboard performance instrumentation and budget assertion",
       "directive": "Implement a lightweight server-timing and performance budget instrumentation layer. In /lib/perf.ts, create a measureAsync(label: string, fn: () => Promise<T>) utility that wraps async operations and emits Server-Timing headers (per W3C spec) on API responses. Instrument /api/rfq and /api/rfq/[id] with this utility, measuring DB query duration. Add a /api/health/perf endpoint that returns a JSON report: {dashboard_ttfb_budget_ms: 1500, ai_inference_budget_ms: 2000, realtime_budget_ms: 300, db_query_last_ms: number, status: 'ok'|'degraded'}. In the CI pre-flight script (AUTO-028), add a step that calls /api/health/perf and fails the build if db_query_last_ms exceeds 500ms (a conservative sub-budget gate). This advances EQS Dashboard Performance clause (< 1.5s load) and provides the observability baseline required before Week-3 performance hardening.",
       "priority": 2,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "AUTO-004, AUTO-011, and AUTO-019 all failed attempting large-scope performance work. This directive takes a minimal, additive approach: a single utility file, two instrumented endpoints, and one health check — no bundler config changes, no webpack plugins. It establishes the measurement infrastructure that makes Week-3 performance optimization tractable and gives the CI pipeline an objective quality gate.",
       "created_at": "2026-06-08T12:00:31.550Z",
-      "started_at": null,
+      "started_at": "2026-06-08T12:30:41.199Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
