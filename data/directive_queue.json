@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-08T09:45:15.396Z",
+  "updated_at": "2026-06-08T09:49:01.192Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -675,14 +675,15 @@
       "title": "Environment validation guard and CI pre-flight check script",
       "directive": "Create scripts/preflight.ts that: (1) reads all required environment variables (DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL, and any others declared in a new src/config/env.ts zod schema), (2) attempts a Neon DB ping via the Drizzle client, (3) exits with code 1 and a human-readable error message listing every missing or invalid variable if validation fails, (4) exits with code 0 and prints a summary table of all validated vars (values masked) on success. Add 'preflight': 'tsx scripts/preflight.ts' to package.json scripts. Add a Jest unit test (env-validation.test.ts) that asserts the zod schema rejects configs missing DATABASE_URL. This script must not touch .github/workflows/** — it is invoked manually or by Builder agents before running migrations. Advances EQS clauses: 100% auditable data, Zero Trust orientation (no silent misconfiguration), SOC 2 readiness.",
       "priority": 2,
-      "status": "in_progress",
+      "status": "complete",
       "origin": "auto",
       "rationale": "AUTO-021 and AUTO-023 both failed on environment configuration and database connection validation. The 20 cumulative failures strongly suggest environment misconfiguration is silently breaking Builder agent runs — directives start executing against missing or wrong DATABASE_URL values and fail mid-run with cryptic errors. A reusable, testable preflight script eliminates this failure mode for all future directives and is a one-time investment that will unblock the entire pipeline.",
       "created_at": "2026-06-06T04:16:08.145Z",
       "started_at": "2026-06-08T09:45:15.396Z",
-      "completed_at": null,
+      "completed_at": "2026-06-08T09:49:01.191Z",
       "commit_sha": null,
-      "auditor_score": null
+      "auditor_score": 92,
+      "build_attempts": 2
     }
   ]
 }
