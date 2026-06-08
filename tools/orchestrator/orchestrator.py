@@ -383,7 +383,7 @@ class Orchestrator:
                     "self_edited":    True,
                     "build_verified": True,
                     "audit_instruction": (
-                        "Build has ALREADY passed a deterministic tsc --noEmit gate "
+                        "Build has ALREADY passed a deterministic `npm run build` gate "
                         "(build_verified=True), so the code compiles. "
                         "PASS if files_written > 0 and frontend_clean=True. "
                         "FAIL only if files_written=0 or a frontend regression is detected."

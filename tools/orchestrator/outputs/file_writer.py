@@ -72,49 +72,55 @@ def run_tests(
 
 def verify_build(
     repo_root: str = "/home/claude/ssc-v2",
-    timeout:   int = 240,
+    timeout:   int = 360,
 ) -> Tuple[str, str]:
     """
-    Deterministic BUILDABILITY gate.
+    Deterministic BUILDABILITY gate — runs the SAME build Vercel runs.
 
-    Runs `tsc --noEmit` against the repo. This is the lens the Auditor lacked:
-    it does not *guess* whether code compiles, it actually compiles it. It
-    catches the two failure classes that have broken the loop in production —
-    missing modules (AUTO-026 `@/lib/logger`) and bad exports (`rfq` vs `rfqs`).
+    This is the lens the Auditor lacked: it does not *guess* whether code
+    compiles, it runs `npm run build` (next build) and only green output may
+    proceed. Production parity is the point — `tsc --noEmit` alone is NOT
+    enough: it passed AUTO-027's `app/rfq/page.tsx`, but `next build` rejects
+    it ("RFQTable is not a valid Page export field"). Catches the whole class
+    that has broken the loop: missing modules, bad exports, and Next.js
+    page/route contract violations that only surface at build.
 
     Returns (status, detail):
-      - "pass"        : type-check clean. Eligible to proceed to audit/commit.
-      - "fail"        : compiler/type errors. detail = the errors, fed back to
-                        the Builder as a correction. MUST NOT be committed.
-      - "unavailable" : the toolchain could not run (tsc not installed, etc.).
+      - "pass"        : build is green. Eligible to proceed to audit/commit.
+      - "fail"        : build errors. detail = the errors, fed back to the
+                        Builder as a correction. MUST NOT be committed.
+      - "unavailable" : the toolchain could not run (npm/next missing, etc.).
                         Caller escalates for human review — never auto-commits,
                         never silently passes.
     """
     try:
         proc = subprocess.run(
-            ["npx", "--no-install", "tsc", "--noEmit", "--pretty", "false"],
+            ["npm", "run", "build"],
             cwd=repo_root,
             capture_output=True,
             text=True,
             timeout=timeout,
         )
     except FileNotFoundError:
-        return "unavailable", "tsc/npx not found on host — buildability gate could not run"
+        return "unavailable", "npm not found on host — buildability gate could not run"
     except subprocess.TimeoutExpired:
-        return "unavailable", f"tsc --noEmit exceeded {timeout}s — buildability gate could not run"
+        return "unavailable", f"next build exceeded {timeout}s — buildability gate could not run"
     except Exception as exc:  # noqa: BLE001 — gate must classify, not crash the loop
         return "unavailable", f"buildability gate error: {exc}"
 
-    if proc.returncode == 0:
-        return "pass", "tsc --noEmit clean"
-
-    # `npx --no-install` exits 1 with this message when tsc isn't present
     combined = f"{proc.stdout}\n{proc.stderr}".strip()
-    if "could not determine executable" in combined or "not found" in combined.lower():
-        return "unavailable", "tsc not installed in repo — buildability gate could not run"
 
-    # Real type/compile errors. Truncate so a wall of errors can't blow context.
-    return "fail", combined[:4000]
+    if proc.returncode == 0:
+        return "pass", "next build green"
+
+    # Distinguish a genuinely missing toolchain from real build errors.
+    low = combined.lower()
+    if "missing script" in low or "command not found" in low or "could not determine executable" in low:
+        return "unavailable", "build script/toolchain unavailable — gate could not run"
+
+    # Real build errors. Surface the meaningful tail (Next prints the error
+    # last) and cap length so a wall of output can't blow context.
+    return "fail", combined[-4000:]
 
 
 def validate_no_frontend_changes(
