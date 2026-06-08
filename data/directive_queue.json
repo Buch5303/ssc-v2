@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-08T12:15:36.276Z",
+  "updated_at": "2026-06-08T12:19:02.893Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -720,14 +720,30 @@
       "title": "Immutable audit log table and POST /api/audit endpoint",
       "directive": "Add an audit_logs table to the existing Drizzle schema (do NOT drop or rename any existing tables or columns — additive migration only). Schema: id (uuid pk), entity_type (varchar), entity_id (varchar), action (varchar: created|updated|viewed|status_changed), actor_id (varchar, nullable for system), payload (jsonb), created_at (timestamptz default now()). Set the table as INSERT-only at the application layer: the API route POST /api/audit must accept {entity_type, entity_id, action, actor_id?, payload} and write a record — no UPDATE or DELETE handlers may be implemented. Run the migration via Drizzle push. Wire the RFQ list endpoint (AUTO-026) and RFQ detail endpoint (AUTO-029) to emit a 'viewed' audit event on each successful response. This directly advances EQS clause: 100% auditable data, immutable audit logs (Week 3 audit trail wiring).",
       "priority": 2,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "auto",
       "rationale": "Audit trail wiring is a Week-3 roadmap priority and an explicit EQS hard requirement. Introducing the audit_logs table now as an additive migration while the schema surface is small reduces future rework. The INSERT-only constraint at the application layer establishes the immutability pattern before more entities are wired in.",
       "created_at": "2026-06-08T12:00:31.550Z",
       "started_at": "2026-06-08T12:15:36.276Z",
-      "completed_at": null,
+      "completed_at": "2026-06-08T12:19:02.893Z",
       "commit_sha": null,
-      "auditor_score": null
+      "auditor_score": 72,
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        }
+      ]
     },
     {
       "id": "AUTO-031",
