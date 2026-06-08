@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-08T12:00:31.561Z",
+  "updated_at": "2026-06-08T12:00:32.893Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -690,11 +690,11 @@
       "title": "RFQ detail page with live data from /api/rfq/[id]",
       "directive": "Create a dynamic route at /app/rfq/[id]/page.tsx that fetches a single RFQ record from a new GET /api/rfq/[id] endpoint. The API handler must query the Neon DB via the established Drizzle query layer (from AUTO-025/AUTO-026), returning fields: id, title, status, created_at, due_date, vendor_name, line_items (JSON), total_value. The page must render a structured detail view with: status badge, financial summary (total_value formatted to ±0.1% precision per EQS Financial Accuracy clause), line-items table, and a back-navigation link to /rfq. Page must achieve server-side render with no client waterfalls; target Time-to-Interactive < 1.5s per EQS Dashboard Performance clause. Return 404 with a graceful error state if the record does not exist. No auth required at this stage — add a TODO comment referencing RBAC Week-2 work.",
       "priority": 1,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "AUTO-027 delivered the RFQ list page consuming /api/rfq. The natural next step in the RFQ response lifecycle (Week 1-2 roadmap) is drill-down detail. This is a low-risk, tightly scoped directive that builds directly on the completed schema, query layer, and list endpoint, avoiding the integration pitfalls that caused the AUTO-016/AUTO-017 failures.",
       "created_at": "2026-06-08T12:00:31.550Z",
-      "started_at": null,
+      "started_at": "2026-06-08T12:00:32.893Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
