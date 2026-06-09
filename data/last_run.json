@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-08T22:32:06.132Z",
+  "timestamp": "2026-06-09T18:49:25.067Z",
   "directive": {
-    "id": "AUTO-033",
-    "title": "Immutable audit_logs table and POST /api/audit endpoint",
-    "status": "complete"
+    "id": "AUTO-034",
+    "title": "Dashboard performance budget assertion and instrumentation",
+    "status": "failed"
   },
-  "elapsed_seconds": 115.794,
+  "elapsed_seconds": 221.783,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -19,8 +19,8 @@
         "audit_focus",
         "estimated_complexity"
       ],
-      "acceptance_criteria_count": 19,
-      "research_queries_count": 0,
+      "acceptance_criteria_count": 16,
+      "research_queries_count": 7,
       "spec_parse_error": false
     },
     "researcher": {
@@ -32,61 +32,65 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 4,
+      "files_count": 8,
       "parse_error": false,
-      "first_file_path": "db/migrations/0001_create_audit_logs.sql"
+      "first_file_path": "lib/db/index.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "PASS",
-      "score": 95,
-      "summary": "The generated code successfully implements the immutable audit log infrastructure per the directive. All 19 acceptance criteria pass. The SQL migration creates the audit_logs table with proper columns, indexes, and REVOKE permissions. The Drizzle schema correctly maps all columns with TypeScript type exports. The API route is strictly POST-only with Zod validation, proper error handling, and Cache-Control headers. The test suite covers 12 of the specified test cases with proper mocking. Two minor issues: missing test for invalid JSON body response and missing Cache-Control header assertions. The build is production-ready with minor test coverage gaps.",
+      "verdict": "UNKNOWN",
+      "score": null,
       "pre_check_failed": false,
-      "issue_count": 2,
-      "top_issues": [
-        {
-          "severity": "LOW",
-          "description": "Test for invalid JSON body is missing - only route.ts handles it but no test case verifies the 400 response for malformed JSON"
-        },
-        {
-          "severity": "LOW",
-          "description": "Cache-Control header is not explicitly tested in any test case"
-        }
-      ]
+      "issue_count": 0,
+      "top_issues": []
     },
     "gate": {
-      "allowed": true,
-      "effective_verdict": "PASS",
-      "reason": "Score 95, verdict PASS"
+      "allowed": false,
+      "effective_verdict": "FAIL",
+      "reason": "No numeric score — EQS v1.0 requires quantitative quality gate"
     },
-    "build_attempts": 1,
+    "build_attempts": 2,
     "attempt_history": [
       {
         "attempt": 1,
-        "verdict": "PASS",
-        "score": 95,
-        "effective": "PASS"
+        "verdict": "COMPILE_FAIL",
+        "score": null,
+        "effective": "FAIL"
+      },
+      {
+        "attempt": 2,
+        "verdict": "UNKNOWN",
+        "score": null,
+        "effective": "FAIL"
       }
     ]
   },
   "log": [
-    "[2026-06-08T22:30:10.339Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 5d0a76f",
-    "[WATCHDOG] In sync at 5d0a76f",
-    "[QUEUE] Loaded via contents-api. Pending: 2, total: 33",
+    "[2026-06-09T18:45:43.284Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ af6b5bb",
+    "[WATCHDOG] In sync at af6b5bb",
+    "[QUEUE] Loaded via contents-api. Pending: 1, total: 33",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-08T22:30:12.077Z] Processing: AUTO-033 — Immutable audit_logs table and POST /api/audit endpoint",
+    "[GENERATOR] Queue low (pending=1). Invoking Directive Generator...",
+    "[GENERATOR] Appended 3: AUTO-034, AUTO-035, AUTO-036",
+    "[2026-06-09T18:46:13.527Z] Processing: AUTO-034 — Dashboard performance budget assertion and instrumentation",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Skipped — no research_queries in spec",
+    "[RESEARCHER] Running 7 queries...",
+    "[RESEARCHER] skipped — 0 result(s)",
+    "[COMPILE-GATE] Repo tree loaded (686 paths)",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 4 files",
-    "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: PASS (95/100)",
-    "[GATE] Attempt 1: Score 95, verdict PASS → PASS",
-    "[COMMIT] Committing 4 file(s) + queue status (PASS 95/100 on attempt 1/2)...",
-    "[COMMIT] OK"
+    "[BUILDER] Attempt 1 complete — 7 files",
+    "[COMPILE-GATE] Attempt 1: 3 unresolved import(s):\n  lib/perf/audit-timing.ts → '@/lib/prisma'\n  app/api/health/perf/route.ts → '@/lib/prisma'\n  app/api/rfq/route.ts → '@/lib/prisma'",
+    "[RETRY] Re-running Builder to fix unresolved imports (attempt 2/2)",
+    "[BUILDER] Attempt 2/2 — generating code...",
+    "[BUILDER] Attempt 2 complete — 8 files",
+    "[COMPILE-GATE] Attempt 2: all imports resolve",
+    "[AUDITOR] Reviewing attempt 2...",
+    "[AUDITOR] Attempt 2 verdict: UNKNOWN",
+    "[GATE] Attempt 2: No numeric score — EQS v1.0 requires quantitative quality gate → FAIL",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): No numeric score — EQS v1.0 requires quantitative quality gate"
   ]
 }
