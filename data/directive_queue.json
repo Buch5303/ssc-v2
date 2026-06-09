@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-08T22:32:06.132Z",
+  "updated_at": "2026-06-09T18:46:11.589Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -804,6 +804,48 @@
       "commit_sha": null,
       "auditor_score": 95,
       "build_attempts": 1
+    },
+    {
+      "id": "AUTO-034",
+      "title": "Dashboard performance budget assertion and instrumentation",
+      "directive": "Implement end-to-end dashboard performance instrumentation and budget enforcement. (1) Add a server-side timing header (Server-Timing) to GET /api/rfq capturing DB query duration. (2) In the RFQ dashboard page (/app/dashboard or equivalent), instrument client-side navigation timing using the Performance API and log time-to-interactive to console in development. (3) Create a lightweight /api/health/perf endpoint that executes a representative DB query (SELECT COUNT(*) FROM rfqs) and returns { db_ms, status: 'ok'|'degraded' } where degraded triggers when db_ms > 200. (4) Add a Jest/Vitest integration test at tests/perf/dashboard-budget.test.ts that calls /api/rfq with a seeded DB and asserts response time < 500ms (synthetic budget with headroom under the 1.5s EQS target). Do NOT modify middleware.ts or any auth routes. All timing values must be logged to the existing audit_logs infrastructure via a non-blocking fire-and-forget pattern. EQS clauses advanced: Dashboard load < 1.5s, 100% auditable data.",
+      "priority": 1,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "AUTO-031 (performance instrumentation) failed and AUTO-033 (audit log) is now complete, providing the prerequisite infrastructure. The EQS dashboard load budget of <1.5s is a Week 3 hard target and the platform has no performance observability in place. With the DB layer and audit endpoint both stable, this directive can now succeed where AUTO-031 could not.",
+      "created_at": "2026-06-09T18:46:11.575Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
+    },
+    {
+      "id": "AUTO-035",
+      "title": "RFQ status transition API with audit log wiring",
+      "directive": "Build the RFQ response lifecycle state machine as required by Week 2 roadmap. (1) Add a status column (enum: 'draft'|'submitted'|'under_review'|'responded'|'closed') to the rfqs table via a non-destructive Drizzle migration (ADD COLUMN only — no drops or renames). (2) Implement PATCH /api/rfq/[id]/status accepting { status, actor_id, reason } with server-side validation that only legal transitions are accepted (e.g. draft→submitted, submitted→under_review, under_review→responded, responded→closed). Reject illegal transitions with HTTP 422 and a machine-readable error body. (3) On every successful transition, write an immutable record to audit_logs via POST /api/audit with event_type='rfq.status_transition', payload containing previous_status, new_status, actor_id, reason, and timestamp. (4) Add unit tests covering all valid transitions and at least three illegal transition rejections. EQS clauses advanced: 100% auditable data, immutable audit logs, RFQ response lifecycle (Week 2 roadmap).",
+      "priority": 1,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "AUTO-033 delivered the audit_logs table and POST /api/audit endpoint, and AUTO-032 delivered the RFQ detail page. The next logical Week 2 milestone is the RFQ response lifecycle — status transitions with full auditability. This directive composes the two completed foundations into a concrete business capability while advancing the SOC 2 auditability requirement.",
+      "created_at": "2026-06-09T18:46:11.575Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
+    },
+    {
+      "id": "AUTO-036",
+      "title": "RBAC role column and middleware-free route authorization",
+      "directive": "Implement a foundational Role-Based Access Control layer without touching middleware.ts or /api/auth/**. (1) Add a non-destructive Drizzle migration to add a role column (enum: 'admin'|'manager'|'viewer', default 'viewer') to the users table (ADD COLUMN only). (2) Create a reusable server-side utility at lib/authz.ts exporting requireRole(allowedRoles: Role[], sessionOrUserId: string): Promise<void> that throws an AuthorizationError if the resolved user role is not in allowedRoles. (3) Apply requireRole to PATCH /api/rfq/[id]/status (requires 'admin' or 'manager') and POST /api/audit (requires 'admin'). Return HTTP 403 with a structured error body on denial. (4) Seed at least two test users with differing roles in the existing seed script. (5) Add integration tests asserting 403 is returned when a 'viewer' attempts a status transition. Do NOT modify middleware.ts, .github/workflows/**, or any auth provider logic. EQS clauses advanced: Zero Trust orientation, SOC 2 / ISO 27001, 100% auditable data (Week 2 RBAC roadmap item).",
+      "priority": 2,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "Week 2 roadmap explicitly lists RBAC as a priority. With the user table, audit log, and status transition endpoint now available or in-flight, RBAC authorization can be layered in without touching the protected auth boundary in middleware.ts. This directive advances Zero Trust and SOC 2 posture while remaining safely scoped to application-layer authorization only.",
+      "created_at": "2026-06-09T18:46:11.575Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
     }
   ]
 }
