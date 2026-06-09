@@ -1,5 +1,6 @@
 {
   "framework": "nextjs",
+  "ignoreCommand": "bash scripts/vercel-ignore-build.sh",
   "crons": [
     {
       "path": "/api/auto-build",

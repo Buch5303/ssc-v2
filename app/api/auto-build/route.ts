@@ -290,6 +290,108 @@ function scoreGate(verdict: string, score: number | null): GateResult {
 }
 
 // ----------------------------------------------------------------------
+// COMPILE GATE — deterministic static import resolution
+// ----------------------------------------------------------------------
+// The Auditor is an LLM. It scored AUTO-033 "95/100 PASS" even though the
+// generated route imported `@/db`, a module that did not exist — so every
+// deploy of that commit failed `next build` on Vercel with
+// "Module not found: Can't resolve '@/db'". A serverless function can't run
+// `next build`, but it CAN verify, before committing, that every LOCAL import
+// in the generated files resolves to a real file (in the repo or in the same
+// batch). This closes the entire "Module not found" class that has been
+// breaking the loop. It is conservative: bare package imports are ignored,
+// and if the repo tree can't be loaded the gate fails OPEN (never stalls the
+// queue on a transient GitHub hiccup).
+
+async function loadRepoPaths(ghPat: string): Promise<Set<string> | null> {
+  const pat = (ghPat || "").trim();
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/trees/${BRANCH}?recursive=1`,
+      {
+        headers: {
+          Authorization: `Bearer ${pat}`,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+        cache: "no-store",
+      }
+    );
+    if (!res.ok) return null;
+    const data: any = await res.json();
+    if (!Array.isArray(data?.tree)) return null;
+    const set = new Set<string>();
+    for (const e of data.tree) if (e?.path) set.add(e.path as string);
+    return set;
+  } catch {
+    return null;
+  }
+}
+
+function extractImportSpecifiers(content: string): string[] {
+  const specs: string[] = [];
+  const patterns = [
+    /\bfrom\s+['"]([^'"]+)['"]/g,            // import x from '...'
+    /\bimport\s+['"]([^'"]+)['"]/g,          // import '...'
+    /\brequire\(\s*['"]([^'"]+)['"]\s*\)/g,  // require('...')
+    /\bimport\(\s*['"]([^'"]+)['"]\s*\)/g,   // dynamic import('...')
+  ];
+  for (const re of patterns) {
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(content)) !== null) specs.push(m[1]);
+  }
+  return specs;
+}
+
+function importResolves(spec: string, importerPath: string, known: Set<string>): boolean {
+  let target: string;
+  if (spec.startsWith("@/")) {
+    target = spec.slice(2); // tsconfig: "@/*" -> "./*"
+  } else if (spec.startsWith("./") || spec.startsWith("../")) {
+    const dir = importerPath.split("/").slice(0, -1);
+    for (const part of spec.split("/")) {
+      if (part === "." || part === "") continue;
+      if (part === "..") dir.pop();
+      else dir.push(part);
+    }
+    target = dir.join("/");
+  } else {
+    return true; // bare package import — not ours to resolve
+  }
+  target = target.replace(/\/+$/, "");
+  const exts = [
+    "", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json", ".css", ".scss",
+    "/index.ts", "/index.tsx", "/index.js", "/index.jsx",
+  ];
+  // A bare directory does NOT resolve unless it has an index file — that is
+  // exactly the `@/db` case that shipped broken (db/ existed with migrations/
+  // and schema/, but no db/index.ts). So we check ONLY real module targets and
+  // index files; we deliberately do not treat "some file exists under dir/" as
+  // resolvable.
+  for (const e of exts) if (known.has(target + e)) return true;
+  return false;
+}
+
+function validateImports(
+  files: Array<{ path: string; content: string }>,
+  repoPaths: Set<string>
+): Array<{ file: string; import: string }> {
+  const known = new Set(repoPaths);
+  for (const f of files) known.add(f.path.replace(/^\/+/, ""));
+  const unresolved: Array<{ file: string; import: string }> = [];
+  for (const f of files) {
+    if (!/\.(ts|tsx|js|jsx|mjs)$/.test(f.path)) continue;
+    const importer = f.path.replace(/^\/+/, "");
+    for (const spec of extractImportSpecifiers(f.content || "")) {
+      if (!importResolves(spec, importer, known)) {
+        unresolved.push({ file: f.path, import: spec });
+      }
+    }
+  }
+  return unresolved;
+}
+
+// ----------------------------------------------------------------------
 // Layer 3 — Self-Heal preflight (inline; mirrors /api/self-heal standalone)
 // ----------------------------------------------------------------------
 
@@ -694,6 +796,13 @@ export async function GET(req: Request) {
   // Two attempts complete in ~220s — safely under the 300s ceiling — so the
   // directive always reaches a definite pass/fail instead of timing out.
   const MAX_BUILD_ATTEMPTS = 2;
+  // Live repo tree for the deterministic compile gate (fail-open if unavailable).
+  const repoPaths = await loadRepoPaths(ghPat);
+  log.push(
+    repoPaths
+      ? `[COMPILE-GATE] Repo tree loaded (${repoPaths.size} paths)`
+      : `[COMPILE-GATE] Repo tree unavailable — gate fails open this cycle`
+  );
   let buildResult: any = null;
   let auditResult: any = null;
   let rawVerdict = "UNKNOWN";
@@ -728,6 +837,41 @@ export async function GET(req: Request) {
       continue;
     }
     log.push(`[BUILDER] Attempt ${attempt} complete — ${buildResult.build.files?.length || 0} files`);
+
+    // ── COMPILE GATE (deterministic, pre-audit) ──────────────────────────
+    // Before we trust the LLM auditor or commit anything, verify every local
+    // import in the generated files actually resolves. This is the lens the
+    // auditor lacked when it passed AUTO-033's `@/db` (Module not found).
+    if (repoPaths) {
+      const batch = (buildResult.build.files || []).map((f: any) => ({
+        path: f.path,
+        content: typeof f.content === "string" ? f.content : "",
+      }));
+      const unresolved = validateImports(batch, repoPaths);
+      if (unresolved.length > 0) {
+        const detail = unresolved.slice(0, 8).map(u => `  ${u.file} → '${u.import}'`).join("\n");
+        log.push(`[COMPILE-GATE] Attempt ${attempt}: ${unresolved.length} unresolved import(s):\n${detail}`);
+        attemptHistory.push({ attempt, verdict: "COMPILE_FAIL", score: null, effective: "FAIL" });
+        if (attempt < MAX_BUILD_ATTEMPTS) {
+          retryContext = [
+            `Your previous output DOES NOT COMPILE. These imports point to files that do not exist in the repo and were not included in your output:`,
+            detail,
+            `Fix EVERY one — either import from the correct existing path, or include the missing file in your files array. Re-emit the COMPLETE set of files. Never import a module that does not exist.`,
+          ].join("\n");
+          log.push(`[RETRY] Re-running Builder to fix unresolved imports (attempt ${attempt + 1}/${MAX_BUILD_ATTEMPTS})`);
+          continue;
+        }
+        // Out of attempts — hard-block commit so the broken code never ships.
+        gate = {
+          allowed: false,
+          reason: `compile gate: ${unresolved.length} unresolved import(s) after ${attempt} attempt(s)`,
+          effective_verdict: "FAIL",
+        };
+        rawVerdict = "COMPILE_FAIL";
+        break;
+      }
+      log.push(`[COMPILE-GATE] Attempt ${attempt}: all imports resolve`);
+    }
 
     log.push(`[AUDITOR] Reviewing attempt ${attempt}...`);
     auditResult = await runAgent("auditor", {

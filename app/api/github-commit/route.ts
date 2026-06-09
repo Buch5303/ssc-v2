@@ -20,54 +20,100 @@ interface FileToCommit {
   content: string;
 }
 
-async function getFileSha(path: string, token: string): Promise<string | null> {
-  try {
-    const res = await fetch(
-      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}`,
-      { headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github.v3+json" } }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      return data.sha;
-    }
-    return null;
-  } catch {
-    return null;
-  }
+const API = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`;
+
+function ghHeaders(token: string) {
+  return {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+    "Content-Type": "application/json",
+  };
 }
 
-async function commitFile(file: FileToCommit, message: string, token: string): Promise<{ path: string; status: string; error?: string }> {
+/**
+ * Atomically commit ALL files in a single git commit via the Git Data API
+ * (blobs → tree → commit → ref update).
+ *
+ * Why this replaced the previous per-file Contents-API loop: that loop made
+ * ONE commit per file, and every commit to main triggers its own Vercel
+ * production deploy. A multi-file directive therefore fired N deploys and
+ * passed through transient, half-applied trees (file A referencing file B
+ * before B was committed) — which deployed RED, tripped the Self-Heal
+ * rollback, and generated a failure notice on every cycle. One atomic commit
+ * = one deploy = the tree is never half-applied.
+ */
+async function atomicCommit(
+  files: FileToCommit[],
+  message: string,
+  token: string
+): Promise<{ ok: boolean; sha?: string; error?: string }> {
+  const h = ghHeaders(token);
   try {
-    const sha = await getFileSha(file.path, token);
-    const body: any = {
-      message: `[auto-build] ${message}: ${file.path}`,
-      content: Buffer.from(file.content).toString("base64"),
-      branch: BRANCH,
-      committer: { name: "FlowSeer Auto-Builder", email: "autobuilder@flowseer.internal" },
-    };
-    if (sha) body.sha = sha; // Update existing file
+    // 1. Current branch head
+    const refRes = await fetch(`${API}/git/ref/heads/${BRANCH}`, { headers: h, cache: "no-store" });
+    if (!refRes.ok) return { ok: false, error: `read ref: HTTP ${refRes.status} ${(await refRes.text()).slice(0, 160)}` };
+    const baseCommitSha = (await refRes.json())?.object?.sha;
+    if (!baseCommitSha) return { ok: false, error: "could not resolve base commit sha" };
 
-    const res = await fetch(
-      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${file.path}`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/vnd.github.v3+json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      }
-    );
+    // 2. Base tree
+    const baseCommitRes = await fetch(`${API}/git/commits/${baseCommitSha}`, { headers: h, cache: "no-store" });
+    if (!baseCommitRes.ok) return { ok: false, error: `read base commit: HTTP ${baseCommitRes.status}` };
+    const baseTreeSha = (await baseCommitRes.json())?.tree?.sha;
+    if (!baseTreeSha) return { ok: false, error: "could not resolve base tree sha" };
 
-    if (res.ok) {
-      return { path: file.path, status: "committed" };
-    } else {
-      const err = await res.json();
-      return { path: file.path, status: "failed", error: err.message };
+    // 3. One blob per file
+    const treeEntries: Array<{ path: string; mode: "100644"; type: "blob"; sha: string }> = [];
+    for (const f of files) {
+      const blobRes = await fetch(`${API}/git/blobs`, {
+        method: "POST",
+        headers: h,
+        body: JSON.stringify({ content: Buffer.from(f.content, "utf8").toString("base64"), encoding: "base64" }),
+      });
+      if (!blobRes.ok) return { ok: false, error: `blob ${f.path}: HTTP ${blobRes.status} ${(await blobRes.text()).slice(0, 160)}` };
+      const blobSha = (await blobRes.json())?.sha;
+      if (!blobSha) return { ok: false, error: `blob ${f.path}: no sha returned` };
+      treeEntries.push({ path: f.path, mode: "100644", type: "blob", sha: blobSha });
     }
+
+    // 4. New tree on top of base
+    const treeRes = await fetch(`${API}/git/trees`, {
+      method: "POST",
+      headers: h,
+      body: JSON.stringify({ base_tree: baseTreeSha, tree: treeEntries }),
+    });
+    if (!treeRes.ok) return { ok: false, error: `create tree: HTTP ${treeRes.status} ${(await treeRes.text()).slice(0, 160)}` };
+    const newTreeSha = (await treeRes.json())?.sha;
+    if (!newTreeSha) return { ok: false, error: "could not create tree" };
+
+    // 5. New commit
+    const author = { name: "FlowSeer Auto-Builder", email: "autobuilder@flowseer.internal", date: new Date().toISOString() };
+    const commitRes = await fetch(`${API}/git/commits`, {
+      method: "POST",
+      headers: h,
+      body: JSON.stringify({
+        message: `[auto-build] ${message}`,
+        tree: newTreeSha,
+        parents: [baseCommitSha],
+        author,
+        committer: author,
+      }),
+    });
+    if (!commitRes.ok) return { ok: false, error: `create commit: HTTP ${commitRes.status} ${(await commitRes.text()).slice(0, 160)}` };
+    const newCommitSha = (await commitRes.json())?.sha;
+    if (!newCommitSha) return { ok: false, error: "could not create commit" };
+
+    // 6. Advance the branch (non-force; rejects if someone else moved it)
+    const updRes = await fetch(`${API}/git/refs/heads/${BRANCH}`, {
+      method: "PATCH",
+      headers: h,
+      body: JSON.stringify({ sha: newCommitSha, force: false }),
+    });
+    if (!updRes.ok) return { ok: false, error: `update ref: HTTP ${updRes.status} ${(await updRes.text()).slice(0, 160)}` };
+
+    return { ok: true, sha: newCommitSha };
   } catch (e: any) {
-    return { path: file.path, status: "failed", error: e.message };
+    return { ok: false, error: e?.message || "atomicCommit exception" };
   }
 }
 
@@ -85,28 +131,46 @@ export async function POST(req: Request) {
     }
 
     const commitMessage = message || `Auto-build ${directive_id || "directive"}`;
-    const results = [];
 
+    // Validate + filter
+    const valid: FileToCommit[] = [];
+    const results: Array<{ path: string; status: string; error?: string; sha?: string }> = [];
     for (const file of files) {
-      if (!file.path || !file.content) {
+      if (!file.path || typeof file.content !== "string" || file.content.length === 0) {
         results.push({ path: file.path || "unknown", status: "skipped", error: "Missing path or content" });
         continue;
       }
-      const result = await commitFile(file, commitMessage, token);
-      results.push(result);
+      valid.push({ path: file.path, content: file.content });
+    }
+
+    if (valid.length === 0) {
+      return NextResponse.json({
+        status: "failed", committed: 0, failed: 0, total: files.length, results,
+        message: commitMessage, note: "No valid files to commit.", timestamp: new Date().toISOString(),
+      });
+    }
+
+    // ONE atomic commit for the whole batch → ONE deploy, never a half-applied tree.
+    const commit = await atomicCommit(valid, commitMessage, token);
+
+    if (commit.ok) {
+      for (const f of valid) results.push({ path: f.path, status: "committed", sha: commit.sha });
+    } else {
+      for (const f of valid) results.push({ path: f.path, status: "failed", error: commit.error });
     }
 
     const committed = results.filter(r => r.status === "committed").length;
     const failed = results.filter(r => r.status === "failed").length;
 
     return NextResponse.json({
-      status: failed === 0 ? "success" : committed > 0 ? "partial" : "failed",
+      status: commit.ok ? "success" : "failed",
       committed,
       failed,
       total: files.length,
+      sha: commit.sha,
       results,
       message: commitMessage,
-      note: committed > 0 ? "Vercel will auto-deploy within 60 seconds." : "No files were committed.",
+      note: commit.ok ? "Single atomic commit pushed. Vercel will auto-deploy within 60 seconds." : `Commit failed: ${commit.error}`,
       timestamp: new Date().toISOString(),
     });
   } catch (e: any) {
