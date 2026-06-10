@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-10T19:47:55.624Z",
+  "updated_at": "2026-06-10T20:00:16.716Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -941,11 +941,11 @@
       "title": "Dashboard load performance budget assertion and instrumentation",
       "directive": "Create a server-side timing utility in lib/perf.ts exporting markStart(label:string) and markEnd(label:string): number (returns elapsed ms). Instrument the GET /api/rfq route (app/api/rfq/route.ts): wrap the Neon DB query with markStart/markEnd and append a Server-Timing response header (e.g. 'Server-Timing: db;dur=42'). In app/dashboard/page.tsx (or equivalent RFQ list page), add a lightweight client-side navigation timing snippet using PerformanceNavigationTiming that logs to console.warn if domContentLoadedEventEnd - startTime exceeds 1500ms. Create scripts/perf-budget-check.ts that fetches /api/rfq locally (requires NEXT_PUBLIC_APP_URL env var), asserts response time < 500ms, and exits non-zero on failure — add this as a 'perf:check' npm script. No middleware.ts changes. EQS clauses: Dashboard load < 1.5s performance budget, 100% auditable data (Server-Timing headers provide observable latency data).",
       "priority": 2,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "AUTO-034 and AUTO-031 both failed on performance instrumentation — likely due to over-engineering (bundle analyzers, webpack plugins). This directive uses only lightweight, zero-dependency primitives: PerformanceNavigationTiming (browser-native), Server-Timing headers (HTTP-native), and a simple fetch-based budget script. Week 3 roadmap explicitly targets dashboard performance to the 1.5s budget. This gives the platform observable latency data without complex toolchain changes.",
       "created_at": "2026-06-10T17:45:58.079Z",
-      "started_at": null,
+      "started_at": "2026-06-10T20:00:16.716Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
