@@ -62,7 +62,14 @@ async function runSelfHeal(dryRun: boolean): Promise<HealResponse> {
     return { action: "skipped", error: "no deployments", timestamp };
   }
 
-  const latest = deployments[0];
+  // CANCELED deployments are intentional skips from vercel.json's
+  // ignoreCommand (data-only commits) — they never change what production
+  // serves and must not trigger a rollback. Judge health by the most recent
+  // deployment that actually attempted a build.
+  const latest = deployments.find((d: any) => d.state !== "CANCELED");
+  if (!latest) {
+    return { action: "healthy", current_state: "ALL_CANCELED", inspected_count: deployments.length, timestamp };
+  }
   const latestSha: string | undefined = latest?.meta?.githubCommitSha;
   const inspected_count = deployments.length;
 
@@ -86,7 +93,7 @@ async function runSelfHeal(dryRun: boolean): Promise<HealResponse> {
     };
   }
 
-  if (latest.state !== "ERROR" && latest.state !== "CANCELED") {
+  if (latest.state !== "ERROR") {
     return {
       action: "skipped",
       error: `Unhandled state ${latest.state}`,
@@ -96,8 +103,9 @@ async function runSelfHeal(dryRun: boolean): Promise<HealResponse> {
     };
   }
 
-  // Latest is ERROR or CANCELED — look for most recent READY to roll back to
-  const lastGood = deployments.find((d: any, i: number) => i > 0 && d.state === "READY");
+  // Latest build attempt is ERROR — look for most recent READY to roll back to
+  const errorIdx = deployments.indexOf(latest);
+  const lastGood = deployments.find((d: any, i: number) => i > errorIdx && d.state === "READY");
   if (!lastGood) {
     return {
       action: "no_good_deployment",

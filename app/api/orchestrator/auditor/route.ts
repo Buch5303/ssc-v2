@@ -209,23 +209,33 @@ Scoring rules:
       });
     }
 
-    if (useDeepSeek) {
-      const res = await fetch("https://api.deepseek.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "deepseek-chat",
-          messages: [{ role: "user", content: prompt }],
-          max_tokens: 4096,
-          temperature: 0.1,
-        }),
-      });
-      const data = await res.json();
-      text = data.choices?.[0]?.message?.content || "";
-    } else {
+    // ------------------------------------------------------------------
+    // LLM call + parse, with one strict retry. AUTO-034 (2026-06-09) died
+    // because the auditor's output didn't parse: verdict surfaced as
+    // UNKNOWN with score null, the gate blocked (correctly), but the
+    // directive burned its attempts on an infrastructure failure rather
+    // than a quality failure. Now: salvage embedded JSON, normalize the
+    // verdict, retry once with a stricter instruction, and on final
+    // failure return an explicit AUDIT_ERROR the pipeline can recognize.
+    // ------------------------------------------------------------------
+    const callAuditorLLM = async (p: string): Promise<string> => {
+      if (useDeepSeek) {
+        const res = await fetch("https://api.deepseek.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: "deepseek-chat",
+            messages: [{ role: "user", content: p }],
+            max_tokens: 8192,
+            temperature: 0.1,
+          }),
+        });
+        const data: any = await res.json();
+        return data.choices?.[0]?.message?.content || "";
+      }
       const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
@@ -235,19 +245,71 @@ Scoring rules:
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
-          max_tokens: 4096,
-          messages: [{ role: "user", content: prompt }],
+          max_tokens: 8192,
+          messages: [{ role: "user", content: p }],
         }),
       });
-      const data = await res.json();
-      text = data.content?.[0]?.text || "";
-    }
+      const data: any = await res.json();
+      return data.content?.[0]?.text || "";
+    };
 
-    let audit;
-    try {
-      audit = JSON.parse(text.replace(/```json|```/g, "").trim());
-    } catch {
-      audit = { raw: text, parse_error: true, verdict: "CONDITIONAL" };
+    // Parse helper: direct parse, then salvage the largest {...} block
+    // (handles preamble text, markdown fences, trailing commentary).
+    const tryParseAudit = (raw: string): any | null => {
+      const stripped = raw.replace(/```json|```/g, "").trim();
+      try { return JSON.parse(stripped); } catch { /* salvage below */ }
+      const first = stripped.indexOf("{");
+      const last = stripped.lastIndexOf("}");
+      if (first !== -1 && last > first) {
+        try { return JSON.parse(stripped.slice(first, last + 1)); } catch { /* fall through */ }
+      }
+      return null;
+    };
+
+    const VALID_VERDICTS = ["PASS", "CONDITIONAL", "FAIL"];
+    const normalizeVerdict = (a: any): void => {
+      if (!a) return;
+      // Some models nest the payload: { "audit": {...} } — unwrap it.
+      if (a.audit && typeof a.audit === "object" && a.audit.verdict !== undefined && a.verdict === undefined) {
+        Object.assign(a, a.audit);
+      }
+      if (typeof a.verdict === "string") {
+        const v = a.verdict.trim().toUpperCase();
+        a.verdict = v === "PASSED" ? "PASS" : v === "FAILED" ? "FAIL" : v;
+      }
+      // Verdict missing but a numeric score exists — derive per EQS bands.
+      if (!VALID_VERDICTS.includes(a.verdict) && typeof a.score === "number" && Number.isFinite(a.score)) {
+        a.verdict = a.score >= 80 ? "PASS" : a.score >= 65 ? "CONDITIONAL" : "FAIL";
+        a.verdict_source = "derived_from_score";
+      }
+    };
+
+    let audit: any = null;
+    for (let auditTry = 1; auditTry <= 2 && !audit; auditTry++) {
+      const tryPrompt = auditTry === 1
+        ? prompt
+        : prompt + "\n\nCRITICAL REMINDER: Your previous response was not parseable. Respond with ONLY a single raw JSON object. No prose, no markdown fences, no explanation before or after. The object MUST contain \"verdict\" (one of PASS/CONDITIONAL/FAIL) and \"score\" (integer 0-100).";
+      text = await callAuditorLLM(tryPrompt);
+      const parsed = tryParseAudit(text);
+      if (parsed && typeof parsed === "object") {
+        normalizeVerdict(parsed);
+        if (VALID_VERDICTS.includes(parsed.verdict)) {
+          audit = parsed;
+          if (auditTry > 1) audit.parse_retries = auditTry - 1;
+        }
+      }
+    }
+    if (!audit) {
+      // Irrecoverable — explicit infrastructure-failure signal. The pipeline
+      // treats AUDIT_ERROR as retryable (not a quality FAIL on the directive).
+      audit = {
+        verdict: "AUDIT_ERROR",
+        score: null,
+        audit_error: true,
+        parse_error: true,
+        raw: (text || "").slice(0, 800),
+        summary: "Auditor LLM output unparseable after retry — infrastructure failure, not a code-quality verdict",
+      };
     }
 
     // Defensive normalization — guarantee `score` is a number for Layer 4 gate.

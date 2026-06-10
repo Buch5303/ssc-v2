@@ -418,7 +418,14 @@ async function selfHealPreflight(): Promise<SelfHealResult> {
     const deployments: any[] = data?.deployments || [];
     if (deployments.length === 0) return { action: "skipped", error: "no deployments" };
 
-    const latest = deployments[0];
+    // CANCELED deployments are *intentional skips* produced by vercel.json's
+    // ignoreCommand (data-only commits). They do not change what is serving
+    // production and must never be treated as an outage. Judge health by the
+    // most recent deployment that actually attempted a build. (2026-06-10:
+    // treating CANCELED as failure made self-heal "roll back" every cycle,
+    // fueling an infinite redeploy loop with the drift watchdog.)
+    const latest = deployments.find((d: any) => d.state !== "CANCELED");
+    if (!latest) return { action: "healthy", current_state: "ALL_CANCELED" };
     const latestSha = latest?.meta?.githubCommitSha;
 
     if (latest.state === "READY") {
@@ -427,12 +434,13 @@ async function selfHealPreflight(): Promise<SelfHealResult> {
     if (latest.state === "BUILDING" || latest.state === "QUEUED" || latest.state === "INITIALIZING") {
       return { action: "in_progress", current_state: latest.state, current_sha: latestSha?.slice(0, 7) };
     }
-    if (latest.state !== "ERROR" && latest.state !== "CANCELED") {
+    if (latest.state !== "ERROR") {
       return { action: "skipped", error: `Unhandled state ${latest.state}` };
     }
 
-    // ERROR / CANCELED — find last READY deployment
-    const lastGood = deployments.find((d: any, i: number) => i > 0 && d.state === "READY");
+    // ERROR — find last READY deployment
+    const errorIdx = deployments.indexOf(latest);
+    const lastGood = deployments.find((d: any, i: number) => i > errorIdx && d.state === "READY");
     if (!lastGood) return { action: "no_good_deployment", current_sha: latestSha?.slice(0, 7) };
     const rollbackSha = lastGood?.meta?.githubCommitSha;
     if (!rollbackSha) return { action: "no_good_deployment", error: "last READY has no SHA" };
@@ -504,6 +512,59 @@ async function checkAndHealDrift(): Promise<{
     if (!vercelSha) return { drifted: false, error: "Could not read Vercel production SHA" };
 
     if (githubSha === vercelSha) return { drifted: false, githubSha, vercelSha };
+
+    // SHAs differ — but vercel.json's ignoreCommand deliberately skips builds
+    // for commits touching only data/, tools/, or docs/. If everything between
+    // the deployed SHA and GitHub HEAD lives in those paths, production is in
+    // sync BY DESIGN. Redeploying HEAD here just creates a deployment that
+    // ignoreCommand immediately cancels, which self-heal then misread as an
+    // outage — the 2026-06-09/10 infinite redeploy loop. Only buildable drift
+    // (changes outside the ignored paths) warrants a force-deploy.
+    const IGNORED_PREFIXES = ["data/", "tools/", "docs/"];
+    try {
+      const cmpRes = await fetch(
+        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/compare/${vercelSha}...${githubSha}`,
+        {
+          headers: {
+            Authorization: `Bearer ${ghPat}`,
+            Accept: "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+          },
+          cache: "no-store",
+        }
+      );
+      const cmpData: any = await cmpRes.json();
+      const files: any[] = Array.isArray(cmpData?.files) ? cmpData.files : [];
+      if (cmpRes.ok && files.length > 0) {
+        const buildable = files.filter(
+          (f: any) => !IGNORED_PREFIXES.some(p => (f.filename || "").startsWith(p))
+        );
+        if (buildable.length === 0) {
+          return {
+            drifted: false,
+            githubSha,
+            vercelSha,
+            action: `HEAD ahead by ignored-path-only changes (${files.length} file(s) in data/tools/docs) — in sync by design, no redeploy`,
+          };
+        }
+      } else if (!cmpRes.ok) {
+        // Can't prove the delta is buildable — do NOT blind-redeploy (that is
+        // what fed the loop). Log and let the next cycle retry the compare.
+        return {
+          drifted: false,
+          githubSha,
+          vercelSha,
+          error: `compare API ${cmpRes.status} — skipping redeploy this cycle`,
+        };
+      }
+    } catch (cmpErr: any) {
+      return {
+        drifted: false,
+        githubSha,
+        vercelSha,
+        error: `compare failed (${cmpErr?.message || "exception"}) — skipping redeploy this cycle`,
+      };
+    }
 
     const redeployRes = await fetch(
       `https://api.vercel.com/v13/deployments?teamId=${VERCEL_TEAM_ID}&forceNew=1`,
@@ -955,13 +1016,28 @@ export async function GET(req: Request) {
       skipReason = `unknown skip condition (gate.allowed=${gate.allowed}, files=${builderFileCount})`;
     }
     log.push(`[COMMIT] Skipped — ${skipReason}`);
-    next.status = "failed";
-    next.completed_at = new Date().toISOString();
+
+    // Infrastructure failure vs quality failure. AUDIT_ERROR means the
+    // Auditor LLM never produced a parseable verdict — the CODE was never
+    // judged. Permanently failing the directive for that (AUTO-034,
+    // 2026-06-09) wastes good work. Requeue as pending so the next cron
+    // cycle retries, capped at 3 audit-infra retries to avoid livelock.
+    const auditInfraFailure = rawVerdict === "AUDIT_ERROR" || auditResult?.audit?.audit_error === true;
+    const auditRetries = ((next as any).audit_error_retries || 0) as number;
+    if (auditInfraFailure && auditRetries < 3) {
+      (next as any).audit_error_retries = auditRetries + 1;
+      next.status = "pending";
+      (next as any).skip_reason = `${skipReason} — audit infrastructure failure, requeued (retry ${auditRetries + 1}/3)`;
+      log.push(`[QUEUE] ${next.id} requeued as pending — audit infra failure (retry ${auditRetries + 1}/3)`);
+    } else {
+      next.status = "failed";
+      next.completed_at = new Date().toISOString();
+      (next as any).skip_reason = skipReason;
+    }
     next.auditor_score = score;
-    (next as any).skip_reason = skipReason;
     (next as any).build_attempts = buildAttempts;
     (next as any).attempt_history = attemptHistory;
-    await saveQueue(queue, `[QUEUE] ${next.id} skipped: ${skipReason}`, baseUrl).catch(() => {});
+    await saveQueue(queue, `[QUEUE] ${next.id} ${next.status === "pending" ? "requeued (audit infra)" : "skipped"}: ${skipReason}`, baseUrl).catch(() => {});
   }
 
   const elapsed = (Date.now() - startTime) / 1000;
