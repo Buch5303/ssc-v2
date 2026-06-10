@@ -328,6 +328,57 @@ async function loadRepoPaths(ghPat: string): Promise<Set<string> | null> {
   }
 }
 
+// ----------------------------------------------------------------------
+// Builder grounding context (added 2026-06-10).
+// Root cause of the AUTO-034..039 zero-throughput streak: the Builder never
+// saw the repo manifest or the real DB schema, so attempt 1 was routinely
+// wasted inventing imports (@/components/ui/card) and columns (createdAt),
+// and the 2-attempt budget (hard-capped by the 300s function ceiling) left
+// nothing for audit-feedback fixes. The tree is already fetched every cycle
+// for the compile gate — now it reaches the Builder too.
+// ----------------------------------------------------------------------
+
+async function loadRepoFileRaw(ghPat: string, path: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}`,
+      {
+        headers: {
+          Authorization: `Bearer ${(ghPat || "").trim()}`,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+        cache: "no-store",
+      }
+    );
+    if (!res.ok) return null;
+    const data: any = await res.json();
+    if (data && typeof data.content === "string") {
+      return Buffer.from(data.content.replace(/\s/g, ""), "base64").toString("utf8");
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+const REPO_CONTEXT_DIRS = ["app/", "components/", "lib/", "types/", "db/", "styles/", "middleware.ts"];
+const REPO_CONTEXT_MAX_PATHS = 700;
+
+async function buildRepoContext(
+  ghPat: string,
+  repoPaths: Set<string> | null
+): Promise<{ source_paths: string[]; db_schema: string | null } | null> {
+  if (!repoPaths) return null;
+  const sourcePaths = Array.from(repoPaths)
+    .filter(p => REPO_CONTEXT_DIRS.some(d => p === d || p.startsWith(d)))
+    .filter(p => /\.(ts|tsx|js|jsx|css|sql)$/.test(p))
+    .sort()
+    .slice(0, REPO_CONTEXT_MAX_PATHS);
+  const dbSchema = await loadRepoFileRaw(ghPat, "lib/db/schema.ts");
+  return { source_paths: sourcePaths, db_schema: dbSchema };
+}
+
 function extractImportSpecifiers(content: string): string[] {
   const specs: string[] = [];
   const patterns = [
@@ -906,6 +957,13 @@ export async function GET(req: Request) {
       ? `[COMPILE-GATE] Repo tree loaded (${repoPaths.size} paths)`
       : `[COMPILE-GATE] Repo tree unavailable — gate fails open this cycle`
   );
+  // Grounding context for the Builder — manifest + real schema (see helper).
+  const repoContext = await buildRepoContext(ghPat, repoPaths);
+  log.push(
+    repoContext
+      ? `[GROUNDING] Builder context: ${repoContext.source_paths.length} source paths, schema ${repoContext.db_schema ? "loaded" : "MISSING"}`
+      : `[GROUNDING] Repo context unavailable — Builder runs ungrounded this cycle`
+  );
   let buildResult: any = null;
   let auditResult: any = null;
   let rawVerdict = "UNKNOWN";
@@ -922,6 +980,7 @@ export async function GET(req: Request) {
       spec: archResult.spec || archResult,
       research: researchResults,
       analysis: analysisResult?.analysis || {},
+      ...(repoContext ? { repo_context: repoContext } : {}),
       ...(retryContext ? { retry_context: retryContext } : {}),
     }, baseUrl);
 

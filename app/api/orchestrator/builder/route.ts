@@ -39,20 +39,35 @@ Rules:
 }
 
 - Write production-quality TypeScript/React code
-- Follow existing patterns: Tailwind CSS, shadcn-style components, IBM Plex Mono for data
+- Follow existing patterns: Tailwind CSS, IBM Plex Mono for data
 - Use CSS variables: --bg, --fg, --card, --border, --accent, --muted
 - Every file must be complete — no placeholders, no "// TODO"
 - Include error handling and loading states
+- HARD RULE: import local modules ONLY from the EXISTING REPO FILES manifest, or include the file in your own output. Do NOT assume shadcn defaults (@/components/ui/card, button, etc.) exist — check the manifest.
+- HARD RULE: reference ONLY tables and columns present in the ACTUAL DATABASE SCHEMA provided. Never invent columns (e.g. createdAt vs updated_at). Type DB rows via typeof <table>.$inferSelect, never hand-written interfaces with required fields the schema lacks.
+- HARD RULE: no \`any\` types (including [key: string]: any) — builds run with TypeScript strict mode and the auditor rejects \`any\`.
 - Output ONLY JSON, no markdown fences`;
 
 export async function POST(req: Request) {
   try {
-    const { spec, research, analysis, retry_context } = await req.json();
+    const { spec, research, analysis, retry_context, repo_context } = await req.json();
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) return NextResponse.json({ error: "ANTHROPIC_API_KEY not set" }, { status: 500 });
 
+    const groundingBlock = repo_context
+      ? [
+          `EXISTING REPO FILES (the ONLY local modules you may import without also creating them in your output):`,
+          (repo_context.source_paths || []).join("\n"),
+          ``,
+          `ACTUAL DATABASE SCHEMA (lib/db/schema.ts) — the ONLY tables and columns that exist. Anything not listed here DOES NOT EXIST:`,
+          repo_context.db_schema || "(schema unavailable — create no new DB references this run)",
+        ].join("\n")
+      : "";
+
     const userMsg = `BUILD SPECIFICATION:
 ${JSON.stringify(spec, null, 2)}
+
+${groundingBlock}
 
 RESEARCH DATA:
 ${JSON.stringify(research || [], null, 2)}
