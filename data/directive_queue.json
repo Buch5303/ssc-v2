@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-10T20:16:36.321Z",
+  "updated_at": "2026-06-10T20:30:47.570Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -842,11 +842,11 @@
       "title": "RFQ status transition API with audit log wiring",
       "directive": "Build the RFQ response lifecycle state machine as required by Week 2 roadmap. (1) Add a status column (enum: 'draft'|'submitted'|'under_review'|'responded'|'closed') to the rfqs table via a non-destructive Drizzle migration (ADD COLUMN only — no drops or renames). (2) Implement PATCH /api/rfq/[id]/status accepting { status, actor_id, reason } with server-side validation that only legal transitions are accepted (e.g. draft→submitted, submitted→under_review, under_review→responded, responded→closed). Reject illegal transitions with HTTP 422 and a machine-readable error body. (3) On every successful transition, write an immutable record to audit_logs via POST /api/audit with event_type='rfq.status_transition', payload containing previous_status, new_status, actor_id, reason, and timestamp. (4) Add unit tests covering all valid transitions and at least three illegal transition rejections. EQS clauses advanced: 100% auditable data, immutable audit logs, RFQ response lifecycle (Week 2 roadmap).",
       "priority": 1,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "AUTO-033 delivered the audit_logs table and POST /api/audit endpoint, and AUTO-032 delivered the RFQ detail page. The next logical Week 2 milestone is the RFQ response lifecycle — status transitions with full auditability. This directive composes the two completed foundations into a concrete business capability while advancing the SOC 2 auditability requirement.",
       "created_at": "2026-06-09T18:46:11.575Z",
-      "started_at": "2026-06-10T17:00:33.044Z",
+      "started_at": "2026-06-10T20:30:47.570Z",
       "commit_sha": null,
       "auditor_score": 72,
       "skip_reason": "Requeued 2026-06-10: prior failures caused by ungrounded Builder (invented imports/schema); Builder now receives repo manifest + real schema",
