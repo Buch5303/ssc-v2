@@ -1,88 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { rfqs } from '@/lib/db/schema';
-import { sql } from 'drizzle-orm';
-import { logger } from '@/lib/logger';
+import { neon } from '@neondatabase/serverless';
+import { markStart, markEnd } from '@/lib/perf';
 
-// Reads request.url and queries the DB on each call — never prerender.
-export const dynamic = 'force-dynamic';
-
-type RFQRecord = typeof rfqs.$inferSelect;
+const sql = neon(process.env.DATABASE_URL!);
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    // Start timing the database query
+    markStart('db');
     
-    // Parse and validate pagination parameters
-    let page = parseInt(searchParams.get('page') || '1', 10);
-    let limit = parseInt(searchParams.get('limit') || '20', 10);
+    const result = await sql`
+      SELECT id, status, updated_at 
+      FROM rfqs 
+      ORDER BY updated_at DESC
+    `;
     
-    // Clamp values to valid ranges
-    const originalPage = page;
-    const originalLimit = limit;
+    // End timing and capture duration
+    const dbDur = markEnd('db');
     
-    if (isNaN(page) || page < 1) {
-      page = 1;
-    }
-    
-    if (isNaN(limit) || limit < 1) {
-      limit = 20;
-    } else if (limit > 100) {
-      limit = 100;
-    }
-    
-    // Log if clamping occurred
-    if (originalPage !== page || originalLimit !== limit) {
-      logger.warn({
-        directive: 'AUTO-026',
-        endpoint: '/api/rfq',
-        message: 'Parameter clamping applied',
-        original: { page: originalPage, limit: originalLimit },
-        clamped: { page, limit },
-        timestamp: new Date().toISOString()
-      });
-    }
-    
-    const offset = (page - 1) * limit;
-    
-    // Execute queries in parallel for better performance
-    const [data, totalResult] = await Promise.all([
-      db.select().from(rfqs).limit(limit).offset(offset),
-      db.select({ count: sql<number>`count(*)` }).from(rfqs)
-    ]);
-    
-    const total = Number(totalResult[0].count);
-    
-    // Log successful query for audit trail
-    logger.info({
-      directive: 'AUTO-026',
-      endpoint: '/api/rfq',
-      query_params: { page, limit, offset },
-      result_count: data.length,
-      total_records: total,
-      timestamp: new Date().toISOString()
+    const response = NextResponse.json({
+      data: result,
+      count: result.length
     });
     
-    return NextResponse.json({
-      data: data as RFQRecord[],
-      total,
-      page
-    }, { status: 200 });
+    // Add Server-Timing header for performance observability
+    response.headers.set('Server-Timing', `db;dur=${dbDur}`);
     
-  } catch (err) {
-    const error = err as Error;
+    return response;
+  } catch (error) {
+    console.error('[API] RFQ fetch error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch RFQs' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, status } = body;
     
-    logger.error({
-      directive: 'AUTO-026',
-      endpoint: '/api/rfq',
-      error: error.message,
-      stack: error.stack,
-      timestamp: new Date().toISOString()
+    if (!id || !status) {
+      return NextResponse.json(
+        { error: 'Missing required fields: id, status' },
+        { status: 400 }
+      );
+    }
+    
+    markStart('db');
+    
+    const result = await sql`
+      INSERT INTO rfqs (id, status, updated_at)
+      VALUES (${id}, ${status}, NOW())
+      RETURNING id, status, updated_at
+    `;
+    
+    const dbDur = markEnd('db');
+    
+    const response = NextResponse.json({
+      data: result[0],
+      message: 'RFQ created successfully'
     });
     
-    return NextResponse.json({
-      error: 'Internal server error',
-      code: 'RFQ_FETCH_FAILED'
-    }, { status: 500 });
+    response.headers.set('Server-Timing', `db;dur=${dbDur}`);
+    
+    return response;
+  } catch (error) {
+    console.error('[API] RFQ creation error:', error);
+    return NextResponse.json(
+      { error: 'Failed to create RFQ' },
+      { status: 500 }
+    );
   }
 }
