@@ -897,18 +897,40 @@ export async function GET(req: Request) {
   // ----- 5-Agent Pipeline -----
 
   log.push(`[ARCHITECT] Decomposing directive...`);
-  const archResult = await runAgent("architect", {
+  const archInput = {
     directive: next.directive,
     context: "FlowSeer W251 BOP procurement platform. Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 standards enforced.",
-  }, baseUrl);
+  };
+  let archResult = await runAgent("architect", archInput, baseUrl);
   if (!archResult?.spec && !archResult?.raw) {
-    log.push(`[ARCHITECT] FAILED: ${archResult?.error || "No spec returned"}`);
-    next.status = "failed";
-    next.completed_at = new Date().toISOString();
-    await saveQueue(queue, `[QUEUE] ${next.id} failed at architect`, baseUrl).catch(() => {});
+    // One immediate retry — a single Anthropic hiccup or cold-start fetch
+    // failure should not consume the whole cycle (2026-06-10: AUTO-034 was
+    // permanently failed by one transient architect miss right after a
+    // deployment swap).
+    log.push(`[ARCHITECT] First call failed (${archResult?.error || "no spec"}) — retrying once...`);
+    archResult = await runAgent("architect", archInput, baseUrl);
+  }
+  if (!archResult?.spec && !archResult?.raw) {
+    const archErr = archResult?.error || "No spec returned";
+    log.push(`[ARCHITECT] FAILED after retry: ${archErr}`);
+    // Infrastructure failure, not a directive defect — requeue (cap 3) so
+    // the next cycle retries instead of killing the directive.
+    const archRetries = ((next as any).architect_error_retries || 0) as number;
+    if (archRetries < 3) {
+      (next as any).architect_error_retries = archRetries + 1;
+      next.status = "pending";
+      (next as any).failure_detail = `architect infra failure: ${String(archErr).slice(0, 300)}`;
+      await saveQueue(queue, `[QUEUE] ${next.id} requeued (architect infra failure, retry ${archRetries + 1}/3): ${String(archErr).slice(0, 120)}`, baseUrl).catch(() => {});
+    } else {
+      next.status = "failed";
+      next.completed_at = new Date().toISOString();
+      (next as any).failure_detail = `architect failed ${archRetries + 1}x: ${String(archErr).slice(0, 300)}`;
+      await saveQueue(queue, `[QUEUE] ${next.id} failed at architect after ${archRetries + 1} cycles: ${String(archErr).slice(0, 120)}`, baseUrl).catch(() => {});
+    }
     return NextResponse.json({
-      status: "failed", directive: next.id, stage: "architect",
-      error: archResult?.error, log, elapsed: (Date.now() - startTime) / 1000,
+      status: next.status === "pending" ? "requeued" : "failed",
+      directive: next.id, stage: "architect",
+      error: archErr, log, elapsed: (Date.now() - startTime) / 1000,
     });
   }
   log.push(`[ARCHITECT] Complete`);
