@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-10T20:33:22.970Z",
+  "timestamp": "2026-06-10T20:50:24.658Z",
   "directive": {
-    "id": "AUTO-035",
-    "title": "RFQ status transition API with audit log wiring",
+    "id": "AUTO-034",
+    "title": "Dashboard performance budget assertion and instrumentation",
     "status": "failed"
   },
-  "elapsed_seconds": 157.742,
+  "elapsed_seconds": 277.331,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -19,8 +19,8 @@
         "audit_focus",
         "estimated_complexity"
       ],
-      "acceptance_criteria_count": 18,
-      "research_queries_count": 0,
+      "acceptance_criteria_count": 14,
+      "research_queries_count": 5,
       "spec_parse_error": false
     },
     "researcher": {
@@ -32,67 +32,81 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 9,
+      "files_count": 8,
       "parse_error": false,
-      "first_file_path": "db/migrations/0002_add_rfq_status_column.sql"
+      "first_file_path": "lib/perf/server-timing.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "FAIL",
-      "score": 55,
-      "summary": "The generated code has a critical inconsistency between the migration file and schema definition - the migration creates a column named 'status_enum' while the schema expects 'status'. Additionally, the migration contains prohibited UPDATE statements. The audit_logs schema has a TypeScript compilation error due to missing 'sql' import. The codebase is missing a database client initialization file (lib/db.ts) that both API routes depend on. The state machine logic and unit tests are well-implemented and cover all required transition paths. The PATCH endpoint correctly implements atomic transactions with audit logging. However, the critical migration and compilation issues prevent this build from passing. Score is 55 due to critical migration inconsistency and compilation errors.",
+      "verdict": "CONDITIONAL",
+      "score": 78,
+      "summary": "The build implements the core performance instrumentation requirements well - server timing headers, client navigation monitoring, health check endpoint, and fire-and-forget audit logging. However, there is a CRITICAL TypeScript compilation error due to a missing import in lib/perf/audit-timing.ts (auditLogs table not imported). Additionally, the health check endpoint returns an 'error' status not in the specified schema. The test suite is comprehensive but has some fragility concerns. With the critical import fix and schema compliance adjustment, this build would pass all acceptance criteria.",
       "pre_check_failed": false,
-      "issue_count": 8,
+      "issue_count": 6,
       "top_issues": [
         {
           "severity": "CRITICAL",
-          "description": "Migration adds column named 'status_enum' instead of 'status' as specified in schema and directive. Also contains UPDATE statement with CASE logic, violating the 'ADD COLUMN only' constraint. Schema file db/schema/rfqs.ts defines column as 'status' but migration creates 'status_enum' - they are inconsistent."
-        },
-        {
-          "severity": "CRITICAL",
-          "description": "Uses 'sql' template literal tag without importing it from drizzle-orm. The check() function usage with sql`...` requires import { sql } from 'drizzle-orm'. This will cause TypeScript compilation error."
+          "description": "Missing import for auditLogs table. The file imports { db } from '@/lib/db' but uses db.insert(auditLogs) without importing auditLogs from '@/lib/db/schema'. This will cause a TypeScript compilation error."
         },
         {
           "severity": "HIGH",
-          "description": "The check() function from drizzle-orm/pg-core may not accept the signature used here. The event_type_check constraint definition may not be valid Drizzle syntax for CHECK constraints."
+          "description": "Returns status 'error' which is not in the specified schema. The acceptance criteria specifies only 'ok' | 'degraded'. The error case should still return 'degraded' with a negative db_ms or handle differently."
+        },
+        {
+          "severity": "MEDIUM",
+          "description": "Uses setImmediate which is not available in all environments (e.g., browser, some Node.js versions). The fallback to setTimeout is good but the type check 'typeof setImmediate !== \"undefined\"' may not work in all bundlers."
         }
       ]
     },
     "gate": {
-      "allowed": false,
-      "effective_verdict": "FAIL",
-      "reason": "Auditor rejected (score 55)"
+      "allowed": true,
+      "effective_verdict": "CONDITIONAL",
+      "reason": "Score 78, verdict CONDITIONAL"
     },
-    "build_attempts": 1,
+    "build_attempts": 2,
     "attempt_history": [
       {
         "attempt": 1,
         "verdict": "FAIL",
         "score": 55,
         "effective": "FAIL"
+      },
+      {
+        "attempt": 2,
+        "verdict": "CONDITIONAL",
+        "score": 78,
+        "effective": "CONDITIONAL"
       }
     ]
   },
   "log": [
-    "[2026-06-10T20:30:45.229Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ c94ba77",
-    "[WATCHDOG] In sync at 1e2519b",
-    "[QUEUE] Loaded via contents-api. Pending: 4, total: 39",
+    "[2026-06-10T20:45:47.328Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ 24c2be7",
+    "[WATCHDOG] In sync at 24c2be7",
+    "[QUEUE] Loaded via contents-api. Pending: 5, total: 39",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-10T20:30:47.570Z] Processing: AUTO-035 — RFQ status transition API with audit log wiring",
+    "[2026-06-10T20:45:50.390Z] Processing: AUTO-034 — Dashboard performance budget assertion and instrumentation",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Skipped — no research_queries in spec",
+    "[RESEARCHER] Running 5 queries...",
+    "[RESEARCHER] skipped — 0 result(s)",
     "[COMPILE-GATE] Repo tree loaded (688 paths)",
     "[GROUNDING] Builder context: 106 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 9 files",
+    "[BUILDER] Attempt 1 complete — 8 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
     "[AUDITOR] Reviewing attempt 1...",
     "[AUDITOR] Attempt 1 verdict: FAIL (55/100)",
     "[GATE] Attempt 1: Auditor rejected (score 55) → FAIL",
-    "[COMMIT] Skipped — gate blocked after 1 attempt(s): Auditor rejected (score 55)"
+    "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
+    "[BUILDER] Attempt 2/2 — generating code...",
+    "[BUILDER] Attempt 2 complete — 8 files",
+    "[COMPILE-GATE] Attempt 2: all imports resolve",
+    "[AUDITOR] Reviewing attempt 2...",
+    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (78/100)",
+    "[GATE] Attempt 2: Score 78, verdict CONDITIONAL → CONDITIONAL",
+    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 78/100)"
   ]
 }
