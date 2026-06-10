@@ -992,7 +992,13 @@ export async function GET(req: Request) {
   let score: number | null = null;
   let gate: GateResult = { allowed: false, reason: "no build attempted", effective_verdict: "FAIL" };
   let buildAttempts = 0;
-  let retryContext: string | undefined;
+  // Seed attempt 1 from feedback carried over a near-miss requeue (see the
+  // post-loop block) so the new cycle continues the work, not restarts it.
+  let retryContext: string | undefined = (next as any).carryover_feedback || undefined;
+  if (retryContext) {
+    delete (next as any).carryover_feedback;
+    log.push(`[CARRYOVER] Attempt 1 seeded with prior cycle's audit findings`);
+  }
   const attemptHistory: Array<{ attempt: number; verdict: string; score: number | null; effective: string }> = [];
 
   for (let attempt = 1; attempt <= MAX_BUILD_ATTEMPTS; attempt++) {
@@ -1153,11 +1159,36 @@ export async function GET(req: Request) {
     // cycle retries, capped at 3 audit-infra retries to avoid livelock.
     const auditInfraFailure = rawVerdict === "AUDIT_ERROR" || auditResult?.audit?.audit_error === true;
     const auditRetries = ((next as any).audit_error_retries || 0) as number;
+    // Near-miss carryover (2026-06-10): a 3rd in-run attempt is impossible
+    // under the 300s function ceiling, so directives that end CONDITIONAL
+    // >= 70 (AUTO-034 hit 78 — two points off PASS) requeue with the final
+    // audit findings persisted. The next cycle's attempt 1 starts FROM the
+    // feedback instead of from scratch. Capped at 2 carryover cycles.
+    const nearMissRetries = ((next as any).near_miss_retries || 0) as number;
+    const isNearMiss =
+      effectiveVerdict === "CONDITIONAL" &&
+      typeof score === "number" &&
+      score >= 70 &&
+      builderFileCount > 0 &&
+      nearMissRetries < 2;
     if (auditInfraFailure && auditRetries < 3) {
       (next as any).audit_error_retries = auditRetries + 1;
       next.status = "pending";
       (next as any).skip_reason = `${skipReason} — audit infrastructure failure, requeued (retry ${auditRetries + 1}/3)`;
       log.push(`[QUEUE] ${next.id} requeued as pending — audit infra failure (retry ${auditRetries + 1}/3)`);
+    } else if (isNearMiss) {
+      const issues: any[] = Array.isArray(auditResult?.audit?.issues) ? auditResult.audit.issues : [];
+      const carried = issues.slice(0, 6).map((i: any, idx: number) =>
+        `${idx + 1}. [${i.severity || "?"}] ${i.description || JSON.stringify(i)}${i.fix ? ` FIX: ${i.fix}` : ""}`
+      ).join("\n");
+      (next as any).near_miss_retries = nearMissRetries + 1;
+      (next as any).carryover_feedback = [
+        `A previous cycle scored ${score}/100 (${rawVerdict}) — two attempts used. These are the EXACT remaining findings. Fix every one of them in your FIRST attempt this cycle:`,
+        carried || "(no structured issues — re-emit the complete spec with maximum rigor)",
+      ].join("\n");
+      next.status = "pending";
+      (next as any).skip_reason = `${skipReason} — near-miss, requeued with carried feedback (carryover ${nearMissRetries + 1}/2)`;
+      log.push(`[QUEUE] ${next.id} requeued as pending — near-miss ${score}/100, feedback carried to next cycle (${nearMissRetries + 1}/2)`);
     } else {
       next.status = "failed";
       next.completed_at = new Date().toISOString();
@@ -1166,7 +1197,7 @@ export async function GET(req: Request) {
     next.auditor_score = score;
     (next as any).build_attempts = buildAttempts;
     (next as any).attempt_history = attemptHistory;
-    await saveQueue(queue, `[QUEUE] ${next.id} ${next.status === "pending" ? "requeued (audit infra)" : "skipped"}: ${skipReason}`, baseUrl).catch(() => {});
+    await saveQueue(queue, `[QUEUE] ${next.id} ${next.status === "pending" ? "requeued" : "skipped"}: ${skipReason}`, baseUrl).catch(() => {});
   }
 
   const elapsed = (Date.now() - startTime) / 1000;
