@@ -3,19 +3,20 @@ import { rfqs as rfqsTable } from '@/lib/db/schema';
 import { desc } from 'drizzle-orm';
 import Link from 'next/link';
 
-interface RfqView {
-  id: string;
-  title: string;
-  status: string;
-  createdAt: Date;
-  updatedAt: Date;
+// Derived from the REAL drizzle schema row — extra display fields optional.
+// (Same AUTO-037 type-error fix as app/rfq/[id]/page.tsx, 2026-06-10.)
+type RfqRow = typeof rfqsTable.$inferSelect;
+type RfqView = RfqRow & {
+  title?: string | null;
+  createdAt?: Date | string | null;
+  updatedAt?: Date | string | null;
   rfq_number?: string | null;
   vendor_name?: string | null;
   due_date?: string | Date | null;
   category?: string | null;
   currency?: string | null;
   estimated_value?: number | string | null;
-}
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -63,7 +64,7 @@ export default async function RFQListPage() {
   const rfqs = await db
     .select()
     .from(rfqsTable)
-    .orderBy(desc(rfqsTable.createdAt));
+    .orderBy(desc(rfqsTable.updated_at));
 
   return (
     <div className="max-w-7xl mx-auto p-6">

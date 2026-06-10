@@ -566,6 +566,45 @@ async function checkAndHealDrift(): Promise<{
       };
     }
 
+    // Per-SHA dedupe before redeploying. 2026-06-10: the watchdog redeployed
+    // HEAD eight times in a row — each attempt got CANCELED because HEAD's
+    // *tip* commit was data-only and ignoreCommand only diffs the tip, even
+    // though the cumulative delta contained code. Rules:
+    //   - A recent ERROR deploy for this SHA → that code is broken; redeploying
+    //     it is futile. Leave it to the deploy-sentinel and skip.
+    //   - A QUEUED/BUILDING deploy for this SHA → already in flight; skip.
+    //   - Only CANCELED attempts (or none) → proceed, and disable
+    //     ignoreCommand for THIS deployment via projectSettings so an
+    //     intentional drift-heal can't be vetoed by the tip-commit heuristic.
+    try {
+      const dRes = await fetch(
+        `https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&teamId=${VERCEL_TEAM_ID}&target=production&limit=20`,
+        { headers: { Authorization: `Bearer ${vercelToken}` }, cache: "no-store" }
+      );
+      const dData: any = await dRes.json();
+      const sameSha = (dData?.deployments || []).filter(
+        (d: any) => d?.meta?.githubCommitSha === githubSha
+      );
+      if (sameSha.some((d: any) => d.state === "ERROR")) {
+        return {
+          drifted: true,
+          githubSha,
+          vercelSha,
+          action: `HEAD ${githubSha.slice(0, 7)} already has a failed (ERROR) deployment — not retrying; deploy-sentinel owns broken builds`,
+        };
+      }
+      if (sameSha.some((d: any) => ["QUEUED", "BUILDING", "INITIALIZING"].includes(d.state))) {
+        return {
+          drifted: true,
+          githubSha,
+          vercelSha,
+          action: `Deployment for HEAD ${githubSha.slice(0, 7)} already in flight — waiting`,
+        };
+      }
+    } catch {
+      // Dedupe is best-effort — fall through to redeploy on lookup failure.
+    }
+
     const redeployRes = await fetch(
       `https://api.vercel.com/v13/deployments?teamId=${VERCEL_TEAM_ID}&forceNew=1`,
       {
@@ -575,6 +614,9 @@ async function checkAndHealDrift(): Promise<{
           name: "ssc-v2",
           target: "production",
           gitSource: { type: "github", repoId: REPO_ID, ref: BRANCH, sha: githubSha },
+          // Buildable drift is already confirmed above via the compare API —
+          // this deploy must not be vetoed by the tip-commit ignoreCommand.
+          projectSettings: { commandForIgnoringBuildStep: "" },
         }),
       }
     );

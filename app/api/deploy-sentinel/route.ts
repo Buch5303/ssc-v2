@@ -392,9 +392,14 @@ export async function GET(req: Request) {
   }
   log.push(`[VERCEL] Loaded ${deployments.length} recent production deployment(s)`);
 
-  const latest = deployments[0];
+  // CANCELED deployments are intentional ignoreCommand skips (data-only
+  // commits). They flood the recent list — AUTO-037's ERROR deploy
+  // (2026-06-10) sat invisible behind 8 of them while the sentinel idled on
+  // "latest is CANCELED". Judge by the latest deployment that actually
+  // attempted a build.
+  const latest = deployments.find((d: any) => d.state !== "CANCELED");
   if (!latest) {
-    return NextResponse.json({ status: "idle", reason: "no recent deployments", log });
+    return NextResponse.json({ status: "idle", reason: "no recent build-attempting deployments (all CANCELED)", log });
   }
   // Vercel REST API exposes the deployment id as `uid` (not `id`) on
   // /v6/deployments list responses. Be defensive and fall back to `.id`

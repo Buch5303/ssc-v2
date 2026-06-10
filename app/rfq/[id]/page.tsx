@@ -5,12 +5,15 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-interface RfqView {
-  id: string;
-  title: string;
-  status: string;
-  createdAt: Date;
-  updatedAt: Date;
+// Derived from the REAL drizzle schema row (id, status, updated_at) — the
+// remaining fields are optional display extras that may not exist yet in the
+// rfqs table. 2026-06-10: declaring them required broke `next build`
+// (AUTO-037 deploy ERROR) because the actual row can't satisfy them.
+type RfqRow = typeof rfqs.$inferSelect;
+type RfqView = RfqRow & {
+  title?: string | null;
+  createdAt?: Date | string | null;
+  updatedAt?: Date | string | null;
   rfq_number?: string | null;
   vendor_name?: string | null;
   issue_date?: string | Date | null;
@@ -19,7 +22,7 @@ interface RfqView {
   currency?: string | null;
   estimated_value?: number | string | null;
   description?: string | null;
-}
+};
 
 export const dynamic = 'force-dynamic';
 
