@@ -6,7 +6,7 @@ export const maxDuration = 300;
 
 export async function POST(req: Request) {
   try {
-    const { spec, build, research } = await req.json();
+    const { spec, build, research, repo_context } = await req.json();
     const apiKey = process.env.DEEPSEEK_API_KEY;
     
     // If no DeepSeek key, fall back to Anthropic
@@ -62,6 +62,13 @@ export async function POST(req: Request) {
 
     const prompt = `You are the Auditor agent in an automated build pipeline. You receive the original build specification and the code that was generated. Your job is to verify the build meets THIS DIRECTIVE'S acceptance criteria, then check for bugs, logic errors, security issues, and spec violations.
 
+${repo_context ? `REPO GROUND TRUTH (use this — do NOT guess about the repo):
+- Files that already exist in the repo (do NOT flag these as "missing"; the build only needs to include files it creates or modifies):
+${(repo_context.source_paths || []).join("\n")}
+
+- ACTUAL DATABASE SCHEMA (lib/db/schema.ts). Flag any build reference to tables/columns not present here as CRITICAL:
+${repo_context.db_schema || "(unavailable)"}
+` : ""}
 DIRECTIVE SCOPE (primary evaluation surface):
 - Title: ${directiveTitle || "(unspecified)"}
 - Objective: ${directiveObjective || "(unspecified)"}

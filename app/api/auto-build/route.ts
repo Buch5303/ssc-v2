@@ -1062,6 +1062,7 @@ export async function GET(req: Request) {
       spec: archResult.spec || archResult,
       build: buildResult.build,
       research: researchResults,
+      ...(repoContext ? { repo_context: repoContext } : {}),
     }, baseUrl);
     rawVerdict = auditResult?.audit?.verdict || "UNKNOWN";
     score = auditResult?.audit?.score ?? null;
@@ -1075,11 +1076,16 @@ export async function GET(req: Request) {
     if (gate.effective_verdict === "PASS") {
       break;
     }
-    // CONDITIONAL with attempts remaining — feed auditor issues back to Builder.
-    if (attempt < MAX_BUILD_ATTEMPTS && gate.effective_verdict === "CONDITIONAL") {
+    // CONDITIONAL or FAIL with attempts remaining — feed auditor issues back
+    // to Builder. 2026-06-10: sub-floor FAILs previously got no retry even
+    // with concrete fixable findings (AUTO-035 died at 55 with a wrong
+    // migration column name and a missing import while attempt 2 sat unused).
+    // A FAIL's issues are exactly as actionable as a CONDITIONAL's; the
+    // commit gate below still requires a clean PASS either way.
+    if (attempt < MAX_BUILD_ATTEMPTS && (gate.effective_verdict === "CONDITIONAL" || gate.effective_verdict === "FAIL")) {
       const issues: any[] = Array.isArray(auditResult?.audit?.issues) ? auditResult.audit.issues : [];
       const topIssues = issues.slice(0, 5).map((i: any, idx: number) =>
-        `${idx + 1}. [${i.severity || "?"}] ${i.description || JSON.stringify(i)}`
+        `${idx + 1}. [${i.severity || "?"}] ${i.description || JSON.stringify(i)}${i.fix ? ` FIX: ${i.fix}` : ""}`
       ).join("\n");
       retryContext = [
         `Previous attempt scored ${score}/100 (${rawVerdict}).`,
@@ -1089,7 +1095,7 @@ export async function GET(req: Request) {
       log.push(`[RETRY] Re-running Builder with auditor feedback (next attempt ${attempt + 1}/${MAX_BUILD_ATTEMPTS})`);
       continue;
     }
-    // FAIL verdict or no attempts left — exit loop, will fail below.
+    // No attempts left — exit loop, will fail below.
     break;
   }
 
