@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-10T20:15:48.533Z",
+  "updated_at": "2026-06-10T20:16:36.321Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -810,7 +810,7 @@
       "title": "Dashboard performance budget assertion and instrumentation",
       "directive": "Implement end-to-end dashboard performance instrumentation and budget enforcement. (1) Add a server-side timing header (Server-Timing) to GET /api/rfq capturing DB query duration. (2) In the RFQ dashboard page (/app/dashboard or equivalent), instrument client-side navigation timing using the Performance API and log time-to-interactive to console in development. (3) Create a lightweight /api/health/perf endpoint that executes a representative DB query (SELECT COUNT(*) FROM rfqs) and returns { db_ms, status: 'ok'|'degraded' } where degraded triggers when db_ms > 200. (4) Add a Jest/Vitest integration test at tests/perf/dashboard-budget.test.ts that calls /api/rfq with a seeded DB and asserts response time < 500ms (synthetic budget with headroom under the 1.5s EQS target). Do NOT modify middleware.ts or any auth routes. All timing values must be logged to the existing audit_logs infrastructure via a non-blocking fire-and-forget pattern. EQS clauses advanced: Dashboard load < 1.5s, 100% auditable data.",
       "priority": 1,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "auto",
       "rationale": "AUTO-031 (performance instrumentation) failed and AUTO-033 (audit log) is now complete, providing the prerequisite infrastructure. The EQS dashboard load budget of <1.5s is a Week 3 hard target and the platform has no performance observability in place. With the DB layer and audit endpoint both stable, this directive can now succeed where AUTO-031 could not.",
       "created_at": "2026-06-09T18:46:11.575Z",
@@ -834,7 +834,8 @@
         }
       ],
       "audit_error_retries": 1,
-      "attempts": 1
+      "attempts": 1,
+      "completed_at": "2026-06-10T20:16:36.321Z"
     },
     {
       "id": "AUTO-035",
