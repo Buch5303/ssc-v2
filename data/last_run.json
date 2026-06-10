@@ -1,27 +1,21 @@
 {
-  "timestamp": "2026-06-10T17:04:10.771Z",
+  "timestamp": "2026-06-10T17:18:56.102Z",
   "directive": {
     "id": "AUTO-034",
     "title": "Dashboard performance budget assertion and instrumentation",
     "status": "failed"
   },
-  "elapsed_seconds": 242.374,
+  "elapsed_seconds": 206.435,
   "pipeline": {
     "architect": {
       "status": "complete",
       "spec_keys": [
-        "directive_id",
-        "title",
-        "objective",
-        "research_queries",
-        "build_spec",
-        "acceptance_criteria",
-        "audit_focus",
-        "estimated_complexity"
+        "raw",
+        "parse_error"
       ],
-      "acceptance_criteria_count": 18,
-      "research_queries_count": 5,
-      "spec_parse_error": false
+      "acceptance_criteria_count": 0,
+      "research_queries_count": 0,
+      "spec_parse_error": true
     },
     "researcher": {
       "results_count": 0
@@ -32,36 +26,36 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 9,
+      "files_count": 12,
       "parse_error": false,
       "first_file_path": "lib/prisma.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "CONDITIONAL",
-      "score": 72,
-      "summary": "The implementation successfully instruments the W251 BOP platform with server-side timing headers, client-side navigation timing, and a performance health endpoint. The fire-and-forget audit logging pattern is correctly implemented with void prefix and error catching. However, several critical acceptance criteria are not fully verified: the non-blocking audit log behavior has no test, the degraded status logic has no unit test, and the SSR safety of the navigation timing hook is untested. Additionally, converting the dashboard page to a Client Component may have unintended side effects. The build is recoverable with additional tests and minor fixes.",
+      "verdict": "FAIL",
+      "score": 40,
+      "summary": "The build has critical issues that prevent it from passing. The most severe problem is the dependency on '@prisma/client' which is not installed in the project - this will cause build failures. Additionally, several files were created as new files when they should have been modifications to existing files (app/api/rfq/route.ts, app/dashboard/page.tsx), which could overwrite existing logic. Unnecessary files were created (DashboardStats.tsx, RFQTable.tsx, lib/auth.ts) that were not in the spec. Multiple acceptance criteria are not met due to missing unit tests. The code structure and logic for the performance instrumentation is otherwise sound, but the buildability issues and spec violations make this a FAIL verdict.",
       "pre_check_failed": false,
-      "issue_count": 8,
+      "issue_count": 12,
       "top_issues": [
         {
-          "severity": "HIGH",
-          "description": "Missing test for non-blocking audit log behavior (criterion 7) - no mock of prisma.audit_logs.create with artificial delay"
+          "severity": "CRITICAL",
+          "description": "Imports from '@prisma/client' which is NOT listed in package.json dependencies or devDependencies. This will cause a build failure."
         },
         {
-          "severity": "HIGH",
-          "description": "Missing test for degraded status when db_ms > 200 (criterion 4) - no unit test or mock verifying the logic"
+          "severity": "CRITICAL",
+          "description": "Imports from '@prisma/client' which is NOT listed in package.json dependencies or devDependencies. Same issue as lib/prisma.ts."
         },
         {
-          "severity": "HIGH",
-          "description": "Missing SSR safety test for useNavigationTiming hook (criterion 9) - no test rendering in Node.js environment without window"
+          "severity": "CRITICAL",
+          "description": "Imports from '@prisma/client' which is NOT listed in package.json dependencies or devDependencies. Same issue as lib/prisma.ts."
         }
       ]
     },
     "gate": {
-      "allowed": true,
-      "effective_verdict": "CONDITIONAL",
-      "reason": "Score 72, verdict CONDITIONAL"
+      "allowed": false,
+      "effective_verdict": "FAIL",
+      "reason": "Auditor rejected (score 40)"
     },
     "build_attempts": 2,
     "attempt_history": [
@@ -73,36 +67,36 @@
       },
       {
         "attempt": 2,
-        "verdict": "CONDITIONAL",
-        "score": 72,
-        "effective": "CONDITIONAL"
+        "verdict": "FAIL",
+        "score": 40,
+        "effective": "FAIL"
       }
     ]
   },
   "log": [
-    "[2026-06-10T17:00:08.398Z] Auto-builder cycle started",
+    "[2026-06-10T17:15:29.668Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy @ 86c3edf",
-    "[WATCHDOG] In sync at 86c3edf",
-    "[QUEUE] Loaded via contents-api. Pending: 4, total: 36",
+    "[WATCHDOG] In sync at da6d0c7",
+    "[QUEUE] Loaded via contents-api. Pending: 2, total: 36",
+    "[RECOVERY] AUTO-034 stuck in_progress for >30min — reset to pending (attempt #1)",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-10T17:00:10.735Z] Processing: AUTO-034 — Dashboard performance budget assertion and instrumentation",
+    "[2026-06-10T17:15:33.723Z] Processing: AUTO-034 — Dashboard performance budget assertion and instrumentation",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 5 queries...",
-    "[RESEARCHER] skipped — 0 result(s)",
+    "[RESEARCHER] Skipped — no research_queries in spec",
     "[COMPILE-GATE] Repo tree loaded (686 paths)",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 8 files",
-    "[COMPILE-GATE] Attempt 1: 4 unresolved import(s):\n  lib/perf/audit-logger.ts → '@/lib/prisma'\n  app/api/health/perf/route.ts → '@/lib/prisma'\n  app/api/rfq/route.ts → '@/lib/prisma'\n  tests/perf/setup/seed.ts → '@/lib/prisma'",
+    "[BUILDER] Attempt 1 complete — 9 files",
+    "[COMPILE-GATE] Attempt 1: 7 unresolved import(s):\n  lib/perf/audit-logger.ts → '@/lib/prisma'\n  app/api/health/perf/route.ts → '@/lib/prisma'\n  app/api/rfq/route.ts → '@/lib/auth'\n  app/api/rfq/route.ts → '@/lib/prisma'\n  app/dashboard/page.tsx → '@/lib/auth'\n  app/dashboard/page.tsx → './_components/DashboardStats'\n  app/dashboard/page.tsx → './_components/RFQTable'",
     "[RETRY] Re-running Builder to fix unresolved imports (attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 9 files",
+    "[BUILDER] Attempt 2 complete — 12 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
     "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)"
+    "[AUDITOR] Attempt 2 verdict: FAIL (40/100)",
+    "[GATE] Attempt 2: Auditor rejected (score 40) → FAIL",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): Auditor rejected (score 40)"
   ]
 }
