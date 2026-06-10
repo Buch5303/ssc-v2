@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updated_at": "2026-06-09T18:49:25.067Z",
-  "description": "FlowSeer Directive Queue \u2014 source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending \u2192 in_progress \u2192 complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
+  "updated_at": "2026-06-10T17:00:10.735Z",
+  "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
       "id": "AUTO-001",
@@ -20,7 +20,7 @@
     {
       "id": "AUTO-002",
       "title": "Loading skeletons for all dashboard pages",
-      "directive": "Add animated loading skeleton components to all 14 dashboard pages. Each page should show a skeleton that matches its layout structure (KPI strip skeleton, table skeleton, panel skeleton) while data is fetching. Use CSS animations only \u2014 no external libraries. Skeletons must feel fast and controlled per EQS v1.0 standards.",
+      "directive": "Add animated loading skeleton components to all 14 dashboard pages. Each page should show a skeleton that matches its layout structure (KPI strip skeleton, table skeleton, panel skeleton) while data is fetching. Use CSS animations only — no external libraries. Skeletons must feel fast and controlled per EQS v1.0 standards.",
       "priority": 2,
       "status": "failed",
       "origin": "seed",
@@ -30,7 +30,7 @@
       "commit_sha": null,
       "auditor_score": 72,
       "attempts": 2,
-      "skip_reason": "did not reach PASS after 2 attempt(s) \u2014 final CONDITIONAL (CONDITIONAL 72/100)",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -84,7 +84,7 @@
       "commit_sha": null,
       "auditor_score": 72,
       "attempts": 1,
-      "skip_reason": "did not reach PASS after 2 attempt(s) \u2014 final CONDITIONAL (CONDITIONAL 72/100)",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -118,11 +118,11 @@
     {
       "id": "AUTO-006",
       "title": "Neon DB connection and basic table creation",
-      "directive": "Establish Neon PostgreSQL database connection in the FlowSeer platform. Create database client configuration in /lib/db.ts using @neondatabase/serverless driver. Create initial tables: users, companies, rfqs, quotes, audit_logs with proper indexes and constraints. Include connection pooling and error handling. Must support the financial accuracy \u00b10.1% requirement from EQS \u00a72.2 and auditable data requirement from EQS \u00a74.1.",
+      "directive": "Establish Neon PostgreSQL database connection in the FlowSeer platform. Create database client configuration in /lib/db.ts using @neondatabase/serverless driver. Create initial tables: users, companies, rfqs, quotes, audit_logs with proper indexes and constraints. Include connection pooling and error handling. Must support the financial accuracy ±0.1% requirement from EQS §2.2 and auditable data requirement from EQS §4.1.",
       "priority": 1,
       "status": "failed",
       "origin": "auto",
-      "rationale": "Week 1 roadmap priority requires Neon DB migration. Previous AUTO-001 failed on write endpoints - need to establish basic connection and schema first before attempting writes. | Reset 2026-05-16 \u2014 previous run truncated mid-build (3 of 5 files); re-running on Builder 16K + retry-gate fix.",
+      "rationale": "Week 1 roadmap priority requires Neon DB migration. Previous AUTO-001 failed on write endpoints - need to establish basic connection and schema first before attempting writes. | Reset 2026-05-16 — previous run truncated mid-build (3 of 5 files); re-running on Builder 16K + retry-gate fix.",
       "created_at": "2026-04-28T07:00:16.242Z",
       "started_at": "2026-05-31T07:02:55.324Z",
       "completed_at": "2026-05-31T07:06:37.124Z",
@@ -149,11 +149,11 @@
     {
       "id": "AUTO-007",
       "title": "RFQ data model and API endpoints",
-      "directive": "Create RFQ (Request for Quote) data model and CRUD API endpoints. Implement /api/rfqs with GET, POST, PUT operations. Include proper TypeScript interfaces for RFQ structure with fields: id, company_id, title, description, budget, deadline, status, created_at, updated_at. Add Zod validation schemas and error handling. Must advance EQS \u00a71.1 dashboard load performance by providing efficient data access patterns.",
+      "directive": "Create RFQ (Request for Quote) data model and CRUD API endpoints. Implement /api/rfqs with GET, POST, PUT operations. Include proper TypeScript interfaces for RFQ structure with fields: id, company_id, title, description, budget, deadline, status, created_at, updated_at. Add Zod validation schemas and error handling. Must advance EQS §1.1 dashboard load performance by providing efficient data access patterns.",
       "priority": 1,
       "status": "failed",
       "origin": "auto",
-      "rationale": "Week 2 roadmap includes RFQ response lifecycle. Need core RFQ data structure and APIs established to support the quote management workflow that differentiates FlowSeer platform. | Reset 2026-05-16 \u2014 previous run truncated mid-build (3 of 5 files); re-running on Builder 16K + retry-gate fix.",
+      "rationale": "Week 2 roadmap includes RFQ response lifecycle. Need core RFQ data structure and APIs established to support the quote management workflow that differentiates FlowSeer platform. | Reset 2026-05-16 — previous run truncated mid-build (3 of 5 files); re-running on Builder 16K + retry-gate fix.",
       "created_at": "2026-04-28T07:00:16.242Z",
       "started_at": "2026-05-31T07:30:39.167Z",
       "completed_at": "2026-05-31T07:35:01.320Z",
@@ -180,7 +180,7 @@
     {
       "id": "AUTO-008",
       "title": "Basic authentication setup with NextAuth",
-      "directive": "Implement basic authentication system using NextAuth.js. Configure email/password provider in /lib/auth.ts with session management. Create sign-in and sign-up pages at /auth/signin and /auth/signup with proper form validation. Include session persistence and protected route middleware. Must support the Zero Trust orientation requirement from EQS \u00a74.3 by ensuring all routes are authenticated by default.",
+      "directive": "Implement basic authentication system using NextAuth.js. Configure email/password provider in /lib/auth.ts with session management. Create sign-in and sign-up pages at /auth/signin and /auth/signup with proper form validation. Include session persistence and protected route middleware. Must support the Zero Trust orientation requirement from EQS §4.3 by ensuring all routes are authenticated by default.",
       "priority": 2,
       "status": "failed",
       "origin": "auto",
@@ -191,7 +191,7 @@
       "commit_sha": null,
       "auditor_score": null,
       "attempts": 1,
-      "skip_reason": "gate blocked after 1 attempt(s): No numeric score \u2014 EQS v1.0 requires quantitative quality gate",
+      "skip_reason": "gate blocked after 1 attempt(s): No numeric score — EQS v1.0 requires quantitative quality gate",
       "build_attempts": 1,
       "attempt_history": [
         {
@@ -205,7 +205,7 @@
     {
       "id": "AUTO-009",
       "title": "Supabase database initialization and core tables",
-      "directive": "Initialize Supabase database connection and create core tables for RFQs, users, and audit logging. Set up environment variables for Supabase connection, create migration files for: rfqs table (id, title, description, status, created_at, updated_at), users table (id, email, name, role, created_at), audit_logs table (id, entity_type, entity_id, action, user_id, timestamp, details). Include proper indexes and foreign key constraints. This advances EQS \u00a73.1 (100% auditable data) and \u00a74.2 (immutable audit logs).",
+      "directive": "Initialize Supabase database connection and create core tables for RFQs, users, and audit logging. Set up environment variables for Supabase connection, create migration files for: rfqs table (id, title, description, status, created_at, updated_at), users table (id, email, name, role, created_at), audit_logs table (id, entity_type, entity_id, action, user_id, timestamp, details). Include proper indexes and foreign key constraints. This advances EQS §3.1 (100% auditable data) and §4.2 (immutable audit logs).",
       "priority": 1,
       "status": "complete",
       "origin": "auto",
@@ -219,7 +219,7 @@
     {
       "id": "AUTO-010",
       "title": "Basic RFQ list and detail pages with static data",
-      "directive": "Create /rfqs page with table listing RFQs and /rfqs/[id] detail page. Use static mock data initially. Implement basic table with columns: Title, Status, Created Date, Actions. Detail page shows full RFQ information including description, requirements, timeline. Include loading states and error boundaries. Style with existing Tailwind theme. This advances EQS \u00a72.2 (C-suite clarity in < 5 seconds) by providing core RFQ visibility.",
+      "directive": "Create /rfqs page with table listing RFQs and /rfqs/[id] detail page. Use static mock data initially. Implement basic table with columns: Title, Status, Created Date, Actions. Detail page shows full RFQ information including description, requirements, timeline. Include loading states and error boundaries. Style with existing Tailwind theme. This advances EQS §2.2 (C-suite clarity in < 5 seconds) by providing core RFQ visibility.",
       "priority": 1,
       "status": "failed",
       "origin": "auto",
@@ -230,7 +230,7 @@
       "commit_sha": null,
       "auditor_score": 72,
       "attempts": 9,
-      "skip_reason": "did not reach PASS after 2 attempt(s) \u2014 final CONDITIONAL (CONDITIONAL 72/100)",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -250,7 +250,7 @@
     {
       "id": "AUTO-011",
       "title": "Performance monitoring and bundle analysis setup",
-      "directive": "Install and configure @next/bundle-analyzer and web-vitals. Add performance monitoring to _app.tsx to track Core Web Vitals. Create /api/performance endpoint to log client-side metrics. Add bundle size analysis to build process with size limits: total bundle < 500KB, individual pages < 100KB. This advances EQS \u00a71.1 (dashboard load < 1.5s) by establishing performance baseline and monitoring.",
+      "directive": "Install and configure @next/bundle-analyzer and web-vitals. Add performance monitoring to _app.tsx to track Core Web Vitals. Create /api/performance endpoint to log client-side metrics. Add bundle size analysis to build process with size limits: total bundle < 500KB, individual pages < 100KB. This advances EQS §1.1 (dashboard load < 1.5s) by establishing performance baseline and monitoring.",
       "priority": 2,
       "status": "failed",
       "origin": "auto",
@@ -261,7 +261,7 @@
       "commit_sha": null,
       "auditor_score": 72,
       "attempts": 1,
-      "skip_reason": "did not reach PASS after 2 attempt(s) \u2014 final CONDITIONAL (CONDITIONAL 72/100)",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -281,7 +281,7 @@
     {
       "id": "AUTO-012",
       "title": "Database schema foundation with Drizzle ORM",
-      "directive": "Establish core database schema using Drizzle ORM with PostgreSQL. Create tables for users, companies, rfqs, and audit_logs with proper relationships and constraints. Include migration setup and connection pooling configuration. Must support EQS \u00a73.4 (100% auditable data) and \u00a72.1 (financial accuracy \u00b10.1%). Focus on schema-first approach before building endpoints.",
+      "directive": "Establish core database schema using Drizzle ORM with PostgreSQL. Create tables for users, companies, rfqs, and audit_logs with proper relationships and constraints. Include migration setup and connection pooling configuration. Must support EQS §3.4 (100% auditable data) and §2.1 (financial accuracy ±0.1%). Focus on schema-first approach before building endpoints.",
       "priority": 1,
       "status": "failed",
       "origin": "auto",
@@ -312,7 +312,7 @@
     {
       "id": "AUTO-013",
       "title": "Static RFQ dashboard with mock data structure",
-      "directive": "Create static RFQ dashboard pages (/dashboard, /rfqs, /rfqs/[id]) using consistent mock data structure that matches planned database schema. Implement basic layout, navigation, and data display components. Must support EQS \u00a72.2 (C-suite clarity < 5s) and \u00a74.1 (Tableau-level visualization). No API calls - focus on UI/UX foundation.",
+      "directive": "Create static RFQ dashboard pages (/dashboard, /rfqs, /rfqs/[id]) using consistent mock data structure that matches planned database schema. Implement basic layout, navigation, and data display components. Must support EQS §2.2 (C-suite clarity < 5s) and §4.1 (Tableau-level visualization). No API calls - focus on UI/UX foundation.",
       "priority": 1,
       "status": "failed",
       "origin": "auto",
@@ -323,7 +323,7 @@
       "commit_sha": null,
       "auditor_score": null,
       "attempts": 4,
-      "skip_reason": "gate blocked after 1 attempt(s): No numeric score \u2014 EQS v1.0 requires quantitative quality gate",
+      "skip_reason": "gate blocked after 1 attempt(s): No numeric score — EQS v1.0 requires quantitative quality gate",
       "build_attempts": 1,
       "attempt_history": [
         {
@@ -337,7 +337,7 @@
     {
       "id": "AUTO-014",
       "title": "Basic error boundary and logging infrastructure",
-      "directive": "Implement React error boundaries for all major page components and establish centralized logging system using structured JSON logs. Include client-side error capture and basic performance metrics collection. Must support EQS \u00a73.4 (auditable operations) and \u00a71.3 (real-time latency monitoring). Essential for debugging failed directive patterns.",
+      "directive": "Implement React error boundaries for all major page components and establish centralized logging system using structured JSON logs. Include client-side error capture and basic performance metrics collection. Must support EQS §3.4 (auditable operations) and §1.3 (real-time latency monitoring). Essential for debugging failed directive patterns.",
       "priority": 2,
       "status": "complete",
       "origin": "auto",
@@ -353,7 +353,7 @@
     {
       "id": "AUTO-015",
       "title": "Neon DB schema setup with Drizzle ORM foundation",
-      "directive": "Establish Neon PostgreSQL database connection and create core schema tables using Drizzle ORM. Create companies, rfqs, users, and audit_logs tables with proper types, constraints, and relationships. Add connection pooling configuration and basic seed data. Implement in lib/db/ with schema definitions, migrations, and connection utilities. Must achieve sub-2s query response times per EQS Performance Standard \u00a72.1 and support 100% auditable data per EQS Compliance \u00a74.1.",
+      "directive": "Establish Neon PostgreSQL database connection and create core schema tables using Drizzle ORM. Create companies, rfqs, users, and audit_logs tables with proper types, constraints, and relationships. Add connection pooling configuration and basic seed data. Implement in lib/db/ with schema definitions, migrations, and connection utilities. Must achieve sub-2s query response times per EQS Performance Standard §2.1 and support 100% auditable data per EQS Compliance §4.1.",
       "priority": 1,
       "status": "failed",
       "origin": "auto",
@@ -384,7 +384,7 @@
     {
       "id": "AUTO-016",
       "title": "Basic RFQ API endpoints with Neon integration",
-      "directive": "Create REST API endpoints for RFQ CRUD operations: GET /api/rfqs (list), GET /api/rfqs/[id] (detail), POST /api/rfqs (create), PUT /api/rfqs/[id] (update). Integrate with Neon database using Drizzle ORM queries. Include proper error handling, input validation with Zod schemas, and audit logging for all mutations. Must support financial accuracy \u00b10.1% per EQS Data Integrity \u00a73.2 and provide C-suite clarity data structure per EQS Usability \u00a71.3.",
+      "directive": "Create REST API endpoints for RFQ CRUD operations: GET /api/rfqs (list), GET /api/rfqs/[id] (detail), POST /api/rfqs (create), PUT /api/rfqs/[id] (update). Integrate with Neon database using Drizzle ORM queries. Include proper error handling, input validation with Zod schemas, and audit logging for all mutations. Must support financial accuracy ±0.1% per EQS Data Integrity §3.2 and provide C-suite clarity data structure per EQS Usability §1.3.",
       "priority": 1,
       "status": "failed",
       "origin": "auto",
@@ -409,7 +409,7 @@
     {
       "id": "AUTO-017",
       "title": "RFQ dashboard with live data integration",
-      "directive": "Build responsive RFQ dashboard page at /dashboard/rfqs displaying live data from Neon database via API endpoints. Include sortable table, status filters, search functionality, and detail view modal. Implement with React Server Components for initial load performance and client-side interactivity for filtering. Must achieve <1.5s dashboard load time per EQS Performance Standard \u00a72.1 and Tableau-level visualization clarity per EQS Presentation \u00a71.4.",
+      "directive": "Build responsive RFQ dashboard page at /dashboard/rfqs displaying live data from Neon database via API endpoints. Include sortable table, status filters, search functionality, and detail view modal. Implement with React Server Components for initial load performance and client-side interactivity for filtering. Must achieve <1.5s dashboard load time per EQS Performance Standard §2.1 and Tableau-level visualization clarity per EQS Presentation §1.4.",
       "priority": 2,
       "status": "failed",
       "origin": "auto",
@@ -434,7 +434,7 @@
     {
       "id": "AUTO-018",
       "title": "Foundation data layer with Neon DB and core schema",
-      "directive": "Establish database foundation by: 1) Setting up Neon DB connection with proper connection pooling, 2) Creating core schema with users, companies, rfqs, and audit_logs tables using Drizzle ORM, 3) Implementing basic CRUD operations for RFQ entities, 4) Adding connection health checks and error handling. Must ensure sub-2s query performance per EQS \u00a72.1 and 100% auditable data per EQS \u00a74.1. Files: lib/db/, drizzle/, api/rfqs/route.ts.",
+      "directive": "Establish database foundation by: 1) Setting up Neon DB connection with proper connection pooling, 2) Creating core schema with users, companies, rfqs, and audit_logs tables using Drizzle ORM, 3) Implementing basic CRUD operations for RFQ entities, 4) Adding connection health checks and error handling. Must ensure sub-2s query performance per EQS §2.1 and 100% auditable data per EQS §4.1. Files: lib/db/, drizzle/, api/rfqs/route.ts.",
       "priority": 1,
       "status": "failed",
       "origin": "auto",
@@ -465,7 +465,7 @@
     {
       "id": "AUTO-019",
       "title": "Static RFQ dashboard with performance budget enforcement",
-      "directive": "Build RFQ dashboard with mock data structure ensuring <1.5s load time per EQS \u00a72.1. Implement: 1) Dashboard layout with key metrics cards, 2) RFQ table with sorting/filtering, 3) Performance monitoring with bundle size tracking, 4) Loading states and error boundaries per EQS \u00a73.2. Use static data to validate UI/UX before database integration. Files: app/dashboard/, components/rfq/, lib/performance.ts.",
+      "directive": "Build RFQ dashboard with mock data structure ensuring <1.5s load time per EQS §2.1. Implement: 1) Dashboard layout with key metrics cards, 2) RFQ table with sorting/filtering, 3) Performance monitoring with bundle size tracking, 4) Loading states and error boundaries per EQS §3.2. Use static data to validate UI/UX before database integration. Files: app/dashboard/, components/rfq/, lib/performance.ts.",
       "priority": 2,
       "status": "failed",
       "origin": "auto",
@@ -476,7 +476,7 @@
       "commit_sha": null,
       "auditor_score": 72,
       "attempts": 1,
-      "skip_reason": "did not reach PASS after 2 attempt(s) \u2014 final CONDITIONAL (CONDITIONAL 72/100)",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -496,7 +496,7 @@
     {
       "id": "AUTO-020",
       "title": "Error handling and logging infrastructure setup",
-      "directive": "Implement comprehensive error handling system: 1) Global error boundary with user-friendly fallbacks, 2) Structured logging with error tracking, 3) API error standardization with proper HTTP codes, 4) Client-side error reporting mechanism. Must support audit trail requirements per EQS \u00a74.1 and enable rapid issue diagnosis. Files: lib/errors/, components/ErrorBoundary.tsx, middleware.ts (non-auth portions).",
+      "directive": "Implement comprehensive error handling system: 1) Global error boundary with user-friendly fallbacks, 2) Structured logging with error tracking, 3) API error standardization with proper HTTP codes, 4) Client-side error reporting mechanism. Must support audit trail requirements per EQS §4.1 and enable rapid issue diagnosis. Files: lib/errors/, components/ErrorBoundary.tsx, middleware.ts (non-auth portions).",
       "priority": 2,
       "status": "failed",
       "origin": "auto",
@@ -507,7 +507,7 @@
       "commit_sha": null,
       "auditor_score": 72,
       "attempts": 1,
-      "skip_reason": "did not reach PASS after 2 attempt(s) \u2014 final CONDITIONAL (CONDITIONAL 72/100)",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -527,7 +527,7 @@
     {
       "id": "AUTO-021",
       "title": "Database connection layer with environment validation",
-      "directive": "Create robust database connection infrastructure in /lib/db/ with connection pooling, retry logic, and environment variable validation. Implement connection health checks and graceful degradation patterns. Must satisfy EQS \u00a73.1 (financial accuracy) and \u00a74.2 (100% auditable data) by ensuring reliable data persistence foundation.",
+      "directive": "Create robust database connection infrastructure in /lib/db/ with connection pooling, retry logic, and environment variable validation. Implement connection health checks and graceful degradation patterns. Must satisfy EQS §3.1 (financial accuracy) and §4.2 (100% auditable data) by ensuring reliable data persistence foundation.",
       "priority": 1,
       "status": "failed",
       "origin": "auto",
@@ -538,7 +538,7 @@
       "commit_sha": null,
       "auditor_score": 72,
       "attempts": 5,
-      "skip_reason": "did not reach PASS after 2 attempt(s) \u2014 final CONDITIONAL (CONDITIONAL 72/100)",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -558,7 +558,7 @@
     {
       "id": "AUTO-022",
       "title": "Basic application shell with navigation structure",
-      "directive": "Implement core application layout in /components/layout/ with header, sidebar navigation, and main content area. Include basic routing structure for dashboard, RFQs, and settings pages with loading states. Must advance EQS \u00a72.2 (C-suite clarity < 5s) through intuitive navigation and \u00a71.1 (dashboard load < 1.5s) through optimized shell architecture.",
+      "directive": "Implement core application layout in /components/layout/ with header, sidebar navigation, and main content area. Include basic routing structure for dashboard, RFQs, and settings pages with loading states. Must advance EQS §2.2 (C-suite clarity < 5s) through intuitive navigation and §1.1 (dashboard load < 1.5s) through optimized shell architecture.",
       "priority": 1,
       "status": "failed",
       "origin": "auto",
@@ -569,7 +569,7 @@
       "commit_sha": null,
       "auditor_score": 78,
       "attempts": 1,
-      "skip_reason": "did not reach PASS after 2 attempt(s) \u2014 final CONDITIONAL (CONDITIONAL 78/100)",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 78/100)",
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -589,7 +589,7 @@
     {
       "id": "AUTO-023",
       "title": "Environment configuration and build validation",
-      "directive": "Create comprehensive environment setup in /lib/config/ with validation for all required environment variables, database URLs, and API keys. Implement build-time checks and runtime configuration validation with clear error messages. Must support EQS \u00a74.3 (SOC 2 orientation) through secure configuration management and \u00a71.3 (real-time latency < 300ms) through optimized config loading.",
+      "directive": "Create comprehensive environment setup in /lib/config/ with validation for all required environment variables, database URLs, and API keys. Implement build-time checks and runtime configuration validation with clear error messages. Must support EQS §4.3 (SOC 2 orientation) through secure configuration management and §1.3 (real-time latency < 300ms) through optimized config loading.",
       "priority": 1,
       "status": "failed",
       "origin": "auto",
@@ -604,11 +604,11 @@
     {
       "id": "AUTO-024",
       "title": "Minimal viable DB connection with health check endpoint",
-      "directive": "Create a single, self-contained database connection module at `lib/db/connection.ts` that: (1) reads DATABASE_URL from environment using a hard fail with a clear error message if absent, (2) exports a tested Neon/Postgres client using the `@neondatabase/serverless` package, (3) implements a connection pool with max 10 connections and 30s idle timeout. Then create a GET handler at `app/api/health/db/route.ts` that executes `SELECT 1` and returns `{ status: 'ok', latency_ms: number }` on success or `{ status: 'error', message: string }` with HTTP 503 on failure. Include a Jest test at `__tests__/lib/db/connection.test.ts` that mocks the Neon client and asserts both success and failure paths. No schema creation, no migrations \u2014 connection only. Advances EQS clauses: real-time latency baseline establishment, 100% auditable data pipeline foundation, Zero Trust orientation (fail-closed on missing secrets).",
+      "directive": "Create a single, self-contained database connection module at `lib/db/connection.ts` that: (1) reads DATABASE_URL from environment using a hard fail with a clear error message if absent, (2) exports a tested Neon/Postgres client using the `@neondatabase/serverless` package, (3) implements a connection pool with max 10 connections and 30s idle timeout. Then create a GET handler at `app/api/health/db/route.ts` that executes `SELECT 1` and returns `{ status: 'ok', latency_ms: number }` on success or `{ status: 'error', message: string }` with HTTP 503 on failure. Include a Jest test at `__tests__/lib/db/connection.test.ts` that mocks the Neon client and asserts both success and failure paths. No schema creation, no migrations — connection only. Advances EQS clauses: real-time latency baseline establishment, 100% auditable data pipeline foundation, Zero Trust orientation (fail-closed on missing secrets).",
       "priority": 1,
       "status": "failed",
       "origin": "auto",
-      "rationale": "19 consecutive failures share a common root cause pattern: directives attempt too much (schema + ORM + endpoints + dashboard) in one pass. The entire Week 1 Neon DB migration goal remains unmet. This directive isolates the single hardest-failing primitive \u2014 a verified DB connection \u2014 with the smallest possible surface area to break the failure streak and give subsequent directives a proven foundation to build on.",
+      "rationale": "19 consecutive failures share a common root cause pattern: directives attempt too much (schema + ORM + endpoints + dashboard) in one pass. The entire Week 1 Neon DB migration goal remains unmet. This directive isolates the single hardest-failing primitive — a verified DB connection — with the smallest possible surface area to break the failure streak and give subsequent directives a proven foundation to build on.",
       "created_at": "2026-05-31T12:30:44.440Z",
       "started_at": "2026-05-31T12:30:45.416Z",
       "completed_at": "2026-05-31T12:32:05.689Z",
@@ -628,11 +628,11 @@
     {
       "id": "AUTO-025",
       "title": "Core RFQ schema migration with Drizzle and seed script",
-      "directive": "Depends on AUTO-024 health check returning 200. Using Drizzle ORM, define the core schema in `lib/db/schema.ts` with three tables only: `rfqs` (id uuid PK, title text NOT NULL, status enum['draft','pending','awarded','closed'], created_at timestamptz default now(), updated_at timestamptz default now()), `rfq_line_items` (id uuid PK, rfq_id uuid FK->rfqs.id ON DELETE CASCADE, description text, quantity numeric(12,4), unit_price numeric(12,4)), and `audit_log` (id uuid PK, table_name text, record_id uuid, action text, changed_by text, changed_at timestamptz default now(), payload jsonb). Generate the migration file via `drizzle-kit generate` into `drizzle/migrations/`. Create `scripts/seed.ts` that inserts 3 sample RFQs with 2 line items each. Add `db:migrate` and `db:seed` npm scripts. Do NOT drop or rename any existing columns. Advances EQS clauses: financial accuracy \u00b10.1% (numeric precision on prices), 100% auditable data (audit_log table), immutable audit log orientation.",
+      "directive": "Depends on AUTO-024 health check returning 200. Using Drizzle ORM, define the core schema in `lib/db/schema.ts` with three tables only: `rfqs` (id uuid PK, title text NOT NULL, status enum['draft','pending','awarded','closed'], created_at timestamptz default now(), updated_at timestamptz default now()), `rfq_line_items` (id uuid PK, rfq_id uuid FK->rfqs.id ON DELETE CASCADE, description text, quantity numeric(12,4), unit_price numeric(12,4)), and `audit_log` (id uuid PK, table_name text, record_id uuid, action text, changed_by text, changed_at timestamptz default now(), payload jsonb). Generate the migration file via `drizzle-kit generate` into `drizzle/migrations/`. Create `scripts/seed.ts` that inserts 3 sample RFQs with 2 line items each. Add `db:migrate` and `db:seed` npm scripts. Do NOT drop or rename any existing columns. Advances EQS clauses: financial accuracy ±0.1% (numeric precision on prices), 100% auditable data (audit_log table), immutable audit log orientation.",
       "priority": 1,
       "status": "complete",
       "origin": "auto",
-      "rationale": "Every previous schema attempt (AUTO-012, AUTO-015, AUTO-018, AUTO-021) bundled connection setup with schema creation, causing cascading failures. With AUTO-024 isolating the connection layer, this directive can assume a working client and focus solely on schema definition and migration \u2014 matching the Week 1 roadmap priority for Neon DB migration with the smallest safe scope increment.",
+      "rationale": "Every previous schema attempt (AUTO-012, AUTO-015, AUTO-018, AUTO-021) bundled connection setup with schema creation, causing cascading failures. With AUTO-024 isolating the connection layer, this directive can assume a working client and focus solely on schema definition and migration — matching the Week 1 roadmap priority for Neon DB migration with the smallest safe scope increment.",
       "created_at": "2026-05-31T12:30:44.440Z",
       "started_at": "2026-05-31T12:45:02.166Z",
       "completed_at": "2026-05-31T12:48:10.061Z",
@@ -643,11 +643,11 @@
     {
       "id": "AUTO-026",
       "title": "RFQ list API endpoint with Neon DB query layer",
-      "directive": "Create a single, minimal, verifiably working GET /api/rfq endpoint that: (1) imports the Drizzle client established in AUTO-025, (2) executes a SELECT on the rfq table with limit/offset pagination params, (3) returns JSON { data: RFQ[], total: number, page: number } with proper HTTP status codes, (4) includes a /api/health/db endpoint that returns { connected: boolean, latency_ms: number } by running a SELECT 1 query and measuring round-trip time. No authentication required on these endpoints for this directive \u2014 that is handled by middleware.ts. Constraints: response must complete in <500ms on cold start; use try/catch with structured error logging compatible with the logging infrastructure from AUTO-014; do not introduce new dependencies beyond what AUTO-025 already installed. Advances EQS clauses: real-time latency <300ms, 100% auditable data pipeline.",
+      "directive": "Create a single, minimal, verifiably working GET /api/rfq endpoint that: (1) imports the Drizzle client established in AUTO-025, (2) executes a SELECT on the rfq table with limit/offset pagination params, (3) returns JSON { data: RFQ[], total: number, page: number } with proper HTTP status codes, (4) includes a /api/health/db endpoint that returns { connected: boolean, latency_ms: number } by running a SELECT 1 query and measuring round-trip time. No authentication required on these endpoints for this directive — that is handled by middleware.ts. Constraints: response must complete in <500ms on cold start; use try/catch with structured error logging compatible with the logging infrastructure from AUTO-014; do not introduce new dependencies beyond what AUTO-025 already installed. Advances EQS clauses: real-time latency <300ms, 100% auditable data pipeline.",
       "priority": 1,
       "status": "complete",
       "origin": "auto",
-      "rationale": "AUTO-025 completed the core RFQ schema and seed script, establishing a stable DB foundation. The pattern of 20 failed directives shows complexity and dependency drift as root causes \u2014 this directive is intentionally minimal and tightly scoped to a single working API layer. Without a functioning data endpoint, all dashboard and visualization work is blocked. The /api/health/db endpoint provides immediate observability to confirm Neon connectivity before further build steps proceed.",
+      "rationale": "AUTO-025 completed the core RFQ schema and seed script, establishing a stable DB foundation. The pattern of 20 failed directives shows complexity and dependency drift as root causes — this directive is intentionally minimal and tightly scoped to a single working API layer. Without a functioning data endpoint, all dashboard and visualization work is blocked. The /api/health/db endpoint provides immediate observability to confirm Neon connectivity before further build steps proceed.",
       "created_at": "2026-06-06T04:16:08.145Z",
       "started_at": "2026-06-06T04:16:09.301Z",
       "completed_at": "2026-06-06T04:17:33.024Z",
@@ -658,11 +658,11 @@
     {
       "id": "AUTO-027",
       "title": "Static RFQ dashboard page consuming /api/rfq endpoint",
-      "directive": "Create app/rfq/page.tsx (Next.js App Router) that: (1) fetches data from /api/rfq (built in AUTO-026) using server-side fetch with cache: 'no-store', (2) renders a simple HTML table with columns: id, title, status, created_at, value \u2014 no external chart libraries required at this stage, (3) includes a loading.tsx skeleton (simple gray placeholder rows, no animation libraries), (4) includes an error.tsx boundary that displays the error message and a retry button, (5) ships with a Playwright or Jest test (one file: rfq-page.test.ts) that mocks /api/rfq and asserts the table renders with seeded data. Performance constraint: Largest Contentful Paint must be measurable via next build output and page must not import any module >50kb uncompressed. Advances EQS clauses: Dashboard load <1.5s, C-suite clarity <5 seconds, Tableau-level visualization groundwork.",
+      "directive": "Create app/rfq/page.tsx (Next.js App Router) that: (1) fetches data from /api/rfq (built in AUTO-026) using server-side fetch with cache: 'no-store', (2) renders a simple HTML table with columns: id, title, status, created_at, value — no external chart libraries required at this stage, (3) includes a loading.tsx skeleton (simple gray placeholder rows, no animation libraries), (4) includes an error.tsx boundary that displays the error message and a retry button, (5) ships with a Playwright or Jest test (one file: rfq-page.test.ts) that mocks /api/rfq and asserts the table renders with seeded data. Performance constraint: Largest Contentful Paint must be measurable via next build output and page must not import any module >50kb uncompressed. Advances EQS clauses: Dashboard load <1.5s, C-suite clarity <5 seconds, Tableau-level visualization groundwork.",
       "priority": 2,
       "status": "complete",
       "origin": "auto",
-      "rationale": "AUTO-002, AUTO-010, AUTO-013, AUTO-017, AUTO-019 all failed attempting RFQ dashboard pages \u2014 analysis shows they attempted too much (live DB + auth + charts + animations) in one pass. This directive deliberately constrains scope to a server-rendered table consuming a known-good API, with an explicit test requirement to prevent silent failures. Building on AUTO-026's endpoint makes this directive's dependency chain concrete and short.",
+      "rationale": "AUTO-002, AUTO-010, AUTO-013, AUTO-017, AUTO-019 all failed attempting RFQ dashboard pages — analysis shows they attempted too much (live DB + auth + charts + animations) in one pass. This directive deliberately constrains scope to a server-rendered table consuming a known-good API, with an explicit test requirement to prevent silent failures. Building on AUTO-026's endpoint makes this directive's dependency chain concrete and short.",
       "created_at": "2026-06-06T04:16:08.145Z",
       "started_at": "2026-06-07T22:45:33.321Z",
       "completed_at": "2026-06-07T22:47:14.957Z",
@@ -673,11 +673,11 @@
     {
       "id": "AUTO-028",
       "title": "Environment validation guard and CI pre-flight check script",
-      "directive": "Create scripts/preflight.ts that: (1) reads all required environment variables (DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL, and any others declared in a new src/config/env.ts zod schema), (2) attempts a Neon DB ping via the Drizzle client, (3) exits with code 1 and a human-readable error message listing every missing or invalid variable if validation fails, (4) exits with code 0 and prints a summary table of all validated vars (values masked) on success. Add 'preflight': 'tsx scripts/preflight.ts' to package.json scripts. Add a Jest unit test (env-validation.test.ts) that asserts the zod schema rejects configs missing DATABASE_URL. This script must not touch .github/workflows/** \u2014 it is invoked manually or by Builder agents before running migrations. Advances EQS clauses: 100% auditable data, Zero Trust orientation (no silent misconfiguration), SOC 2 readiness.",
+      "directive": "Create scripts/preflight.ts that: (1) reads all required environment variables (DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL, and any others declared in a new src/config/env.ts zod schema), (2) attempts a Neon DB ping via the Drizzle client, (3) exits with code 1 and a human-readable error message listing every missing or invalid variable if validation fails, (4) exits with code 0 and prints a summary table of all validated vars (values masked) on success. Add 'preflight': 'tsx scripts/preflight.ts' to package.json scripts. Add a Jest unit test (env-validation.test.ts) that asserts the zod schema rejects configs missing DATABASE_URL. This script must not touch .github/workflows/** — it is invoked manually or by Builder agents before running migrations. Advances EQS clauses: 100% auditable data, Zero Trust orientation (no silent misconfiguration), SOC 2 readiness.",
       "priority": 2,
       "status": "complete",
       "origin": "auto",
-      "rationale": "AUTO-021 and AUTO-023 both failed on environment configuration and database connection validation. The 20 cumulative failures strongly suggest environment misconfiguration is silently breaking Builder agent runs \u2014 directives start executing against missing or wrong DATABASE_URL values and fail mid-run with cryptic errors. A reusable, testable preflight script eliminates this failure mode for all future directives and is a one-time investment that will unblock the entire pipeline.",
+      "rationale": "AUTO-021 and AUTO-023 both failed on environment configuration and database connection validation. The 20 cumulative failures strongly suggest environment misconfiguration is silently breaking Builder agent runs — directives start executing against missing or wrong DATABASE_URL values and fail mid-run with cryptic errors. A reusable, testable preflight script eliminates this failure mode for all future directives and is a one-time investment that will unblock the entire pipeline.",
       "created_at": "2026-06-06T04:16:08.145Z",
       "started_at": "2026-06-08T09:45:15.396Z",
       "completed_at": "2026-06-08T09:49:01.191Z",
@@ -688,7 +688,7 @@
     {
       "id": "AUTO-029",
       "title": "RFQ detail page with live data from /api/rfq/[id]",
-      "directive": "Create a dynamic route at /app/rfq/[id]/page.tsx that fetches a single RFQ record from a new GET /api/rfq/[id] endpoint. The API handler must query the Neon DB via the established Drizzle query layer (from AUTO-025/AUTO-026), returning fields: id, title, status, created_at, due_date, vendor_name, line_items (JSON), total_value. The page must render a structured detail view with: status badge, financial summary (total_value formatted to \u00b10.1% precision per EQS Financial Accuracy clause), line-items table, and a back-navigation link to /rfq. Page must achieve server-side render with no client waterfalls; target Time-to-Interactive < 1.5s per EQS Dashboard Performance clause. Return 404 with a graceful error state if the record does not exist. No auth required at this stage \u2014 add a TODO comment referencing RBAC Week-2 work.",
+      "directive": "Create a dynamic route at /app/rfq/[id]/page.tsx that fetches a single RFQ record from a new GET /api/rfq/[id] endpoint. The API handler must query the Neon DB via the established Drizzle query layer (from AUTO-025/AUTO-026), returning fields: id, title, status, created_at, due_date, vendor_name, line_items (JSON), total_value. The page must render a structured detail view with: status badge, financial summary (total_value formatted to ±0.1% precision per EQS Financial Accuracy clause), line-items table, and a back-navigation link to /rfq. Page must achieve server-side render with no client waterfalls; target Time-to-Interactive < 1.5s per EQS Dashboard Performance clause. Return 404 with a graceful error state if the record does not exist. No auth required at this stage — add a TODO comment referencing RBAC Week-2 work.",
       "priority": 1,
       "status": "failed",
       "origin": "auto",
@@ -698,7 +698,7 @@
       "completed_at": "2026-06-08T12:04:24.222Z",
       "commit_sha": null,
       "auditor_score": 72,
-      "skip_reason": "did not reach PASS after 2 attempt(s) \u2014 final CONDITIONAL (CONDITIONAL 72/100)",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -718,7 +718,7 @@
     {
       "id": "AUTO-030",
       "title": "Immutable audit log table and POST /api/audit endpoint",
-      "directive": "Add an audit_logs table to the existing Drizzle schema (do NOT drop or rename any existing tables or columns \u2014 additive migration only). Schema: id (uuid pk), entity_type (varchar), entity_id (varchar), action (varchar: created|updated|viewed|status_changed), actor_id (varchar, nullable for system), payload (jsonb), created_at (timestamptz default now()). Set the table as INSERT-only at the application layer: the API route POST /api/audit must accept {entity_type, entity_id, action, actor_id?, payload} and write a record \u2014 no UPDATE or DELETE handlers may be implemented. Run the migration via Drizzle push. Wire the RFQ list endpoint (AUTO-026) and RFQ detail endpoint (AUTO-029) to emit a 'viewed' audit event on each successful response. This directly advances EQS clause: 100% auditable data, immutable audit logs (Week 3 audit trail wiring).",
+      "directive": "Add an audit_logs table to the existing Drizzle schema (do NOT drop or rename any existing tables or columns — additive migration only). Schema: id (uuid pk), entity_type (varchar), entity_id (varchar), action (varchar: created|updated|viewed|status_changed), actor_id (varchar, nullable for system), payload (jsonb), created_at (timestamptz default now()). Set the table as INSERT-only at the application layer: the API route POST /api/audit must accept {entity_type, entity_id, action, actor_id?, payload} and write a record — no UPDATE or DELETE handlers may be implemented. Run the migration via Drizzle push. Wire the RFQ list endpoint (AUTO-026) and RFQ detail endpoint (AUTO-029) to emit a 'viewed' audit event on each successful response. This directly advances EQS clause: 100% auditable data, immutable audit logs (Week 3 audit trail wiring).",
       "priority": 2,
       "status": "failed",
       "origin": "auto",
@@ -728,7 +728,7 @@
       "completed_at": "2026-06-08T12:19:02.893Z",
       "commit_sha": null,
       "auditor_score": 72,
-      "skip_reason": "did not reach PASS after 2 attempt(s) \u2014 final CONDITIONAL (CONDITIONAL 72/100)",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -752,13 +752,13 @@
       "priority": 2,
       "status": "failed",
       "origin": "auto",
-      "rationale": "AUTO-004, AUTO-011, and AUTO-019 all failed attempting large-scope performance work. This directive takes a minimal, additive approach: a single utility file, two instrumented endpoints, and one health check \u2014 no bundler config changes, no webpack plugins. It establishes the measurement infrastructure that makes Week-3 performance optimization tractable and gives the CI pipeline an objective quality gate.",
+      "rationale": "AUTO-004, AUTO-011, and AUTO-019 all failed attempting large-scope performance work. This directive takes a minimal, additive approach: a single utility file, two instrumented endpoints, and one health check — no bundler config changes, no webpack plugins. It establishes the measurement infrastructure that makes Week-3 performance optimization tractable and gives the CI pipeline an objective quality gate.",
       "created_at": "2026-06-08T12:00:31.550Z",
       "started_at": "2026-06-08T12:30:41.199Z",
       "completed_at": "2026-06-08T12:35:06.740Z",
       "commit_sha": null,
       "auditor_score": 78,
-      "skip_reason": "did not reach PASS after 2 attempt(s) \u2014 final CONDITIONAL (CONDITIONAL 78/100)",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 78/100)",
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -797,7 +797,7 @@
       "priority": 1,
       "status": "complete",
       "origin": "auto",
-      "rationale": "AUTO-030 failed. The failure pattern suggests the migration and schema were attempted together with too much scope. This directive isolates the migration, schema definition, single write-only endpoint, and a focused test \u2014 matching the minimal-surface approach that succeeded in AUTO-025 and AUTO-026. Audit infrastructure is a Week 3 hard requirement and is blocking downstream traceability work.",
+      "rationale": "AUTO-030 failed. The failure pattern suggests the migration and schema were attempted together with too much scope. This directive isolates the migration, schema definition, single write-only endpoint, and a focused test — matching the minimal-surface approach that succeeded in AUTO-025 and AUTO-026. Audit infrastructure is a Week 3 hard requirement and is blocking downstream traceability work.",
       "created_at": "2026-06-08T12:46:05.660Z",
       "started_at": "2026-06-08T22:30:12.078Z",
       "completed_at": "2026-06-08T22:32:01.354Z",
@@ -810,11 +810,11 @@
       "title": "Dashboard performance budget assertion and instrumentation",
       "directive": "Implement end-to-end dashboard performance instrumentation and budget enforcement. (1) Add a server-side timing header (Server-Timing) to GET /api/rfq capturing DB query duration. (2) In the RFQ dashboard page (/app/dashboard or equivalent), instrument client-side navigation timing using the Performance API and log time-to-interactive to console in development. (3) Create a lightweight /api/health/perf endpoint that executes a representative DB query (SELECT COUNT(*) FROM rfqs) and returns { db_ms, status: 'ok'|'degraded' } where degraded triggers when db_ms > 200. (4) Add a Jest/Vitest integration test at tests/perf/dashboard-budget.test.ts that calls /api/rfq with a seeded DB and asserts response time < 500ms (synthetic budget with headroom under the 1.5s EQS target). Do NOT modify middleware.ts or any auth routes. All timing values must be logged to the existing audit_logs infrastructure via a non-blocking fire-and-forget pattern. EQS clauses advanced: Dashboard load < 1.5s, 100% auditable data.",
       "priority": 1,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "AUTO-031 (performance instrumentation) failed and AUTO-033 (audit log) is now complete, providing the prerequisite infrastructure. The EQS dashboard load budget of <1.5s is a Week 3 hard target and the platform has no performance observability in place. With the DB layer and audit endpoint both stable, this directive can now succeed where AUTO-031 could not.",
       "created_at": "2026-06-09T18:46:11.575Z",
-      "started_at": "2026-06-09T18:46:13.527Z",
+      "started_at": "2026-06-10T17:00:10.735Z",
       "commit_sha": null,
       "auditor_score": null,
       "skip_reason": "Requeued 2026-06-10: gate block was an Auditor parse failure (infra), not a code-quality FAIL",
@@ -838,11 +838,11 @@
     {
       "id": "AUTO-035",
       "title": "RFQ status transition API with audit log wiring",
-      "directive": "Build the RFQ response lifecycle state machine as required by Week 2 roadmap. (1) Add a status column (enum: 'draft'|'submitted'|'under_review'|'responded'|'closed') to the rfqs table via a non-destructive Drizzle migration (ADD COLUMN only \u2014 no drops or renames). (2) Implement PATCH /api/rfq/[id]/status accepting { status, actor_id, reason } with server-side validation that only legal transitions are accepted (e.g. draft\u2192submitted, submitted\u2192under_review, under_review\u2192responded, responded\u2192closed). Reject illegal transitions with HTTP 422 and a machine-readable error body. (3) On every successful transition, write an immutable record to audit_logs via POST /api/audit with event_type='rfq.status_transition', payload containing previous_status, new_status, actor_id, reason, and timestamp. (4) Add unit tests covering all valid transitions and at least three illegal transition rejections. EQS clauses advanced: 100% auditable data, immutable audit logs, RFQ response lifecycle (Week 2 roadmap).",
+      "directive": "Build the RFQ response lifecycle state machine as required by Week 2 roadmap. (1) Add a status column (enum: 'draft'|'submitted'|'under_review'|'responded'|'closed') to the rfqs table via a non-destructive Drizzle migration (ADD COLUMN only — no drops or renames). (2) Implement PATCH /api/rfq/[id]/status accepting { status, actor_id, reason } with server-side validation that only legal transitions are accepted (e.g. draft→submitted, submitted→under_review, under_review→responded, responded→closed). Reject illegal transitions with HTTP 422 and a machine-readable error body. (3) On every successful transition, write an immutable record to audit_logs via POST /api/audit with event_type='rfq.status_transition', payload containing previous_status, new_status, actor_id, reason, and timestamp. (4) Add unit tests covering all valid transitions and at least three illegal transition rejections. EQS clauses advanced: 100% auditable data, immutable audit logs, RFQ response lifecycle (Week 2 roadmap).",
       "priority": 1,
       "status": "pending",
       "origin": "auto",
-      "rationale": "AUTO-033 delivered the audit_logs table and POST /api/audit endpoint, and AUTO-032 delivered the RFQ detail page. The next logical Week 2 milestone is the RFQ response lifecycle \u2014 status transitions with full auditability. This directive composes the two completed foundations into a concrete business capability while advancing the SOC 2 auditability requirement.",
+      "rationale": "AUTO-033 delivered the audit_logs table and POST /api/audit endpoint, and AUTO-032 delivered the RFQ detail page. The next logical Week 2 milestone is the RFQ response lifecycle — status transitions with full auditability. This directive composes the two completed foundations into a concrete business capability while advancing the SOC 2 auditability requirement.",
       "created_at": "2026-06-09T18:46:11.575Z",
       "started_at": null,
       "completed_at": null,
