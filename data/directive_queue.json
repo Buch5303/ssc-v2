@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-10T17:34:51.539Z",
+  "updated_at": "2026-06-10T17:45:58.084Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -896,6 +896,48 @@
           "effective": "FAIL"
         }
       ]
+    },
+    {
+      "id": "AUTO-037",
+      "title": "RFQ status transition API with audit log integration",
+      "directive": "Create PATCH /api/rfq/[id]/status route in app/api/rfq/[id]/status/route.ts. Accept body { status: 'pending'|'active'|'closed'|'awarded', actor_id: string }. Validate status is a legal forward transition using a simple state machine (pending→active→closed, active→awarded). On valid transition: update rfqs.status in Neon DB via Drizzle, then INSERT a row into audit_logs (entity_type='rfq', entity_id, action='status_transition', payload=JSON of {from, to, actor_id}, created_at=now()). Return 200 { id, status, updated_at } on success, 422 with { error } on illegal transition, 404 if RFQ not found. No middleware.ts changes. No auth route changes. EQS clauses: 100% auditable data (every status change recorded), immutable audit logs, financial accuracy ±0.1% (status integrity directly gates invoicing and award logic).",
+      "priority": 1,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "AUTO-033 (audit_logs table + POST /api/audit) is complete and AUTO-032 (RFQ detail) is complete, giving the required foundations. AUTO-035 failed previously — this directive narrows scope strictly to the PATCH route + audit write, removing the RBAC dependency that likely caused the failure. Week 2 roadmap calls for RFQ response lifecycle; this is the critical path item.",
+      "created_at": "2026-06-10T17:45:58.079Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
+    },
+    {
+      "id": "AUTO-038",
+      "title": "RBAC: add role column to users table and authorize RFQ routes",
+      "directive": "Create a new Drizzle migration file in drizzle/migrations/ that adds column role TEXT NOT NULL DEFAULT 'viewer' CHECK (role IN ('admin','manager','viewer')) to the users table — additive only, no drops or renames. Create lib/rbac.ts exporting getRoleFromRequest(req: NextRequest): Promise<string> that reads user session from the request cookie/header (using the existing session mechanism, do NOT modify middleware.ts or /api/auth/**) and returns the role string. Create app/api/rfq/[id]/status/authorize.ts that calls getRoleFromRequest and throws a 403 Response if role is 'viewer'. Wire this check into the PATCH /api/rfq/[id]/status route (AUTO-037) as the first step before any DB writes. Add a GET /api/rbac/me route returning { role } for frontend use. EQS clauses: SOC 2 / ISO 27001 / Zero Trust orientation (least-privilege access control), 100% auditable data (actor role recorded). No middleware.ts modifications. No /api/auth/** modifications.",
+      "priority": 2,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "AUTO-036 failed — likely due to scope overreach touching middleware or auth routes. This directive isolates RBAC to: (1) a purely additive DB migration, (2) a library utility, (3) a per-route guard, and (4) a safe introspection endpoint. Week 2 roadmap explicitly requires RBAC. Dependency on AUTO-037 for the authorization wire-in makes sequencing clear.",
+      "created_at": "2026-06-10T17:45:58.079Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
+    },
+    {
+      "id": "AUTO-039",
+      "title": "Dashboard load performance budget assertion and instrumentation",
+      "directive": "Create a server-side timing utility in lib/perf.ts exporting markStart(label:string) and markEnd(label:string): number (returns elapsed ms). Instrument the GET /api/rfq route (app/api/rfq/route.ts): wrap the Neon DB query with markStart/markEnd and append a Server-Timing response header (e.g. 'Server-Timing: db;dur=42'). In app/dashboard/page.tsx (or equivalent RFQ list page), add a lightweight client-side navigation timing snippet using PerformanceNavigationTiming that logs to console.warn if domContentLoadedEventEnd - startTime exceeds 1500ms. Create scripts/perf-budget-check.ts that fetches /api/rfq locally (requires NEXT_PUBLIC_APP_URL env var), asserts response time < 500ms, and exits non-zero on failure — add this as a 'perf:check' npm script. No middleware.ts changes. EQS clauses: Dashboard load < 1.5s performance budget, 100% auditable data (Server-Timing headers provide observable latency data).",
+      "priority": 2,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "AUTO-034 and AUTO-031 both failed on performance instrumentation — likely due to over-engineering (bundle analyzers, webpack plugins). This directive uses only lightweight, zero-dependency primitives: PerformanceNavigationTiming (browser-native), Server-Timing headers (HTTP-native), and a simple fetch-based budget script. Week 3 roadmap explicitly targets dashboard performance to the 1.5s budget. This gives the platform observable latency data without complex toolchain changes.",
+      "created_at": "2026-06-10T17:45:58.079Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
     }
   ]
 }
