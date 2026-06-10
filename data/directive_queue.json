@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-10T17:00:33.044Z",
+  "updated_at": "2026-06-10T17:04:06.910Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -810,14 +810,14 @@
       "title": "Dashboard performance budget assertion and instrumentation",
       "directive": "Implement end-to-end dashboard performance instrumentation and budget enforcement. (1) Add a server-side timing header (Server-Timing) to GET /api/rfq capturing DB query duration. (2) In the RFQ dashboard page (/app/dashboard or equivalent), instrument client-side navigation timing using the Performance API and log time-to-interactive to console in development. (3) Create a lightweight /api/health/perf endpoint that executes a representative DB query (SELECT COUNT(*) FROM rfqs) and returns { db_ms, status: 'ok'|'degraded' } where degraded triggers when db_ms > 200. (4) Add a Jest/Vitest integration test at tests/perf/dashboard-budget.test.ts that calls /api/rfq with a seeded DB and asserts response time < 500ms (synthetic budget with headroom under the 1.5s EQS target). Do NOT modify middleware.ts or any auth routes. All timing values must be logged to the existing audit_logs infrastructure via a non-blocking fire-and-forget pattern. EQS clauses advanced: Dashboard load < 1.5s, 100% auditable data.",
       "priority": 1,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "auto",
       "rationale": "AUTO-031 (performance instrumentation) failed and AUTO-033 (audit log) is now complete, providing the prerequisite infrastructure. The EQS dashboard load budget of <1.5s is a Week 3 hard target and the platform has no performance observability in place. With the DB layer and audit endpoint both stable, this directive can now succeed where AUTO-031 could not.",
       "created_at": "2026-06-09T18:46:11.575Z",
       "started_at": "2026-06-10T17:00:10.735Z",
       "commit_sha": null,
-      "auditor_score": null,
-      "skip_reason": "Requeued 2026-06-10: gate block was an Auditor parse failure (infra), not a code-quality FAIL",
+      "auditor_score": 72,
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -828,23 +828,24 @@
         },
         {
           "attempt": 2,
-          "verdict": "UNKNOWN",
-          "score": null,
-          "effective": "FAIL"
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
         }
       ],
-      "audit_error_retries": 1
+      "audit_error_retries": 1,
+      "completed_at": "2026-06-10T17:04:06.910Z"
     },
     {
       "id": "AUTO-035",
       "title": "RFQ status transition API with audit log wiring",
       "directive": "Build the RFQ response lifecycle state machine as required by Week 2 roadmap. (1) Add a status column (enum: 'draft'|'submitted'|'under_review'|'responded'|'closed') to the rfqs table via a non-destructive Drizzle migration (ADD COLUMN only — no drops or renames). (2) Implement PATCH /api/rfq/[id]/status accepting { status, actor_id, reason } with server-side validation that only legal transitions are accepted (e.g. draft→submitted, submitted→under_review, under_review→responded, responded→closed). Reject illegal transitions with HTTP 422 and a machine-readable error body. (3) On every successful transition, write an immutable record to audit_logs via POST /api/audit with event_type='rfq.status_transition', payload containing previous_status, new_status, actor_id, reason, and timestamp. (4) Add unit tests covering all valid transitions and at least three illegal transition rejections. EQS clauses advanced: 100% auditable data, immutable audit logs, RFQ response lifecycle (Week 2 roadmap).",
       "priority": 1,
-      "status": "in_progress",
+      "status": "pending",
       "origin": "auto",
       "rationale": "AUTO-033 delivered the audit_logs table and POST /api/audit endpoint, and AUTO-032 delivered the RFQ detail page. The next logical Week 2 milestone is the RFQ response lifecycle — status transitions with full auditability. This directive composes the two completed foundations into a concrete business capability while advancing the SOC 2 auditability requirement.",
       "created_at": "2026-06-09T18:46:11.575Z",
-      "started_at": "2026-06-10T17:00:33.044Z",
+      "started_at": null,
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
