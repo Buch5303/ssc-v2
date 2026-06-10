@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-10T21:04:56.189Z",
+  "timestamp": "2026-06-10T21:19:20.030Z",
   "directive": {
     "id": "AUTO-034",
     "title": "Dashboard performance budget assertion and instrumentation",
-    "status": "pending"
+    "status": "failed"
   },
-  "elapsed_seconds": 275.893,
+  "elapsed_seconds": 239.25,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -19,8 +19,8 @@
         "audit_focus",
         "estimated_complexity"
       ],
-      "acceptance_criteria_count": 17,
-      "research_queries_count": 6,
+      "acceptance_criteria_count": 23,
+      "research_queries_count": 5,
       "spec_parse_error": false
     },
     "researcher": {
@@ -32,36 +32,36 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 12,
+      "files_count": 7,
       "parse_error": false,
-      "first_file_path": "lib/perf/server-timing.ts"
+      "first_file_path": "app/api/health/perf/route.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "CONDITIONAL",
+      "verdict": "COMPILE_FAIL",
       "score": 72,
-      "summary": "The build implements the core performance instrumentation requirements correctly: Server-Timing headers, health/perf endpoint, client-side navigation timing, and fire-and-forget audit logging. However, there are critical issues: (1) lib/prisma.ts imports '@prisma/client' which is not in package.json - the project uses Drizzle ORM, not Prisma; (2) The existing app/api/rfq/route.ts is completely replaced rather than merged, potentially removing existing auth/error handling; (3) The audit_logs schema mapping is correct (entity_type='PERF_TELEMETRY') but acceptance criteria expect a 'category' column that doesn't exist in the actual schema. The build is recoverable with fixes but cannot pass in its current state due to the Prisma dependency issue.",
+      "summary": "The build implements most of the performance instrumentation requirements correctly, including Server-Timing headers, health endpoint with degradation detection, fire-and-forget audit logging, and client-side timing hooks. However, there are two CRITICAL/HIGH issues: (1) The dashboard page imports a 'use client' hook directly in a server component which will cause a Next.js build error, and (2) the audit log entity_type uses 'PERF_TELEMETRY' instead of the required 'PERFORMANCE_METRIC'. Additionally, the test mock structure may not properly match the route handler implementation. The build is recoverable with these fixes but cannot pass in its current state.",
       "pre_check_failed": false,
       "issue_count": 8,
       "top_issues": [
         {
           "severity": "CRITICAL",
-          "description": "Imports '@prisma/client' which is NOT listed in package.json dependencies. The project uses Drizzle ORM with 'drizzle-orm' and 'pg' packages, not Prisma. This import will fail at compile time."
+          "description": "Server component imports a 'use client' hook directly. Next.js 14 requires 'use client' hooks to be imported only from client components or wrapped in a client boundary. This will cause a build error."
         },
         {
           "severity": "HIGH",
-          "description": "The audit_logs schema has columns: id, entity_type, entity_id, action, payload, created_at. There is NO separate 'category' column. The code uses entity_type='PERF_TELEMETRY' which is correct for the schema, but the acceptance criteria expect a 'category' field. The category information is embedded in payload JSON, not as a top-level column. This means criteria 11 and 12 cannot be verified by querying a 'category' column."
+          "description": "auditPerfLog stores entity_type as 'PERF_TELEMETRY' but acceptance criterion 21 requires event_type 'PERFORMANCE_METRIC'. The audit_logs table schema shows entity_type is a text field, but the criterion specifically requires queryable by event_type='PERFORMANCE_METRIC'."
         },
         {
           "severity": "HIGH",
-          "description": "This file already exists in the repo at app/api/rfq/route.ts. The generated code completely replaces it with a new implementation that removes any existing auth guards, request parsing, or response shape. The build spec says to 'merge carefully' but the generated code is a full replacement."
+          "description": "Test mock structure may not match actual route handler implementation. The mock returns data via .limit() but the actual GET handler in app/api/rfq/route.ts calls .limit(100) on the query chain. The mock needs to properly chain all methods used by the handler."
         }
       ]
     },
     "gate": {
-      "allowed": true,
-      "effective_verdict": "CONDITIONAL",
-      "reason": "Score 72, verdict CONDITIONAL"
+      "allowed": false,
+      "effective_verdict": "FAIL",
+      "reason": "compile gate: 2 unresolved import(s) after 2 attempt(s)"
     },
     "build_attempts": 2,
     "attempt_history": [
@@ -73,42 +73,38 @@
       },
       {
         "attempt": 2,
-        "verdict": "CONDITIONAL",
-        "score": 72,
-        "effective": "CONDITIONAL"
+        "verdict": "COMPILE_FAIL",
+        "score": null,
+        "effective": "FAIL"
       }
     ]
   },
   "log": [
-    "[2026-06-10T21:00:20.296Z] Auto-builder cycle started",
+    "[2026-06-10T21:15:20.780Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy @ e0582e8",
-    "[WATCHDOG] In sync at e0582e8",
+    "[WATCHDOG] In sync at 5add170",
     "[QUEUE] Loaded via contents-api. Pending: 5, total: 39",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-10T21:00:22.202Z] Processing: AUTO-034 — Dashboard performance budget assertion and instrumentation",
+    "[2026-06-10T21:15:22.896Z] Processing: AUTO-034 — Dashboard performance budget assertion and instrumentation",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 6 queries...",
+    "[RESEARCHER] Running 5 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
     "[COMPILE-GATE] Repo tree loaded (688 paths)",
     "[GROUNDING] Builder context: 106 source paths, schema loaded",
     "[CARRYOVER] Attempt 1 seeded with prior cycle's audit findings",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 10 files",
+    "[BUILDER] Attempt 1 complete — 7 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
     "[AUDITOR] Reviewing attempt 1...",
     "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
     "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 12 files",
-    "[COMPILE-GATE] Attempt 2: all imports resolve",
-    "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
-    "[QUEUE] AUTO-034 requeued as pending — near-miss 72/100, feedback carried to next cycle (2/2)"
+    "[BUILDER] Attempt 2 complete — 7 files",
+    "[COMPILE-GATE] Attempt 2: 2 unresolved import(s):\n  app/api/health/perf/route.ts → '../../../lib/db'\n  app/api/health/perf/route.ts → '../../../lib/perf/audit-perf-log'",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 2 unresolved import(s) after 2 attempt(s)"
   ]
 }
