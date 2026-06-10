@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-09T18:49:25.067Z",
+  "timestamp": "2026-06-10T17:04:10.771Z",
   "directive": {
     "id": "AUTO-034",
     "title": "Dashboard performance budget assertion and instrumentation",
     "status": "failed"
   },
-  "elapsed_seconds": 221.783,
+  "elapsed_seconds": 242.374,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -19,8 +19,8 @@
         "audit_focus",
         "estimated_complexity"
       ],
-      "acceptance_criteria_count": 16,
-      "research_queries_count": 7,
+      "acceptance_criteria_count": 18,
+      "research_queries_count": 5,
       "spec_parse_error": false
     },
     "researcher": {
@@ -32,22 +32,36 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 8,
+      "files_count": 9,
       "parse_error": false,
-      "first_file_path": "lib/db/index.ts"
+      "first_file_path": "lib/prisma.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "UNKNOWN",
-      "score": null,
+      "verdict": "CONDITIONAL",
+      "score": 72,
+      "summary": "The implementation successfully instruments the W251 BOP platform with server-side timing headers, client-side navigation timing, and a performance health endpoint. The fire-and-forget audit logging pattern is correctly implemented with void prefix and error catching. However, several critical acceptance criteria are not fully verified: the non-blocking audit log behavior has no test, the degraded status logic has no unit test, and the SSR safety of the navigation timing hook is untested. Additionally, converting the dashboard page to a Client Component may have unintended side effects. The build is recoverable with additional tests and minor fixes.",
       "pre_check_failed": false,
-      "issue_count": 0,
-      "top_issues": []
+      "issue_count": 8,
+      "top_issues": [
+        {
+          "severity": "HIGH",
+          "description": "Missing test for non-blocking audit log behavior (criterion 7) - no mock of prisma.audit_logs.create with artificial delay"
+        },
+        {
+          "severity": "HIGH",
+          "description": "Missing test for degraded status when db_ms > 200 (criterion 4) - no unit test or mock verifying the logic"
+        },
+        {
+          "severity": "HIGH",
+          "description": "Missing SSR safety test for useNavigationTiming hook (criterion 9) - no test rendering in Node.js environment without window"
+        }
+      ]
     },
     "gate": {
-      "allowed": false,
-      "effective_verdict": "FAIL",
-      "reason": "No numeric score — EQS v1.0 requires quantitative quality gate"
+      "allowed": true,
+      "effective_verdict": "CONDITIONAL",
+      "reason": "Score 72, verdict CONDITIONAL"
     },
     "build_attempts": 2,
     "attempt_history": [
@@ -59,38 +73,36 @@
       },
       {
         "attempt": 2,
-        "verdict": "UNKNOWN",
-        "score": null,
-        "effective": "FAIL"
+        "verdict": "CONDITIONAL",
+        "score": 72,
+        "effective": "CONDITIONAL"
       }
     ]
   },
   "log": [
-    "[2026-06-09T18:45:43.284Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ af6b5bb",
-    "[WATCHDOG] In sync at af6b5bb",
-    "[QUEUE] Loaded via contents-api. Pending: 1, total: 33",
+    "[2026-06-10T17:00:08.398Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ 86c3edf",
+    "[WATCHDOG] In sync at 86c3edf",
+    "[QUEUE] Loaded via contents-api. Pending: 4, total: 36",
     "[PREFLIGHT] Anthropic API healthy",
-    "[GENERATOR] Queue low (pending=1). Invoking Directive Generator...",
-    "[GENERATOR] Appended 3: AUTO-034, AUTO-035, AUTO-036",
-    "[2026-06-09T18:46:13.527Z] Processing: AUTO-034 — Dashboard performance budget assertion and instrumentation",
+    "[2026-06-10T17:00:10.735Z] Processing: AUTO-034 — Dashboard performance budget assertion and instrumentation",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 7 queries...",
+    "[RESEARCHER] Running 5 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
     "[COMPILE-GATE] Repo tree loaded (686 paths)",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 7 files",
-    "[COMPILE-GATE] Attempt 1: 3 unresolved import(s):\n  lib/perf/audit-timing.ts → '@/lib/prisma'\n  app/api/health/perf/route.ts → '@/lib/prisma'\n  app/api/rfq/route.ts → '@/lib/prisma'",
+    "[BUILDER] Attempt 1 complete — 8 files",
+    "[COMPILE-GATE] Attempt 1: 4 unresolved import(s):\n  lib/perf/audit-logger.ts → '@/lib/prisma'\n  app/api/health/perf/route.ts → '@/lib/prisma'\n  app/api/rfq/route.ts → '@/lib/prisma'\n  tests/perf/setup/seed.ts → '@/lib/prisma'",
     "[RETRY] Re-running Builder to fix unresolved imports (attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 8 files",
+    "[BUILDER] Attempt 2 complete — 9 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
     "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: UNKNOWN",
-    "[GATE] Attempt 2: No numeric score — EQS v1.0 requires quantitative quality gate → FAIL",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): No numeric score — EQS v1.0 requires quantitative quality gate"
+    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
+    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)"
   ]
 }
