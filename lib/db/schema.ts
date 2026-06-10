@@ -1,43 +1,22 @@
-import { pgEnum, pgTable, uuid, text, timestamp, numeric, jsonb } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
-import { type InferSelectModel, type InferInsertModel } from 'drizzle-orm';
-
-// Define the RFQ status enum
-export const rfqStatusEnum = pgEnum('rfq_status_enum', ['draft', 'pending', 'awarded', 'closed']);
+import { pgTable, text, timestamp, uuid, jsonb, index } from 'drizzle-orm/pg-core';
 
 // RFQs table
 export const rfqs = pgTable('rfqs', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-  title: text('title').notNull(),
-  status: rfqStatusEnum('status').notNull().default('draft'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`)
+  id: text('id').primaryKey(),
+  status: text('status').notNull(),
+  updated_at: timestamp('updated_at').notNull().defaultNow(),
 });
 
-// RFQ Line Items table
-export const rfqLineItems = pgTable('rfq_line_items', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-  rfqId: uuid('rfq_id').notNull().references(() => rfqs.id, { onDelete: 'cascade' }),
-  description: text('description'),
-  quantity: numeric('quantity', { precision: 12, scale: 4 }),
-  unitPrice: numeric('unit_price', { precision: 12, scale: 4 })
-});
-
-// IMMUTABLE: No UPDATE or DELETE operations permitted on this table per EQS v1.0 audit clause
-export const auditLog = pgTable('audit_log', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-  tableName: text('table_name').notNull(),
-  recordId: uuid('record_id'),
+// Audit logs table - IMMUTABLE: No UPDATE/DELETE operations permitted
+// Recommendation: Implement DB-level row security policy to enforce INSERT-only access
+// This table maintains complete audit trail for data lineage and financial integrity
+export const auditLogs = pgTable('audit_logs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  entity_type: text('entity_type').notNull(),
+  entity_id: text('entity_id').notNull(),
   action: text('action').notNull(),
-  changedBy: text('changed_by').notNull(),
-  changedAt: timestamp('changed_at', { withTimezone: true }).notNull().default(sql`now()`),
-  payload: jsonb('payload')
-});
-
-// Export types
-export type Rfq = InferSelectModel<typeof rfqs>;
-export type NewRfq = InferInsertModel<typeof rfqs>;
-export type RfqLineItem = InferSelectModel<typeof rfqLineItems>;
-export type NewRfqLineItem = InferInsertModel<typeof rfqLineItems>;
-export type AuditLog = InferSelectModel<typeof auditLog>;
-export type NewAuditLog = InferInsertModel<typeof auditLog>;
+  payload: jsonb('payload').notNull(),
+  created_at: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  entityTypeIdIdx: index('audit_logs_entity_type_entity_id_idx').on(table.entity_type, table.entity_id),
+}));

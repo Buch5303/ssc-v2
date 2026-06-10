@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-10T17:46:00.106Z",
+  "updated_at": "2026-06-10T17:48:38.483Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -902,14 +902,15 @@
       "title": "RFQ status transition API with audit log integration",
       "directive": "Create PATCH /api/rfq/[id]/status route in app/api/rfq/[id]/status/route.ts. Accept body { status: 'pending'|'active'|'closed'|'awarded', actor_id: string }. Validate status is a legal forward transition using a simple state machine (pending→active→closed, active→awarded). On valid transition: update rfqs.status in Neon DB via Drizzle, then INSERT a row into audit_logs (entity_type='rfq', entity_id, action='status_transition', payload=JSON of {from, to, actor_id}, created_at=now()). Return 200 { id, status, updated_at } on success, 422 with { error } on illegal transition, 404 if RFQ not found. No middleware.ts changes. No auth route changes. EQS clauses: 100% auditable data (every status change recorded), immutable audit logs, financial accuracy ±0.1% (status integrity directly gates invoicing and award logic).",
       "priority": 1,
-      "status": "in_progress",
+      "status": "complete",
       "origin": "auto",
       "rationale": "AUTO-033 (audit_logs table + POST /api/audit) is complete and AUTO-032 (RFQ detail) is complete, giving the required foundations. AUTO-035 failed previously — this directive narrows scope strictly to the PATCH route + audit write, removing the RBAC dependency that likely caused the failure. Week 2 roadmap calls for RFQ response lifecycle; this is the critical path item.",
       "created_at": "2026-06-10T17:45:58.079Z",
       "started_at": "2026-06-10T17:46:00.106Z",
-      "completed_at": null,
+      "completed_at": "2026-06-10T17:48:38.483Z",
       "commit_sha": null,
-      "auditor_score": null
+      "auditor_score": 90,
+      "build_attempts": 2
     },
     {
       "id": "AUTO-038",
