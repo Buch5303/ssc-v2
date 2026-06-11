@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T19:32:33.168Z",
+  "updated_at": "2026-06-11T19:45:09.923Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1316,9 +1316,10 @@
       "id": "AUTO-052",
       "title": "RFQ Authorization Audit Log Schema & Migration",
       "directive": "Create the authorization_audit_log table in lib/db/schema.ts and generate the corresponding Drizzle migration. The table must store: id (uuid, primary key, default random), user_id (text, not null, FK to users.id), role (text, not null), http_method (text, not null), resource (text, not null), action (text, not null, e.g. DENY/ALLOW), ip_address (text, nullable), created_at (timestamp, not null, default now(), immutable — no updatedAt). Add a DB-level CHECK constraint or trigger ensuring no UPDATE/DELETE on this table (append-only). This is a schema-only directive: no application logic changes. EQS v1.0 standards apply: 100% auditable, immutable log. Depends on: existing users table with role field already in schema.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T05:01:24.131Z",
-      "origin": "split_from:AUTO-044"
+      "origin": "split_from:AUTO-044",
+      "started_at": "2026-06-11T19:45:09.791Z"
     },
     {
       "id": "AUTO-053",
