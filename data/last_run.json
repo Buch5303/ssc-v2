@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T04:35:00.492Z",
+  "timestamp": "2026-06-11T04:48:35.891Z",
   "directive": {
-    "id": "AUTO-005",
-    "title": "Mobile responsive pass",
+    "id": "AUTO-043",
+    "title": "RBAC part 1: role field on users (schema + migration)",
     "status": "failed"
   },
-  "elapsed_seconds": 267.317,
+  "elapsed_seconds": 182.519,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -21,7 +21,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 0,
+      "research_queries_count": 3,
       "spec_parse_error": false
     },
     "researcher": {
@@ -35,82 +35,82 @@
       "status": "complete",
       "files_count": 3,
       "parse_error": false,
-      "first_file_path": "components/layout/MobileNav.tsx"
+      "first_file_path": "lib/db/schema.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "CONDITIONAL",
-      "score": 72,
-      "summary": "The generated code implements the core mobile navigation infrastructure correctly — MobileNav component with hamburger button (48×48px), slide-over drawer with backdrop and Escape key handling, and Sidebar hidden on mobile via responsive classes. DashboardShell properly integrates both components with responsive margin classes. However, two critical files specified in the build spec are missing from the generated output: KpiGrid.tsx (grid column responsiveness) and globals.css (font-size enforcement, table overflow, touch target CSS). These omissions mean 4 of the 8 acceptance criteria are only partially satisfied. The build is recoverable with the addition of these two files. Score is 72 due to missing critical CSS and component modifications that are essential for full acceptance criteria compliance.",
+      "verdict": "FAIL",
+      "score": 55,
+      "summary": "The build adds the user role enum and column as specified, but has two CRITICAL issues: (1) the CREATE TYPE statement lacks IF NOT EXISTS, breaking idempotency; (2) the 'users' table defined in schema.ts does not exist in the ground truth database schema, meaning the migration would create a new table rather than alter an existing one. This fundamentally breaks the drizzle-kit compatibility requirement. Additionally, the schema.ts adds extra columns beyond the directive scope, and the audit table's RLS policy allows unrestricted inserts. The build needs significant rework to align with the actual database schema and ensure true idempotency.",
       "pre_check_failed": false,
-      "issue_count": 6,
+      "issue_count": 7,
       "top_issues": [
         {
-          "severity": "HIGH",
-          "description": "KpiGrid.tsx modification is specified in the build spec but the generated code does not include this file. The grid column classes need to be changed to 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6' for responsive behavior."
+          "severity": "CRITICAL",
+          "description": "CREATE TYPE statement lacks IF NOT EXISTS guard. Re-running the migration will fail with 'type already exists' error, violating the idempotency requirement."
+        },
+        {
+          "severity": "CRITICAL",
+          "description": "The 'users' table definition is added to schema.ts, but the ground truth schema only contains 'rfqs' and 'auditLogs' tables. There is no 'users' table in the existing database schema. The build spec assumes a users table exists, but it does not in the ground truth. This means drizzle-kit generate:pg would produce CREATE TABLE users, not ALTER TABLE ADD COLUMN, making the migration semantically incompatible."
         },
         {
           "severity": "HIGH",
-          "description": "globals.css modification is specified in the build spec but the generated code does not include this file. Three critical CSS rules are missing: (1) body font-size enforcement via max(14px, 1rem), (2) .table-responsive class with overflow-x: auto, (3) a/button touch target min-height/min-width at mobile breakpoint."
-        },
-        {
-          "severity": "MEDIUM",
-          "description": "MobileNav.tsx duplicates the navigation items list from Sidebar.tsx. This creates a maintenance burden — any nav item added/removed must be updated in both files. The build spec says to 'contain the existing Sidebar nav tree' but this implementation duplicates it."
+          "description": "The 'users' table definition includes 'email', 'name', 'created_at', 'updated_at' columns that are not part of the directive scope. The directive only asks to add a 'role' column. Adding extra columns to the schema definition could cause unintended schema drift when using drizzle-kit."
         }
       ]
     },
     "gate": {
-      "allowed": true,
-      "effective_verdict": "CONDITIONAL",
-      "reason": "Score 72, verdict CONDITIONAL"
+      "allowed": false,
+      "effective_verdict": "FAIL",
+      "reason": "Auditor rejected (score 55)"
     },
     "build_attempts": 2,
     "attempt_history": [
       {
         "attempt": 1,
-        "verdict": "CONDITIONAL",
-        "score": 78,
-        "effective": "CONDITIONAL"
+        "verdict": "FAIL",
+        "score": 55,
+        "effective": "FAIL"
       },
       {
         "attempt": 2,
-        "verdict": "CONDITIONAL",
-        "score": 72,
-        "effective": "CONDITIONAL"
+        "verdict": "FAIL",
+        "score": 55,
+        "effective": "FAIL"
       }
     ]
   },
   "log": [
-    "[2026-06-11T04:30:33.175Z] Auto-builder cycle started",
+    "[2026-06-11T04:45:33.372Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy",
-    "[WATCHDOG] In sync at 3d0e86a",
-    "[QUEUE] Loaded via contents-api. Pending: 7, total: 48",
+    "[WATCHDOG] In sync at 6107a28",
+    "[QUEUE] Loaded via contents-api. Pending: 7, total: 49",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T04:30:39.044Z] Processing: AUTO-005 — Mobile responsive pass",
+    "[2026-06-11T04:45:35.472Z] Processing: AUTO-043 — RBAC part 1: role field on users (schema + migration)",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
-    "[ARCHITECT] Lossless split: 1 follow-up directive(s) appended to queue (origin AUTO-005)",
+    "[ARCHITECT] Lossless split: 2 follow-up directive(s) appended to queue (origin AUTO-043)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Skipped — no research_queries in spec",
+    "[RESEARCHER] Running 3 queries...",
+    "[RESEARCHER] skipped — 0 result(s)",
     "[COMPILE-GATE] Repo tree loaded (693 paths)",
     "[GROUNDING] Builder context: 109 source paths, schema loaded",
-    "[CARRYOVER] Attempt 1 seeded with prior cycle's audit findings",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 5 files",
+    "[BUILDER] Attempt 1 complete — 3 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
     "[COMPILE-GATE] Attempt 1: all named exports verified (0 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (78/100)",
-    "[GATE] Attempt 1: Score 78, verdict CONDITIONAL → CONDITIONAL",
+    "[AUDITOR] Attempt 1 verdict: FAIL (55/100)",
+    "[GATE] Attempt 1: Auditor rejected (score 55) → FAIL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
     "[BUILDER] Attempt 2 complete — 3 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
     "[COMPILE-GATE] Attempt 2: all named exports verified (0 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)"
+    "[AUDITOR] Attempt 2 verdict: FAIL (55/100)",
+    "[GATE] Attempt 2: Auditor rejected (score 55) → FAIL",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): Auditor rejected (score 55)"
   ]
 }
