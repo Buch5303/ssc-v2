@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T22:04:17.325Z",
+  "updated_at": "2026-06-11T22:04:20.199Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1497,7 +1497,8 @@
       "completed_at": "2026-06-11T22:04:17.205Z",
       "auditor_score": 72,
       "build_attempts": 2,
-      "conditional_ship": true
+      "conditional_ship": true,
+      "commit_sha": "fe7d662aac4061b3ce8e5384b8a7f10fc04db0e4"
     },
     {
       "id": "AUTO-061",

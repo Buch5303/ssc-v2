@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T21:34:46.403Z",
+  "timestamp": "2026-06-11T22:04:20.068Z",
   "directive": {
-    "id": "AUTO-058-FIX",
-    "title": "Fix residual audit findings from AUTO-058",
-    "status": "failed"
+    "id": "AUTO-060",
+    "title": "FS-VIZ-MOB-002 — Mobile Chart Accessibility: ARIA Labels, Keyboard Nav & Screen Reader Support for W251 BOP Visualizatio",
+    "status": "complete"
   },
-  "elapsed_seconds": 272.907,
+  "elapsed_seconds": 255.575,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -21,7 +21,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 4,
+      "research_queries_count": 5,
       "spec_parse_error": false
     },
     "researcher": {
@@ -33,36 +33,36 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 3,
+      "files_count": 4,
       "parse_error": false,
-      "first_file_path": "hooks/useChartGestures.ts"
+      "first_file_path": "components/charts/AccessibleChartWrapper.tsx"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "FAIL",
-      "score": 55,
-      "summary": "The build addresses all 6 residual audit findings at the code level, with correct implementations for pinch-zoom scale calculation, long-press hit-testing, cloneElement elimination, keyboard accessibility, and swipe velocity guard. However, the build fails on 5 of 8 acceptance criteria due to critical issues in test implementation and missing verification artifacts. The long-press handler has a stale closure bug that captures coordinates at pointerdown time instead of at timeout fire time. The test mocks are insufficient and would produce unreliable results. Two acceptance criteria (AC-7 regression testing and AC-8 performance benchmarking) are completely unaddressed. The build requires significant fixes to tests and the long-press timing bug before it can be accepted.",
+      "verdict": "CONDITIONAL",
+      "score": 72,
+      "summary": "The build implements the core WCAG 2.1 AA accessibility requirements including figure semantics, dynamic figcaption summaries, keyboard-navigable legends with focus rings, and SVG role/aria-label injection. However, there are several issues that prevent a PASS verdict: (1) TypeScript 'any' type usage violates the directive's strict typing constraint, (2) dynamic Tailwind class construction may break the focus ring styling in production, (3) incomplete PieChart implementation, (4) fragile SVG attribute injection approach, and (5) missing tests for accessibility features. The build is recoverable with moderate fixes and should be CONDITIONAL pending resolution of the HIGH-severity issues.",
       "pre_check_failed": false,
-      "issue_count": 9,
+      "issue_count": 7,
       "top_issues": [
         {
-          "severity": "CRITICAL",
-          "description": "The long-press timeout captures `event` from the closure of handlePointerDown, but by the time the timeout fires (500ms later), the pointer may have moved. The spec requires using containerRef.getBoundingClientRect() to convert clientX/clientY to local coordinates at the time of the long-press trigger, but the code captures event.clientX/clientY at pointerdown time, not at timeout fire time. This means the long-press coordinates are stale and inaccurate."
-        },
-        {
-          "severity": "CRITICAL",
-          "description": "The Date.now mock setup is insufficient. The implementation calls Date.now() multiple times (in handlePointerDown and handlePointerUp), but the test only mocks two return values. This will cause the timing calculations to use undefined/NaN values, making the swipe velocity tests unreliable."
+          "severity": "HIGH",
+          "description": "TypeScript 'any' type used in renderCustomDot callback parameter: `(props: any, seriesIndex: number)`. This violates the directive's constraint of 'No implicit any, no type assertions on DOM nodes without null guard'."
         },
         {
           "severity": "HIGH",
-          "description": "The test for cloneElement elimination uses a placeholder `expect(true).toBe(true)` instead of actually reading the file and checking for cloneElement occurrences. The test for XAxis domain attribute checks for an HTML attribute, but the mock renders a div with spread props, so the domain prop would be a React prop, not an HTML attribute."
+          "description": "Dynamic Tailwind class construction with template literals: `focus-visible:ring-[${FOCUS_RING_COLOR}]`. Tailwind's JIT compiler cannot detect classes built with string interpolation, so this class may not be included in the production CSS bundle."
+        },
+        {
+          "severity": "MEDIUM",
+          "description": "The `chartProps` object includes `activeIndex` which is passed to all chart types including BarChart and PieChart. The Recharts BarChart and PieChart components may not accept an `activeIndex` prop, which could cause TypeScript errors or unexpected behavior."
         }
       ]
     },
     "gate": {
-      "allowed": false,
-      "effective_verdict": "FAIL",
-      "reason": "Auditor rejected (score 55)"
+      "allowed": true,
+      "effective_verdict": "CONDITIONAL",
+      "reason": "Score 72, verdict CONDITIONAL"
     },
     "build_attempts": 2,
     "attempt_history": [
@@ -74,42 +74,43 @@
       },
       {
         "attempt": 2,
-        "verdict": "FAIL",
-        "score": 55,
-        "effective": "FAIL"
+        "verdict": "CONDITIONAL",
+        "score": 72,
+        "effective": "CONDITIONAL"
       }
     ]
   },
   "log": [
-    "[2026-06-11T21:30:13.497Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 076e018",
-    "[WATCHDOG] In sync at 1b7e4da",
-    "[QUEUE] Loaded via contents-api. Pending: 22, total: 81",
+    "[2026-06-11T22:00:04.494Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ ef53266",
+    "[WATCHDOG] In sync at ef53266",
+    "[QUEUE] Loaded via contents-api. Pending: 21, total: 82",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T21:30:16.050Z] Processing: AUTO-058-FIX — Fix residual audit findings from AUTO-058",
+    "[2026-06-11T22:00:06.638Z] Processing: AUTO-060 — FS-VIZ-MOB-002 — Mobile Chart Accessibility: ARIA Labels, Keyboard Nav & Screen Reader Support for W251 BOP Visualizatio",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 4 queries...",
+    "[RESEARCHER] Running 5 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
-    "[COMPILE-GATE] Repo tree loaded (722 paths)",
+    "[COMPILE-GATE] Repo tree loaded (727 paths)",
     "[COMPILE-GATE] Manifest loaded (37 packages) — bare imports validated",
-    "[GROUNDING] Builder context: 125 source paths, schema loaded",
+    "[GROUNDING] Builder context: 129 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 3 files",
+    "[BUILDER] Attempt 1 complete — 4 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
-    "[COMPILE-GATE] Attempt 1: all Tailwind tokens defined",
-    "[COMPILE-GATE] Attempt 1: 1 missing named export(s):\n  components/charts/BaseChart.tsx → './TouchableChartWrapper' has no export 'ChartGestureContext'",
-    "[RETRY] Re-running Builder to fix missing exports (attempt 2/2)",
+    "[COMPILE-GATE] Attempt 1: 1 undefined Tailwind token(s):\n  components/charts/BaseChart.tsx → 'ring-offset-2'",
+    "[RETRY] Re-running Builder to fix undefined Tailwind tokens (attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 3 files",
+    "[BUILDER] Attempt 2 complete — 4 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
     "[COMPILE-GATE] Attempt 2: all Tailwind tokens defined",
-    "[COMPILE-GATE] Attempt 2: all named exports verified (1 repo file(s) inspected)",
+    "[COMPILE-GATE] Attempt 2: all named exports verified (0 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: FAIL (55/100)",
-    "[GATE] Attempt 2: Auditor rejected (score 55) → FAIL",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): Auditor rejected (score 55)"
+    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
+    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[COMMIT] Committing 4 file(s) + queue status (CONDITIONAL-SHIP 72/100 (zero CRITICAL) on attempt 2/2)...",
+    "[QUEUE] Appended fix-up directive AUTO-060-FIX (7 residual finding(s))",
+    "[COMMIT] OK"
   ]
 }
