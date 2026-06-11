@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T19:47:13.883Z",
+  "updated_at": "2026-06-11T20:00:46.723Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1329,9 +1329,10 @@
       "id": "AUTO-053",
       "title": "RFQ Authorization Integration & E2E Tests",
       "directive": "Add integration and E2E tests for the role-based authorization on RFQ API routes (AUTH-RFQ-001). Using the real test database (or a seeded test Postgres instance), verify: (1) 403 responses produce a real persisted audit log row readable via db.select(); (2) concurrent denial requests each produce independent audit rows (no row merge); (3) missing/expired session returns 401 not 403; (4) audit log rows cannot be deleted or updated via any exposed API (attempt DELETE on audit row returns 405/403). Playwright or Supertest acceptable. EQS v1.0: real latency measured — authorization overhead must not increase p95 response time by more than 50ms versus baseline. Depends on AUTH-RFQ-001 and the audit log schema migration directive.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T05:01:24.131Z",
-      "origin": "split_from:AUTO-044"
+      "origin": "split_from:AUTO-044",
+      "started_at": "2026-06-11T20:00:46.604Z"
     },
     {
       "id": "AUTO-054",
