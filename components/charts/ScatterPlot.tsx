@@ -68,7 +68,7 @@ function CustomScatterPlot({
         } : undefined}
       />
       <Tooltip
-        position={(props) => clampTooltipPosition(props.coordinate, props.viewBox, containerWidth)}
+        allowEscapeViewBox={{ x: false, y: false }}
         contentStyle={{
           backgroundColor: 'hsl(var(--card))',
           border: '1px solid hsl(var(--border))',

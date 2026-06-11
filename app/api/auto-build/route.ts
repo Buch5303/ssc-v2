@@ -430,7 +430,14 @@ function extractImportSpecifiers(content: string): string[] {
   return specs;
 }
 
-function importResolves(spec: string, importerPath: string, known: Set<string>): boolean {
+// Node builtins (with or without node: prefix) — always resolvable.
+const NODE_BUILTINS = new Set([
+  "assert", "buffer", "child_process", "crypto", "dns", "events", "fs", "http",
+  "https", "net", "os", "path", "process", "querystring", "stream",
+  "string_decoder", "timers", "tls", "url", "util", "worker_threads", "zlib",
+]);
+
+function importResolves(spec: string, importerPath: string, known: Set<string>, installedPkgs: Set<string> | null): boolean {
   let target: string;
   if (spec.startsWith("@/")) {
     target = spec.slice(2); // tsconfig: "@/*" -> "./*"
@@ -443,7 +450,19 @@ function importResolves(spec: string, importerPath: string, known: Set<string>):
     }
     target = dir.join("/");
   } else {
-    return true; // bare package import — not ours to resolve
+    // Bare package import. 2026-06-11: this used to fail open unconditionally —
+    // AUTO-047 shipped 4 chart components importing `recharts` (not in
+    // package.json); the gate waved them through, the Auditor's BUILDABILITY
+    // lens missed it (the exact AUTO-006 failure mode recurring), and the
+    // PASS 88/100 commit broke the production build. Now: validate the
+    // package root against the live manifest. Fails open only if the
+    // manifest could not be fetched (installedPkgs === null).
+    if (installedPkgs === null) return true;
+    const clean = spec.startsWith("node:") ? spec.slice(5) : spec;
+    const segs = clean.split("/");
+    const root = clean.startsWith("@") ? segs.slice(0, 2).join("/") : segs[0];
+    if (NODE_BUILTINS.has(root)) return true;
+    return installedPkgs.has(root);
   }
   target = target.replace(/\/+$/, "");
   const exts = [
@@ -461,7 +480,8 @@ function importResolves(spec: string, importerPath: string, known: Set<string>):
 
 function validateImports(
   files: Array<{ path: string; content: string }>,
-  repoPaths: Set<string>
+  repoPaths: Set<string>,
+  installedPkgs: Set<string> | null
 ): Array<{ file: string; import: string }> {
   const known = new Set(repoPaths);
   for (const f of files) known.add(f.path.replace(/^\/+/, ""));
@@ -470,7 +490,7 @@ function validateImports(
     if (!/\.(ts|tsx|js|jsx|mjs)$/.test(f.path)) continue;
     const importer = f.path.replace(/^\/+/, "");
     for (const spec of extractImportSpecifiers(f.content || "")) {
-      if (!importResolves(spec, importer, known)) {
+      if (!importResolves(spec, importer, known, installedPkgs)) {
         unresolved.push({ file: f.path, import: spec });
       }
     }
@@ -1165,6 +1185,26 @@ export async function GET(req: Request) {
       ? `[COMPILE-GATE] Repo tree loaded (${repoPaths.size} paths)`
       : `[COMPILE-GATE] Repo tree unavailable — gate fails open this cycle`
   );
+  // Package manifest for bare-import validation in the compile gate.
+  let installedPkgs: Set<string> | null = null;
+  try {
+    const pkgRes = await fetch(
+      `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/package.json`,
+      { cache: "no-store" }
+    );
+    if (pkgRes.ok) {
+      const pkg = await pkgRes.json();
+      installedPkgs = new Set([
+        ...Object.keys(pkg.dependencies || {}),
+        ...Object.keys(pkg.devDependencies || {}),
+      ]);
+    }
+  } catch { /* fail open — gate skips bare-import validation this cycle */ }
+  log.push(
+    installedPkgs
+      ? `[COMPILE-GATE] Manifest loaded (${installedPkgs.size} packages) — bare imports validated`
+      : `[COMPILE-GATE] Manifest unavailable — bare imports fail open this cycle`
+  );
   // Grounding context for the Builder — manifest + real schema (see helper).
   const repoContext = await buildRepoContext(ghPat, repoPaths);
   log.push(
@@ -1231,7 +1271,7 @@ export async function GET(req: Request) {
         path: f.path,
         content: typeof f.content === "string" ? f.content : "",
       }));
-      const unresolved = validateImports(batch, repoPaths);
+      const unresolved = validateImports(batch, repoPaths, installedPkgs);
       if (unresolved.length > 0) {
         const detail = unresolved.slice(0, 8).map(u => `  ${u.file} → '${u.import}'`).join("\n");
         log.push(`[COMPILE-GATE] Attempt ${attempt}: ${unresolved.length} unresolved import(s):\n${detail}`);

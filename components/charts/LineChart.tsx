@@ -1,6 +1,6 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { ResponsiveChartWrapper, calcTickInterval, clampTooltipPosition } from './ResponsiveChartWrapper';
+import { ResponsiveChartWrapper, calcTickInterval } from './ResponsiveChartWrapper';
 
 interface LineChartData {
   name: string;
@@ -51,7 +51,7 @@ function CustomLineChart({
         className="text-muted-foreground"
       />
       <Tooltip
-        position={(props) => clampTooltipPosition(props.coordinate, props.viewBox, containerWidth)}
+        allowEscapeViewBox={{ x: false, y: false }}
         contentStyle={{
           backgroundColor: 'hsl(var(--card))',
           border: '1px solid hsl(var(--border))',
