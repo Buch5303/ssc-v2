@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T22:00:06.752Z",
+  "updated_at": "2026-06-11T22:04:17.325Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1490,10 +1490,14 @@
       "id": "AUTO-060",
       "title": "FS-VIZ-MOB-002 — Mobile Chart Accessibility: ARIA Labels, Keyboard Nav & Screen Reader Support for W251 BOP Visualizatio",
       "directive": "DIRECTIVE: Following FS-VIZ-MOB-001 (mobile responsive charts), add full accessibility support to all chart components on the W251 BOP dashboard. Every Recharts chart must have: (1) a wrapping <figure> with aria-label describing the chart title and data range; (2) a visually-hidden <figcaption> with a plain-language data summary updated dynamically when chart data changes; (3) all interactive chart elements (tooltip triggers, legend items) must be keyboard-focusable with visible focus rings meeting WCAG 2.1 AA 3:1 contrast ratio; (4) Recharts SVG must have role='img' and aria-label; (5) color encoding must not be the sole differentiator — patterns or shapes must supplement color for line/area charts. CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced. This covers ONLY chart accessibility — no layout, auth, or data changes. Builds on ChartWrapper.tsx and BaseChart.tsx introduced in FS-VIZ-MOB-001.",
-      "status": "in_progress",
+      "status": "complete",
       "created_at": "2026-06-11T06:02:17.586Z",
       "origin": "split_from:AUTO-046",
-      "started_at": "2026-06-11T22:00:06.638Z"
+      "started_at": "2026-06-11T22:00:06.638Z",
+      "completed_at": "2026-06-11T22:04:17.205Z",
+      "auditor_score": 72,
+      "build_attempts": 2,
+      "conditional_ship": true
     },
     {
       "id": "AUTO-061",
@@ -1714,6 +1718,20 @@
       "status": "pending",
       "created_at": "2026-06-11T21:46:13.411Z",
       "origin": "split_from:AUTO-059"
+    },
+    {
+      "id": "AUTO-060-FIX",
+      "title": "Fix residual audit findings from AUTO-060",
+      "directive": "AUTO-060 (\"FS-VIZ-MOB-002 — Mobile Chart Accessibility: ARIA Labels, Keyboard Nav & Screen Reader Support for W251 BOP Visualizatio\") shipped via the conditional-ship valve at 72/100 with zero CRITICAL findings. Resolve every residual audit finding below in the files committed by that directive. Do not change unrelated files, do not regress passing acceptance criteria.\n\nRESIDUAL FINDINGS:\n1. [HIGH] components/charts/BaseChart.tsx: TypeScript 'any' type used in renderCustomDot callback parameter: `(props: any, seriesIndex: number)`. This violates the directive's constraint of 'No implicit any, no type assertions on DOM nodes without null guard'. FIX: Define a proper interface for the dot props, e.g., `interface DotProps { cx?: number; cy?: number; fill?: string; }` and use it instead of `any`.\n2. [HIGH] components/charts/BaseChart.tsx: Dynamic Tailwind class construction with template literals: `focus-visible:ring-[${FOCUS_RING_COLOR}]`. Tailwind's JIT compiler cannot detect classes built with string interpolation, so this class may not be included in the production CSS bundle. FIX: Use a static class string: `focus-visible:ring-[#0052CC]` instead of interpolating the variable. The FOCUS_RING_COLOR constant can be kept for documentation but the className should be a literal string.\n3. [MEDIUM] components/charts/BaseChart.tsx: The `chartProps` object includes `activeIndex` which is passed to all chart types including BarChart and PieChart. The Recharts BarChart and PieChart components may not accept an `activeIndex` prop, which could cause TypeScript errors or unexpected behavior. FIX: Only pass `activeIndex` to LineChart and AreaChart which support it. For BarChart and PieChart, omit the prop or use a type-specific props object.\n4. [MEDIUM] components/charts/BaseChart.tsx: The PieChart case is incomplete with a comment placeholder. This leaves pie charts without proper accessibility support, which violates the directive's scope of 'all Recharts chart components'. FIX: Implement the PieChart rendering with proper accessibility attributes, or at minimum add a fallback that renders a basic accessible pie chart.\n5. [MEDIUM] components/charts/BaseChart.tsx: The SVG role/aria-label injection via useEffect may fail if the SVG element is not yet rendered when the effect runs (e.g., due to ResponsiveContainer's async rendering). The effect depends on `[title, data]` but the SVG may not be a child of chartRef.current at that point. FIX: Use a MutationObserver or a ResizeObserver to detect when the SVG is added to the DOM, or use Recharts' built-in customization props (like `rootElement` or `wrapperStyle`) to set the SVG attributes declaratively.\n6. [LOW] components/charts/BaseChart.tsx: The `PATTERN_MAP` uses string keys 'series1', 'series2', etc., but the code accesses values via `Object.values(PATTERN_MAP)[index % ...]`. This is fragile and doesn't guarantee consistent ordering across JavaScript engines. FIX: Use an array instead of an object for the pattern definitions, or use a Map with explicit ordering.\n7. [LOW] components/charts/hooks/useChartSummary.ts: The `formatValue` function assumes values >= 1000 are monetary and formats them as currency. This may not be appropriate for all chart types (e.g., percentages, counts). FIX: Make the formatting configurable via a prop or detect the data type from the series keys or data values.",
+      "priority": 5,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "Auto-generated debt repayment for conditional-ship of AUTO-060",
+      "created_at": "2026-06-11T22:04:17.205Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
     }
   ]
 }
