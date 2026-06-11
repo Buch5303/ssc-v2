@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T20:15:46.892Z",
+  "updated_at": "2026-06-11T20:20:11.497Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1356,10 +1356,28 @@
       "id": "AUTO-054",
       "title": "RFQ Authorization Observability — Denial Rate Dashboard Metric",
       "directive": "Expose a server-side metric endpoint (or integrate with existing observability layer) that reads from authorization_audit_log and emits: (1) denial count per role per hour for the last 24h; (2) top 5 most-denied user_ids in rolling 24h window; (3) denial rate as % of total RFQ requests. Surface these as a read-only C-suite tile on the existing FlowSeer dashboard — value must be interpretable in <5 seconds with no training (EQS v1.0). Data must reconcile 100% with audit log rows (no sampling). Depends on AUTH-RFQ-001 and the audit log schema migration directive.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-11T05:01:24.131Z",
       "origin": "split_from:AUTO-044",
-      "started_at": "2026-06-11T20:15:46.768Z"
+      "started_at": "2026-06-11T20:15:46.768Z",
+      "completed_at": "2026-06-11T20:20:11.368Z",
+      "skip_reason": "gate blocked after 2 attempt(s): Auditor rejected (score 55)",
+      "auditor_score": 55,
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "FAIL",
+          "score": 55,
+          "effective": "FAIL"
+        }
+      ]
     },
     {
       "id": "AUTO-055",
@@ -1550,6 +1568,22 @@
       "status": "pending",
       "created_at": "2026-06-11T19:30:49.927Z",
       "origin": "split_from:AUTO-051"
+    },
+    {
+      "id": "AUTO-075",
+      "title": "AUTH-METRICS-002: Real-Time Denial Alert Streaming via SSE",
+      "directive": "Extend the authorization denial metrics layer (built in AUTH-METRICS-001) to push real-time denial spike alerts to the C-suite dashboard tile. Implement a Server-Sent Events endpoint at GET /api/metrics/auth-denials/stream that tails authorization_audit_log using Postgres LISTEN/NOTIFY (trigger on INSERT where outcome='deny'). The SSE stream must emit an event within 300ms of a new denial row being committed (EQS real-time latency budget). On the client, AuthDenialTile's KPI counters must update without full page reload. Alert threshold: if denial count in any rolling 5-minute window exceeds 10, emit a 'spike' event that renders a red banner ('Unusual denial spike detected — {count} denials in 5 min') on the tile. All streamed data must reference authorization_audit_log row IDs for full auditability. No sampling. Depends on AUTH-METRICS-001 being merged.",
+      "status": "pending",
+      "created_at": "2026-06-11T20:16:41.596Z",
+      "origin": "split_from:AUTO-054"
+    },
+    {
+      "id": "AUTO-076",
+      "title": "AUTH-METRICS-003: Denial Metrics CSV Export + Audit Trail Download",
+      "directive": "Add a CSV export capability to the authorization denial metrics tile (built in AUTH-METRICS-001). Implement a GET /api/metrics/auth-denials/export endpoint that streams a CSV of all raw authorization_audit_log rows (outcome='deny', last 24h by default, configurable via ?hours=N up to 168) with columns: id, user_id, role, action, resource, rfq_id, created_at. The export must include a checksum footer row (SHA-256 of all data rows) to enable offline reconciliation. Endpoint must require METRICS_READ_KEY header (HTTP 401 otherwise). On the AuthDenialTile, add a small 'Export CSV' button (visible only to users with role='c_suite' or 'auditor' — check via existing session/auth pattern). Export must complete within 2s for up to 10,000 rows. Depends on AUTH-METRICS-001 being merged.",
+      "status": "pending",
+      "created_at": "2026-06-11T20:16:41.596Z",
+      "origin": "split_from:AUTO-054"
     }
   ]
 }
