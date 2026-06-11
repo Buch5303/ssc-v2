@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T21:05:10.455Z",
+  "updated_at": "2026-06-11T21:15:46.446Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1464,9 +1464,10 @@
       "id": "AUTO-058",
       "title": "FS-VIZ-MOB-002: Mobile Touch Interaction & Gesture Support for Charts",
       "directive": "DIRECTIVE: Extend the mobile chart responsiveness work from FS-VIZ-MOB-001 to add touch interaction and gesture support across all 14 FlowSeer W251 BOP dashboard pages. Specifically: (1) Pinch-to-zoom must be supported on line and area charts using touch events (no new dependencies; use Recharts ReferenceArea or pointer events natively). (2) Swipe-left/right on multi-series charts must cycle through visible data series or pan the time axis where applicable. (3) Long-press (500ms) on a data point must open a persistent tooltip modal overlay with full data point details (replacing hover-only tooltips that do not work on touch). The persistent tooltip modal must be dismissible by tap-outside or an explicit close button (44x44px). (4) All gesture handlers must be passive (`{ passive: true }`) to not block scroll. (5) Verify all interactions against iPhone 14 Pro (393x852) and an Android mid-range emulation (360px width). CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced. FS-VIZ-MOB-001 (chart container responsiveness) is a prerequisite and must be merged first. Scope limited to gesture/interaction layer of visualization components only — no layout, sidebar, grid, or table changes.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T05:46:31.943Z",
-      "origin": "split_from:AUTO-046"
+      "origin": "split_from:AUTO-046",
+      "started_at": "2026-06-11T21:15:46.357Z"
     },
     {
       "id": "AUTO-059",
