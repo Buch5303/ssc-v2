@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T22:30:45.432Z",
+  "updated_at": "2026-06-11T22:35:31.134Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1504,10 +1504,14 @@
       "id": "AUTO-061",
       "title": "FS-VIZ-MOB-003 — Mobile Chart Interaction: Pinch-Zoom, Swipe-to-Pan & Touch Gesture Handling for W251 BOP Time-Series Ch",
       "directive": "DIRECTIVE: Following FS-VIZ-MOB-001 (mobile responsive charts), add touch gesture support to time-series and trend charts on the W251 BOP dashboard. Requirements: (1) pinch-to-zoom on time-series charts adjusts the visible X-axis date range (min zoom = 1 day, max = full dataset range); (2) horizontal swipe-to-pan shifts the visible window without triggering page scroll; (3) double-tap resets zoom to full range; (4) all gestures must have visual affordance (zoom level indicator, pan handle icons); (5) gesture state must be managed locally in a useChartGestures hook — no global state changes; (6) gestures must not interfere with page scroll on the vertical axis. CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. Recharts only — no additional charting libraries. EQS v1.0 enforced. Builds on ChartWrapper.tsx and BaseChart.tsx from FS-VIZ-MOB-001. Covers ONLY gesture interaction — no layout, accessibility, or data changes.",
-      "status": "in_progress",
+      "status": "complete",
       "created_at": "2026-06-11T06:02:17.586Z",
       "origin": "split_from:AUTO-046",
-      "started_at": "2026-06-11T22:30:45.340Z"
+      "started_at": "2026-06-11T22:30:45.340Z",
+      "completed_at": "2026-06-11T22:35:31.014Z",
+      "auditor_score": 78,
+      "build_attempts": 2,
+      "conditional_ship": true
     },
     {
       "id": "AUTO-062",
@@ -1750,6 +1754,36 @@
           "effective": "FAIL"
         }
       ]
+    },
+    {
+      "id": "AUTO-081",
+      "title": "FS-VIZ-GESTURE-002 — Keyboard & Accessibility Equivalents for Chart Gesture Controls",
+      "directive": "Following FS-VIZ-GESTURE-001 (touch gesture support), add keyboard-accessible equivalents for all gesture interactions on time-series and trend charts. Requirements: (1) When a chart is focused, left/right arrow keys pan the visible window by 10% of the current domain span per keypress; (2) plus/minus keys zoom in/out by a 1.5× scale factor per keypress, respecting the same 1-day minimum / full-range maximum constraints from FS-VIZ-GESTURE-001; (3) Home key resets to full range (equivalent to double-tap reset); (4) all keyboard interactions must update the same domainStart/domainEnd state produced by useChartGestures — extend the hook with a keyboardHandlers return value, no separate state; (5) focus ring must be visible on the chart container per WCAG 2.1 AA (3:1 contrast ratio); (6) aria-label on the chart container must dynamically reflect current zoom level and visible date range (e.g. 'Revenue trend chart, zoomed 2.4×, showing Jan 1 – Jan 15 2025'). Context: Next.js 14, Tailwind, TypeScript. Recharts only. Builds on ChartWrapper.tsx, BaseChart.tsx, hooks/useChartGestures.ts from FS-VIZ-GESTURE-001. Covers ONLY keyboard/accessibility interaction — no layout, data, or schema changes.",
+      "status": "pending",
+      "created_at": "2026-06-11T22:31:42.602Z",
+      "origin": "split_from:AUTO-061"
+    },
+    {
+      "id": "AUTO-082",
+      "title": "FS-VIZ-GESTURE-003 — Gesture State Persistence & URL-Synced Chart Zoom",
+      "directive": "Following FS-VIZ-GESTURE-001 (touch gesture support), add optional URL-query-parameter synchronization for chart zoom/pan state so that users can share a bookmarked view. Requirements: (1) ChartWrapper accepts an optional syncToUrl?: boolean prop; when true, domainStart and domainEnd are serialized as ISO date strings into URL search params (keys: chartId_start, chartId_end) using Next.js 14 useSearchParams / useRouter — no full page reload; (2) on mount, if URL params are present and valid for the given chartId, useChartGestures initializes from those values rather than the full data range; (3) invalid or out-of-range URL params are silently discarded and full range is used; (4) URL update must be debounced 400ms to avoid excessive history entries during continuous pan; (5) when syncToUrl is false or absent, behavior is identical to FS-VIZ-GESTURE-001 (no URL side effects). Context: Next.js 14 App Router, TypeScript. Builds on hooks/useChartGestures.ts and ChartWrapper.tsx from FS-VIZ-GESTURE-001. Covers ONLY URL sync — no schema, API, layout, or accessibility changes.",
+      "status": "pending",
+      "created_at": "2026-06-11T22:31:42.602Z",
+      "origin": "split_from:AUTO-061"
+    },
+    {
+      "id": "AUTO-061-FIX",
+      "title": "Fix residual audit findings from AUTO-061",
+      "directive": "AUTO-061 (\"FS-VIZ-MOB-003 — Mobile Chart Interaction: Pinch-Zoom, Swipe-to-Pan & Touch Gesture Handling for W251 BOP Time-Series Ch\") shipped via the conditional-ship valve at 78/100 with zero CRITICAL findings. Resolve every residual audit finding below in the files committed by that directive. Do not change unrelated files, do not regress passing acceptance criteria.\n\nRESIDUAL FINDINGS:\n1. [HIGH] hooks/useChartGestures.ts: Missing test file for useChartGestures hook. The build specification requires automated tests for all acceptance criteria (AC1-AC7), but no test files were generated. This was a prior HIGH finding that remains unresolved. FIX: Create tests/useChartGestures.test.ts with unit tests for pinch zoom (AC1), zoom clamp (AC2), pan shift (AC3), double-tap reset positive and negative cases (AC4), vertical scroll non-interference (AC5), and rAF throttle verification (AC7).\n2. [MEDIUM] components/charts/BaseChart.tsx: Fragile child cloning pattern persists. React.cloneElement with children cast as React.ReactElement (line 52) will break with fragments, arrays of children, or string elements. This was a prior MEDIUM finding that remains unresolved. FIX: Replace React.cloneElement with a pattern that handles multiple children, fragments, and string elements. Use React.Children.map or render children directly with the data prop passed via context or cloneElement with proper type checking.\n3. [MEDIUM] components/charts/ChartWrapper.tsx: useChartGestures hook is called unconditionally even when enableGestures is false (line 32). This causes unnecessary state initialization and RAF setup for non-gesture charts. This was a prior LOW finding that remains unresolved. FIX: Conditionally call useChartGestures only when enableGestures is true and dataMinMs/dataMaxMs are provided. Use a conditional hook pattern or move the hook call inside a conditional render.\n4. [MEDIUM] components/charts/GestureAffordance.tsx: Uses custom Tailwind theme tokens ('bg-card', 'border-border', 'text-muted') that may not exist in the project's Tailwind configuration. These classes could result in missing styles. This was a prior LOW finding that remains unresolved. FIX: Replace custom theme tokens with standard Tailwind classes (e.g., 'bg-white', 'border-gray-200', 'text-gray-500') or verify that these tokens are defined in the project's tailwind.config.ts and add them if missing.\n5. [LOW] hooks/useChartGestures.ts: The double-tap detection in onTouchStart (lines 103-108) uses Date.now() which is not mockable in tests. Consider using a configurable timestamp source for testability. FIX: Accept an optional getTime function parameter (defaulting to Date.now) in useChartGestures to allow test injection of controlled timestamps.\n6. [LOW] hooks/useChartGestures.ts: The containerWidthPx parameter defaults to 400 (line 69) when not provided, but ChartWrapper.tsx always passes a measured width. The default could cause incorrect pixel-to-ms calculations if the hook is used outside ChartWrapper. FIX: Consider making containerWidthPx required or providing a more meaningful default based on a ref callback.",
+      "priority": 5,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "Auto-generated debt repayment for conditional-ship of AUTO-061",
+      "created_at": "2026-06-11T22:35:31.015Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
     }
   ]
 }

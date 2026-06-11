@@ -1,38 +1,81 @@
-import { ReactNode, useState, useEffect } from 'react';
-import AccessibleChartWrapper, { ChartDatum } from './AccessibleChartWrapper';
+import React, { createContext, useContext, useRef, useEffect, useState } from 'react';
+import { useChartGestures, ChartGesturesReturn } from '@/hooks/useChartGestures';
+import { GestureAffordance } from './GestureAffordance';
 
-interface ChartWrapperProps {
-  children: ReactNode;
-  className?: string;
-  title?: string;
-  data?: ChartDatum[];
-  seriesKeys?: string[];
-  dataRange?: string;
+interface ChartContextValue {
+  domainStart?: number;
+  domainEnd?: number;
+  zoomLevel?: number;
+  resetZoom?: () => void;
 }
 
-export default function ChartWrapper({ 
-  children, 
-  className = '', 
-  title = 'Chart',
-  data = [],
-  seriesKeys = [],
-  dataRange = 'current period'
-}: ChartWrapperProps) {
-  // Mobile responsive classes preserved from FS-VIZ-MOB-001
-  const baseClasses = 'w-full h-full min-h-[300px] sm:min-h-[400px] lg:min-h-[500px] overflow-hidden';
-  const responsiveClasses = 'px-2 sm:px-4 py-2 sm:py-4';
-  const combinedClasses = `${baseClasses} ${responsiveClasses} ${className}`.trim();
+const ChartContext = createContext<ChartContextValue>({});
 
+export const useChartContext = () => useContext(ChartContext);
+
+interface ChartWrapperProps {
+  children: React.ReactNode;
+  enableGestures?: boolean;
+  dataMinMs?: number;
+  dataMaxMs?: number;
+  className?: string;
+}
+
+export function ChartWrapper({ 
+  children, 
+  enableGestures = typeof window !== 'undefined' && 'ontouchstart' in window,
+  dataMinMs,
+  dataMaxMs,
+  className = '' 
+}: ChartWrapperProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState<number>(400);
+  
+  const gestures = useChartGestures(
+    dataMinMs || 0,
+    dataMaxMs || Date.now(),
+    containerWidth
+  );
+  
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
+    };
+    
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    
+    return () => {
+      window.removeEventListener('resize', updateWidth);
+    };
+  }, []);
+  
+  const chartContextValue: ChartContextValue = enableGestures && dataMinMs !== undefined && dataMaxMs !== undefined ? {
+    domainStart: gestures.domainStart,
+    domainEnd: gestures.domainEnd,
+    zoomLevel: gestures.zoomLevel,
+    resetZoom: gestures.resetZoom
+  } : {};
+  
+  const wrapperProps = enableGestures && dataMinMs !== undefined && dataMaxMs !== undefined ? {
+    ...gestures.gestureHandlers,
+    className: `${className} touch-pan-y relative`,
+    ref: containerRef
+  } : {
+    className: `${className} relative`,
+    ref: containerRef
+  };
+  
   return (
-    <AccessibleChartWrapper
-      chartTitle={title}
-      dataRange={dataRange}
-      summaryData={data}
-      seriesKeys={seriesKeys}
-    >
-      <div className={combinedClasses}>
+    <div {...wrapperProps}>
+      <ChartContext.Provider value={chartContextValue}>
         {children}
-      </div>
-    </AccessibleChartWrapper>
+        {enableGestures && dataMinMs !== undefined && dataMaxMs !== undefined && (
+          <GestureAffordance zoomLevel={gestures.zoomLevel} />
+        )}
+      </ChartContext.Provider>
+    </div>
   );
 }

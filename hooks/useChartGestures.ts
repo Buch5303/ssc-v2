@@ -1,208 +1,240 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useReducer, useRef, useCallback, useEffect } from 'react';
 
-interface GestureState {
-  zoomDomain: [number, number] | null;
-  activeSeriesIndex: number;
-  panOffset: number;
-  longPressData: ChartDataPoint | null;
-}
+type GestureState = {
+  domainStart: number;
+  domainEnd: number;
+  zoomLevel: number;
+};
 
-interface ChartDataPoint {
-  label: string;
-  value: number;
-  unit?: string;
-  timestamp: string;
-  seriesName: string;
-  sourceId: string;
-}
+type GestureAction =
+  | { type: 'PINCH_UPDATE'; scale: number; centerMs: number }
+  | { type: 'PAN_UPDATE'; offsetMs: number }
+  | { type: 'RESET' };
 
-interface UseChartGesturesOptions {
-  seriesCount: number;
-  chartType: 'timeseries' | 'categorical';
-  originalDomain: [number, number];
-  onDataPointHit?: (point: ChartDataPoint) => void;
-}
+const MIN_SPAN_MS = 864_000_000; // 1 day
 
-interface PointerState {
-  id: number;
-  x: number;
-  y: number;
-}
-
-export function useChartGestures({
-  seriesCount,
-  chartType,
-  originalDomain,
-  onDataPointHit
-}: UseChartGesturesOptions) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const pointersRef = useRef<Map<number, PointerState>>(new Map());
-  const initialDistanceRef = useRef<number | null>(null);
-  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const startPositionRef = useRef<{ x: number; y: number } | null>(null);
+function gestureReducer(
+  state: GestureState,
+  action: GestureAction,
+  dataMinMs: number,
+  dataMaxMs: number
+): GestureState {
+  const dataSpanMs = dataMaxMs - dataMinMs;
   
-  const [gestureState, setGestureState] = useState<GestureState>({
-    zoomDomain: null,
-    activeSeriesIndex: 0,
-    panOffset: 0,
-    longPressData: null
+  switch (action.type) {
+    case 'PINCH_UPDATE': {
+      const currentSpanMs = state.domainEnd - state.domainStart;
+      const newSpanMs = Math.max(MIN_SPAN_MS, Math.min(dataSpanMs, currentSpanMs / action.scale));
+      
+      // Center the zoom around the pinch point
+      const spanDelta = newSpanMs - currentSpanMs;
+      let newStart = action.centerMs - newSpanMs / 2;
+      let newEnd = action.centerMs + newSpanMs / 2;
+      
+      // Clamp to data bounds
+      if (newStart < dataMinMs) {
+        newStart = dataMinMs;
+        newEnd = dataMinMs + newSpanMs;
+      } else if (newEnd > dataMaxMs) {
+        newEnd = dataMaxMs;
+        newStart = dataMaxMs - newSpanMs;
+      }
+      
+      return {
+        ...state,
+        domainStart: newStart,
+        domainEnd: newEnd,
+        zoomLevel: dataSpanMs / newSpanMs
+      };
+    }
+    
+    case 'PAN_UPDATE': {
+      const currentSpanMs = state.domainEnd - state.domainStart;
+      let newStart = state.domainStart + action.offsetMs;
+      let newEnd = state.domainEnd + action.offsetMs;
+      
+      // Clamp to data bounds
+      if (newStart < dataMinMs) {
+        newStart = dataMinMs;
+        newEnd = dataMinMs + currentSpanMs;
+      } else if (newEnd > dataMaxMs) {
+        newEnd = dataMaxMs;
+        newStart = dataMaxMs - currentSpanMs;
+      }
+      
+      return {
+        ...state,
+        domainStart: newStart,
+        domainEnd: newEnd
+      };
+    }
+    
+    case 'RESET': {
+      return {
+        domainStart: dataMinMs,
+        domainEnd: dataMaxMs,
+        zoomLevel: 1.0
+      };
+    }
+    
+    default:
+      return state;
+  }
+}
+
+export interface ChartGestureHandlers {
+  onTouchStart: React.TouchEventHandler<HTMLDivElement>;
+  onTouchMove: React.TouchEventHandler<HTMLDivElement>;
+  onTouchEnd: React.TouchEventHandler<HTMLDivElement>;
+}
+
+export interface ChartGesturesReturn {
+  domainStart: number;
+  domainEnd: number;
+  zoomLevel: number;
+  gestureHandlers: ChartGestureHandlers;
+  resetZoom: () => void;
+}
+
+export function useChartGestures(
+  dataMinMs: number,
+  dataMaxMs: number,
+  containerWidthPx?: number
+): ChartGesturesReturn {
+  const [state, dispatch] = useReducer(
+    (state: GestureState, action: GestureAction) => 
+      gestureReducer(state, action, dataMinMs, dataMaxMs),
+    {
+      domainStart: dataMinMs,
+      domainEnd: dataMaxMs,
+      zoomLevel: 1.0
+    }
+  );
+  
+  const touchStateRef = useRef({
+    startTouches: [] as Touch[],
+    lastDistance: 0,
+    lastCenter: { x: 0, y: 0 },
+    lastPanX: 0,
+    rafId: null as number | null
   });
-
-  const clearLongPressTimer = useCallback(() => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
-  }, []);
-
-  const calculateDistance = useCallback((p1: PointerState, p2: PointerState): number => {
-    return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
-  }, []);
-
-  const handlePointerDown = useCallback((event: PointerEvent) => {
-    const pointer: PointerState = {
-      id: event.pointerId,
-      x: event.clientX,
-      y: event.clientY
-    };
-    
-    pointersRef.current.set(event.pointerId, pointer);
-    
-    // Start long press timer for single pointer
-    if (pointersRef.current.size === 1) {
-      startPositionRef.current = { x: event.clientX, y: event.clientY };
-      longPressTimerRef.current = setTimeout(() => {
-        if (startPositionRef.current && onDataPointHit) {
-          // In a real implementation, this would hit-test against chart data
-          // For now, we need the parent to provide the data point
-          const mockDataPoint: ChartDataPoint = {
-            label: 'Sample Data',
-            value: 100,
-            unit: 'USD',
-            timestamp: new Date().toISOString(),
-            seriesName: 'Series 1',
-            sourceId: 'chart-gesture-' + Date.now()
-          };
-          onDataPointHit(mockDataPoint);
-        }
-      }, 500);
-    } else {
-      clearLongPressTimer();
-    }
-
-    // Initialize pinch distance for two pointers
-    if (pointersRef.current.size === 2) {
-      const pointers = Array.from(pointersRef.current.values());
-      initialDistanceRef.current = calculateDistance(pointers[0], pointers[1]);
-    }
-  }, [calculateDistance, clearLongPressTimer, onDataPointHit]);
-
-  const handlePointerMove = useCallback((event: PointerEvent) => {
-    const existingPointer = pointersRef.current.get(event.pointerId);
-    if (!existingPointer) return;
-
-    // Check for long press cancellation
-    if (startPositionRef.current && pointersRef.current.size === 1) {
-      const movementDistance = Math.sqrt(
-        Math.pow(event.clientX - startPositionRef.current.x, 2) +
-        Math.pow(event.clientY - startPositionRef.current.y, 2)
-      );
-      if (movementDistance > 8) {
-        clearLongPressTimer();
-      }
-    }
-
-    // Update pointer position
-    pointersRef.current.set(event.pointerId, {
-      id: event.pointerId,
-      x: event.clientX,
-      y: event.clientY
-    });
-
-    // Handle pinch-to-zoom for two pointers
-    if (pointersRef.current.size === 2 && initialDistanceRef.current) {
-      const pointers = Array.from(pointersRef.current.values());
-      const currentDistance = calculateDistance(pointers[0], pointers[1]);
-      const scale = currentDistance / initialDistanceRef.current;
-      
-      // Clamp scale to [0.5x, 8x]
-      const clampedScale = Math.max(0.5, Math.min(8, scale));
-      
-      const [min, max] = originalDomain;
-      const range = max - min;
-      const center = (min + max) / 2;
-      const newRange = range / clampedScale;
-      
-      setGestureState(prev => ({
-        ...prev,
-        zoomDomain: [center - newRange / 2, center + newRange / 2]
-      }));
-    }
-  }, [calculateDistance, clearLongPressTimer, originalDomain]);
-
-  const handlePointerUp = useCallback((event: PointerEvent) => {
-    const pointer = pointersRef.current.get(event.pointerId);
-    if (!pointer) return;
-
-    // Handle swipe gesture for single pointer
-    if (pointersRef.current.size === 1 && startPositionRef.current) {
-      const deltaX = event.clientX - startPositionRef.current.x;
-      const deltaY = event.clientY - startPositionRef.current.y;
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      
-      // Check for horizontal swipe (threshold: 40px)
-      if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
-        if (deltaX < 0) {
-          // Swipe left - increment series
-          setGestureState(prev => ({
-            ...prev,
-            activeSeriesIndex: (prev.activeSeriesIndex + 1) % seriesCount
-          }));
-        } else {
-          // Swipe right - decrement series
-          setGestureState(prev => ({
-            ...prev,
-            activeSeriesIndex: prev.activeSeriesIndex === 0 ? seriesCount - 1 : prev.activeSeriesIndex - 1
-          }));
-        }
-      }
-    }
-
-    pointersRef.current.delete(event.pointerId);
-    clearLongPressTimer();
-    startPositionRef.current = null;
-
-    // Reset initial distance when no pointers left
-    if (pointersRef.current.size < 2) {
-      initialDistanceRef.current = null;
-    }
-  }, [seriesCount, clearLongPressTimer]);
-
-  const setLongPressData = useCallback((data: ChartDataPoint | null) => {
-    setGestureState(prev => ({ ...prev, longPressData: data }));
-  }, []);
-
+  
+  const lastTapTimeRef = useRef(0);
+  const stateRef = useRef(state);
+  
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    container.addEventListener('pointerdown', handlePointerDown, { passive: true });
-    container.addEventListener('pointermove', handlePointerMove, { passive: true });
-    container.addEventListener('pointerup', handlePointerUp, { passive: true });
-    container.addEventListener('pointercancel', handlePointerUp, { passive: true });
-
-    return () => {
-      container.removeEventListener('pointerdown', handlePointerDown);
-      container.removeEventListener('pointermove', handlePointerMove);
-      container.removeEventListener('pointerup', handlePointerUp);
-      container.removeEventListener('pointercancel', handlePointerUp);
-      clearLongPressTimer();
-    };
-  }, [handlePointerDown, handlePointerMove, handlePointerUp, clearLongPressTimer]);
-
+    stateRef.current = state;
+  }, [state]);
+  
+  const pixelToMs = useCallback((pixels: number): number => {
+    const currentSpan = stateRef.current.domainEnd - stateRef.current.domainStart;
+    const width = containerWidthPx || 400;
+    return (pixels / width) * currentSpan;
+  }, [containerWidthPx]);
+  
+  const getDistance = useCallback((touch1: Touch, touch2: Touch): number => {
+    const dx = touch2.clientX - touch1.clientX;
+    const dy = touch2.clientY - touch1.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }, []);
+  
+  const getCenter = useCallback((touch1: Touch, touch2: Touch) => ({
+    x: (touch1.clientX + touch2.clientX) / 2,
+    y: (touch1.clientY + touch2.clientY) / 2
+  }), []);
+  
+  const onTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    const touches = Array.from(e.touches);
+    touchStateRef.current.startTouches = touches;
+    
+    if (touches.length === 2) {
+      touchStateRef.current.lastDistance = getDistance(touches[0], touches[1]);
+      touchStateRef.current.lastCenter = getCenter(touches[0], touches[1]);
+    } else if (touches.length === 1) {
+      touchStateRef.current.lastPanX = touches[0].clientX;
+      
+      // Double tap detection
+      const now = Date.now();
+      if (now - lastTapTimeRef.current <= 300) {
+        dispatch({ type: 'RESET' });
+      }
+      lastTapTimeRef.current = now;
+    }
+  }, [getDistance, getCenter]);
+  
+  const onTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    const touches = Array.from(e.touches);
+    
+    if (touchStateRef.current.rafId) {
+      cancelAnimationFrame(touchStateRef.current.rafId);
+    }
+    
+    touchStateRef.current.rafId = requestAnimationFrame(() => {
+      if (touches.length === 2) {
+        // Pinch gesture
+        const distance = getDistance(touches[0], touches[1]);
+        const center = getCenter(touches[0], touches[1]);
+        
+        if (touchStateRef.current.lastDistance > 0) {
+          const scale = distance / touchStateRef.current.lastDistance;
+          const centerXRatio = center.x / (containerWidthPx || 400);
+          const currentSpan = stateRef.current.domainEnd - stateRef.current.domainStart;
+          const centerMs = stateRef.current.domainStart + (centerXRatio * currentSpan);
+          
+          dispatch({ 
+            type: 'PINCH_UPDATE', 
+            scale,
+            centerMs 
+          });
+        }
+        
+        touchStateRef.current.lastDistance = distance;
+        touchStateRef.current.lastCenter = center;
+        
+        e.preventDefault();
+      } else if (touches.length === 1 && touchStateRef.current.startTouches.length === 1) {
+        // Pan gesture
+        const dx = touches[0].clientX - touchStateRef.current.lastPanX;
+        const dy = touches[0].clientY - touchStateRef.current.startTouches[0].clientY;
+        
+        // Only prevent default if horizontal movement is greater than vertical
+        if (Math.abs(dx) > Math.abs(dy)) {
+          e.preventDefault();
+          
+          const offsetMs = -pixelToMs(dx);
+          dispatch({ type: 'PAN_UPDATE', offsetMs });
+        }
+        
+        touchStateRef.current.lastPanX = touches[0].clientX;
+      }
+    });
+  }, [getDistance, getCenter, containerWidthPx, pixelToMs]);
+  
+  const onTouchEnd = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    if (touchStateRef.current.rafId) {
+      cancelAnimationFrame(touchStateRef.current.rafId);
+      touchStateRef.current.rafId = null;
+    }
+    
+    touchStateRef.current.startTouches = [];
+    touchStateRef.current.lastDistance = 0;
+  }, []);
+  
+  const resetZoom = useCallback(() => {
+    dispatch({ type: 'RESET' });
+  }, []);
+  
   return {
-    containerRef,
-    gestureState,
-    setLongPressData
+    domainStart: state.domainStart,
+    domainEnd: state.domainEnd,
+    zoomLevel: state.zoomLevel,
+    gestureHandlers: {
+      onTouchStart,
+      onTouchMove,
+      onTouchEnd
+    },
+    resetZoom
   };
 }
+
+export type { GestureState };
