@@ -62,7 +62,7 @@ type ParseResult =
  * @param raw - The raw environment object (typically process.env)
  * @returns Parse result with either validated data or error array
  */
-export function parseEnv(raw: NodeJS.ProcessEnv): ParseResult {
+export function parseEnv(raw: Record<string, string | undefined>): ParseResult {
   const result = envSchema.safeParse(raw);
   
   if (result.success) {
