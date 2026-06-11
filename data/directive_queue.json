@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T20:20:13.418Z",
+  "updated_at": "2026-06-11T20:30:47.502Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1383,9 +1383,10 @@
       "id": "AUTO-055",
       "title": "FS-RESP-003: Responsive Audit & Remediation Pages 5–9",
       "directive": "DIRECTIVE: Continue the FS-RESP-002 responsive audit for the FlowSeer W251 BOP platform. FS-RESP-002 remediated app/dashboard/procurement/page.tsx, app/dashboard/spend-analytics/page.tsx, app/dashboard/supplier-performance/page.tsx, and app/dashboard/risk-overview/page.tsx. This directive covers the NEXT 5 dashboard pages: app/dashboard/contract-management/page.tsx, app/dashboard/inventory/page.tsx, app/dashboard/purchase-orders/page.tsx, app/dashboard/vendor-management/page.tsx, and app/dashboard/forecasting/page.tsx. For each page: identify any KPI grids or data tables NOT rendered through shared KpiGrid.tsx or DataTable.tsx components and apply identical responsive rules — grid-cols-2 at mobile, overflow-x-auto table wrapper, 14px minimum font size, 44x44px touch targets — directly in the page or local component file. Extend the Playwright test suite in tests/responsive/resp-003-audit.spec.ts using iPhone 14 Pro device emulation (393x852). Apply audit comment '// FS-RESP-003: responsive patch applied'. All EQS v1.0 constraints apply. No schema or shared component changes. TypeScript strict mode must remain satisfied. Dashboard load < 1.5s must not regress.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T05:16:17.140Z",
-      "origin": "split_from:AUTO-045"
+      "origin": "split_from:AUTO-045",
+      "started_at": "2026-06-11T20:30:47.400Z"
     },
     {
       "id": "AUTO-056",
