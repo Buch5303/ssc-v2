@@ -7,7 +7,8 @@ import type { UserRole } from './lib/db/schema';
 const secret = process.env.NEXTAUTH_SECRET;
 
 export async function middleware(request: NextRequest) {
-  const { pathname, method } = request.nextUrl;
+  const { pathname } = request.nextUrl;
+  const method = request.method;
   
   // Skip middleware for static assets and API routes that don't need protection
   if (pathname.startsWith('/_next/static/') || 

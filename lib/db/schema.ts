@@ -1,5 +1,9 @@
 import { pgTable, text, timestamp, uuid, jsonb, index } from 'drizzle-orm/pg-core';
 
+// User roles for route authorization (AUTO-050)
+// Single source of truth — middleware, session, and permission maps all import from here
+export type UserRole = 'admin' | 'procurement_manager' | 'viewer';
+
 // RFQs table
 export const rfqs = pgTable('rfqs', {
   id: text('id').primaryKey(),
