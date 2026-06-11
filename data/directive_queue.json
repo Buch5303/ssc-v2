@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T05:04:38.553Z",
+  "updated_at": "2026-06-11T05:15:35.789Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1135,9 +1135,10 @@
       "id": "AUTO-045",
       "title": "Mobile Responsive — Per-Page Audit for Non-Shared Grids and Tables",
       "directive": "DIRECTIVE: Audit all 14 dashboard pages in the FlowSeer W251 BOP platform for any KPI grids or data tables that are NOT rendered through the shared KpiGrid.tsx or DataTable.tsx components and therefore did not receive responsive treatment from FS-RESP-001. For each non-shared instance found: apply the same responsive rules — grid-cols-2 at mobile, overflow-x-auto table wrapper, 14px minimum font size, 44x44px touch targets — directly in the page or local component file. CONTEXT: Next.js 14, Tailwind, TypeScript. EQS v1.0. The 5-file limit per spec means this audit and remediation is a follow-up to FS-RESP-001 which handled only shared components. Verify all 14 pages against iPhone 14 Pro viewport (393x852) using Playwright device emulation.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T04:01:19.251Z",
-      "origin": "split_from:AUTO-005"
+      "origin": "split_from:AUTO-005",
+      "started_at": "2026-06-11T05:15:35.705Z"
     },
     {
       "id": "AUTO-046",
