@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T02:30:50.514Z",
+  "updated_at": "2026-06-11T02:34:17.702Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1003,14 +1003,30 @@
       "title": "RFQ detail page loading skeleton and error boundary",
       "directive": "In the existing RFQ detail page at `app/rfq/[id]/page.tsx`, implement: (1) a Suspense-based loading skeleton component at `components/rfq/RFQDetailSkeleton.tsx` that renders placeholder shimmer blocks matching the layout of vendor name, status badge, line-item table, and audit trail section — skeleton must be visible within 100ms of navigation (no network dependency); (2) wrap the page data-fetch in the existing error boundary from `lib/error-boundary` (AUTO-014 foundation) so that a failed /api/rfq/[id] fetch renders a user-facing error card with retry CTA rather than a blank page or unhandled exception. Add a Playwright or Jest test in `tests/rfq-detail-skeleton.test.ts` that asserts the skeleton renders when the API response is delayed >300ms. EQS clauses: Dashboard load < 1.5s (skeleton advances perceived performance), C-suite clarity in < 5 seconds, Tableau-level visualization baseline.",
       "priority": 2,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "auto",
       "rationale": "AUTO-002 and AUTO-003 (loading skeletons, empty states) both failed historically. AUTO-032 completed the detail page with live data, so the rendering surface now exists. Scoping this directive to only the detail page — with explicit file paths and a concrete test requirement — avoids the broad scope that caused prior failures. Perceived performance directly supports the 1.5s dashboard budget (EQS).",
       "created_at": "2026-06-11T02:16:19.580Z",
       "started_at": "2026-06-11T02:30:50.514Z",
-      "completed_at": null,
+      "completed_at": "2026-06-11T02:34:17.702Z",
       "commit_sha": null,
-      "auditor_score": null
+      "auditor_score": 72,
+      "skip_reason": "gate blocked after 2 attempt(s): compile gate: 1 missing named export(s) after 2 attempt(s)",
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        }
+      ]
     },
     {
       "id": "AUTO-042",
