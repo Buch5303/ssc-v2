@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T02:45:50.464Z",
+  "updated_at": "2026-06-11T02:49:09.794Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1033,14 +1033,32 @@
       "title": "Mailgun email notification on RFQ status change",
       "directive": "Create a Mailgun notification module at `lib/notifications/email.ts` that exports `sendRFQStatusEmail({ to: string, rfqId: string, newStatus: string, actorName: string })`. Use the Mailgun REST API (not SDK) via a plain `fetch` POST to `https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages` with credentials from env vars `MAILGUN_API_KEY` and `MAILGUN_DOMAIN`. The email subject must follow the pattern `[FlowSeer] RFQ #{rfqId} status changed to {newStatus}` and the text body must include actor name and a direct link to `/rfq/{rfqId}`. Wire this into the existing `PATCH /api/rfq/[id]/status` route (AUTO-037) so that on every successful status transition, `sendRFQStatusEmail` is called with the RFQ's `contact_email` field as recipient. Failures in email sending must NOT block the HTTP response — catch and log to `audit_logs` with action `'email_notification_failed'`. Add env var documentation to `.env.example`. EQS clauses: 100% auditable data, SOC 2 orientation (notification delivery traceability).",
       "priority": 2,
-      "status": "in_progress",
+      "status": "pending",
       "origin": "auto",
       "rationale": "Email notifications via Mailgun are an explicit Week 2-4 roadmap deliverable (Autonomous Build Directive §VII). AUTO-037 (status transition API) is now complete, creating the natural integration point. Scoping to a single module + one call site with explicit error isolation (non-blocking, audit-logged failure path) keeps this executable in a single pipeline run.",
       "created_at": "2026-06-11T02:16:19.580Z",
       "started_at": "2026-06-11T02:45:50.464Z",
       "completed_at": null,
       "commit_sha": null,
-      "auditor_score": null
+      "auditor_score": 72,
+      "near_miss_retries": 1,
+      "carryover_feedback": "A previous cycle scored 72/100 (CONDITIONAL) — two attempts used. These are the EXACT remaining findings. Fix every one of them in your FIRST attempt this cycle:\n1. [CRITICAL] Modified existing schema file that was not in the build specification's files_to_modify list. The build spec only lists lib/notifications/email.ts, app/api/rfq/[id]/status/route.ts, and .env.example as files to create/modify. Modifying lib/db/schema.ts without authorization could break other parts of the system that depend on the original schema. FIX: Remove the schema modification. Instead, handle the contact_email and actor_name fields through the existing schema or add them via a separate migration file if needed.\n2. [CRITICAL] The actor_name field added to auditLogs table does not exist in the ground truth schema. This will cause TypeScript compilation errors in any existing code that imports auditLogs without the actor_name field. FIX: Revert schema changes. If actor_name is needed, add it as a separate migration and update all references consistently.\n3. [HIGH] Import path '@/lib/db' may not resolve correctly. The ground truth shows db/index.ts exists, but the import pattern '@/lib/db' could be ambiguous if there's also a lib/db.ts file. This is a BUILDABILITY violation. FIX: Use explicit import path '@/lib/db/index' or verify that the barrel export pattern works correctly.\n4. [HIGH] The base64Encode function uses btoa for edge runtime but falls back to Buffer. However, the function is named 'base64Encode' but the test mocks global.btoa directly. In edge runtime, btoa is available but the test setup may not properly mock it for all scenarios. FIX: Use a consistent approach - either always use Buffer (Node.js runtime) or always use btoa (edge runtime). The build spec mentions 'edge and Node.js runtimes' but the current implementation may have inconsistent behavior.\n5. [MEDIUM] Missing integration tests for critical acceptance criteria: non-blocking behavior (300ms response), audit_log insertion on failure, contact_email null handling, and API key redaction verification. FIX: Add integration tests for: 1) delayed fetch not blocking response, 2) DB state verification after email failure, 3) null contact_email handling, 4) log output and DB record content verification for API key redaction.\n6. [MEDIUM] The route imports auditLogs from '@/lib/db/schema' but the schema modification adds actor_name field. If the schema change is reverted, the route will fail to compile because it references actor_name in the audit log insert. FIX: Remove actor_name from audit log insert if reverting schema, or ensure the field exists in the actual schema.",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100) — near-miss, requeued with carried feedback (carryover 1/2)",
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        }
+      ]
     }
   ]
 }
