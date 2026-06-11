@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T21:34:46.493Z",
+  "updated_at": "2026-06-11T21:45:15.513Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1478,9 +1478,10 @@
       "id": "AUTO-059",
       "title": "FS-VIZ-MOB-003: Mobile Chart Data Density & Adaptive Tick Reduction",
       "directive": "DIRECTIVE: Implement adaptive data density management for all charts across the 14 FlowSeer W251 BOP dashboard pages on mobile viewports (< 768px). The current chart implementation renders all data ticks and data points at full desktop density, causing overlapping labels and illegible axes on mobile. Required: (1) XAxis must automatically reduce tick count to a maximum of 5 ticks on viewports < 768px using Recharts `ticks` prop computed from the data array length and viewport width. (2) Line and area charts must reduce rendered data points to a maximum of 50 visible points on mobile via a `downsampleData(data, maxPoints)` utility (LTTB algorithm or uniform stride — no new deps). (3) Bar charts with > 10 bars must switch to a horizontally scrollable container on mobile (overflow-x: scroll, snap-type: x mandatory, snap-align: start per bar group) rather than compressing bars below 20px width. (4) All label truncation must use CSS `text-overflow: ellipsis` with a `title` attribute fallback for full value. (5) The downsample utility must preserve data min/max/last values for financial accuracy per EQS ±0.1% tolerance. CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced. FS-VIZ-MOB-001 is a prerequisite. Scope limited to data density and axis rendering of visualization components — no layout, sidebar, grid, table, or gesture changes.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T05:46:31.943Z",
-      "origin": "split_from:AUTO-046"
+      "origin": "split_from:AUTO-046",
+      "started_at": "2026-06-11T21:45:15.419Z"
     },
     {
       "id": "AUTO-060",
