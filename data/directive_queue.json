@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T04:45:35.567Z",
+  "updated_at": "2026-06-11T04:48:34.382Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1081,10 +1081,28 @@
       "id": "AUTO-043",
       "title": "RBAC part 1: role field on users (schema + migration)",
       "directive": "Add a role field to the users table supporting at minimum the roles admin, procurement_manager, and viewer. Scope: lib/db/schema.ts change with a proper migration in lib/db/migrations, default role viewer, typed via the schema (no hand-written interfaces), and a backfill-safe migration (existing users get viewer). Single concern: SCHEMA ONLY — no route authorization in this directive (that is the follow-up). All EQS v1.0 audit/data-integrity standards apply: immutable audit logging of the migration event, 100% reconcilable data.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-11T02:45:00.000Z",
       "origin": "split_from:AUTO-040",
-      "started_at": "2026-06-11T04:45:35.472Z"
+      "started_at": "2026-06-11T04:45:35.472Z",
+      "completed_at": "2026-06-11T04:48:34.299Z",
+      "skip_reason": "gate blocked after 2 attempt(s): Auditor rejected (score 55)",
+      "auditor_score": 55,
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "FAIL",
+          "score": 55,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "FAIL",
+          "score": 55,
+          "effective": "FAIL"
+        }
+      ]
     },
     {
       "id": "AUTO-044",
@@ -1133,6 +1151,22 @@
       "status": "pending",
       "created_at": "2026-06-11T04:31:19.982Z",
       "origin": "split_from:AUTO-005"
+    },
+    {
+      "id": "AUTO-050",
+      "title": "Route Authorization Middleware for User Roles",
+      "directive": "Using the 'role' column and 'UserRole' type established in FS-SCHEMA-001, implement route-level authorization for the FlowSeer W251 BOP procurement platform (Next.js 14, Vercel). Scope: middleware.ts (or equivalent) that reads the authenticated user's role from the session/JWT, enforces access rules (admin = full access; procurement_manager = read+write procurement routes; viewer = read-only), and returns 403 for unauthorized access. No schema changes — consume the existing UserRole type from lib/db/schema.ts only. EQS v1.0 standards apply: audit log every authorization denial (reuse schema_migration_audit pattern or a dedicated access_denied_audit table defined in its own schema directive), latency overhead of middleware < 20ms p99. Do not bundle schema changes in this directive.",
+      "status": "pending",
+      "created_at": "2026-06-11T04:46:20.349Z",
+      "origin": "split_from:AUTO-043"
+    },
+    {
+      "id": "AUTO-051",
+      "title": "Role-Based UI Visibility — Component-Level Access Control",
+      "directive": "Using the 'UserRole' type from lib/db/schema.ts (established in FS-SCHEMA-001) and the session role resolved by the authorization middleware, implement component-level role gating in the FlowSeer W251 BOP procurement platform dashboard (Next.js 14, Tailwind). Scope: a reusable <RoleGuard role={requiredRole}> React component and integration into existing dashboard navigation and action components — hiding or disabling controls that the current user's role does not permit. No schema changes, no middleware changes. EQS v1.0: zero training required for interpretation, C-suite clarity within 5 seconds, UI must not flash restricted content before hydration (use server-component role check as primary guard). Scope limited to 5 files maximum; if more components require gating, deliver in a follow-up directive.",
+      "status": "pending",
+      "created_at": "2026-06-11T04:46:20.349Z",
+      "origin": "split_from:AUTO-043"
     }
   ]
 }
