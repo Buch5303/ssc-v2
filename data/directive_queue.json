@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T06:30:48.962Z",
+  "updated_at": "2026-06-11T06:35:17.999Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1190,14 +1190,13 @@
       "id": "AUTO-047",
       "title": "Mobile Responsive — Per-Page Chart & Data-Viz Reflow",
       "directive": "FLOWSEER-RESP-002: After FLOWSEER-RESP-001 lands, audit all 14 dashboard pages for chart and data-visualization components (line charts, bar charts, heatmaps, scatter plots) that have fixed pixel widths or fixed SVG viewBox dimensions that break below 768px. For each chart component: (1) replace fixed width props with '100%' or responsive container wrappers (ResponsiveContainer from recharts or equivalent), (2) reduce chart padding/margins on mobile so charts fill available width on 393px viewport, (3) hide or truncate x-axis labels that overlap at narrow widths (show every Nth tick), (4) ensure chart tooltips render within viewport bounds on touch (no overflow clipping). Validate: all charts visible and non-overlapping at 393x852 (iPhone 14 Pro), no horizontal overflow on chart pages, touch-tap tooltip opens correctly on mobile Safari. EQS v1.0 performance: chart render < 1.5s on mobile. Maximum 5 files modified. One concern: charts only, no sidebar or grid changes.",
-      "status": "in_progress",
+      "status": "complete",
       "created_at": "2026-06-11T04:16:24.786Z",
       "origin": "split_from:AUTO-005",
       "started_at": "2026-06-11T06:30:48.862Z",
       "near_miss_retries": 1,
-      "carryover_feedback": "A previous cycle's best attempt scored 72/100 (CONDITIONAL). These are the EXACT remaining findings. Fix every one of them in your FIRST attempt this cycle:\n1. [HIGH] ResponsiveHeatmap component has a default width={400} prop which is a fixed pixel value exceeding 393px viewport. This violates acceptance criterion #2 and the directive's requirement to eliminate fixed pixel widths. FIX: Remove the default width prop and use containerWidth from useChartDimensions hook as the default, or set default to 393.\n2. [HIGH] ResponsiveHeatmap component does not implement tooltips, violating acceptance criterion #4 about tooltip bounding rects being within viewport. Heatmap uses SVG <title> elements which are not touch-friendly on mobile Safari. FIX: Implement a custom tooltip component for the heatmap using recharts Tooltip or a custom positioned div that respects viewport bounds.\n3. [HIGH] Unused variable 'containerWidth' is destructured but never used in ResponsiveLineChart, ResponsiveBarChart, and ResponsiveScatterChart. This will cause TypeScript/ESLint errors. FIX: Remove containerWidth from the destructuring or use it (e.g., pass to ResponsiveChartWrapper for debugging).\n4. [MEDIUM] The build creates ChartComponents.tsx as a new file but the spec says to 'modify' it. The file doesn't exist in the repo ground truth, so this is acceptable, but the build does not modify any existing dashboard page files to use these new components. The directive requires all 14 dashboard pages to be fixed. FIX: Either modify the 14 dashboard page files to import and use these new components, or update the build spec to clarify that only the shared components are being created.\n5. [MEDIUM] The useResizeObserver hook sets dimensions on every ResizeObserver callback without debouncing. The debounce is applied to the dimensions state, but the ResizeObserver callback itself fires on every frame. This could cause excessive re-renders. FIX: Debounce the ResizeObserver callback itself, not just the state update. Use requestAnimationFrame or a debounced function inside the observer.\n6. [MEDIUM] The CSS overrides .recharts-wrapper overflow to 'visible !important' on mobile, which could cause tooltips to overflow the chart container and create horizontal scrollbars. This contradicts the directive's goal of preventing horizontal overflow. FIX: Remove the overflow: visible override on .recharts-wrapper for mobile, or scope it more narrowly to only affect tooltip wrappers.",
       "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100) — near-miss (best 72/100), requeued with carried feedback (carryover 1/2)",
-      "auditor_score": 72,
+      "auditor_score": 88,
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -1212,7 +1211,8 @@
           "score": 72,
           "effective": "CONDITIONAL"
         }
-      ]
+      ],
+      "completed_at": "2026-06-11T06:35:17.880Z"
     },
     {
       "id": "AUTO-048",
@@ -1340,6 +1340,30 @@
       "directive": "After FLOWSEER-RESP-002 and FLOWSEER-RESP-002b land, create a Playwright visual regression test suite that: (1) captures screenshots of all 14 dashboard pages at 393x852 (iPhone 14 Pro), 768x1024 (iPad), and 1440x900 (desktop) viewports, (2) asserts no horizontal overflow (scrollWidth <= innerWidth) on every page, (3) simulates a tap on the first data point of each chart type (line, bar, scatter, heatmap) and asserts the tooltip bounding rect is within viewport bounds, (4) asserts chart SVG render completes within 1500ms using Performance API marks. Test files must live under tests/responsive/charts/. Maximum 5 files created. One concern: test suite only, no production code changes. EQS v1.0 pass rate = 100% required.",
       "status": "pending",
       "created_at": "2026-06-11T06:16:22.645Z",
+      "origin": "split_from:AUTO-047"
+    },
+    {
+      "id": "AUTO-064",
+      "title": "FLOWSEER-RESP-002b — Inline Chart Instances Responsive Remediation",
+      "directive": "After FLOWSEER-RESP-002 lands, audit all 14 dashboard pages for chart components that are NOT imported from the 4 shared primitives (components/charts/LineChart.tsx, BarChart.tsx, HeatmapChart.tsx, ScatterPlot.tsx) — i.e., any inline recharts usage or one-off chart components defined directly in page files. For each such instance: (1) replace fixed width props with ResponsiveChartWrapper from components/charts/ResponsiveChartWrapper.tsx, (2) apply the same calcTickInterval and clampTooltipPosition utilities, (3) reduce mobile margins, (4) ensure tooltip viewport clamping. Validate at 393x852 (iPhone 14 Pro): no horizontal overflow, tooltips within bounds, chart render < 1500ms. Maximum 5 files modified per spec iteration — scope to highest-traffic pages first (Analytics, Spend Overview, Supplier Risk) and defer remaining pages to FLOWSEER-RESP-002c.",
+      "status": "pending",
+      "created_at": "2026-06-11T06:31:47.025Z",
+      "origin": "split_from:AUTO-047"
+    },
+    {
+      "id": "AUTO-065",
+      "title": "FLOWSEER-RESP-002c — Remaining Dashboard Pages Inline Chart Remediation",
+      "directive": "After FLOWSEER-RESP-002b lands, complete the inline chart remediation for the remaining dashboard pages not covered by FLOWSEER-RESP-002b. Apply the same ResponsiveChartWrapper, calcTickInterval, and clampTooltipPosition patterns from FLOWSEER-RESP-002. Validate all affected pages at 393x852: no horizontal overflow, tooltips within bounds, chart render < 1500ms on Lighthouse mobile. Maximum 5 files per spec iteration.",
+      "status": "pending",
+      "created_at": "2026-06-11T06:31:47.025Z",
+      "origin": "split_from:AUTO-047"
+    },
+    {
+      "id": "AUTO-066",
+      "title": "FLOWSEER-RESP-002d — Chart Accessibility & Touch Interaction Audit",
+      "directive": "After FLOWSEER-RESP-002 and FLOWSEER-RESP-002b/c land, audit all chart components for mobile accessibility: (1) ensure ARIA labels and roles are set on SVG/canvas elements, (2) verify keyboard navigation does not break after ResponsiveContainer wrapping, (3) add touch swipe support for paginated charts on mobile (e.g., time-series charts with dense data points), (4) verify VoiceOver/TalkBack can announce chart data summaries. Validate: axe-core zero critical violations on chart components, touch swipe navigates paginated series correctly in Playwright iOS emulation. Maximum 5 files modified.",
+      "status": "pending",
+      "created_at": "2026-06-11T06:31:47.025Z",
       "origin": "split_from:AUTO-047"
     }
   ]
