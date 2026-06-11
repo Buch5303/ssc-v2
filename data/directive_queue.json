@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T21:15:46.446Z",
+  "updated_at": "2026-06-11T21:20:24.714Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1464,10 +1464,14 @@
       "id": "AUTO-058",
       "title": "FS-VIZ-MOB-002: Mobile Touch Interaction & Gesture Support for Charts",
       "directive": "DIRECTIVE: Extend the mobile chart responsiveness work from FS-VIZ-MOB-001 to add touch interaction and gesture support across all 14 FlowSeer W251 BOP dashboard pages. Specifically: (1) Pinch-to-zoom must be supported on line and area charts using touch events (no new dependencies; use Recharts ReferenceArea or pointer events natively). (2) Swipe-left/right on multi-series charts must cycle through visible data series or pan the time axis where applicable. (3) Long-press (500ms) on a data point must open a persistent tooltip modal overlay with full data point details (replacing hover-only tooltips that do not work on touch). The persistent tooltip modal must be dismissible by tap-outside or an explicit close button (44x44px). (4) All gesture handlers must be passive (`{ passive: true }`) to not block scroll. (5) Verify all interactions against iPhone 14 Pro (393x852) and an Android mid-range emulation (360px width). CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced. FS-VIZ-MOB-001 (chart container responsiveness) is a prerequisite and must be merged first. Scope limited to gesture/interaction layer of visualization components only — no layout, sidebar, grid, or table changes.",
-      "status": "in_progress",
+      "status": "complete",
       "created_at": "2026-06-11T05:46:31.943Z",
       "origin": "split_from:AUTO-046",
-      "started_at": "2026-06-11T21:15:46.357Z"
+      "started_at": "2026-06-11T21:15:46.357Z",
+      "completed_at": "2026-06-11T21:20:24.602Z",
+      "auditor_score": 72,
+      "build_attempts": 2,
+      "conditional_ship": true
     },
     {
       "id": "AUTO-059",
@@ -1658,6 +1662,28 @@
       "status": "pending",
       "created_at": "2026-06-11T20:31:45.540Z",
       "origin": "split_from:AUTO-055"
+    },
+    {
+      "id": "AUTO-079",
+      "title": "FS-VIZ-TOUCH-002: Per-Page Gesture Tuning & Series Visibility Integration for All 14 Dashboard Pages",
+      "directive": "Following FS-VIZ-TOUCH-001 (touch gesture layer on BaseChart), audit all 14 W251 BOP dashboard pages to verify gesture inheritance and apply per-chart overrides where needed. Specifically: (1) For pages that render charts NOT using BaseChart (any legacy direct Recharts usage), migrate those chart instances to use BaseChart + TouchableChartWrapper. (2) For time-series charts on pages 3, 7, 9, and 11 (SpendTrend, ForecastVariance, PipelineVelocity, AnomalyTimeline — verify exact component names), validate that swipe-pan shifts the XAxis time domain correctly by one viewport-width of data rather than cycling series. (3) For categorical bar/pie charts where pinch-to-zoom is not meaningful, disable zoom gesture and ensure swipe cycles chart groupings instead. (4) Run Cypress E2E touch emulation tests against iPhone 14 Pro (393x852) and Android mid-range (360px width) viewport presets for all 14 pages, asserting: long-press modal appears, swipe changes visible data, pinch zoom is scoped only to line/area charts. (5) Confirm EQS dashboard load < 1.5s is maintained after gesture layer addition via Lighthouse CI budget file. Context: Next.js 14, Tailwind, TypeScript, Vercel. FS-VIZ-TOUCH-001 is prerequisite and must be merged first.",
+      "status": "pending",
+      "created_at": "2026-06-11T21:16:34.220Z",
+      "origin": "split_from:AUTO-058"
+    },
+    {
+      "id": "AUTO-058-FIX",
+      "title": "Fix residual audit findings from AUTO-058",
+      "directive": "AUTO-058 (\"FS-VIZ-MOB-002: Mobile Touch Interaction & Gesture Support for Charts\") shipped via the conditional-ship valve at 72/100 with zero CRITICAL findings. Resolve every residual audit finding below in the files committed by that directive. Do not change unrelated files, do not regress passing acceptance criteria.\n\nRESIDUAL FINDINGS:\n1. [HIGH] hooks/useChartGestures.ts: Pinch-to-zoom scale calculation still broken: initialDistanceRef is set in handlePointerDown, but pointer positions are updated in handlePointerMove before distance calculation, making currentDistance approximately equal to initialDistance on every frame. Scale always ~1.0. FIX: Store initial pointer positions when two pointers are first detected (not just the distance). In handlePointerMove, calculate currentDistance from the stored initial positions and current positions, not from updated pointer positions.\n2. [HIGH] hooks/useChartGestures.ts: Long-press handler still generates mock data instead of using actual chart data point from touch coordinates. This violates acceptance criterion #4. FIX: Implement hit-testing against chart data using touch coordinates. The parent component should provide a function to resolve data points from coordinates, or use Recharts' internal coordinate system to map touch position to data point.\n3. [MEDIUM] components/charts/BaseChart.tsx: ChartContent uses React.cloneElement to inject 'gestureZoomDomain' and 'gestureActiveSeriesIndex' as props on arbitrary children. Recharts XAxis expects 'domain' as a direct prop, not a custom prop on wrapper elements. This will not affect Recharts rendering. FIX: Instead of injecting props via cloneElement, use the ChartGestureContext to provide zoomDomain and activeSeriesIndex. Modify Recharts XAxis to read from context, or pass domain directly to the XAxis component via a render prop pattern.\n4. [MEDIUM] components/charts/PersistentTooltipModal.tsx: Modal does not handle keyboard dismissal (Escape key) for accessibility compliance. FIX: Add a useEffect that listens for 'keydown' event with Escape key and calls onClose. Add proper focus trapping and aria-modal attributes.\n5. [LOW] hooks/useChartGestures.ts: handlePointerMove recalculates initialDistance on every move event instead of storing initial pointer positions once when two pointers are first detected. FIX: Store initial pointer positions (not just distance) when two pointers are first detected. Use these stored positions to calculate initialDistance once, then compare against current positions for scale calculation.\n6. [LOW] hooks/useChartGestures.ts: No velocity guard on swipe gesture (requirement mentions 0.3px/ms velocity guard). FIX: Track time delta between touchstart and touchend, and only trigger swipe if velocity (distance/time) exceeds 0.3px/ms.",
+      "priority": 5,
+      "status": "pending",
+      "origin": "auto",
+      "rationale": "Auto-generated debt repayment for conditional-ship of AUTO-058",
+      "created_at": "2026-06-11T21:20:24.602Z",
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "auditor_score": null
     }
   ]
 }
