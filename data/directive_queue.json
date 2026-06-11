@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T19:30:10.283Z",
+  "updated_at": "2026-06-11T19:32:31.330Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1289,10 +1289,28 @@
       "id": "AUTO-051",
       "title": "Role-Based UI Visibility — Component-Level Access Control",
       "directive": "Using the 'UserRole' type from lib/db/schema.ts (established in FS-SCHEMA-001) and the session role resolved by the authorization middleware, implement component-level role gating in the FlowSeer W251 BOP procurement platform dashboard (Next.js 14, Tailwind). Scope: a reusable <RoleGuard role={requiredRole}> React component and integration into existing dashboard navigation and action components — hiding or disabling controls that the current user's role does not permit. No schema changes, no middleware changes. EQS v1.0: zero training required for interpretation, C-suite clarity within 5 seconds, UI must not flash restricted content before hydration (use server-component role check as primary guard). Scope limited to 5 files maximum; if more components require gating, deliver in a follow-up directive.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-11T04:46:20.349Z",
       "origin": "split_from:AUTO-043",
-      "started_at": "2026-06-11T19:30:10.174Z"
+      "started_at": "2026-06-11T19:30:10.174Z",
+      "completed_at": "2026-06-11T19:32:31.201Z",
+      "skip_reason": "gate blocked after 2 attempt(s): compile gate: 1 undefined Tailwind token(s) after 2 attempt(s)",
+      "auditor_score": null,
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        }
+      ]
     },
     {
       "id": "AUTO-052",
@@ -1499,6 +1517,14 @@
           "effective": "FAIL"
         }
       ]
+    },
+    {
+      "id": "AUTO-074",
+      "title": "FS-RBAC-UI-002: Role Gating for BOP Procurement Detail and Report Export Components",
+      "directive": "Using the <RoleGuard> component and getSessionRole utility delivered in FS-RBAC-UI-001, extend component-level role gating to the remaining dashboard UI surfaces in the FlowSeer W251 BOP procurement platform: (1) BOP Procurement Detail panel (components/procurement/BOPDetail.tsx) — gate edit, approve, and reject action controls by role; (2) Report Export controls (components/reports/ReportExport.tsx) — gate export-to-CSV and export-to-PDF buttons by role; (3) any additional action or navigation components identified during FS-RBAC-UI-001 implementation that were deferred due to the 5-file limit. No schema changes, no middleware changes. Apply the same EQS v1.0 standards: no hydration flash, restricted content never in the HTML response for unauthorized users, C-suite clarity within 5 seconds, zero training required. Maximum 5 files modified or created in this spec. If further components remain, defer to FS-RBAC-UI-003 using the same pattern.",
+      "status": "pending",
+      "created_at": "2026-06-11T19:30:49.927Z",
+      "origin": "split_from:AUTO-051"
     }
   ]
 }
