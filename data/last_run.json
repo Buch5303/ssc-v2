@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T20:04:20.404Z",
+  "timestamp": "2026-06-11T20:20:13.141Z",
   "directive": {
-    "id": "AUTO-053",
-    "title": "RFQ Authorization Integration & E2E Tests",
+    "id": "AUTO-054",
+    "title": "RFQ Authorization Observability — Denial Rate Dashboard Metric",
     "status": "failed"
   },
-  "elapsed_seconds": 215.819,
+  "elapsed_seconds": 268.69,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -21,7 +21,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 4,
+      "research_queries_count": 2,
       "spec_parse_error": false
     },
     "researcher": {
@@ -35,79 +35,82 @@
       "status": "complete",
       "files_count": 5,
       "parse_error": false,
-      "first_file_path": "tests/integration/rfq-auth/setup.ts"
+      "first_file_path": "lib/metrics/authDenialQueries.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "COMPILE_FAIL",
-      "score": 40,
-      "summary": "The build generated only a single configuration file (jest.config.integration.ts) which itself has two critical issues: references a non-existent setup-env.ts file and uses an invalid Jest config property name. The three core files required by the build specification (setup.ts, rfq-auth.test.ts, and fixtures/seed.ts) were not created at all. This means 0 of 8 acceptance criteria can be satisfied. The build is fundamentally incomplete and cannot fulfill the directive objective of implementing an integration test suite for role-based authorization on RFQ API routes. The generated code is insufficient to even begin testing, and the configuration file alone would fail to run due to missing dependencies and configuration errors.",
+      "verdict": "FAIL",
+      "score": 55,
+      "summary": "The build has fundamental issues that prevent it from working correctly. The most critical problem is a schema mismatch: the authorization_audit_log table has no 'outcome' column, but all queries filter on `action = 'DENY'` as if there were an allow/deny outcome. The actual schema only has an 'action' column (text) that stores action types. Additionally, the dashboard page and sparkline component use incorrect prop signatures for existing components (KPI, AlertCard, ResponsiveBarChart), which will cause TypeScript compilation failures. The METRICS_READ_KEY security check is also implemented incorrectly — it's optional rather than mandatory. The build cannot be shipped in its current state.",
       "pre_check_failed": false,
-      "issue_count": 7,
+      "issue_count": 8,
       "top_issues": [
         {
           "severity": "CRITICAL",
-          "description": "Required test file was not generated. The build specification explicitly requires this file with four describe blocks covering all acceptance criteria. Without it, the entire directive objective is unfulfilled."
+          "description": "Schema mismatch: The authorization_audit_log table has no 'outcome' column. The spec mentions outcome ENUM('allow','deny') but the actual schema only has 'action' column (text). The queries filter on `action = 'DENY'` but the action column stores action types like 'read', 'write', not allow/deny outcomes. This will cause all queries to return zero results or incorrect data."
         },
         {
           "severity": "CRITICAL",
-          "description": "Required setup file was not generated. The build specification requires globalSetup/globalTeardown, env guard logic, test database connection, migration runner, seed function, and createTestServer helper."
+          "description": "KPI component usage has incorrect props. The actual KPI component accepts { label, value, sub, badge, accent, className } but the dashboard page passes { title, trend, trendDirection } which don't exist on the component. This will cause TypeScript compilation errors."
         },
         {
           "severity": "CRITICAL",
-          "description": "Required seed fixture file was not generated. The build specification requires deterministic test user UUIDs, role assignments, and an existing RFQ row."
+          "description": "AlertCard component usage has incorrect props. The actual AlertCard accepts { severity, title, detail, action?, aside? } but the dashboard page passes { title, description, severity, timestamp }. 'description' should be 'detail', and 'timestamp' is not a valid prop."
         }
       ]
     },
     "gate": {
       "allowed": false,
       "effective_verdict": "FAIL",
-      "reason": "compile gate: 2 unresolved import(s) after 2 attempt(s)"
+      "reason": "Auditor rejected (score 55)"
     },
     "build_attempts": 2,
     "attempt_history": [
       {
         "attempt": 1,
-        "verdict": "FAIL",
-        "score": 40,
+        "verdict": "COMPILE_FAIL",
+        "score": null,
         "effective": "FAIL"
       },
       {
         "attempt": 2,
-        "verdict": "COMPILE_FAIL",
-        "score": null,
+        "verdict": "FAIL",
+        "score": 55,
         "effective": "FAIL"
       }
     ]
   },
   "log": [
-    "[2026-06-11T20:00:44.586Z] Auto-builder cycle started",
+    "[2026-06-11T20:15:44.452Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy @ b2b67fe",
-    "[WATCHDOG] In sync at ed0b9eb",
-    "[QUEUE] Loaded via contents-api. Pending: 22, total: 75",
+    "[WATCHDOG] In sync at 0ddad0e",
+    "[QUEUE] Loaded via contents-api. Pending: 21, total: 75",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T20:00:46.604Z] Processing: AUTO-053 — RFQ Authorization Integration & E2E Tests",
+    "[2026-06-11T20:15:46.768Z] Processing: AUTO-054 — RFQ Authorization Observability — Denial Rate Dashboard Metric",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
+    "[ARCHITECT] Lossless split: 2 follow-up directive(s) appended to queue (origin AUTO-054)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 4 queries...",
+    "[RESEARCHER] Running 2 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
     "[COMPILE-GATE] Repo tree loaded (718 paths)",
     "[COMPILE-GATE] Manifest loaded (37 packages) — bare imports validated",
     "[GROUNDING] Builder context: 122 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 1 files",
+    "[BUILDER] Attempt 1 complete — 5 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
     "[COMPILE-GATE] Attempt 1: all Tailwind tokens defined",
-    "[COMPILE-GATE] Attempt 1: all named exports verified (0 repo file(s) inspected)",
-    "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: FAIL (40/100)",
-    "[GATE] Attempt 1: Auditor rejected (score 40) → FAIL",
-    "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
+    "[COMPILE-GATE] Attempt 1: 1 missing named export(s):\n  components/dashboard/DenialSparkline.tsx → '@/components/charts/BarChart' has no export 'BarChart'",
+    "[RETRY] Re-running Builder to fix missing exports (attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
     "[BUILDER] Attempt 2 complete — 5 files",
-    "[COMPILE-GATE] Attempt 2: 2 unresolved import(s):\n  tests/integration/rfq-auth/rfq-auth.test.ts → 'supertest'\n  tests/integration/rfq-auth/rfq-auth.test.ts → 'perf_hooks'",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 2 unresolved import(s) after 2 attempt(s)"
+    "[COMPILE-GATE] Attempt 2: all imports resolve",
+    "[COMPILE-GATE] Attempt 2: all Tailwind tokens defined",
+    "[COMPILE-GATE] Attempt 2: all named exports verified (9 repo file(s) inspected)",
+    "[AUDITOR] Reviewing attempt 2...",
+    "[AUDITOR] Attempt 2 verdict: FAIL (55/100)",
+    "[GATE] Attempt 2: Auditor rejected (score 55) → FAIL",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): Auditor rejected (score 55)"
   ]
 }
