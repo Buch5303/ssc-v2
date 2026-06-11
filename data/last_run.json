@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T20:49:54.296Z",
+  "timestamp": "2026-06-11T21:05:10.252Z",
   "directive": {
-    "id": "AUTO-056",
-    "title": "FS-RESP-004: Responsive Audit & Remediation Pages 10–14",
+    "id": "AUTO-057",
+    "title": "FS-RESP-003: Mobile Chart Responsiveness — Remaining 9 Dashboard Pages",
     "status": "failed"
   },
-  "elapsed_seconds": 249.815,
+  "elapsed_seconds": 213.024,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -21,7 +21,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 0,
+      "research_queries_count": 2,
       "spec_parse_error": false
     },
     "researcher": {
@@ -33,29 +33,29 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 3,
+      "files_count": 8,
       "parse_error": false,
-      "first_file_path": "app/dashboard/budget-tracking/page.tsx"
+      "first_file_path": "components/charts/ChartWrapper.tsx"
     },
     "auditor": {
       "status": "complete",
       "verdict": "FAIL",
       "score": 40,
-      "summary": "The build is incomplete and fails to meet the directive's core requirements. Only 3 of 5 required page files were generated (budget-tracking, compliance, reports), while settings and audit-log pages are missing. The critical test file and documentation file were also not generated due to truncation. Additionally, the generated files contain TypeScript errors: Badge component is used with invalid variant values ('default', 'secondary', 'outline', 'destructive') that don't exist in the actual Badge component's type definition, and KPI component is used with a non-existent 'status' prop. These issues will cause compilation failures. The build has not converged from the prior audit - 4 of 8 prior findings remain unresolved.",
+      "summary": "The build fails to meet critical acceptance criteria. Only 7 of 9 required page files were generated, the required Playwright test file was not created, and the ChartWrapper component was incorrectly created as new instead of being imported from the existing codebase. The generated pages that do exist correctly implement the ChartWrapper migration pattern with proper imports, tick font sizes, tooltip dimensions, and legend styling. However, the missing files and test suite make this build incomplete and unverifiable. The build also introduces a TypeScript `any` type violation in the PieChart label renderer.",
       "pre_check_failed": false,
-      "issue_count": 13,
+      "issue_count": 8,
       "top_issues": [
         {
           "severity": "CRITICAL",
-          "description": "Required file specified in build_spec.files_to_modify was not generated. This is a core deliverable of the directive."
+          "description": "The Playwright test file required by the build specification was not generated. The spec explicitly requires a single test suite covering all 14 dashboard pages."
         },
         {
           "severity": "CRITICAL",
-          "description": "Required file specified in build_spec.files_to_modify was not generated. This is a core deliverable of the directive."
+          "description": "Required page file was not generated. The build spec lists 9 files to modify, but only 7 were generated. Missing: app/(dashboard)/purchase-orders/page.tsx"
         },
         {
           "severity": "CRITICAL",
-          "description": "Required test file was not generated. This is a core deliverable of the directive."
+          "description": "Required page file was not generated. The build spec lists 9 files to modify, but only 7 were generated. Missing: app/(dashboard)/cost-avoidance/page.tsx"
         }
       ]
     },
@@ -68,8 +68,8 @@
     "attempt_history": [
       {
         "attempt": 1,
-        "verdict": "FAIL",
-        "score": 40,
+        "verdict": "COMPILE_FAIL",
+        "score": null,
         "effective": "FAIL"
       },
       {
@@ -81,34 +81,30 @@
     ]
   },
   "log": [
-    "[2026-06-11T20:45:44.481Z] Auto-builder cycle started",
+    "[2026-06-11T21:01:37.228Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy",
-    "[WATCHDOG] In sync at d152cc4",
-    "[QUEUE] Loaded via contents-api. Pending: 23, total: 79",
+    "[WATCHDOG] In sync at 64984ea",
+    "[QUEUE] Loaded via contents-api. Pending: 22, total: 79",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T20:45:47.691Z] Processing: AUTO-056 — FS-RESP-004: Responsive Audit & Remediation Pages 10–14",
+    "[2026-06-11T21:01:39.667Z] Processing: AUTO-057 — FS-RESP-003: Mobile Chart Responsiveness — Remaining 9 Dashboard Pages",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Skipped — no research_queries in spec",
+    "[RESEARCHER] Running 2 queries...",
+    "[RESEARCHER] skipped — 0 result(s)",
     "[COMPILE-GATE] Repo tree loaded (718 paths)",
     "[COMPILE-GATE] Manifest loaded (37 packages) — bare imports validated",
     "[GROUNDING] Builder context: 122 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 3 files",
-    "[COMPILE-GATE] Attempt 1: all imports resolve",
-    "[COMPILE-GATE] Attempt 1: all Tailwind tokens defined",
-    "[COMPILE-GATE] Attempt 1: all named exports verified (3 repo file(s) inspected)",
-    "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: FAIL (40/100)",
-    "[GATE] Attempt 1: Auditor rejected (score 40) → FAIL",
-    "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
+    "[BUILDER] Attempt 1 complete — 2 files",
+    "[COMPILE-GATE] Attempt 1: 2 unresolved import(s):\n  app/(dashboard)/forecast/page.tsx → '@/components/charts/ChartWrapper'\n  app/(dashboard)/vendor-performance/page.tsx → '@/components/charts/ChartWrapper'",
+    "[RETRY] Re-running Builder to fix unresolved imports (attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 3 files",
+    "[BUILDER] Attempt 2 complete — 8 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
     "[COMPILE-GATE] Attempt 2: all Tailwind tokens defined",
-    "[COMPILE-GATE] Attempt 2: all named exports verified (2 repo file(s) inspected)",
+    "[COMPILE-GATE] Attempt 2: all named exports verified (0 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 2...",
     "[AUDITOR] Attempt 2 verdict: FAIL (40/100)",
     "[GATE] Attempt 2: Auditor rejected (score 40) → FAIL",
