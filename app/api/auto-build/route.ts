@@ -443,6 +443,104 @@ function validateImports(
 }
 
 // ----------------------------------------------------------------------
+// Layer 2b — Named-export validation (added 2026-06-10).
+// AUTO-039 imported { Skeletons } from a path that EXISTS (so path-level
+// validation passed) but exports no such symbol — broke `next build` for
+// 4 hours. For named imports resolving to repo files, verify the symbol is
+// actually exported. Files containing `export *` re-exports are skipped
+// (can't verify without a full graph). Fetched contents are returned so the
+// Auditor can see the real interfaces of everything the build imports.
+// ----------------------------------------------------------------------
+
+function extractExportedNames(content: string): { names: Set<string>; hasStar: boolean } {
+  const names = new Set<string>();
+  let hasStar = false;
+  const src = content || "";
+  if (/export\s*\*\s*from/.test(src)) hasStar = true;
+  let m: RegExpExecArray | null;
+  const declRe = /export\s+(?:default\s+)?(?:async\s+)?(?:function|const|let|var|class|interface|type|enum)\s+([A-Za-z_$][\w$]*)/g;
+  while ((m = declRe.exec(src))) names.add(m[1]);
+  const braceRe = /export\s*\{([^}]+)\}/g;
+  while ((m = braceRe.exec(src))) {
+    for (const part of m[1].split(",")) {
+      const alias = part.trim().split(/\s+as\s+/);
+      const exported = (alias[1] || alias[0]).trim();
+      if (exported) names.add(exported);
+    }
+  }
+  if (/export\s+default/.test(src)) names.add("default");
+  return { names, hasStar };
+}
+
+function extractNamedImports(content: string): Array<{ spec: string; symbols: string[] }> {
+  const out: Array<{ spec: string; symbols: string[] }> = [];
+  const re = /import\s+(?:[\w$]+\s*,\s*)?\{([^}]+)\}\s*from\s*['"]([^'"]+)['"]/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(content || ""))) {
+    const symbols = m[1]
+      .split(",")
+      .map(s => s.trim().split(/\s+as\s+/)[0].trim())
+      .filter(s => s && !s.startsWith("type "));
+    out.push({ spec: m[2], symbols });
+  }
+  return out;
+}
+
+function resolveRepoFile(spec: string, importer: string, repoPaths: Set<string>): string | null {
+  let base: string | null = null;
+  if (spec.startsWith("@/")) base = spec.slice(2);
+  else if (spec.startsWith(".")) {
+    const dir = importer.split("/").slice(0, -1);
+    for (const seg of spec.split("/")) {
+      if (seg === ".") continue;
+      else if (seg === "..") dir.pop();
+      else dir.push(seg);
+    }
+    base = dir.join("/");
+  }
+  if (!base) return null;
+  for (const cand of [base, `${base}.ts`, `${base}.tsx`, `${base}.js`, `${base}.jsx`, `${base}/index.ts`, `${base}/index.tsx`]) {
+    if (repoPaths.has(cand)) return cand;
+  }
+  return null;
+}
+
+async function validateNamedExports(
+  files: Array<{ path: string; content: string }>,
+  repoPaths: Set<string>,
+  ghPat: string
+): Promise<{ missing: Array<{ file: string; import: string; symbol: string }>; fetched: Map<string, string> }> {
+  const missing: Array<{ file: string; import: string; symbol: string }> = [];
+  const fetched = new Map<string, string>();
+  const batchByPath = new Map(files.map(f => [f.path.replace(/^\/+/, ""), f.content || ""]));
+  let fetchBudget = 12; // hard cap on GitHub content fetches per cycle
+  for (const f of files) {
+    if (!/\.(ts|tsx|js|jsx)$/.test(f.path)) continue;
+    const importer = f.path.replace(/^\/+/, "");
+    for (const { spec, symbols } of extractNamedImports(f.content || "")) {
+      if (symbols.length === 0) continue;
+      const target = resolveRepoFile(spec, importer, repoPaths);
+      if (!target) continue; // path-level validation owns unresolved paths
+      let content = batchByPath.get(target) ?? fetched.get(target);
+      if (content === undefined) {
+        if (fetchBudget <= 0) continue;
+        fetchBudget--;
+        const raw = await loadRepoFileRaw(ghPat, target);
+        if (raw === null) continue; // fail open on fetch error
+        content = raw;
+        fetched.set(target, raw);
+      }
+      const { names, hasStar } = extractExportedNames(content);
+      if (hasStar) continue;
+      for (const sym of symbols) {
+        if (!names.has(sym)) missing.push({ file: f.path, import: spec, symbol: sym });
+      }
+    }
+  }
+  return { missing, fetched };
+}
+
+// ----------------------------------------------------------------------
 // Layer 3 — Self-Heal preflight (inline; mirrors /api/self-heal standalone)
 // ----------------------------------------------------------------------
 
@@ -650,6 +748,20 @@ async function checkAndHealDrift(): Promise<{
           githubSha,
           vercelSha,
           action: `Deployment for HEAD ${githubSha.slice(0, 7)} already in flight — waiting`,
+        };
+      }
+      // 2026-06-10: the projectSettings ignoreCommand bypass below proved
+      // unreliable — watchdog redeploys of a data-only-tip SHA were CANCELED
+      // every cycle for 4 hours. Two canceled attempts for the same SHA
+      // means a third will cancel too: stop burning deployments and leave
+      // the drift to resolve via the next code push or sentinel directive.
+      const canceledAttempts = sameSha.filter((d: any) => d.state === "CANCELED").length;
+      if (canceledAttempts >= 2) {
+        return {
+          drifted: true,
+          githubSha,
+          vercelSha,
+          action: `HEAD ${githubSha.slice(0, 7)} already canceled ${canceledAttempts}x (ignoreCommand bypass ineffective) — not retrying`,
         };
       }
     } catch {
@@ -992,6 +1104,7 @@ export async function GET(req: Request) {
   let score: number | null = null;
   let gate: GateResult = { allowed: false, reason: "no build attempted", effective_verdict: "FAIL" };
   let buildAttempts = 0;
+  let importedInterfaces: Map<string, string> = new Map();
   // Seed attempt 1 from feedback carried over a near-miss requeue (see the
   // post-loop block) so the new cycle continues the work, not restarts it.
   let retryContext: string | undefined = (next as any).carryover_feedback || undefined;
@@ -1061,6 +1174,38 @@ export async function GET(req: Request) {
         break;
       }
       log.push(`[COMPILE-GATE] Attempt ${attempt}: all imports resolve`);
+
+      // Symbol-level pass (Layer 2b) — catches AUTO-039's class of break:
+      // named import of a symbol the (existing) target file doesn't export.
+      const symCheck = await validateNamedExports(batch, repoPaths, ghPat);
+      importedInterfaces = symCheck.fetched;
+      if (symCheck.missing.length > 0) {
+        const detail = symCheck.missing.slice(0, 8).map(u => `  ${u.file} → '${u.import}' has no export '${u.symbol}'`).join("\n");
+        log.push(`[COMPILE-GATE] Attempt ${attempt}: ${symCheck.missing.length} missing named export(s):\n${detail}`);
+        attemptHistory.push({ attempt, verdict: "COMPILE_FAIL", score: null, effective: "FAIL" });
+        if (attempt < MAX_BUILD_ATTEMPTS) {
+          const exportLists = Array.from(symCheck.fetched.entries())
+            .map(([p, c]) => `${p} exports: ${Array.from(extractExportedNames(c).names).join(", ") || "(none parsed)"}`)
+            .join("\n");
+          retryContext = [
+            `Your previous output imports symbols that DO NOT EXIST in the target files:`,
+            detail,
+            `The actual exports of those files are:`,
+            exportLists,
+            `Use only symbols that actually exist (or include your own implementation in the files array). Re-emit the COMPLETE set of files.`,
+          ].join("\n");
+          log.push(`[RETRY] Re-running Builder to fix missing exports (attempt ${attempt + 1}/${MAX_BUILD_ATTEMPTS})`);
+          continue;
+        }
+        gate = {
+          allowed: false,
+          reason: `compile gate: ${symCheck.missing.length} missing named export(s) after ${attempt} attempt(s)`,
+          effective_verdict: "FAIL",
+        };
+        rawVerdict = "COMPILE_FAIL";
+        break;
+      }
+      log.push(`[COMPILE-GATE] Attempt ${attempt}: all named exports verified (${symCheck.fetched.size} repo file(s) inspected)`);
     }
 
     log.push(`[AUDITOR] Reviewing attempt ${attempt}...`);
@@ -1069,6 +1214,10 @@ export async function GET(req: Request) {
       build: buildResult.build,
       research: researchResults,
       ...(repoContext ? { repo_context: repoContext } : {}),
+      imported_files: Array.from(importedInterfaces.entries()).map(([p, c]) => ({
+        path: p,
+        content: c.slice(0, 4000),
+      })),
     }, baseUrl);
     rawVerdict = auditResult?.audit?.verdict || "UNKNOWN";
     score = auditResult?.audit?.score ?? null;

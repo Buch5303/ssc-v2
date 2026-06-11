@@ -6,7 +6,7 @@ export const maxDuration = 300;
 
 export async function POST(req: Request) {
   try {
-    const { spec, build, research, repo_context } = await req.json();
+    const { spec, build, research, repo_context, imported_files } = await req.json();
     const apiKey = process.env.DEEPSEEK_API_KEY;
     
     // If no DeepSeek key, fall back to Anthropic
@@ -68,6 +68,9 @@ ${(repo_context.source_paths || []).join("\n")}
 
 - ACTUAL DATABASE SCHEMA (lib/db/schema.ts). Flag any build reference to tables/columns not present here as CRITICAL:
 ${repo_context.db_schema || "(unavailable)"}
+` : ""}
+${Array.isArray(imported_files) && imported_files.length > 0 ? `ACTUAL CONTENTS OF REPO FILES THE BUILD IMPORTS (verify prop names, types, and export signatures against these — mismatches are CRITICAL):
+${imported_files.map((f: any) => `--- ${f.path} ---\n${f.content}`).join("\n\n")}
 ` : ""}
 DIRECTIVE SCOPE (primary evaluation surface):
 - Title: ${directiveTitle || "(unspecified)"}

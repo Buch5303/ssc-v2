@@ -147,8 +147,12 @@ async function vercelFetch(path: string): Promise<any> {
 
 async function listRecentDeployments(): Promise<any[]> {
   const since = Date.now() - DEPLOY_LOOKBACK_MS;
+  // limit=50 (was 20): each cron cycle adds ~2 CANCELED data-only deploys,
+  // so a broken build sank below a 20-deep window within ~2.5h and the
+  // sentinel went blind to it for 4 hours (AUTO-039, 2026-06-10). 50 covers
+  // the full lookback at the worst-case cancel rate.
   const data = await vercelFetch(
-    `/v6/deployments?projectId=${VERCEL_PROJECT_ID}&teamId=${VERCEL_TEAM_ID}&target=production&limit=20&since=${since}`
+    `/v6/deployments?projectId=${VERCEL_PROJECT_ID}&teamId=${VERCEL_TEAM_ID}&target=production&limit=50&since=${since}`
   );
   return data?.deployments || [];
 }

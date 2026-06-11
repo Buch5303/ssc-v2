@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { KpiCard } from '@/components/cards/KpiCard';
 import { AlertCard } from '@/components/ui/AlertCard';
-import { Skeletons } from '@/components/ui/Skeletons';
+import { GenericPageSkeleton } from '@/components/ui/Skeletons';
 import NavTimingGuard from './_components/NavTimingGuard';
 
 export default function DashboardPage() {
@@ -22,36 +22,36 @@ export default function DashboardPage() {
 
       {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Suspense fallback={<Skeletons.Card />}>
+        <Suspense fallback={<GenericPageSkeleton />}>
           <KpiCard
-            title="Active RFQs"
+            label="Active RFQs"
             value="12"
-            trend="+8.3%"
-            isPositive={true}
+            sub="+8.3% vs prior period"
+            accent="green"
           />
         </Suspense>
-        <Suspense fallback={<Skeletons.Card />}>
+        <Suspense fallback={<GenericPageSkeleton />}>
           <KpiCard
-            title="Cost Savings"
+            label="Cost Savings"
             value="$2.4M"
-            trend="+15.2%"
-            isPositive={true}
+            sub="+15.2% vs prior period"
+            accent="green"
           />
         </Suspense>
-        <Suspense fallback={<Skeletons.Card />}>
+        <Suspense fallback={<GenericPageSkeleton />}>
           <KpiCard
-            title="Supplier Score"
+            label="Supplier Score"
             value="94.2"
-            trend="+2.1%"
-            isPositive={true}
+            sub="+2.1% vs prior period"
+            accent="green"
           />
         </Suspense>
-        <Suspense fallback={<Skeletons.Card />}>
+        <Suspense fallback={<GenericPageSkeleton />}>
           <KpiCard
-            title="Risk Level"
+            label="Risk Level"
             value="Low"
-            trend="-5.8%"
-            isPositive={true}
+            sub="-5.8% vs prior period"
+            accent="green"
           />
         </Suspense>
       </div>
@@ -63,16 +63,14 @@ export default function DashboardPage() {
         </h2>
         <div className="space-y-3">
           <AlertCard
-            type="warning"
+            severity="warning"
             title="Supplier Risk Increase"
-            message="Acme Corp risk score increased to 7.2 (threshold: 7.0)"
-            timestamp="2 minutes ago"
+            detail="Acme Corp risk score increased to 7.2 (threshold: 7.0) (2 minutes ago)"
           />
           <AlertCard
-            type="info"
+            severity="resolved"
             title="New RFQ Submitted"
-            message="RFQ-2024-0892 submitted for Electronics Components"
-            timestamp="5 minutes ago"
+            detail="RFQ-2024-0892 submitted for Electronics Components (5 minutes ago)"
           />
         </div>
       </div>
