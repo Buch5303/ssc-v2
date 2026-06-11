@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T05:33:54.499Z",
+  "timestamp": "2026-06-11T05:49:32.805Z",
   "directive": {
     "id": "AUTO-046",
     "title": "Mobile Responsive — Charts and Data Visualizations",
     "status": "pending"
   },
-  "elapsed_seconds": 201.148,
+  "elapsed_seconds": 239.674,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -21,7 +21,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 5,
+      "research_queries_count": 4,
       "spec_parse_error": false
     },
     "researcher": {
@@ -33,36 +33,36 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 4,
+      "files_count": 15,
       "parse_error": false,
-      "first_file_path": "components/charts/ChartWrapper.tsx"
+      "first_file_path": "components/charts/ResponsiveChartWrapper.tsx"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "CONDITIONAL",
-      "score": 72,
-      "summary": "The generated code creates the ChartWrapper component and useChartDimensions hook as specified, with correct CSS overrides for mobile responsiveness. However, there are several critical issues: (1) No page-level modifications were made to actually use ChartWrapper on the 5 dashboard pages, making the acceptance criteria unverifiable. (2) The component detection logic for identifying Recharts sub-components (XAxis, YAxis, Legend, Tooltip) is fragile and unreliable, relying on prop presence rather than component type detection. (3) No tests were provided despite the acceptance criteria requiring Jest and Playwright verification. (4) The index.ts exports may cause TypeScript compilation errors. (5) No Lighthouse CI configuration was implemented. The build is CONDITIONAL because the core infrastructure is correct but significant functional gaps exist that prevent meeting the acceptance criteria. The code needs page-level integration, more robust component detection, and comprehensive testing before it can be considered complete.",
+      "verdict": "FAIL",
+      "score": 40,
+      "summary": "The build implements the core ResponsiveChartWrapper component and MobileChartConfig configuration as specified, but fails to meet several critical acceptance criteria. Only 11 of 14 dashboard pages were modified (missing page.tsx, log-response/page.tsx, send-rfq/page.tsx). The legend layout uses 'horizontal' instead of the required 'vertical' stacking. No unit tests or Playwright tests were created to verify the acceptance criteria. The tooltip wrapping approach may break Recharts' internal DOM structure. Several type safety issues exist in the component identification logic. The build is incomplete and requires significant fixes before it can pass audit. Score is 40 due to multiple critical failures on acceptance criteria and missing test infrastructure.",
       "pre_check_failed": false,
-      "issue_count": 9,
+      "issue_count": 12,
       "top_issues": [
         {
-          "severity": "HIGH",
-          "description": "Component detection logic is fragile and unreliable. The code attempts to identify Recharts components (XAxis, YAxis, Legend, Tooltip) by checking for specific props (dataKey, type, payload, iconType, cursor, labelFormatter) or displayName. This approach will fail for many valid Recharts configurations. For example, XAxis without dataKey prop, custom Legend components, or Tooltip with different prop combinations. This is a CRITICAL functional issue that will cause the wrapper to silently fail to apply mobile overrides."
+          "severity": "CRITICAL",
+          "description": "Missing 3 dashboard page modifications: app/dashboard/page.tsx, app/dashboard/log-response/page.tsx, app/dashboard/send-rfq/page.tsx. The build spec requires all 14 dashboard pages to have chart components wrapped in ResponsiveChartWrapper. Only 11 pages were modified."
         },
         {
-          "severity": "HIGH",
-          "description": "The enhanceChild function recursively processes children but does not handle the case where children is a single ReactElement vs an array consistently. The initial call passes a single ReactElement (children prop), but inside the recursion it checks for Array.isArray. This works but is fragile. More critically, the function does not handle Fragment children or multiple top-level chart components."
+          "severity": "CRITICAL",
+          "description": "Legend layout is set to 'horizontal' instead of 'vertical' as specified in the build spec. The spec requires `<Legend layout='vertical' verticalAlign='bottom' align='center' />` on mobile, but the code uses `layout: 'horizontal'`. This will cause legends to render in a single row instead of stacked vertically, potentially causing overflow on narrow viewports."
         },
         {
-          "severity": "MEDIUM",
-          "description": "The LegendProps interface is defined locally but the index.ts also exports LegendProps from 'recharts'. This creates a naming conflict. The local interface may not match Recharts' actual LegendProps type, causing type mismatches."
+          "severity": "CRITICAL",
+          "description": "The tooltip wrapper div is returned as a separate element with key=\"tooltip-wrapper\" inside the processedChildren array, but it wraps the Tooltip component. This creates an extra DOM node that may break Recharts' tooltip positioning logic. The Tooltip should be wrapped at the ResponsiveChartWrapper level, not inside the children mapping."
         }
       ]
     },
     "gate": {
-      "allowed": true,
-      "effective_verdict": "CONDITIONAL",
-      "reason": "Score 72, verdict CONDITIONAL"
+      "allowed": false,
+      "effective_verdict": "FAIL",
+      "reason": "Auditor rejected (score 40)"
     },
     "build_attempts": 2,
     "attempt_history": [
@@ -74,28 +74,29 @@
       },
       {
         "attempt": 2,
-        "verdict": "CONDITIONAL",
-        "score": 72,
-        "effective": "CONDITIONAL"
+        "verdict": "FAIL",
+        "score": 40,
+        "effective": "FAIL"
       }
     ]
   },
   "log": [
-    "[2026-06-11T05:30:33.351Z] Auto-builder cycle started",
+    "[2026-06-11T05:45:33.131Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy",
-    "[WATCHDOG] In sync at 400e35b",
-    "[QUEUE] Loaded via contents-api. Pending: 11, total: 56",
+    "[WATCHDOG] In sync at 9513953",
+    "[QUEUE] Loaded via contents-api. Pending: 12, total: 57",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T05:30:36.063Z] Processing: AUTO-046 — Mobile Responsive — Charts and Data Visualizations",
+    "[2026-06-11T05:45:37.734Z] Processing: AUTO-046 — Mobile Responsive — Charts and Data Visualizations",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
-    "[ARCHITECT] Lossless split: 1 follow-up directive(s) appended to queue (origin AUTO-046)",
+    "[ARCHITECT] Lossless split: 2 follow-up directive(s) appended to queue (origin AUTO-046)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 5 queries...",
+    "[RESEARCHER] Running 4 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
     "[COMPILE-GATE] Repo tree loaded (693 paths)",
     "[GROUNDING] Builder context: 109 source paths, schema loaded",
+    "[CARRYOVER] Attempt 1 seeded with prior cycle's audit findings",
     "[BUILDER] Attempt 1/2 — generating code...",
     "[BUILDER] Attempt 1 complete — 4 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
@@ -105,13 +106,13 @@
     "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 4 files",
+    "[BUILDER] Attempt 2 complete — 15 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
     "[COMPILE-GATE] Attempt 2: all named exports verified (0 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
-    "[QUEUE] AUTO-046 requeued as pending — near-miss best 72/100, feedback carried (1/2)"
+    "[AUDITOR] Attempt 2 verdict: FAIL (40/100)",
+    "[GATE] Attempt 2: Auditor rejected (score 40) → FAIL",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): Auditor rejected (score 40)",
+    "[QUEUE] AUTO-046 requeued as pending — near-miss best 72/100, feedback carried (2/2)"
   ]
 }
