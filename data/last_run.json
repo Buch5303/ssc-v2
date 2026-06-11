@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T02:49:11.318Z",
+  "timestamp": "2026-06-11T03:04:57.764Z",
   "directive": {
     "id": "AUTO-042",
     "title": "Mailgun email notification on RFQ status change",
-    "status": "pending"
+    "status": "failed"
   },
-  "elapsed_seconds": 203.016,
+  "elapsed_seconds": 249.458,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -19,7 +19,7 @@
         "audit_focus",
         "estimated_complexity"
       ],
-      "acceptance_criteria_count": 13,
+      "acceptance_criteria_count": 19,
       "research_queries_count": 0,
       "spec_parse_error": false
     },
@@ -32,36 +32,36 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 4,
+      "files_count": 3,
       "parse_error": false,
       "first_file_path": "lib/notifications/email.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "CONDITIONAL",
-      "score": 72,
-      "summary": "The build implements the core Mailgun email notification functionality with proper fire-and-forget pattern, audit logging for failures, and configuration validation. However, it has a CRITICAL issue: unauthorized modification of lib/db/schema.ts which is outside the build specification's scope and introduces schema changes that may break existing code. The TypeScript compilation cannot be guaranteed to succeed due to these schema changes and potential import path issues. Additionally, several acceptance criteria lack corresponding integration tests. The build is CONDITIONAL - it can ship after reverting the unauthorized schema changes, fixing import paths, and adding the missing integration tests.",
+      "verdict": "FAIL",
+      "score": 55,
+      "summary": "The build implements the Mailgun email notification module with correct email construction, timeout handling, and error handling in lib/notifications/email.ts. However, the PATCH handler has two critical issues: (1) it uses a detached promise pattern instead of awaiting the email result before sending the HTTP 200 response, violating the spec's explicit requirement; (2) it uses a hardcoded placeholder email because the actual DB schema lacks a contact_email column, making the directive impossible to implement correctly without schema changes. Additionally, the audit_log payload structure doesn't match the schema definition. The build is recoverable with fixes but currently fails key acceptance criteria.",
       "pre_check_failed": false,
-      "issue_count": 7,
+      "issue_count": 6,
       "top_issues": [
         {
           "severity": "CRITICAL",
-          "description": "Modified existing schema file that was not in the build specification's files_to_modify list. The build spec only lists lib/notifications/email.ts, app/api/rfq/[id]/status/route.ts, and .env.example as files to create/modify. Modifying lib/db/schema.ts without authorization could break other parts of the system that depend on the original schema."
+          "description": "The PATCH handler uses a detached promise pattern for email sending, but the spec explicitly requires awaiting the email result before sending the HTTP 200 response. The spec says 'declare const emailResult = await sendRFQStatusEmail(...) BEFORE sending the HTTP 200 response'. The current implementation returns HTTP 200 immediately without waiting for the email attempt, which means: (1) the email may not have been attempted when the response is sent, (2) audit logs for email outcome may not be written before the response, (3) latency measurements are meaningless."
         },
         {
           "severity": "CRITICAL",
-          "description": "The actor_name field added to auditLogs table does not exist in the ground truth schema. This will cause TypeScript compilation errors in any existing code that imports auditLogs without the actor_name field."
+          "description": "The code uses a hardcoded placeholder email 'notifications@example.com' instead of sourcing contact_email from the DB post-update RFQ row. The spec explicitly states 'contact_email field MUST be sourced from the DB post-update RFQ row, not from request body'. However, the actual DB schema (lib/db/schema.ts) does NOT have a contact_email column in the rfqs table - it only has id, status, and updated_at. This is a fundamental schema mismatch that makes the directive impossible to implement correctly without schema changes."
         },
         {
           "severity": "HIGH",
-          "description": "Import path '@/lib/db' may not resolve correctly. The ground truth shows db/index.ts exists, but the import pattern '@/lib/db' could be ambiguous if there's also a lib/db.ts file. This is a BUILDABILITY violation."
+          "description": "The audit_logs insert uses a payload structure that doesn't match the schema. The schema defines payload as jsonb, but the code passes individual properties (messageId, to, rfqId, etc.) as separate fields. The drizzle insert should pass a single JSON object as the payload value."
         }
       ]
     },
     "gate": {
-      "allowed": true,
-      "effective_verdict": "CONDITIONAL",
-      "reason": "Score 72, verdict CONDITIONAL"
+      "allowed": false,
+      "effective_verdict": "FAIL",
+      "reason": "Auditor rejected (score 55)"
     },
     "build_attempts": 2,
     "attempt_history": [
@@ -73,19 +73,19 @@
       },
       {
         "attempt": 2,
-        "verdict": "CONDITIONAL",
-        "score": 72,
-        "effective": "CONDITIONAL"
+        "verdict": "FAIL",
+        "score": 55,
+        "effective": "FAIL"
       }
     ]
   },
   "log": [
-    "[2026-06-11T02:45:48.302Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 061068d",
-    "[WATCHDOG] In sync at 6f5af19",
+    "[2026-06-11T03:00:48.306Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy",
+    "[WATCHDOG] In sync at e2c6cf3",
     "[QUEUE] Loaded via contents-api. Pending: 2, total: 42",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T02:45:50.463Z] Processing: AUTO-042 — Mailgun email notification on RFQ status change",
+    "[2026-06-11T03:00:53.646Z] Processing: AUTO-042 — Mailgun email notification on RFQ status change",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
@@ -93,6 +93,7 @@
     "[RESEARCHER] Skipped — no research_queries in spec",
     "[COMPILE-GATE] Repo tree loaded (693 paths)",
     "[GROUNDING] Builder context: 109 source paths, schema loaded",
+    "[CARRYOVER] Attempt 1 seeded with prior cycle's audit findings",
     "[BUILDER] Attempt 1/2 — generating code...",
     "[BUILDER] Attempt 1 complete — 2 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
@@ -102,13 +103,12 @@
     "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 4 files",
+    "[BUILDER] Attempt 2 complete — 3 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
-    "[COMPILE-GATE] Attempt 2: all named exports verified (0 repo file(s) inspected)",
+    "[COMPILE-GATE] Attempt 2: all named exports verified (1 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
-    "[QUEUE] AUTO-042 requeued as pending — near-miss 72/100, feedback carried to next cycle (1/2)"
+    "[AUDITOR] Attempt 2 verdict: FAIL (55/100)",
+    "[GATE] Attempt 2: Auditor rejected (score 55) → FAIL",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): Auditor rejected (score 55)"
   ]
 }
