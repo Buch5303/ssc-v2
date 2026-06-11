@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T07:18:51.727Z",
+  "timestamp": "2026-06-11T07:33:36.508Z",
   "directive": {
-    "id": "AUTO-049",
-    "title": "FS-RESP-002 — Per-Page Table Wrapper Audit & Chart Responsiveness",
-    "status": "failed"
+    "id": "AUTO-050",
+    "title": "Route Authorization Middleware for User Roles",
+    "status": "pending"
   },
-  "elapsed_seconds": 218.327,
+  "elapsed_seconds": 202.634,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -35,28 +35,42 @@
       "status": "complete",
       "files_count": 4,
       "parse_error": false,
-      "first_file_path": "app/(dashboard)/page.tsx"
+      "first_file_path": "middleware.ts"
     },
     "auditor": {
       "status": "complete",
       "verdict": "COMPILE_FAIL",
-      "score": null,
+      "score": 72,
+      "summary": "The build implements the core authorization middleware correctly with proper route matching, role enforcement, and audit logging structure. All major acceptance criteria are met or partially met. However, there are critical issues: (1) userId is hardcoded to 'unknown' instead of being extracted from JWT, violating the audit trail requirement; (2) the fire-and-forget logging pattern has potential unhandled promise rejection issues; (3) no performance benchmark test exists to validate the 20ms p99 latency requirement. The build is functional but requires fixes before production deployment. Score is 72 due to the missing userId extraction and performance test gaps.",
       "pre_check_failed": false,
-      "issue_count": 0,
-      "top_issues": []
+      "issue_count": 7,
+      "top_issues": [
+        {
+          "severity": "HIGH",
+          "description": "userId is hardcoded to 'unknown' instead of being extracted from the JWT token. The spec requires capturing userId in audit logs. The getUserIdFromToken function exists in session.ts but is never used in middleware."
+        },
+        {
+          "severity": "HIGH",
+          "description": "The fire-and-forget pattern uses .catch() on the promise but the function is called without await. However, the implementation uses fetch() which is not guaranteed to be fire-and-forget in Edge Runtime - the promise rejection could cause unhandled promise rejections. Also, the INTERNAL_AUDIT_SECRET fallback to 'dev-secret' is a security risk."
+        },
+        {
+          "severity": "MEDIUM",
+          "description": "The ROUTE_RULES does not include /api/health as a public route, but middleware.ts has it in PUBLIC_PATHS. This inconsistency could cause confusion. Also, the /api default rule catches all API routes including /api/health before middleware's public path check."
+        }
+      ]
     },
     "gate": {
       "allowed": false,
       "effective_verdict": "FAIL",
-      "reason": "compile gate: 8 missing named export(s) after 2 attempt(s)"
+      "reason": "compile gate: 2 missing named export(s) after 2 attempt(s)"
     },
     "build_attempts": 2,
     "attempt_history": [
       {
         "attempt": 1,
-        "verdict": "COMPILE_FAIL",
-        "score": null,
-        "effective": "FAIL"
+        "verdict": "CONDITIONAL",
+        "score": 72,
+        "effective": "CONDITIONAL"
       },
       {
         "attempt": 2,
@@ -67,15 +81,15 @@
     ]
   },
   "log": [
-    "[2026-06-11T07:15:13.401Z] Auto-builder cycle started",
+    "[2026-06-11T07:30:13.874Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy @ 3574430",
-    "[WATCHDOG] In sync at 3574430",
-    "[QUEUE] Loaded via contents-api. Pending: 19, total: 67",
+    "[WATCHDOG] In sync at 8706932",
+    "[QUEUE] Loaded via contents-api. Pending: 20, total: 69",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T07:15:15.755Z] Processing: AUTO-049 — FS-RESP-002 — Per-Page Table Wrapper Audit & Chart Responsiveness",
+    "[2026-06-11T07:30:16.351Z] Processing: AUTO-050 — Route Authorization Middleware for User Roles",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
-    "[ARCHITECT] Lossless split: 2 follow-up directive(s) appended to queue (origin AUTO-049)",
+    "[ARCHITECT] Lossless split: 2 follow-up directive(s) appended to queue (origin AUTO-050)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
     "[RESEARCHER] Running 3 queries...",
@@ -84,16 +98,20 @@
     "[COMPILE-GATE] Manifest loaded (37 packages) — bare imports validated",
     "[GROUNDING] Builder context: 118 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 3 files",
+    "[BUILDER] Attempt 1 complete — 4 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
     "[COMPILE-GATE] Attempt 1: all Tailwind tokens defined",
-    "[COMPILE-GATE] Attempt 1: 1 missing named export(s):\n  app/(dashboard)/page.tsx → '../../components/ui/Skeletons' has no export 'Skeletons'",
-    "[RETRY] Re-running Builder to fix missing exports (attempt 2/2)",
+    "[COMPILE-GATE] Attempt 1: all named exports verified (0 repo file(s) inspected)",
+    "[AUDITOR] Reviewing attempt 1...",
+    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
+    "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
     "[BUILDER] Attempt 2 complete — 4 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
     "[COMPILE-GATE] Attempt 2: all Tailwind tokens defined",
-    "[COMPILE-GATE] Attempt 2: 8 missing named export(s):\n  app/(dashboard)/page.tsx → '../../components/charts/LineChart' has no export 'LineChart'\n  app/(dashboard)/page.tsx → '../../components/charts/BarChart' has no export 'BarChart'\n  app/(dashboard)/spend-analytics/page.tsx → '../../../components/charts/BarChart' has no export 'BarChart'\n  app/(dashboard)/spend-analytics/page.tsx → '../../../components/charts/LineChart' has no export 'LineChart'\n  app/(dashboard)/supplier-performance/page.tsx → '../../../components/charts/BarChart' has no export 'BarChart'\n  app/(dashboard)/supplier-performance/page.tsx → '../../../components/charts/ScatterPlot' has no export 'ScatterPlot'\n  app/(dashboard)/contract-management/page.tsx → '../../../components/charts/LineChart' has no export 'LineChart'\n  app/(dashboard)/contract-management/page.tsx → '../../../components/charts/BarChart' has no export 'BarChart'",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 8 missing named export(s) after 2 attempt(s)"
+    "[COMPILE-GATE] Attempt 2: 2 missing named export(s):\n  lib/auth/route-rules.ts → '../db/schema' has no export 'UserRole'\n  lib/auth/session.ts → '../db/schema' has no export 'UserRole'",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 2 missing named export(s) after 2 attempt(s)",
+    "[QUEUE] AUTO-050 requeued as pending — near-miss best 72/100, feedback carried (1/2)"
   ]
 }
