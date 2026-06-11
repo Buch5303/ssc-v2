@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T04:30:39.120Z",
+  "updated_at": "2026-06-11T04:34:58.957Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -106,16 +106,16 @@
       "title": "Mobile responsive pass",
       "directive": "Make all 14 dashboard pages fully responsive. On mobile (< 768px): collapse the sidebar into a hamburger menu, stack KPI grids from 6-column to 2-column, make tables horizontally scrollable, ensure all text is readable at 14px minimum on mobile, and ensure touch targets are at least 44x44px. Test against iPhone 14 Pro viewport (393x852).",
       "priority": 5,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "seed",
       "created_at": "2026-04-21T00:00:00Z",
       "started_at": "2026-06-11T04:30:39.044Z",
-      "completed_at": null,
+      "completed_at": "2026-06-11T04:34:58.865Z",
       "commit_sha": null,
       "auditor_score": 72,
       "attempts": 1,
       "near_miss_retries": 2,
-      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100) — near-miss (best 78/100), requeued with carried feedback (carryover 2/2)",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -130,8 +130,7 @@
           "score": 72,
           "effective": "CONDITIONAL"
         }
-      ],
-      "carryover_feedback": "A previous cycle's best attempt scored 78/100 (CONDITIONAL). These are the EXACT remaining findings. Fix every one of them in your FIRST attempt this cycle:\n1. [MEDIUM] Font-size floor of 14px is only applied to body element. Elements with explicit smaller font sizes (e.g., 'text-xs' from Tailwind) in other components could still be below 14px. The directive requires ALL dashboard page text >= 14px, but the implementation only guarantees body text. FIX: Add a global rule: '* { font-size: max(14px, inherit); }' or ensure all text elements use at least 'text-sm' (14px) classes. Alternatively, add a CSS reset: 'p, span, a, li, h1, h2, h3, h4, h5, h6 { font-size: max(14px, inherit); }'\n2. [MEDIUM] The .table-responsive-wrapper only wraps the main content children. Tables nested inside child components (e.g., RFQTable, SupplierDrawer) may not be direct children of this wrapper and thus won't get the horizontal scroll behavior. The directive requires ALL data tables to be wrapped. FIX: Move the .table-responsive-wrapper class to individual table components or apply it globally to all tables via CSS: '.table-responsive-wrapper, table { display: block; overflow-x: auto; ... }' or add the wrapper inside each table component.\n3. [MEDIUM] Body overflow is set on a child div ('overflow-x-hidden') rather than on the <body> element itself. The directive requires 'no horizontal scrollbar appears on <body>'. If any element overflows the viewport, a body scrollbar could still appear. FIX: Add 'overflow-x-hidden' to the body element in globals.css: 'body { overflow-x: hidden; }' or use Next.js layout to set it on the HTML element.\n4. [LOW] The focus trap implementation only focuses the first focusable element on open but does not trap focus within the drawer (user can tab out of the drawer to elements behind the backdrop). WCAG 2.1 AA requires focus to be trapped inside modal dialogs. FIX: Implement a proper focus trap that cycles focus within the drawer. Add a focus-trap library or implement manual focus management that prevents tabbing outside the drawer while it's open.\n5. [LOW] The hamburger button's aria-expanded is set to {isOpen} but when the drawer is closed (isOpen=false), the button still exists in the DOM. The aria-expanded=false is correct, but the button should ideally have aria-haspopup='dialog' to indicate it opens a dialog. FIX: Add 'aria-haspopup=\"dialog\"' to the hamburger button for better screen reader support.\n6. [LOW] The dynamic import of MobileSidebar uses a Suspense fallback with a placeholder div. However, the fallback does not have aria-hidden or role='presentation', which could cause accessibility issues during loading. FIX: Add 'aria-hidden=\"true\"' to the fallback div or use a simpler null fallback since the hamburger button is not critical for initial render."
+      ]
     },
     {
       "id": "AUTO-006",
@@ -1124,6 +1123,14 @@
       "directive": "FLOWSEER-RESP-003: After FLOWSEER-RESP-001 and FLOWSEER-RESP-002 land, implement mobile navigation UX polish: (1) swipe-right gesture on main content to open sidebar drawer (touch event deltaX > 50px threshold), swipe-left on drawer to close; (2) bottom navigation bar for the 5 most-accessed dashboard pages on mobile (< 768px) as a fixed bottom bar (safe-area-inset-bottom padding for iPhone notch), replacing deep hamburger drilling for primary routes; (3) sticky page headers on mobile so table column headers remain visible during vertical scroll (position: sticky top-0); (4) ensure all dropdown menus and select inputs use native mobile pickers (no custom floating dropdowns that violate 44px targets on mobile). Validate at 393x852: swipe open/close gesture functional, bottom nav renders above system home bar, sticky headers hold during scroll, no z-index collisions with sidebar drawer. EQS performance: no additional JS bundle > 5KB for gesture handling. Maximum 5 files. One concern: gesture and nav UX only.",
       "status": "pending",
       "created_at": "2026-06-11T04:16:24.786Z",
+      "origin": "split_from:AUTO-005"
+    },
+    {
+      "id": "AUTO-049",
+      "title": "FS-RESP-002 — Per-Page Table Wrapper Audit & Chart Responsiveness",
+      "directive": "Directive FS-RESP-001 applies overflow-x-auto to tables via globals.css. This follow-up must audit all 14 dashboard pages individually to confirm every data table has the responsive wrapper div applied at the component level (not only via global CSS), and must make all chart/visualization components (Recharts, Victory, or equivalent) use responsive containers (ResponsiveContainer width='100%') so they reflow correctly at 393px without fixed pixel widths. Scope: inspect each of the 14 page-specific table components and chart components, add overflow-x-auto wrapper divs explicitly in JSX where missing, replace any fixed-width chart containers with responsive equivalents. Files affected will be up to 5 of the highest-traffic dashboard page component files per spec iteration. Continue in additional follow-up directives if more than 5 files are needed. EQS standards apply: dashboard load < 1.5s, no chart clipping or horizontal page scroll at 393px viewport.",
+      "status": "pending",
+      "created_at": "2026-06-11T04:31:19.982Z",
       "origin": "split_from:AUTO-005"
     }
   ]
