@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T21:01:39.787Z",
+  "updated_at": "2026-06-11T21:05:08.192Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1437,10 +1437,28 @@
       "id": "AUTO-057",
       "title": "FS-RESP-003: Mobile Chart Responsiveness — Remaining 9 Dashboard Pages",
       "directive": "DIRECTIVE: Complete mobile chart responsiveness migration for the remaining 9 of 14 FlowSeer W251 BOP dashboard pages not covered in FS-RESP-002. FS-RESP-002 migrated the 5 highest-traffic pages (overview, spend-analysis, supplier-risk, contract-pipeline, savings-tracker) to use ChartWrapper. This directive covers the remaining 9 pages. All charts on these pages must be wrapped in the ChartWrapper component created in FS-RESP-002 (components/charts/ChartWrapper.tsx). Requirements are identical to FS-RESP-002: charts reflow to full container width on mobile (< 768px), axis labels >= 14px font size, legends stack vertically below charts on mobile, minimum touch-safe container height of 200px, tooltip tap targets >= 44x44px. Verify against iPhone 14 Pro viewport (393x852). CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced. Scope is visualization components only — no sidebar, grid, layout, or table changes. The ChartWrapper, useChartDimensions hook, and charts.css rules are already in place from FS-RESP-002 and must not be modified unless a bug is found. Only page-level chart call sites need updating. Identify the 9 remaining pages by grepping for '<ResponsiveContainer', '<BarChart', '<LineChart', '<AreaChart', '<PieChart', '<RadarChart', '<ComposedChart' in pages and components directories excluding the 5 already-migrated pages. Acceptance criteria must mirror FS-RESP-002 criteria applied to all 9 pages, plus a final integration test confirming all 14 dashboard pages pass mobile chart compliance checks in a single Playwright test suite run.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-11T05:31:25.546Z",
       "origin": "split_from:AUTO-046",
-      "started_at": "2026-06-11T21:01:39.667Z"
+      "started_at": "2026-06-11T21:01:39.667Z",
+      "completed_at": "2026-06-11T21:05:08.009Z",
+      "skip_reason": "gate blocked after 2 attempt(s): Auditor rejected (score 40)",
+      "auditor_score": 40,
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "FAIL",
+          "score": 40,
+          "effective": "FAIL"
+        }
+      ]
     },
     {
       "id": "AUTO-058",
