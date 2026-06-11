@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T05:45:37.803Z",
+  "updated_at": "2026-06-11T05:49:31.291Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1162,14 +1162,13 @@
       "id": "AUTO-046",
       "title": "Mobile Responsive — Charts and Data Visualizations",
       "directive": "DIRECTIVE: Make all charts and data visualizations across the 14 FlowSeer W251 BOP dashboard pages responsive for mobile (< 768px). Charts must reflow to full container width on mobile, axis labels must remain readable at 14px minimum, legends must stack vertically below charts on screens < 768px, and chart containers must have a minimum touch-safe height of 200px on mobile. Tooltip tap targets must be >= 44x44px. Verify against iPhone 14 Pro viewport (393x852). CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced. This is a follow-up to FS-RESP-001 (layout responsiveness) and covers ONLY visualization components — no sidebar, grid, or table changes.",
-      "status": "in_progress",
+      "status": "pending",
       "created_at": "2026-06-11T04:01:19.251Z",
       "origin": "split_from:AUTO-005",
       "started_at": "2026-06-11T05:45:37.734Z",
-      "near_miss_retries": 1,
-      "carryover_feedback": "A previous cycle's best attempt scored 72/100 (CONDITIONAL). These are the EXACT remaining findings. Fix every one of them in your FIRST attempt this cycle:\n1. [CRITICAL] Test file imports from '@testing-library/react' which is NOT in package.json dependencies. This will cause build failure. FIX: Remove the test file or add @testing-library/react to devDependencies. Alternatively, use Jest's built-in renderHook or a different testing approach.\n2. [CRITICAL] Test file uses @ts-ignore to delete global.window, which violates the directive's TypeScript strict requirement. This is explicitly forbidden. FIX: Remove @ts-ignore and use a proper SSR mock. Create a separate test file that doesn't require deleting window, or use jest.mock to mock the hook's dependencies.\n3. [HIGH] ChartWrapper uses `(child.type as any).name` to identify Recharts components. Recharts components may not expose a .name property, or the name may differ between development and production builds. This will silently fail to apply mobile overrides. FIX: Use a more robust identification method, such as checking for specific props (e.g., dataKey on XAxis) or using React.displayName. Alternatively, use a different approach like context or a wrapper component pattern.\n4. [HIGH] The Tooltip content override is incorrect. It wraps the content function but doesn't ensure the outer .recharts-tooltip-wrapper div has the required dimensions. Recharts may render the tooltip in a portal or with inline styles that override the CSS. FIX: Instead of wrapping the content, apply the min-width/min-height directly to the tooltip wrapper via CSS with !important, or use a custom Tooltip component that renders a div with the required dimensions.\n5. [HIGH] The `originalLegendProps` prop is typed as `any`, which violates TypeScript strict mode. The directive explicitly requires no implicit 'any' types. FIX: Define a proper interface for legend props: `{ layout?: string; verticalAlign?: string; align?: string; }` or use Recharts' LegendProps type if available.\n6. [MEDIUM] The hook does not guard against window being undefined during SSR in the useEffect. While useState(false) provides a default, the effect will still try to access window.matchMedia if the component renders on the server (which it shouldn't in Next.js, but the guard is incomplete). FIX: Add `if (typeof window === 'undefined') return;` at the beginning of the useEffect callback, before any window access.",
-      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100) — near-miss (best 72/100), requeued with carried feedback (carryover 1/2)",
-      "auditor_score": 72,
+      "near_miss_retries": 2,
+      "skip_reason": "gate blocked after 2 attempt(s): Auditor rejected (score 40) — near-miss (best 72/100), requeued with carried feedback (carryover 2/2)",
+      "auditor_score": 40,
       "build_attempts": 2,
       "attempt_history": [
         {
@@ -1180,11 +1179,12 @@
         },
         {
           "attempt": 2,
-          "verdict": "CONDITIONAL",
-          "score": 72,
-          "effective": "CONDITIONAL"
+          "verdict": "FAIL",
+          "score": 40,
+          "effective": "FAIL"
         }
-      ]
+      ],
+      "carryover_feedback": "A previous cycle's best attempt scored 72/100 (CONDITIONAL). These are the EXACT remaining findings. Fix every one of them in your FIRST attempt this cycle:\n1. [CRITICAL] The wrapper component is created but no integration into the 14 dashboard pages is provided. The build spec explicitly requires every chart component across all 14 dashboard pages to be wrapped in ResponsiveChartWrapper. Without modifying the actual chart files, the directive's core objective is not achieved. FIX: Modify each of the 14 dashboard page chart components to import and use ResponsiveChartWrapper as their outermost container, OR provide a clear integration plan showing how existing charts will be wrapped.\n2. [CRITICAL] The axis detection logic is fragile and may not correctly identify all XAxis/YAxis components. It checks for 'dataKey' or 'type' props on any child, which could incorrectly match non-axis components or miss axis components that use different prop patterns. FIX: Use a more robust detection method, such as checking child.type === XAxis or child.type.displayName === 'XAxis', or require explicit axis props to be passed to the wrapper.\n3. [HIGH] The tooltip wrapping logic only applies to children with a 'content' prop. Many Recharts tooltip implementations use the default tooltip or pass content as a render prop. This will miss most tooltip instances, leaving them without the required 44x44px touch targets. FIX: Apply the touch-target wrapper to all tooltip-like children (checking for Tooltip component type) or provide a separate TooltipWrapper component that can be used explicitly.\n4. [HIGH] Desktop width behavior is incorrect. The wrapper always sets width='100%' on ResponsiveContainer (via dimensions.width which is always '100%'), even on desktop. The acceptance criteria require that desktop width (>= 768px) is NOT overridden. FIX: For desktop, either omit the width prop (allowing ResponsiveContainer to use its default) or pass the original width from the wrapped chart component.\n5. [HIGH] No unit tests are provided. The acceptance criteria explicitly require unit tests for tooltip tap targets (criterion 4) and breakpoint behavior (criterion 5). Missing tests make these criteria impossible to verify. FIX: Create ResponsiveChartWrapper.test.tsx with React Testing Library tests for: (1) tooltip minWidth/minHeight >= 44px, (2) width='100%' at < 768px, (3) desktop width not overridden at >= 768px.\n6. [MEDIUM] The useChartDimensions hook uses setTimeout for debouncing instead of a proper debounce utility. This could lead to race conditions or memory leaks if the component unmounts during a pending timeout. FIX: Use a proper debounce function (e.g., from lodash or a custom hook) or use requestAnimationFrame for smoother resize handling."
     },
     {
       "id": "AUTO-047",
@@ -1272,6 +1272,22 @@
       "directive": "DIRECTIVE: Complete mobile chart responsiveness migration for the remaining 9 of 14 FlowSeer W251 BOP dashboard pages not covered in FS-RESP-002. FS-RESP-002 migrated the 5 highest-traffic pages (overview, spend-analysis, supplier-risk, contract-pipeline, savings-tracker) to use ChartWrapper. This directive covers the remaining 9 pages. All charts on these pages must be wrapped in the ChartWrapper component created in FS-RESP-002 (components/charts/ChartWrapper.tsx). Requirements are identical to FS-RESP-002: charts reflow to full container width on mobile (< 768px), axis labels >= 14px font size, legends stack vertically below charts on mobile, minimum touch-safe container height of 200px, tooltip tap targets >= 44x44px. Verify against iPhone 14 Pro viewport (393x852). CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced. Scope is visualization components only — no sidebar, grid, layout, or table changes. The ChartWrapper, useChartDimensions hook, and charts.css rules are already in place from FS-RESP-002 and must not be modified unless a bug is found. Only page-level chart call sites need updating. Identify the 9 remaining pages by grepping for '<ResponsiveContainer', '<BarChart', '<LineChart', '<AreaChart', '<PieChart', '<RadarChart', '<ComposedChart' in pages and components directories excluding the 5 already-migrated pages. Acceptance criteria must mirror FS-RESP-002 criteria applied to all 9 pages, plus a final integration test confirming all 14 dashboard pages pass mobile chart compliance checks in a single Playwright test suite run.",
       "status": "pending",
       "created_at": "2026-06-11T05:31:25.546Z",
+      "origin": "split_from:AUTO-046"
+    },
+    {
+      "id": "AUTO-058",
+      "title": "FS-VIZ-MOB-002: Mobile Touch Interaction & Gesture Support for Charts",
+      "directive": "DIRECTIVE: Extend the mobile chart responsiveness work from FS-VIZ-MOB-001 to add touch interaction and gesture support across all 14 FlowSeer W251 BOP dashboard pages. Specifically: (1) Pinch-to-zoom must be supported on line and area charts using touch events (no new dependencies; use Recharts ReferenceArea or pointer events natively). (2) Swipe-left/right on multi-series charts must cycle through visible data series or pan the time axis where applicable. (3) Long-press (500ms) on a data point must open a persistent tooltip modal overlay with full data point details (replacing hover-only tooltips that do not work on touch). The persistent tooltip modal must be dismissible by tap-outside or an explicit close button (44x44px). (4) All gesture handlers must be passive (`{ passive: true }`) to not block scroll. (5) Verify all interactions against iPhone 14 Pro (393x852) and an Android mid-range emulation (360px width). CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced. FS-VIZ-MOB-001 (chart container responsiveness) is a prerequisite and must be merged first. Scope limited to gesture/interaction layer of visualization components only — no layout, sidebar, grid, or table changes.",
+      "status": "pending",
+      "created_at": "2026-06-11T05:46:31.943Z",
+      "origin": "split_from:AUTO-046"
+    },
+    {
+      "id": "AUTO-059",
+      "title": "FS-VIZ-MOB-003: Mobile Chart Data Density & Adaptive Tick Reduction",
+      "directive": "DIRECTIVE: Implement adaptive data density management for all charts across the 14 FlowSeer W251 BOP dashboard pages on mobile viewports (< 768px). The current chart implementation renders all data ticks and data points at full desktop density, causing overlapping labels and illegible axes on mobile. Required: (1) XAxis must automatically reduce tick count to a maximum of 5 ticks on viewports < 768px using Recharts `ticks` prop computed from the data array length and viewport width. (2) Line and area charts must reduce rendered data points to a maximum of 50 visible points on mobile via a `downsampleData(data, maxPoints)` utility (LTTB algorithm or uniform stride — no new deps). (3) Bar charts with > 10 bars must switch to a horizontally scrollable container on mobile (overflow-x: scroll, snap-type: x mandatory, snap-align: start per bar group) rather than compressing bars below 20px width. (4) All label truncation must use CSS `text-overflow: ellipsis` with a `title` attribute fallback for full value. (5) The downsample utility must preserve data min/max/last values for financial accuracy per EQS ±0.1% tolerance. CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced. FS-VIZ-MOB-001 is a prerequisite. Scope limited to data density and axis rendering of visualization components — no layout, sidebar, grid, table, or gesture changes.",
+      "status": "pending",
+      "created_at": "2026-06-11T05:46:31.943Z",
       "origin": "split_from:AUTO-046"
     }
   ]
