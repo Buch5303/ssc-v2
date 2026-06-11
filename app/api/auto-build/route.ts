@@ -205,12 +205,40 @@ async function saveQueue(
   queue: Queue,
   message: string,
   baseUrl: string,
-  extraFiles: Array<{ path: string; content: string }> = []
+  extraFiles: Array<{ path: string; content: string }> = [],
+  touchedIds: string[] | null = null
 ): Promise<{ ok: boolean; sha?: string; error?: string }> {
   try {
-    queue.updated_at = new Date().toISOString();
+    // MERGE-BEFORE-WRITE (2026-06-11). Last-writer-wins clobbered the queue
+    // twice: overlapping cron runs reverted each other's directive statuses,
+    // and an in-flight run wiped externally-added directives (AUTO-043/044)
+    // plus a requeue. Strategy: re-fetch the live remote queue as the base,
+    // then overlay ONLY (a) directives this run actually touched and (b)
+    // directives the remote doesn't know about. Remote-only directives and
+    // remote status changes to untouched directives are preserved.
+    let toWrite: Queue = queue;
+    try {
+      const live = await loadQueue((process.env.GITHUB_PAT || "").trim());
+      if (live?.queue?.directives) {
+        const base = live.queue;
+        const touched = new Set(touchedIds || []);
+        const baseById = new Map(base.directives.map((d: any) => [d.id, d]));
+        for (const d of queue.directives) {
+          if (touched.has(d.id) || !baseById.has(d.id)) {
+            baseById.set(d.id, d);
+          }
+        }
+        base.directives = Array.from(baseById.values());
+        toWrite = base;
+        // keep the local in-memory queue coherent with what we persist
+        queue.directives = base.directives;
+      }
+    } catch {
+      // merge is best-effort; fall back to writing our copy
+    }
+    toWrite.updated_at = new Date().toISOString();
     const files = [
-      { path: QUEUE_PATH, content: JSON.stringify(queue, null, 2) + "\n" },
+      { path: QUEUE_PATH, content: JSON.stringify(toWrite, null, 2) + "\n" },
       ...extraFiles,
     ];
     const res = await fetch(`${baseUrl}/api/github-commit`, {
@@ -901,6 +929,7 @@ export async function GET(req: Request) {
   const STUCK_MS = 15 * 60 * 1000;
   const now = Date.now();
   let recoveredStuck = 0;
+  const recoveredIds: string[] = [];
   for (const d of queue.directives) {
     if (d.status === "in_progress" && d.started_at) {
       const startedMs = Date.parse(d.started_at);
@@ -909,12 +938,13 @@ export async function GET(req: Request) {
         d.started_at = null;
         (d as any).attempts = ((d as any).attempts || 0) + 1;
         recoveredStuck++;
+        recoveredIds.push(d.id);
         log.push(`[RECOVERY] ${d.id} stuck in_progress for >30min — reset to pending (attempt #${(d as any).attempts})`);
       }
     }
   }
   if (recoveredStuck > 0) {
-    await saveQueue(queue, `[RECOVERY] Reset ${recoveredStuck} stuck directive(s) to pending`, baseUrl).catch(() => {});
+    await saveQueue(queue, `[RECOVERY] Reset ${recoveredStuck} stuck directive(s) to pending`, baseUrl, [], recoveredIds).catch(() => {});
   }
 
   // ----------------------------------------------------------------------
@@ -967,7 +997,9 @@ export async function GET(req: Request) {
       const persist = await saveQueue(
         queue,
         `[LAYER 2] Directive Generator appended ${newOnes.length} directive(s): ${newOnes.map(d => d.id).join(", ")}`,
-        baseUrl
+        baseUrl,
+        [],
+        newOnes.map(d => d.id)
       );
       if (persist.ok) {
         log.push(`[GENERATOR] Appended ${newOnes.length}: ${newOnes.map(d => d.id).join(", ")}`);
@@ -1004,7 +1036,7 @@ export async function GET(req: Request) {
   // Mark in_progress
   next.status = "in_progress";
   next.started_at = new Date().toISOString();
-  await saveQueue(queue, `[QUEUE] ${next.id} started`, baseUrl).catch(() => {});
+  await saveQueue(queue, `[QUEUE] ${next.id} started`, baseUrl, [], [next.id]).catch(() => {});
 
   // ----- 5-Agent Pipeline -----
 
@@ -1032,12 +1064,12 @@ export async function GET(req: Request) {
       (next as any).architect_error_retries = archRetries + 1;
       next.status = "pending";
       (next as any).failure_detail = `architect infra failure: ${String(archErr).slice(0, 300)}`;
-      await saveQueue(queue, `[QUEUE] ${next.id} requeued (architect infra failure, retry ${archRetries + 1}/3): ${String(archErr).slice(0, 120)}`, baseUrl).catch(() => {});
+      await saveQueue(queue, `[QUEUE] ${next.id} requeued (architect infra failure, retry ${archRetries + 1}/3): ${String(archErr).slice(0, 120)}`, baseUrl, [], [next.id]).catch(() => {});
     } else {
       next.status = "failed";
       next.completed_at = new Date().toISOString();
       (next as any).failure_detail = `architect failed ${archRetries + 1}x: ${String(archErr).slice(0, 300)}`;
-      await saveQueue(queue, `[QUEUE] ${next.id} failed at architect after ${archRetries + 1} cycles: ${String(archErr).slice(0, 120)}`, baseUrl).catch(() => {});
+      await saveQueue(queue, `[QUEUE] ${next.id} failed at architect after ${archRetries + 1} cycles: ${String(archErr).slice(0, 120)}`, baseUrl, [], [next.id]).catch(() => {});
     }
     return NextResponse.json({
       status: next.status === "pending" ? "requeued" : "failed",
@@ -1165,7 +1197,7 @@ export async function GET(req: Request) {
       if (attempt === MAX_BUILD_ATTEMPTS) {
         next.status = "failed";
         next.completed_at = new Date().toISOString();
-        await saveQueue(queue, `[QUEUE] ${next.id} failed at builder after ${attempt} attempts`, baseUrl).catch(() => {});
+        await saveQueue(queue, `[QUEUE] ${next.id} failed at builder after ${attempt} attempts`, baseUrl, [], [next.id]).catch(() => {});
         return NextResponse.json({
           status: "failed", directive: next.id, stage: "builder",
           error: buildResult?.error, log, elapsed: (Date.now() - startTime) / 1000,
@@ -1323,7 +1355,8 @@ export async function GET(req: Request) {
       queue,
       commitMsg,
       baseUrl,
-      buildResult.build.files.map((f: any) => ({ path: f.path, content: f.content }))
+      buildResult.build.files.map((f: any) => ({ path: f.path, content: f.content })),
+      [next.id]
     );
     commitResult = { ok: persist.ok, sha: persist.sha, error: persist.error };
     if (persist.ok) {
@@ -1392,7 +1425,7 @@ export async function GET(req: Request) {
     next.auditor_score = score;
     (next as any).build_attempts = buildAttempts;
     (next as any).attempt_history = attemptHistory;
-    await saveQueue(queue, `[QUEUE] ${next.id} ${next.status === "pending" ? "requeued" : "skipped"}: ${skipReason}`, baseUrl).catch(() => {});
+    await saveQueue(queue, `[QUEUE] ${next.id} ${next.status === "pending" ? "requeued" : "skipped"}: ${skipReason}`, baseUrl, [], [next.id]).catch(() => {});
   }
 
   const elapsed = (Date.now() - startTime) / 1000;
@@ -1445,10 +1478,11 @@ export async function GET(req: Request) {
     log,
   };
   await saveQueue(
-    queue, // no-op queue payload; we use the extraFiles slot to write snapshot
+    queue, // queue payload merged against live remote; touched = this run's directive
     `[DEBUG] last_run snapshot for ${next.id}`,
     baseUrl,
-    [{ path: "data/last_run.json", content: JSON.stringify(runSnapshot, null, 2) + "\n" }]
+    [{ path: "data/last_run.json", content: JSON.stringify(runSnapshot, null, 2) + "\n" }],
+    [next.id]
   ).catch(() => {});
 
   return NextResponse.json({
