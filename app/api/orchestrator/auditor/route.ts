@@ -6,7 +6,7 @@ export const maxDuration = 300;
 
 export async function POST(req: Request) {
   try {
-    const { spec, build, research, repo_context, imported_files } = await req.json();
+    const { spec, build, research, repo_context, imported_files, prior_issues, prior_score } = await req.json();
     const apiKey = process.env.DEEPSEEK_API_KEY;
     
     // If no DeepSeek key, fall back to Anthropic
@@ -123,7 +123,17 @@ would have produced an artifact in this directive's scope:
 For each EQS lens, decide first whether it APPLIES to this scope. If it does
 not apply, do not penalize on it and do not list it as an issue.
 
-BUILD SPECIFICATION (full context):
+${Array.isArray(prior_issues) && prior_issues.length > 0 ? `DELTA AUDIT — CONVERGENCE RULE (this is a RE-AUDIT of a revised build):
+A prior audit of an earlier attempt scored ${typeof prior_score === "number" ? prior_score : "?"}/100. The Builder was instructed to fix these EXACT findings:
+${prior_issues.map((i: any, idx: number) => `  ${idx + 1}. [${i.severity || "?"}] ${i.file ? i.file + ": " : ""}${i.description || JSON.stringify(i)}`).join("\n")}
+
+Your PRIMARY task on this pass:
+1. For EACH prior finding above, verify in the new code whether it is RESOLVED or NOT RESOLVED. Report this in a "prior_findings_resolution" array.
+2. Check for NEW CRITICAL issues introduced by the revision.
+3. CONVERGENCE RULE (mandatory): if every prior CRITICAL and HIGH finding is RESOLVED and the revision introduces NO new CRITICAL issues, the build has converged — your verdict MUST be PASS and your score MUST be >= 80. Do NOT block convergence by surfacing new MEDIUM/LOW findings or stylistic concerns on code you effectively already reviewed; list them as issues for the record, but they must not change the verdict.
+4. Anchoring on the prior score is FORBIDDEN. Score the build in front of you. A revision that resolves all prior CRITICAL/HIGH findings is materially better than its predecessor and the score must reflect that.
+
+` : ""}BUILD SPECIFICATION (full context):
 ${JSON.stringify(spec, null, 2)}
 
 INSTALLED PACKAGES (package.json dependencies + devDependencies — every \`import\` in the generated code MUST resolve to one of these OR to a relative path that exists in the repo):
@@ -143,6 +153,9 @@ Audit this code. Output ONLY valid JSON:
     {"criterion": "the criterion text", "result": "PASS|FAIL|PARTIAL", "evidence": "where in the code"}
   ],
   "applicable_eqs_lenses": ["SECURITY", "RELIABILITY", "..."],
+  "prior_findings_resolution": [
+    {"finding": "prior finding text", "resolved": true, "evidence": "where in the new code"}
+  ],
   "issues": [
     {
       "severity": "CRITICAL|HIGH|MEDIUM|LOW",

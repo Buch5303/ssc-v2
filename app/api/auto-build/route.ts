@@ -73,6 +73,14 @@ const REPO_ID = "1193314065";
 // Layer 4 — EQS v1.0 quality gate thresholds
 const SCORE_FLOOR = 65;        // Hard reject below this regardless of verdict
 const SCORE_PASS_MIN = 80;     // Verdict=PASS requires at least this; else downgraded
+// Conditional-ship valve (2026-06-11): the PASS>=80 commit gate, combined with
+// an LLM Auditor that anchors at CONDITIONAL ~72 even after its own findings
+// are fixed, produced a structural deadlock — AUTO-002 through AUTO-047
+// churned for weeks with ZERO commits while the queue grew. A final-attempt
+// CONDITIONAL with score >= this floor and ZERO CRITICAL findings now ships,
+// and the residual findings are appended to the queue as an auto fix-up
+// directive. CRITICALs (compile breaks, schema mismatches) still hard-block.
+const SCORE_CONDITIONAL_SHIP_MIN = 70;
 
 // ----------------------------------------------------------------------
 // Types
@@ -1175,6 +1183,12 @@ export async function GET(req: Request) {
   // Seed attempt 1 from feedback carried over a near-miss requeue (see the
   // post-loop block) so the new cycle continues the work, not restarts it.
   let retryContext: string | undefined = (next as any).carryover_feedback || undefined;
+  // Structured prior findings for the Auditor's delta-audit convergence rule.
+  // Seeded from a near-miss carryover; updated after every audited attempt.
+  let priorIssuesForAudit: any[] | null = Array.isArray((next as any).carryover_issues) ? (next as any).carryover_issues : null;
+  let priorScoreForAudit: number | null = typeof (next as any).carryover_score === "number" ? (next as any).carryover_score : null;
+  if ((next as any).carryover_issues) delete (next as any).carryover_issues;
+  if ((next as any).carryover_score !== undefined) delete (next as any).carryover_score;
   if (retryContext) {
     delete (next as any).carryover_feedback;
     log.push(`[CARRYOVER] Attempt 1 seeded with prior cycle's audit findings`);
@@ -1285,6 +1299,12 @@ export async function GET(req: Request) {
         path: p,
         content: c.slice(0, 4000),
       })),
+      // Delta-audit: on attempt >= 2 (or a carryover cycle) the Auditor judges
+      // the revision against the prior findings, with a mandatory convergence
+      // rule — all prior CRITICAL/HIGH resolved + no new CRITICAL => PASS.
+      ...(priorIssuesForAudit && priorIssuesForAudit.length > 0
+        ? { prior_issues: priorIssuesForAudit.slice(0, 8), prior_score: priorScoreForAudit }
+        : {}),
     }, baseUrl);
     rawVerdict = auditResult?.audit?.verdict || "UNKNOWN";
     score = auditResult?.audit?.score ?? null;
@@ -1292,6 +1312,10 @@ export async function GET(req: Request) {
 
     gate = scoreGate(rawVerdict, score);
     attemptHistory.push({ attempt, verdict: rawVerdict, score, effective: gate.effective_verdict });
+    if (Array.isArray(auditResult?.audit?.issues) && auditResult.audit.issues.length > 0) {
+      priorIssuesForAudit = auditResult.audit.issues;
+      priorScoreForAudit = typeof score === "number" ? score : null;
+    }
     log.push(`[GATE] Attempt ${attempt}: ${gate.reason} → ${gate.effective_verdict}`);
 
     // Track the best audited attempt (2026-06-11): a later attempt that
@@ -1337,19 +1361,62 @@ export async function GET(req: Request) {
   const builderFileCount = buildResult?.build?.files?.length || 0;
   const builderParseError = buildResult?.build?.parse_error === true;
 
-  // Only commit on a clean PASS. CONDITIONAL/FAIL after retries → mark
-  // failed so the queue advances rather than shipping incomplete work.
+  // Commit on a clean PASS — or via the conditional-ship valve: a
+  // final-attempt CONDITIONAL with score >= SCORE_CONDITIONAL_SHIP_MIN and
+  // ZERO CRITICAL findings ships, with residual findings appended to the
+  // queue as an auto fix-up directive. Without this valve the pipeline
+  // deadlocked: the Auditor never awards PASS>=80 in practice, so nothing
+  // committed for weeks while the queue grew (AUTO-002 → AUTO-047).
   let commitResult: any = null;
-  const shouldCommit = effectiveVerdict === "PASS" && builderFileCount > 0;
+  const cleanPass = effectiveVerdict === "PASS" && builderFileCount > 0;
+  const finalIssues: any[] = Array.isArray(auditResult?.audit?.issues) ? auditResult.audit.issues : [];
+  const finalHasCritical = finalIssues.some((i: any) => String(i?.severity || "").toUpperCase() === "CRITICAL");
+  const conditionalShip =
+    !cleanPass &&
+    gate.allowed &&
+    effectiveVerdict === "CONDITIONAL" &&
+    typeof score === "number" && score >= SCORE_CONDITIONAL_SHIP_MIN &&
+    !finalHasCritical &&
+    builderFileCount > 0 &&
+    !builderParseError;
+  const shouldCommit = cleanPass || conditionalShip;
 
   if (shouldCommit) {
-    log.push(`[COMMIT] Committing ${builderFileCount} file(s) + queue status (PASS ${score}/100 on attempt ${buildAttempts}/${MAX_BUILD_ATTEMPTS})...`);
+    const shipLabel = conditionalShip ? `CONDITIONAL-SHIP ${score}/100 (zero CRITICAL)` : `PASS ${score}/100`;
+    log.push(`[COMMIT] Committing ${builderFileCount} file(s) + queue status (${shipLabel} on attempt ${buildAttempts}/${MAX_BUILD_ATTEMPTS})...`);
     next.status = "complete";
     next.completed_at = new Date().toISOString();
     next.auditor_score = score;
     (next as any).build_attempts = buildAttempts;
+    if (conditionalShip) {
+      (next as any).conditional_ship = true;
+      // Residual-findings fix-up directive: ship now, repay the debt next
+      // cycle. Never spawned from a -FIX directive (no recursion) and never
+      // duplicated.
+      const fixId = `${next.id}-FIX`;
+      if (!next.id.endsWith("-FIX") && !queue.directives.some((d) => d.id === fixId) && finalIssues.length > 0) {
+        const issueLines = finalIssues.slice(0, 8).map((i: any, idx: number) =>
+          `${idx + 1}. [${i.severity || "?"}] ${i.file ? i.file + ": " : ""}${i.description || JSON.stringify(i)}${i.fix ? ` FIX: ${i.fix}` : ""}`
+        ).join("\n");
+        queue.directives.push({
+          id: fixId,
+          title: `Fix residual audit findings from ${next.id}`,
+          directive: `${next.id} ("${next.title}") shipped via the conditional-ship valve at ${score}/100 with zero CRITICAL findings. Resolve every residual audit finding below in the files committed by that directive. Do not change unrelated files, do not regress passing acceptance criteria.\n\nRESIDUAL FINDINGS:\n${issueLines}`,
+          priority: typeof next.priority === "number" ? next.priority : 5,
+          status: "pending",
+          origin: "auto",
+          rationale: `Auto-generated debt repayment for conditional-ship of ${next.id}`,
+          created_at: new Date().toISOString(),
+          started_at: null,
+          completed_at: null,
+          commit_sha: null,
+          auditor_score: null,
+        } as any);
+        log.push(`[QUEUE] Appended fix-up directive ${fixId} (${Math.min(finalIssues.length, 8)} residual finding(s))`);
+      }
+    }
 
-    const commitMsg = `[${next.id}] ${next.title} — PASS ${score}/100 (attempt ${buildAttempts}/${MAX_BUILD_ATTEMPTS})`;
+    const commitMsg = `[${next.id}] ${next.title} — ${shipLabel} (attempt ${buildAttempts}/${MAX_BUILD_ATTEMPTS})`;
 
     const persist = await saveQueue(
       queue,
@@ -1410,6 +1477,8 @@ export async function GET(req: Request) {
         ? `\nNOTE: the most recent attempt ALSO failed the compile gate (${gate.reason}) — do not repeat that import/export mistake.`
         : "";
       (next as any).near_miss_retries = nearMissRetries + 1;
+      (next as any).carryover_issues = (nearMissBasis!.issues || []).slice(0, 8);
+      (next as any).carryover_score = nearMissBasis!.score;
       (next as any).carryover_feedback = [
         `A previous cycle's best attempt scored ${nearMissBasis!.score}/100 (CONDITIONAL). These are the EXACT remaining findings. Fix every one of them in your FIRST attempt this cycle:`,
         carried || "(no structured issues — re-emit the complete spec with maximum rigor)",
