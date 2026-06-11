@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T04:20:27.870Z",
+  "timestamp": "2026-06-11T04:35:00.492Z",
   "directive": {
     "id": "AUTO-005",
     "title": "Mobile responsive pass",
-    "status": "pending"
+    "status": "failed"
   },
-  "elapsed_seconds": 294.561,
+  "elapsed_seconds": 267.317,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -21,7 +21,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 4,
+      "research_queries_count": 0,
       "spec_parse_error": false
     },
     "researcher": {
@@ -33,29 +33,29 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 5,
+      "files_count": 3,
       "parse_error": false,
-      "first_file_path": "components/layout/MobileSidebar.tsx"
+      "first_file_path": "components/layout/MobileNav.tsx"
     },
     "auditor": {
       "status": "complete",
       "verdict": "CONDITIONAL",
       "score": 72,
-      "summary": "The build implements the core mobile responsive requirements: hamburger menu with slide-in drawer, responsive KPI grid, table horizontal scroll wrapper, and touch target utilities. However, there are several issues: (1) the global table CSS rule may break non-dashboard pages, (2) the font-size floor implementation may not override explicit Tailwind font-size classes, (3) desktop sidebar nav links lack touch-target class, (4) potential desktop layout regression from padding changes, and (5) performance cannot be verified without testing. The build is recoverable with fixes but requires attention before shipping.",
+      "summary": "The generated code implements the core mobile navigation infrastructure correctly — MobileNav component with hamburger button (48×48px), slide-over drawer with backdrop and Escape key handling, and Sidebar hidden on mobile via responsive classes. DashboardShell properly integrates both components with responsive margin classes. However, two critical files specified in the build spec are missing from the generated output: KpiGrid.tsx (grid column responsiveness) and globals.css (font-size enforcement, table overflow, touch target CSS). These omissions mean 4 of the 8 acceptance criteria are only partially satisfied. The build is recoverable with the addition of these two files. Score is 72 due to missing critical CSS and component modifications that are essential for full acceptance criteria compliance.",
       "pre_check_failed": false,
-      "issue_count": 7,
+      "issue_count": 6,
       "top_issues": [
         {
           "severity": "HIGH",
-          "description": "Desktop sidebar navigation links do not have 'touch-target' class. While desktop may not require 44px touch targets, the acceptance criterion states 'All interactive elements (buttons, nav links, hamburger) have a bounding box >= 44x44px at 393px viewport'. At 393px, the desktop sidebar is hidden, but the criterion doesn't specify viewport-dependent targeting. If interpreted strictly, all interactive elements everywhere must meet 44px minimum."
+          "description": "KpiGrid.tsx modification is specified in the build spec but the generated code does not include this file. The grid column classes need to be changed to 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6' for responsive behavior."
+        },
+        {
+          "severity": "HIGH",
+          "description": "globals.css modification is specified in the build spec but the generated code does not include this file. Three critical CSS rules are missing: (1) body font-size enforcement via max(14px, 1rem), (2) .table-responsive class with overflow-x: auto, (3) a/button touch target min-height/min-width at mobile breakpoint."
         },
         {
           "severity": "MEDIUM",
-          "description": "The font-size floor rule 'p, span, a, li, h1, h2, h3, h4, h5, h6, button, label, input, textarea, select { font-size: max(14px, inherit); }' uses 'inherit' which may not override explicit Tailwind font-size classes like 'text-xs' (12px). The 'max()' function with 'inherit' evaluates to the inherited value, not the explicitly set value. This means elements with 'text-xs' class will still render at 12px."
-        },
-        {
-          "severity": "MEDIUM",
-          "description": "Global 'table { display: block; overflow-x: auto; }' rule applies to ALL tables in the application, not just dashboard tables. This could break tables on non-dashboard pages (e.g., RFQ pages, login page) by forcing them into block display with horizontal scroll. The spec intended this only for dashboard tables."
+          "description": "MobileNav.tsx duplicates the navigation items list from Sidebar.tsx. This creates a maintenance burden — any nav item added/removed must be updated in both files. The build spec says to 'contain the existing Sidebar nav tree' but this implementation duplicates it."
         }
       ]
     },
@@ -81,19 +81,18 @@
     ]
   },
   "log": [
-    "[2026-06-11T04:15:33.309Z] Auto-builder cycle started",
+    "[2026-06-11T04:30:33.175Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy",
-    "[WATCHDOG] In sync at c19b316",
-    "[QUEUE] Loaded via contents-api. Pending: 5, total: 46",
+    "[WATCHDOG] In sync at 3d0e86a",
+    "[QUEUE] Loaded via contents-api. Pending: 7, total: 48",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T04:15:35.649Z] Processing: AUTO-005 — Mobile responsive pass",
+    "[2026-06-11T04:30:39.044Z] Processing: AUTO-005 — Mobile responsive pass",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
-    "[ARCHITECT] Lossless split: 2 follow-up directive(s) appended to queue (origin AUTO-005)",
+    "[ARCHITECT] Lossless split: 1 follow-up directive(s) appended to queue (origin AUTO-005)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 4 queries...",
-    "[RESEARCHER] skipped — 0 result(s)",
+    "[RESEARCHER] Skipped — no research_queries in spec",
     "[COMPILE-GATE] Repo tree loaded (693 paths)",
     "[GROUNDING] Builder context: 109 source paths, schema loaded",
     "[CARRYOVER] Attempt 1 seeded with prior cycle's audit findings",
@@ -106,13 +105,12 @@
     "[GATE] Attempt 1: Score 78, verdict CONDITIONAL → CONDITIONAL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 5 files",
+    "[BUILDER] Attempt 2 complete — 3 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
-    "[COMPILE-GATE] Attempt 2: all named exports verified (1 repo file(s) inspected)",
+    "[COMPILE-GATE] Attempt 2: all named exports verified (0 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 2...",
     "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
     "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
-    "[QUEUE] AUTO-005 requeued as pending — near-miss best 78/100, feedback carried (2/2)"
+    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)"
   ]
 }
