@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T21:30:16.200Z",
+  "updated_at": "2026-06-11T21:34:44.737Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1677,14 +1677,30 @@
       "title": "Fix residual audit findings from AUTO-058",
       "directive": "AUTO-058 (\"FS-VIZ-MOB-002: Mobile Touch Interaction & Gesture Support for Charts\") shipped via the conditional-ship valve at 72/100 with zero CRITICAL findings. Resolve every residual audit finding below in the files committed by that directive. Do not change unrelated files, do not regress passing acceptance criteria.\n\nRESIDUAL FINDINGS:\n1. [HIGH] hooks/useChartGestures.ts: Pinch-to-zoom scale calculation still broken: initialDistanceRef is set in handlePointerDown, but pointer positions are updated in handlePointerMove before distance calculation, making currentDistance approximately equal to initialDistance on every frame. Scale always ~1.0. FIX: Store initial pointer positions when two pointers are first detected (not just the distance). In handlePointerMove, calculate currentDistance from the stored initial positions and current positions, not from updated pointer positions.\n2. [HIGH] hooks/useChartGestures.ts: Long-press handler still generates mock data instead of using actual chart data point from touch coordinates. This violates acceptance criterion #4. FIX: Implement hit-testing against chart data using touch coordinates. The parent component should provide a function to resolve data points from coordinates, or use Recharts' internal coordinate system to map touch position to data point.\n3. [MEDIUM] components/charts/BaseChart.tsx: ChartContent uses React.cloneElement to inject 'gestureZoomDomain' and 'gestureActiveSeriesIndex' as props on arbitrary children. Recharts XAxis expects 'domain' as a direct prop, not a custom prop on wrapper elements. This will not affect Recharts rendering. FIX: Instead of injecting props via cloneElement, use the ChartGestureContext to provide zoomDomain and activeSeriesIndex. Modify Recharts XAxis to read from context, or pass domain directly to the XAxis component via a render prop pattern.\n4. [MEDIUM] components/charts/PersistentTooltipModal.tsx: Modal does not handle keyboard dismissal (Escape key) for accessibility compliance. FIX: Add a useEffect that listens for 'keydown' event with Escape key and calls onClose. Add proper focus trapping and aria-modal attributes.\n5. [LOW] hooks/useChartGestures.ts: handlePointerMove recalculates initialDistance on every move event instead of storing initial pointer positions once when two pointers are first detected. FIX: Store initial pointer positions (not just distance) when two pointers are first detected. Use these stored positions to calculate initialDistance once, then compare against current positions for scale calculation.\n6. [LOW] hooks/useChartGestures.ts: No velocity guard on swipe gesture (requirement mentions 0.3px/ms velocity guard). FIX: Track time delta between touchstart and touchend, and only trigger swipe if velocity (distance/time) exceeds 0.3px/ms.",
       "priority": 5,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "auto",
       "rationale": "Auto-generated debt repayment for conditional-ship of AUTO-058",
       "created_at": "2026-06-11T21:20:24.602Z",
       "started_at": "2026-06-11T21:30:16.050Z",
-      "completed_at": null,
+      "completed_at": "2026-06-11T21:34:44.557Z",
       "commit_sha": null,
-      "auditor_score": null
+      "auditor_score": 55,
+      "skip_reason": "gate blocked after 2 attempt(s): Auditor rejected (score 55)",
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "FAIL",
+          "score": 55,
+          "effective": "FAIL"
+        }
+      ]
     }
   ]
 }
