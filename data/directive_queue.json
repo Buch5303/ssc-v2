@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T20:04:20.511Z",
+  "updated_at": "2026-06-11T20:15:46.892Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1356,9 +1356,10 @@
       "id": "AUTO-054",
       "title": "RFQ Authorization Observability — Denial Rate Dashboard Metric",
       "directive": "Expose a server-side metric endpoint (or integrate with existing observability layer) that reads from authorization_audit_log and emits: (1) denial count per role per hour for the last 24h; (2) top 5 most-denied user_ids in rolling 24h window; (3) denial rate as % of total RFQ requests. Surface these as a read-only C-suite tile on the existing FlowSeer dashboard — value must be interpretable in <5 seconds with no training (EQS v1.0). Data must reconcile 100% with audit log rows (no sampling). Depends on AUTH-RFQ-001 and the audit log schema migration directive.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T05:01:24.131Z",
-      "origin": "split_from:AUTO-044"
+      "origin": "split_from:AUTO-044",
+      "started_at": "2026-06-11T20:15:46.768Z"
     },
     {
       "id": "AUTO-055",
