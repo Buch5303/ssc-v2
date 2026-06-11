@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T06:01:24.734Z",
+  "updated_at": "2026-06-11T06:05:41.159Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1162,29 +1162,29 @@
       "id": "AUTO-046",
       "title": "Mobile Responsive — Charts and Data Visualizations",
       "directive": "DIRECTIVE: Make all charts and data visualizations across the 14 FlowSeer W251 BOP dashboard pages responsive for mobile (< 768px). Charts must reflow to full container width on mobile, axis labels must remain readable at 14px minimum, legends must stack vertically below charts on screens < 768px, and chart containers must have a minimum touch-safe height of 200px on mobile. Tooltip tap targets must be >= 44x44px. Verify against iPhone 14 Pro viewport (393x852). CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced. This is a follow-up to FS-RESP-001 (layout responsiveness) and covers ONLY visualization components — no sidebar, grid, or table changes.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-11T04:01:19.251Z",
       "origin": "split_from:AUTO-005",
       "started_at": "2026-06-11T06:01:24.616Z",
       "near_miss_retries": 2,
-      "skip_reason": "gate blocked after 2 attempt(s): Auditor rejected (score 40) — near-miss (best 72/100), requeued with carried feedback (carryover 2/2)",
+      "skip_reason": "gate blocked after 2 attempt(s): compile gate: 1 unresolved import(s) after 2 attempt(s)",
       "auditor_score": 40,
       "build_attempts": 2,
       "attempt_history": [
         {
           "attempt": 1,
-          "verdict": "CONDITIONAL",
-          "score": 72,
-          "effective": "CONDITIONAL"
-        },
-        {
-          "attempt": 2,
           "verdict": "FAIL",
           "score": 40,
           "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
         }
       ],
-      "carryover_feedback": "A previous cycle's best attempt scored 72/100 (CONDITIONAL). These are the EXACT remaining findings. Fix every one of them in your FIRST attempt this cycle:\n1. [CRITICAL] The wrapper component is created but no integration into the 14 dashboard pages is provided. The build spec explicitly requires every chart component across all 14 dashboard pages to be wrapped in ResponsiveChartWrapper. Without modifying the actual chart files, the directive's core objective is not achieved. FIX: Modify each of the 14 dashboard page chart components to import and use ResponsiveChartWrapper as their outermost container, OR provide a clear integration plan showing how existing charts will be wrapped.\n2. [CRITICAL] The axis detection logic is fragile and may not correctly identify all XAxis/YAxis components. It checks for 'dataKey' or 'type' props on any child, which could incorrectly match non-axis components or miss axis components that use different prop patterns. FIX: Use a more robust detection method, such as checking child.type === XAxis or child.type.displayName === 'XAxis', or require explicit axis props to be passed to the wrapper.\n3. [HIGH] The tooltip wrapping logic only applies to children with a 'content' prop. Many Recharts tooltip implementations use the default tooltip or pass content as a render prop. This will miss most tooltip instances, leaving them without the required 44x44px touch targets. FIX: Apply the touch-target wrapper to all tooltip-like children (checking for Tooltip component type) or provide a separate TooltipWrapper component that can be used explicitly.\n4. [HIGH] Desktop width behavior is incorrect. The wrapper always sets width='100%' on ResponsiveContainer (via dimensions.width which is always '100%'), even on desktop. The acceptance criteria require that desktop width (>= 768px) is NOT overridden. FIX: For desktop, either omit the width prop (allowing ResponsiveContainer to use its default) or pass the original width from the wrapped chart component.\n5. [HIGH] No unit tests are provided. The acceptance criteria explicitly require unit tests for tooltip tap targets (criterion 4) and breakpoint behavior (criterion 5). Missing tests make these criteria impossible to verify. FIX: Create ResponsiveChartWrapper.test.tsx with React Testing Library tests for: (1) tooltip minWidth/minHeight >= 44px, (2) width='100%' at < 768px, (3) desktop width not overridden at >= 768px.\n6. [MEDIUM] The useChartDimensions hook uses setTimeout for debouncing instead of a proper debounce utility. This could lead to race conditions or memory leaks if the component unmounts during a pending timeout. FIX: Use a proper debounce function (e.g., from lodash or a custom hook) or use requestAnimationFrame for smoother resize handling."
+      "completed_at": "2026-06-11T06:05:41.051Z"
     },
     {
       "id": "AUTO-047",
@@ -1288,6 +1288,22 @@
       "directive": "DIRECTIVE: Implement adaptive data density management for all charts across the 14 FlowSeer W251 BOP dashboard pages on mobile viewports (< 768px). The current chart implementation renders all data ticks and data points at full desktop density, causing overlapping labels and illegible axes on mobile. Required: (1) XAxis must automatically reduce tick count to a maximum of 5 ticks on viewports < 768px using Recharts `ticks` prop computed from the data array length and viewport width. (2) Line and area charts must reduce rendered data points to a maximum of 50 visible points on mobile via a `downsampleData(data, maxPoints)` utility (LTTB algorithm or uniform stride — no new deps). (3) Bar charts with > 10 bars must switch to a horizontally scrollable container on mobile (overflow-x: scroll, snap-type: x mandatory, snap-align: start per bar group) rather than compressing bars below 20px width. (4) All label truncation must use CSS `text-overflow: ellipsis` with a `title` attribute fallback for full value. (5) The downsample utility must preserve data min/max/last values for financial accuracy per EQS ±0.1% tolerance. CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced. FS-VIZ-MOB-001 is a prerequisite. Scope limited to data density and axis rendering of visualization components — no layout, sidebar, grid, table, or gesture changes.",
       "status": "pending",
       "created_at": "2026-06-11T05:46:31.943Z",
+      "origin": "split_from:AUTO-046"
+    },
+    {
+      "id": "AUTO-060",
+      "title": "FS-VIZ-MOB-002 — Mobile Chart Accessibility: ARIA Labels, Keyboard Nav & Screen Reader Support for W251 BOP Visualizatio",
+      "directive": "DIRECTIVE: Following FS-VIZ-MOB-001 (mobile responsive charts), add full accessibility support to all chart components on the W251 BOP dashboard. Every Recharts chart must have: (1) a wrapping <figure> with aria-label describing the chart title and data range; (2) a visually-hidden <figcaption> with a plain-language data summary updated dynamically when chart data changes; (3) all interactive chart elements (tooltip triggers, legend items) must be keyboard-focusable with visible focus rings meeting WCAG 2.1 AA 3:1 contrast ratio; (4) Recharts SVG must have role='img' and aria-label; (5) color encoding must not be the sole differentiator — patterns or shapes must supplement color for line/area charts. CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced. This covers ONLY chart accessibility — no layout, auth, or data changes. Builds on ChartWrapper.tsx and BaseChart.tsx introduced in FS-VIZ-MOB-001.",
+      "status": "pending",
+      "created_at": "2026-06-11T06:02:17.586Z",
+      "origin": "split_from:AUTO-046"
+    },
+    {
+      "id": "AUTO-061",
+      "title": "FS-VIZ-MOB-003 — Mobile Chart Interaction: Pinch-Zoom, Swipe-to-Pan & Touch Gesture Handling for W251 BOP Time-Series Ch",
+      "directive": "DIRECTIVE: Following FS-VIZ-MOB-001 (mobile responsive charts), add touch gesture support to time-series and trend charts on the W251 BOP dashboard. Requirements: (1) pinch-to-zoom on time-series charts adjusts the visible X-axis date range (min zoom = 1 day, max = full dataset range); (2) horizontal swipe-to-pan shifts the visible window without triggering page scroll; (3) double-tap resets zoom to full range; (4) all gestures must have visual affordance (zoom level indicator, pan handle icons); (5) gesture state must be managed locally in a useChartGestures hook — no global state changes; (6) gestures must not interfere with page scroll on the vertical axis. CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. Recharts only — no additional charting libraries. EQS v1.0 enforced. Builds on ChartWrapper.tsx and BaseChart.tsx from FS-VIZ-MOB-001. Covers ONLY gesture interaction — no layout, accessibility, or data changes.",
+      "status": "pending",
+      "created_at": "2026-06-11T06:02:17.586Z",
       "origin": "split_from:AUTO-046"
     }
   ]
