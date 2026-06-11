@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T04:04:54.456Z",
+  "timestamp": "2026-06-11T04:20:27.870Z",
   "directive": {
     "id": "AUTO-005",
     "title": "Mobile responsive pass",
     "status": "pending"
   },
-  "elapsed_seconds": 261.287,
+  "elapsed_seconds": 294.561,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -21,7 +21,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 3,
+      "research_queries_count": 4,
       "spec_parse_error": false
     },
     "researcher": {
@@ -41,21 +41,21 @@
       "status": "complete",
       "verdict": "CONDITIONAL",
       "score": 72,
-      "summary": "The build implements the core mobile responsive requirements correctly — hamburger sidebar, 2-column KPI grids, scrollable tables, and touch targets on the modified components. However, there is a CRITICAL TypeScript compilation error in DashboardShell.tsx where TopBar is called with non-existent props. Additionally, the TopBar component (shared across all 14 dashboard pages) was not modified and contains 9px font sizes and potentially undersized touch targets, violating the 14px minimum font size and 44x44px touch target requirements. The build also uses custom Tailwind theme classes that may not be configured in the project. These issues prevent a PASS verdict but are recoverable with fixes.",
+      "summary": "The build implements the core mobile responsive requirements: hamburger menu with slide-in drawer, responsive KPI grid, table horizontal scroll wrapper, and touch target utilities. However, there are several issues: (1) the global table CSS rule may break non-dashboard pages, (2) the font-size floor implementation may not override explicit Tailwind font-size classes, (3) desktop sidebar nav links lack touch-target class, (4) potential desktop layout regression from padding changes, and (5) performance cannot be verified without testing. The build is recoverable with fixes but requires attention before shipping.",
       "pre_check_failed": false,
-      "issue_count": 8,
+      "issue_count": 7,
       "top_issues": [
         {
-          "severity": "CRITICAL",
-          "description": "TopBar component is called with 'title' and 'subtitle' props, but the actual TopBar.tsx component (from repo ground truth) has no props — its signature is 'export function TopBar()' with no parameters. This will cause a TypeScript compilation error."
+          "severity": "HIGH",
+          "description": "Desktop sidebar navigation links do not have 'touch-target' class. While desktop may not require 44px touch targets, the acceptance criterion states 'All interactive elements (buttons, nav links, hamburger) have a bounding box >= 44x44px at 393px viewport'. At 393px, the desktop sidebar is hidden, but the criterion doesn't specify viewport-dependent targeting. If interpreted strictly, all interactive elements everywhere must meet 44px minimum."
         },
         {
-          "severity": "HIGH",
-          "description": "Uses Tailwind classes 'bg-bg', 'text-fg' which are not standard Tailwind utility classes. These require custom theme configuration in tailwind.config.js that may not exist. Same issue applies to 'bg-card', 'text-muted', 'bg-muted', 'border-border', 'bg-accent', 'text-accent-foreground' used across multiple files."
+          "severity": "MEDIUM",
+          "description": "The font-size floor rule 'p, span, a, li, h1, h2, h3, h4, h5, h6, button, label, input, textarea, select { font-size: max(14px, inherit); }' uses 'inherit' which may not override explicit Tailwind font-size classes like 'text-xs' (12px). The 'max()' function with 'inherit' evaluates to the inherited value, not the explicitly set value. This means elements with 'text-xs' class will still render at 12px."
         },
         {
-          "severity": "HIGH",
-          "description": "Uses 'process.env.NODE_ENV' in JSX which will be replaced at build time but may cause ESLint issues (no-process-env in client components) and is not a standard pattern for displaying build info."
+          "severity": "MEDIUM",
+          "description": "Global 'table { display: block; overflow-x: auto; }' rule applies to ALL tables in the application, not just dashboard tables. This could break tables on non-dashboard pages (e.g., RFQ pages, login page) by forcing them into block display with horizontal scroll. The spec intended this only for dashboard tables."
         }
       ]
     },
@@ -69,7 +69,7 @@
       {
         "attempt": 1,
         "verdict": "CONDITIONAL",
-        "score": 72,
+        "score": 78,
         "effective": "CONDITIONAL"
       },
       {
@@ -81,37 +81,38 @@
     ]
   },
   "log": [
-    "[2026-06-11T04:00:33.169Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 4c7aa90",
-    "[WATCHDOG] In sync at 9d28973",
-    "[QUEUE] Loaded via contents-api. Pending: 3, total: 44",
+    "[2026-06-11T04:15:33.309Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy",
+    "[WATCHDOG] In sync at c19b316",
+    "[QUEUE] Loaded via contents-api. Pending: 5, total: 46",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T04:00:35.250Z] Processing: AUTO-005 — Mobile responsive pass",
+    "[2026-06-11T04:15:35.649Z] Processing: AUTO-005 — Mobile responsive pass",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ARCHITECT] Lossless split: 2 follow-up directive(s) appended to queue (origin AUTO-005)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 3 queries...",
+    "[RESEARCHER] Running 4 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
     "[COMPILE-GATE] Repo tree loaded (693 paths)",
     "[GROUNDING] Builder context: 109 source paths, schema loaded",
+    "[CARRYOVER] Attempt 1 seeded with prior cycle's audit findings",
     "[BUILDER] Attempt 1/2 — generating code...",
     "[BUILDER] Attempt 1 complete — 5 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
-    "[COMPILE-GATE] Attempt 1: all named exports verified (2 repo file(s) inspected)",
+    "[COMPILE-GATE] Attempt 1: all named exports verified (0 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (78/100)",
+    "[GATE] Attempt 1: Score 78, verdict CONDITIONAL → CONDITIONAL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
     "[BUILDER] Attempt 2 complete — 5 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
-    "[COMPILE-GATE] Attempt 2: all named exports verified (2 repo file(s) inspected)",
+    "[COMPILE-GATE] Attempt 2: all named exports verified (1 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 2...",
     "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
     "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
     "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
-    "[QUEUE] AUTO-005 requeued as pending — near-miss best 72/100, feedback carried (1/2)"
+    "[QUEUE] AUTO-005 requeued as pending — near-miss best 78/100, feedback carried (2/2)"
   ]
 }
