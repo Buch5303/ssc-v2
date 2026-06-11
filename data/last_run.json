@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T22:04:20.068Z",
+  "timestamp": "2026-06-11T22:18:35.772Z",
   "directive": {
-    "id": "AUTO-060",
-    "title": "FS-VIZ-MOB-002 — Mobile Chart Accessibility: ARIA Labels, Keyboard Nav & Screen Reader Support for W251 BOP Visualizatio",
-    "status": "complete"
+    "id": "AUTO-060-FIX",
+    "title": "Fix residual audit findings from AUTO-060",
+    "status": "failed"
   },
-  "elapsed_seconds": 255.575,
+  "elapsed_seconds": 172.502,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -21,7 +21,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 5,
+      "research_queries_count": 4,
       "spec_parse_error": false
     },
     "researcher": {
@@ -33,36 +33,22 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 4,
+      "files_count": 2,
       "parse_error": false,
-      "first_file_path": "components/charts/AccessibleChartWrapper.tsx"
+      "first_file_path": "components/charts/BaseChart.tsx"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "CONDITIONAL",
-      "score": 72,
-      "summary": "The build implements the core WCAG 2.1 AA accessibility requirements including figure semantics, dynamic figcaption summaries, keyboard-navigable legends with focus rings, and SVG role/aria-label injection. However, there are several issues that prevent a PASS verdict: (1) TypeScript 'any' type usage violates the directive's strict typing constraint, (2) dynamic Tailwind class construction may break the focus ring styling in production, (3) incomplete PieChart implementation, (4) fragile SVG attribute injection approach, and (5) missing tests for accessibility features. The build is recoverable with moderate fixes and should be CONDITIONAL pending resolution of the HIGH-severity issues.",
+      "verdict": "COMPILE_FAIL",
+      "score": null,
       "pre_check_failed": false,
-      "issue_count": 7,
-      "top_issues": [
-        {
-          "severity": "HIGH",
-          "description": "TypeScript 'any' type used in renderCustomDot callback parameter: `(props: any, seriesIndex: number)`. This violates the directive's constraint of 'No implicit any, no type assertions on DOM nodes without null guard'."
-        },
-        {
-          "severity": "HIGH",
-          "description": "Dynamic Tailwind class construction with template literals: `focus-visible:ring-[${FOCUS_RING_COLOR}]`. Tailwind's JIT compiler cannot detect classes built with string interpolation, so this class may not be included in the production CSS bundle."
-        },
-        {
-          "severity": "MEDIUM",
-          "description": "The `chartProps` object includes `activeIndex` which is passed to all chart types including BarChart and PieChart. The Recharts BarChart and PieChart components may not accept an `activeIndex` prop, which could cause TypeScript errors or unexpected behavior."
-        }
-      ]
+      "issue_count": 0,
+      "top_issues": []
     },
     "gate": {
-      "allowed": true,
-      "effective_verdict": "CONDITIONAL",
-      "reason": "Score 72, verdict CONDITIONAL"
+      "allowed": false,
+      "effective_verdict": "FAIL",
+      "reason": "compile gate: 1 undefined Tailwind token(s) after 2 attempt(s)"
     },
     "build_attempts": 2,
     "attempt_history": [
@@ -74,43 +60,37 @@
       },
       {
         "attempt": 2,
-        "verdict": "CONDITIONAL",
-        "score": 72,
-        "effective": "CONDITIONAL"
+        "verdict": "COMPILE_FAIL",
+        "score": null,
+        "effective": "FAIL"
       }
     ]
   },
   "log": [
-    "[2026-06-11T22:00:04.494Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ ef53266",
-    "[WATCHDOG] In sync at ef53266",
-    "[QUEUE] Loaded via contents-api. Pending: 21, total: 82",
+    "[2026-06-11T22:15:43.271Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ fe7d662",
+    "[WATCHDOG] In sync at 95aa3e4",
+    "[QUEUE] Loaded via contents-api. Pending: 21, total: 83",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T22:00:06.638Z] Processing: AUTO-060 — FS-VIZ-MOB-002 — Mobile Chart Accessibility: ARIA Labels, Keyboard Nav & Screen Reader Support for W251 BOP Visualizatio",
+    "[2026-06-11T22:15:45.233Z] Processing: AUTO-060-FIX — Fix residual audit findings from AUTO-060",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 5 queries...",
+    "[RESEARCHER] Running 4 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
-    "[COMPILE-GATE] Repo tree loaded (727 paths)",
+    "[COMPILE-GATE] Repo tree loaded (730 paths)",
     "[COMPILE-GATE] Manifest loaded (37 packages) — bare imports validated",
-    "[GROUNDING] Builder context: 129 source paths, schema loaded",
+    "[GROUNDING] Builder context: 131 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 4 files",
+    "[BUILDER] Attempt 1 complete — 2 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
-    "[COMPILE-GATE] Attempt 1: 1 undefined Tailwind token(s):\n  components/charts/BaseChart.tsx → 'ring-offset-2'",
+    "[COMPILE-GATE] Attempt 1: 4 undefined Tailwind token(s):\n  components/charts/BaseChart.tsx → 'bg-var'\n  components/charts/BaseChart.tsx → 'border-var'\n  components/charts/BaseChart.tsx → 'ring-offset-2'\n  components/charts/BaseChart.tsx → 'text-var'",
     "[RETRY] Re-running Builder to fix undefined Tailwind tokens (attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 4 files",
+    "[BUILDER] Attempt 2 complete — 2 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
-    "[COMPILE-GATE] Attempt 2: all Tailwind tokens defined",
-    "[COMPILE-GATE] Attempt 2: all named exports verified (0 repo file(s) inspected)",
-    "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[COMMIT] Committing 4 file(s) + queue status (CONDITIONAL-SHIP 72/100 (zero CRITICAL) on attempt 2/2)...",
-    "[QUEUE] Appended fix-up directive AUTO-060-FIX (7 residual finding(s))",
-    "[COMMIT] OK"
+    "[COMPILE-GATE] Attempt 2: 1 undefined Tailwind token(s):\n  components/charts/BaseChart.tsx → 'ring-offset-2'",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 1 undefined Tailwind token(s) after 2 attempt(s)"
   ]
 }
