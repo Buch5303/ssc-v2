@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T03:15:35.958Z",
+  "updated_at": "2026-06-11T03:18:40.808Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1003,31 +1003,31 @@
       "title": "RFQ detail page loading skeleton and error boundary",
       "directive": "In the existing RFQ detail page at `app/rfq/[id]/page.tsx`, implement: (1) a Suspense-based loading skeleton component at `components/rfq/RFQDetailSkeleton.tsx` that renders placeholder shimmer blocks matching the layout of vendor name, status badge, line-item table, and audit trail section — skeleton must be visible within 100ms of navigation (no network dependency); (2) wrap the page data-fetch in the existing error boundary from `lib/error-boundary` (AUTO-014 foundation) so that a failed /api/rfq/[id] fetch renders a user-facing error card with retry CTA rather than a blank page or unhandled exception. Add a Playwright or Jest test in `tests/rfq-detail-skeleton.test.ts` that asserts the skeleton renders when the API response is delayed >300ms. EQS clauses: Dashboard load < 1.5s (skeleton advances perceived performance), C-suite clarity in < 5 seconds, Tableau-level visualization baseline.",
       "priority": 2,
-      "status": "in_progress",
+      "status": "pending",
       "origin": "auto",
       "rationale": "AUTO-002 and AUTO-003 (loading skeletons, empty states) both failed historically. AUTO-032 completed the detail page with live data, so the rendering surface now exists. Scoping this directive to only the detail page — with explicit file paths and a concrete test requirement — avoids the broad scope that caused prior failures. Perceived performance directly supports the 1.5s dashboard budget (EQS).",
       "created_at": "2026-06-11T02:16:19.580Z",
       "started_at": "2026-06-11T03:15:35.880Z",
       "commit_sha": null,
       "auditor_score": 72,
-      "skip_reason": "Requeued 2026-06-11 under best-attempt near-miss rule (best 72/100)",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100) — near-miss (best 72/100), requeued with carried feedback (carryover 2/2)",
       "build_attempts": 2,
       "attempt_history": [
         {
           "attempt": 1,
-          "verdict": "CONDITIONAL",
-          "score": 72,
-          "effective": "CONDITIONAL"
+          "verdict": "FAIL",
+          "score": 40,
+          "effective": "FAIL"
         },
         {
           "attempt": 2,
-          "verdict": "COMPILE_FAIL",
-          "score": null,
-          "effective": "FAIL"
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
         }
       ],
-      "near_miss_retries": 1,
-      "carryover_feedback": "A previous cycle's best attempt scored 72/100 (CONDITIONAL). Fix the auditor findings from that attempt and re-emit the complete spec.\nNOTE: a later attempt failed the compile gate — it imported 'auditLog' from lib/db/audit, which does not exist. That file exports: createAuditMetadata, saveAuditRecord, executeWithAudit, getExistingRecord. Use only those."
+      "near_miss_retries": 2,
+      "carryover_feedback": "A previous cycle's best attempt scored 72/100 (CONDITIONAL). These are the EXACT remaining findings. Fix every one of them in your FIRST attempt this cycle:\n1. [CRITICAL] The page is converted from a server component to a client component by adding 'use client' directive. This breaks the existing architecture where app/rfq/[id]/page.tsx was a server component. The build spec says 'Do not restructure or move the existing /api/rfq/[id] fetch logic — only wrap it', but converting to client component fundamentally restructures the data fetching pattern. Additionally, the async RFQDetailContent component inside a 'use client' file is invalid — Next.js 14 does not support async server components inside client component files. FIX: Remove 'use client' directive. Keep the page as a server component. Import ErrorBoundary and Suspense in a server component context. Move RFQErrorCard to a separate client component file. The data fetching should remain as a server component with Suspense boundary wrapping it.\n2. [CRITICAL] BUILDABILITY violation: The build spec requires using 'lib/error-boundary (AUTO-014)' but the generated code imports from '../../../components/ui/ErrorBoundary'. The spec explicitly states 'Use existing lib/error-boundary export from AUTO-014 without modification'. The import path is incorrect and the component may not exist at the expected location. FIX: Change import to use the correct path: import { ErrorBoundary } from '@/lib/error-boundary' or the appropriate path as specified in the directive.\n3. [HIGH] The async RFQDetailContent component is defined inside a 'use client' file. In Next.js 14 App Router, async components are only supported in server components. This will cause a runtime error or unexpected behavior. FIX: Extract RFQDetailContent to a separate server component file (e.g., app/rfq/[id]/RFQDetailContent.tsx) and import it in the page. The page should remain a server component without 'use client'.\n4. [HIGH] The RFQErrorCard component uses useRouter() but is not marked with 'use client'. Since it's defined in a file that now has 'use client' at the top, this works, but if the page is reverted to a server component, this will break. FIX: Extract RFQErrorCard to a separate client component file with its own 'use client' directive.\n5. [MEDIUM] The retry test has a flawed setup: it sets up a new route handler after page.goto(), but the initial navigation already triggered the first request. The requestCount tracking may not work as expected because the route handler is registered after the page has already loaded. FIX: Set up the route handler with request counting before page.goto(), and use a more robust mechanism to verify the second request (e.g., wait for a specific network event).\n6. [MEDIUM] The test uses expect(skeleton).not.toBeVisible() instead of waitForSelector with state:'detached' as specified in acceptance criterion 6. The timeout of 2000ms also exceeds the 1500ms requirement. FIX: Use page.waitForSelector('[data-testid=\"rfq-detail-skeleton\"]', { state: 'detached', timeout: 1500 }) instead."
     },
     {
       "id": "AUTO-042",
