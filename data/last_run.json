@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T21:20:27.265Z",
+  "timestamp": "2026-06-11T21:34:46.403Z",
   "directive": {
-    "id": "AUTO-058",
-    "title": "FS-VIZ-MOB-002: Mobile Touch Interaction & Gesture Support for Charts",
-    "status": "complete"
+    "id": "AUTO-058-FIX",
+    "title": "Fix residual audit findings from AUTO-058",
+    "status": "failed"
   },
-  "elapsed_seconds": 283.033,
+  "elapsed_seconds": 272.907,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -33,89 +33,83 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 4,
+      "files_count": 3,
       "parse_error": false,
       "first_file_path": "hooks/useChartGestures.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "CONDITIONAL",
-      "score": 72,
-      "summary": "The build implements the gesture layer structure correctly with passive listeners, swipe logic, and modal components. However, two HIGH-severity issues from the prior audit remain unresolved: pinch-to-zoom scale calculation is still broken (scale always ~1.0), and long-press still uses mock data instead of actual chart data points. These directly violate acceptance criteria #2 and #4. Additionally, the cloneElement approach for injecting gesture props into Recharts components is architecturally incorrect. The build is recoverable but requires fixes to the core gesture logic before it can pass.",
+      "verdict": "FAIL",
+      "score": 55,
+      "summary": "The build addresses all 6 residual audit findings at the code level, with correct implementations for pinch-zoom scale calculation, long-press hit-testing, cloneElement elimination, keyboard accessibility, and swipe velocity guard. However, the build fails on 5 of 8 acceptance criteria due to critical issues in test implementation and missing verification artifacts. The long-press handler has a stale closure bug that captures coordinates at pointerdown time instead of at timeout fire time. The test mocks are insufficient and would produce unreliable results. Two acceptance criteria (AC-7 regression testing and AC-8 performance benchmarking) are completely unaddressed. The build requires significant fixes to tests and the long-press timing bug before it can be accepted.",
       "pre_check_failed": false,
-      "issue_count": 6,
+      "issue_count": 9,
       "top_issues": [
         {
-          "severity": "HIGH",
-          "description": "Pinch-to-zoom scale calculation still broken: initialDistanceRef is set in handlePointerDown, but pointer positions are updated in handlePointerMove before distance calculation, making currentDistance approximately equal to initialDistance on every frame. Scale always ~1.0."
+          "severity": "CRITICAL",
+          "description": "The long-press timeout captures `event` from the closure of handlePointerDown, but by the time the timeout fires (500ms later), the pointer may have moved. The spec requires using containerRef.getBoundingClientRect() to convert clientX/clientY to local coordinates at the time of the long-press trigger, but the code captures event.clientX/clientY at pointerdown time, not at timeout fire time. This means the long-press coordinates are stale and inaccurate."
+        },
+        {
+          "severity": "CRITICAL",
+          "description": "The Date.now mock setup is insufficient. The implementation calls Date.now() multiple times (in handlePointerDown and handlePointerUp), but the test only mocks two return values. This will cause the timing calculations to use undefined/NaN values, making the swipe velocity tests unreliable."
         },
         {
           "severity": "HIGH",
-          "description": "Long-press handler still generates mock data instead of using actual chart data point from touch coordinates. This violates acceptance criterion #4."
-        },
-        {
-          "severity": "MEDIUM",
-          "description": "ChartContent uses React.cloneElement to inject 'gestureZoomDomain' and 'gestureActiveSeriesIndex' as props on arbitrary children. Recharts XAxis expects 'domain' as a direct prop, not a custom prop on wrapper elements. This will not affect Recharts rendering."
+          "description": "The test for cloneElement elimination uses a placeholder `expect(true).toBe(true)` instead of actually reading the file and checking for cloneElement occurrences. The test for XAxis domain attribute checks for an HTML attribute, but the mock renders a div with spread props, so the domain prop would be a React prop, not an HTML attribute."
         }
       ]
     },
     "gate": {
-      "allowed": true,
-      "effective_verdict": "CONDITIONAL",
-      "reason": "Score 72, verdict CONDITIONAL"
+      "allowed": false,
+      "effective_verdict": "FAIL",
+      "reason": "Auditor rejected (score 55)"
     },
     "build_attempts": 2,
     "attempt_history": [
       {
         "attempt": 1,
-        "verdict": "CONDITIONAL",
-        "score": 72,
-        "effective": "CONDITIONAL"
+        "verdict": "COMPILE_FAIL",
+        "score": null,
+        "effective": "FAIL"
       },
       {
         "attempt": 2,
-        "verdict": "CONDITIONAL",
-        "score": 72,
-        "effective": "CONDITIONAL"
+        "verdict": "FAIL",
+        "score": 55,
+        "effective": "FAIL"
       }
     ]
   },
   "log": [
-    "[2026-06-11T21:15:44.232Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy",
-    "[WATCHDOG] In sync at 94b4314",
-    "[QUEUE] Loaded via contents-api. Pending: 21, total: 79",
+    "[2026-06-11T21:30:13.497Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ 076e018",
+    "[WATCHDOG] In sync at 1b7e4da",
+    "[QUEUE] Loaded via contents-api. Pending: 22, total: 81",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T21:15:46.357Z] Processing: AUTO-058 — FS-VIZ-MOB-002: Mobile Touch Interaction & Gesture Support for Charts",
+    "[2026-06-11T21:30:16.050Z] Processing: AUTO-058-FIX — Fix residual audit findings from AUTO-058",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
-    "[ARCHITECT] Lossless split: 1 follow-up directive(s) appended to queue (origin AUTO-058)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
     "[RESEARCHER] Running 4 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
-    "[COMPILE-GATE] Repo tree loaded (718 paths)",
+    "[COMPILE-GATE] Repo tree loaded (722 paths)",
     "[COMPILE-GATE] Manifest loaded (37 packages) — bare imports validated",
-    "[GROUNDING] Builder context: 122 source paths, schema loaded",
+    "[GROUNDING] Builder context: 125 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 4 files",
+    "[BUILDER] Attempt 1 complete — 3 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
     "[COMPILE-GATE] Attempt 1: all Tailwind tokens defined",
-    "[COMPILE-GATE] Attempt 1: all named exports verified (0 repo file(s) inspected)",
-    "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
+    "[COMPILE-GATE] Attempt 1: 1 missing named export(s):\n  components/charts/BaseChart.tsx → './TouchableChartWrapper' has no export 'ChartGestureContext'",
+    "[RETRY] Re-running Builder to fix missing exports (attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 4 files",
+    "[BUILDER] Attempt 2 complete — 3 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
     "[COMPILE-GATE] Attempt 2: all Tailwind tokens defined",
-    "[COMPILE-GATE] Attempt 2: all named exports verified (0 repo file(s) inspected)",
+    "[COMPILE-GATE] Attempt 2: all named exports verified (1 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
-    "[COMMIT] Committing 4 file(s) + queue status (CONDITIONAL-SHIP 72/100 (zero CRITICAL) on attempt 2/2)...",
-    "[QUEUE] Appended fix-up directive AUTO-058-FIX (6 residual finding(s))",
-    "[COMMIT] OK"
+    "[AUDITOR] Attempt 2 verdict: FAIL (55/100)",
+    "[GATE] Attempt 2: Auditor rejected (score 55) → FAIL",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): Auditor rejected (score 55)"
   ]
 }
