@@ -1047,6 +1047,40 @@ export async function GET(req: Request) {
   }
   log.push(`[ARCHITECT] Complete`);
 
+  // Lossless scope splitting (2026-06-11): if the Architect deferred scope
+  // into follow_up_directives, append them to the queue as pending NOW so
+  // deferred requirements can never be silently dropped. The EQS standard
+  // covers the full original scope — splitting changes sequencing, not
+  // coverage.
+  const followUps: any[] = Array.isArray((archResult.spec || archResult)?.follow_up_directives)
+    ? (archResult.spec || archResult).follow_up_directives
+    : [];
+  if (followUps.length > 0) {
+    const maxNum = queue.directives.reduce((m: number, d: any) => {
+      const n = parseInt(String(d.id || "").replace(/\D/g, ""), 10);
+      return Number.isFinite(n) ? Math.max(m, n) : m;
+    }, 0);
+    followUps.slice(0, 4).forEach((fu: any, i: number) => {
+      if (!fu?.directive) return;
+      queue.directives.push({
+        id: `AUTO-${String(maxNum + 1 + i).padStart(3, "0")}`,
+        title: String(fu.title || "Follow-up").slice(0, 120),
+        directive: String(fu.directive),
+        status: "pending",
+        created_at: new Date().toISOString(),
+        origin: `split_from:${next.id}`,
+      } as any);
+    });
+    log.push(`[ARCHITECT] Lossless split: ${Math.min(followUps.length, 4)} follow-up directive(s) appended to queue (origin ${next.id})`);
+  }
+  // Scope-limit telemetry — never truncate: the audit must evaluate every
+  // criterion the spec demands. Oversized specs are an Architect defect to
+  // surface, not requirements to drop.
+  const critCount = (archResult.spec || archResult)?.acceptance_criteria?.length || 0;
+  if (critCount > 8) {
+    log.push(`[ARCHITECT] WARNING: ${critCount} acceptance criteria exceeds the 8-criteria scope limit — spec proceeds UNTRUNCATED; expect split on regeneration`);
+  }
+
   log.push(`[ANALYST] Reviewing codebase...`);
   const analysisResult = await runAgent("analyst", { spec: archResult.spec || archResult }, baseUrl);
   log.push(`[ANALYST] ${analysisResult?.status || "complete"}`);
@@ -1105,6 +1139,7 @@ export async function GET(req: Request) {
   let gate: GateResult = { allowed: false, reason: "no build attempted", effective_verdict: "FAIL" };
   let buildAttempts = 0;
   let importedInterfaces: Map<string, string> = new Map();
+  let bestAudit: { score: number | null; verdict: string; issues: any[] } | null = null;
   // Seed attempt 1 from feedback carried over a near-miss requeue (see the
   // post-loop block) so the new cycle continues the work, not restarts it.
   let retryContext: string | undefined = (next as any).carryover_feedback || undefined;
@@ -1227,6 +1262,18 @@ export async function GET(req: Request) {
     attemptHistory.push({ attempt, verdict: rawVerdict, score, effective: gate.effective_verdict });
     log.push(`[GATE] Attempt ${attempt}: ${gate.reason} → ${gate.effective_verdict}`);
 
+    // Track the best audited attempt (2026-06-11): a later attempt that
+    // regresses (e.g. compile-fails) must not erase an earlier near-miss.
+    // AUTO-041's attempt 1 scored 72; attempt 2 broke the compile gate and
+    // the directive was permanently failed on the worse result.
+    if (typeof score === "number" && (bestAudit === null || score > (bestAudit.score as number))) {
+      bestAudit = {
+        score,
+        verdict: gate.effective_verdict,
+        issues: Array.isArray(auditResult?.audit?.issues) ? auditResult.audit.issues : [],
+      };
+    }
+
     // Clean PASS — break out of retry loop and commit.
     if (gate.effective_verdict === "PASS") {
       break;
@@ -1308,36 +1355,35 @@ export async function GET(req: Request) {
     // cycle retries, capped at 3 audit-infra retries to avoid livelock.
     const auditInfraFailure = rawVerdict === "AUDIT_ERROR" || auditResult?.audit?.audit_error === true;
     const auditRetries = ((next as any).audit_error_retries || 0) as number;
-    // Near-miss carryover (2026-06-10): a 3rd in-run attempt is impossible
-    // under the 300s function ceiling, so directives that end CONDITIONAL
-    // >= 70 (AUTO-034 hit 78 — two points off PASS) requeue with the final
-    // audit findings persisted. The next cycle's attempt 1 starts FROM the
-    // feedback instead of from scratch. Capped at 2 carryover cycles.
+    // Near-miss carryover (2026-06-10, widened 2026-06-11): judged on the
+    // BEST audited attempt, not the last — a final compile-fail must not
+    // bury a 70+ CONDITIONAL. Carryover never lowers the bar: nothing
+    // commits below a clean PASS; this only retries with memory.
     const nearMissRetries = ((next as any).near_miss_retries || 0) as number;
-    const isNearMiss =
-      effectiveVerdict === "CONDITIONAL" &&
-      typeof score === "number" &&
-      score >= 70 &&
-      builderFileCount > 0 &&
-      nearMissRetries < 2;
+    const nearMissBasis = bestAudit && typeof bestAudit.score === "number" && bestAudit.score >= 70 && bestAudit.verdict === "CONDITIONAL"
+      ? bestAudit
+      : null;
+    const isNearMiss = nearMissBasis !== null && builderFileCount > 0 && nearMissRetries < 2;
     if (auditInfraFailure && auditRetries < 3) {
       (next as any).audit_error_retries = auditRetries + 1;
       next.status = "pending";
       (next as any).skip_reason = `${skipReason} — audit infrastructure failure, requeued (retry ${auditRetries + 1}/3)`;
       log.push(`[QUEUE] ${next.id} requeued as pending — audit infra failure (retry ${auditRetries + 1}/3)`);
     } else if (isNearMiss) {
-      const issues: any[] = Array.isArray(auditResult?.audit?.issues) ? auditResult.audit.issues : [];
-      const carried = issues.slice(0, 6).map((i: any, idx: number) =>
+      const carried = (nearMissBasis!.issues || []).slice(0, 6).map((i: any, idx: number) =>
         `${idx + 1}. [${i.severity || "?"}] ${i.description || JSON.stringify(i)}${i.fix ? ` FIX: ${i.fix}` : ""}`
       ).join("\n");
+      const lastAttemptNote = rawVerdict === "COMPILE_FAIL"
+        ? `\nNOTE: the most recent attempt ALSO failed the compile gate (${gate.reason}) — do not repeat that import/export mistake.`
+        : "";
       (next as any).near_miss_retries = nearMissRetries + 1;
       (next as any).carryover_feedback = [
-        `A previous cycle scored ${score}/100 (${rawVerdict}) — two attempts used. These are the EXACT remaining findings. Fix every one of them in your FIRST attempt this cycle:`,
+        `A previous cycle's best attempt scored ${nearMissBasis!.score}/100 (CONDITIONAL). These are the EXACT remaining findings. Fix every one of them in your FIRST attempt this cycle:`,
         carried || "(no structured issues — re-emit the complete spec with maximum rigor)",
-      ].join("\n");
+      ].join("\n") + lastAttemptNote;
       next.status = "pending";
-      (next as any).skip_reason = `${skipReason} — near-miss, requeued with carried feedback (carryover ${nearMissRetries + 1}/2)`;
-      log.push(`[QUEUE] ${next.id} requeued as pending — near-miss ${score}/100, feedback carried to next cycle (${nearMissRetries + 1}/2)`);
+      (next as any).skip_reason = `${skipReason} — near-miss (best ${nearMissBasis!.score}/100), requeued with carried feedback (carryover ${nearMissRetries + 1}/2)`;
+      log.push(`[QUEUE] ${next.id} requeued as pending — near-miss best ${nearMissBasis!.score}/100, feedback carried (${nearMissRetries + 1}/2)`);
     } else {
       next.status = "failed";
       next.completed_at = new Date().toISOString();

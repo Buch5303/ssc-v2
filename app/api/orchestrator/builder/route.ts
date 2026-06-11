@@ -46,6 +46,7 @@ Rules:
 - HARD RULE: import local modules ONLY from the EXISTING REPO FILES manifest, or include the file in your own output. Do NOT assume shadcn defaults (@/components/ui/card, button, etc.) exist — check the manifest.
 - HARD RULE: reference ONLY tables and columns present in the ACTUAL DATABASE SCHEMA provided. Never invent columns (e.g. createdAt vs updated_at). Type DB rows via typeof <table>.$inferSelect, never hand-written interfaces with required fields the schema lacks.
 - HARD RULE: no \`any\` types (including [key: string]: any) — builds run with TypeScript strict mode and the auditor rejects \`any\`.
+- HARD RULE: NEVER create or modify lib/db/schema.ts, lib/db/migrations/*, or schema.sql unless the BUILD SPECIFICATION explicitly lists that file in files_to_modify or files_to_create. Schema changes outside spec are an automatic audit CRITICAL.
 - Output ONLY JSON, no markdown fences`;
 
 export async function POST(req: Request) {
