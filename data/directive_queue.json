@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T02:34:19.271Z",
+  "updated_at": "2026-06-11T02:45:50.464Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1033,11 +1033,11 @@
       "title": "Mailgun email notification on RFQ status change",
       "directive": "Create a Mailgun notification module at `lib/notifications/email.ts` that exports `sendRFQStatusEmail({ to: string, rfqId: string, newStatus: string, actorName: string })`. Use the Mailgun REST API (not SDK) via a plain `fetch` POST to `https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages` with credentials from env vars `MAILGUN_API_KEY` and `MAILGUN_DOMAIN`. The email subject must follow the pattern `[FlowSeer] RFQ #{rfqId} status changed to {newStatus}` and the text body must include actor name and a direct link to `/rfq/{rfqId}`. Wire this into the existing `PATCH /api/rfq/[id]/status` route (AUTO-037) so that on every successful status transition, `sendRFQStatusEmail` is called with the RFQ's `contact_email` field as recipient. Failures in email sending must NOT block the HTTP response — catch and log to `audit_logs` with action `'email_notification_failed'`. Add env var documentation to `.env.example`. EQS clauses: 100% auditable data, SOC 2 orientation (notification delivery traceability).",
       "priority": 2,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "Email notifications via Mailgun are an explicit Week 2-4 roadmap deliverable (Autonomous Build Directive §VII). AUTO-037 (status transition API) is now complete, creating the natural integration point. Scoping to a single module + one call site with explicit error isolation (non-blocking, audit-logged failure path) keeps this executable in a single pipeline run.",
       "created_at": "2026-06-11T02:16:19.580Z",
-      "started_at": null,
+      "started_at": "2026-06-11T02:45:50.464Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
