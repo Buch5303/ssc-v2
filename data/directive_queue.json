@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T07:33:36.595Z",
+  "updated_at": "2026-06-11T07:45:15.642Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1259,10 +1259,10 @@
       "id": "AUTO-050",
       "title": "Route Authorization Middleware for User Roles",
       "directive": "Using the 'role' column and 'UserRole' type established in FS-SCHEMA-001, implement route-level authorization for the FlowSeer W251 BOP procurement platform (Next.js 14, Vercel). Scope: middleware.ts (or equivalent) that reads the authenticated user's role from the session/JWT, enforces access rules (admin = full access; procurement_manager = read+write procurement routes; viewer = read-only), and returns 403 for unauthorized access. No schema changes — consume the existing UserRole type from lib/db/schema.ts only. EQS v1.0 standards apply: audit log every authorization denial (reuse schema_migration_audit pattern or a dedicated access_denied_audit table defined in its own schema directive), latency overhead of middleware < 20ms p99. Do not bundle schema changes in this directive.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T04:46:20.349Z",
       "origin": "split_from:AUTO-043",
-      "started_at": "2026-06-11T07:30:16.351Z",
+      "started_at": "2026-06-11T07:45:15.516Z",
       "near_miss_retries": 1,
       "carryover_issues": [
         {
