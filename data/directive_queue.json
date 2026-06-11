@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T04:35:00.581Z",
+  "updated_at": "2026-06-11T04:45:35.567Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1081,9 +1081,10 @@
       "id": "AUTO-043",
       "title": "RBAC part 1: role field on users (schema + migration)",
       "directive": "Add a role field to the users table supporting at minimum the roles admin, procurement_manager, and viewer. Scope: lib/db/schema.ts change with a proper migration in lib/db/migrations, default role viewer, typed via the schema (no hand-written interfaces), and a backfill-safe migration (existing users get viewer). Single concern: SCHEMA ONLY — no route authorization in this directive (that is the follow-up). All EQS v1.0 audit/data-integrity standards apply: immutable audit logging of the migration event, 100% reconcilable data.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T02:45:00.000Z",
-      "origin": "split_from:AUTO-040"
+      "origin": "split_from:AUTO-040",
+      "started_at": "2026-06-11T04:45:35.472Z"
     },
     {
       "id": "AUTO-044",
