@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireInternal } from "@/lib/api-guard";
 
 /**
  * GitHub Commit API
@@ -118,6 +119,8 @@ async function atomicCommit(
 }
 
 export async function POST(req: Request) {
+  const denied = requireInternal(req);
+  if (denied) return denied;
   try {
     const { files, message, directive_id } = await req.json();
     const token = process.env.GITHUB_PAT;

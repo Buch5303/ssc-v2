@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireSessionOrInternal } from "@/lib/api-guard";
 
 const SYSTEM = `You are FlowSeer's Supply Chain Risk Engine for the TG20/W251 BOP procurement program.
 
@@ -44,6 +45,8 @@ Analyze supply chain risks and return ONLY valid JSON:
 }`;
 
 export async function POST(req: Request) {
+  const denied = await requireSessionOrInternal(req);
+  if (denied) return denied;
   try {
     const body = await req.json().catch(() => ({}));
     const apiKey = process.env.ANTHROPIC_API_KEY;

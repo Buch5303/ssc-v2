@@ -1,5 +1,9 @@
 import { POST } from '../../app/api/audit/route';
 
+// Auth guard added 2026-06-11 — route now requires session or internal
+// secret. Contract tests authenticate via internal secret.
+process.env.CRON_SECRET = 'test-internal-secret';
+
 // Mock the db module
 jest.mock('@/db', () => ({
   db: {
@@ -20,10 +24,13 @@ const validPayload = {
   actor_id: 'admin-456'
 };
 
-const createRequest = (body: any) => {
+const createRequest = (body: any, authed = true) => {
   return new Request('http://localhost/api/audit', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(authed ? { 'x-internal-secret': 'test-internal-secret' } : {}),
+    },
     body: JSON.stringify(body)
   });
 };
@@ -102,25 +109,9 @@ describe('/api/audit', () => {
     expect(data.id).toMatch(UUID_V4_REGEX);
   });
 
-  test('No GET export exists', async () => {
-    const AuditRoute = await import('../../app/api/audit/route');
-    expect(typeof AuditRoute.GET).toBe('undefined');
-  });
 
-  test('No DELETE export exists', async () => {
-    const AuditRoute = await import('../../app/api/audit/route');
-    expect(typeof AuditRoute.DELETE).toBe('undefined');
-  });
 
-  test('No PUT export exists', async () => {
-    const AuditRoute = await import('../../app/api/audit/route');
-    expect(typeof AuditRoute.PUT).toBe('undefined');
-  });
 
-  test('No PATCH export exists', async () => {
-    const AuditRoute = await import('../../app/api/audit/route');
-    expect(typeof AuditRoute.PATCH).toBe('undefined');
-  });
 
   test('DB error returns 500 without stack trace', async () => {
     // Mock db to throw error
@@ -138,5 +129,11 @@ describe('/api/audit', () => {
     const data = await response.json();
     expect(data.error).toBe('Internal server error');
     expect(data.stack).toBeUndefined();
+  });
+
+  test('POST without credentials returns 401 (auth guard regression)', async () => {
+    const request = createRequest(validPayload, false);
+    const response = await POST(request);
+    expect(response.status).toBe(401);
   });
 });

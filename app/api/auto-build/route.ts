@@ -122,7 +122,7 @@ async function runAgent(agentPath: string, body: any, baseUrl: string): Promise<
   try {
     const res = await fetch(`${baseUrl}/api/orchestrator/${agentPath}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-internal-secret": (process.env.CRON_SECRET || "").trim() },
       body: JSON.stringify(body),
     });
     return await res.json();
@@ -251,7 +251,7 @@ async function saveQueue(
     ];
     const res = await fetch(`${baseUrl}/api/github-commit`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-internal-secret": (process.env.CRON_SECRET || "").trim() },
       body: JSON.stringify({ files, message }),
     });
     const data = await res.json();

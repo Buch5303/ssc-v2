@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireSessionOrInternal } from "@/lib/api-guard";
 import { z } from 'zod';
 import pool from '@/lib/db/connection';
 import { validateAndSanitize, checkRateLimit } from '@/lib/db/validators';
@@ -25,6 +26,8 @@ function getClientIP(request: NextRequest): string {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await requireSessionOrInternal(request);
+  if (denied) return denied;
   const startTime = Date.now();
   const clientIP = getClientIP(request);
   const userAgent = request.headers.get('user-agent') || '';

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireSessionOrInternal } from "@/lib/api-guard";
 
 /**
  * Layer 3 — Self-Heal / Auto-Rollback endpoint
@@ -183,6 +184,8 @@ async function runSelfHeal(dryRun: boolean): Promise<HealResponse> {
 }
 
 export async function GET(req: Request) {
+  const denied = await requireSessionOrInternal(req);
+  if (denied) return denied;
   // Default to dry_run=true so GET never accidentally triggers a rollback
   // from a casual browser hit. Pass ?execute=true to actually act.
   const url = new URL(req.url);

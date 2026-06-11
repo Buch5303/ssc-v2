@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireSessionOrInternal } from "@/lib/api-guard";
 import { writeFileSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { execSync } from 'child_process';
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSessionOrInternal(req);
+  if (denied) return denied;
   const body = await req.json();
   const { rfq_id, supplier, contact = '', quoted_price, date, notes = '' } = body;
   if (!rfq_id || !supplier || !quoted_price) {

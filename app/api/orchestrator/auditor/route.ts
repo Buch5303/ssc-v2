@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
+import { requireSessionOrInternal } from "@/lib/api-guard";
 
 // Vercel function timeout: 300s (Pro plan max). Was 60 on Hobby.
 // Pro upgrade lifted ceiling so full Sonnet 4 + 8K-token Builder fits cleanly.
 export const maxDuration = 300;
 
 export async function POST(req: Request) {
+  const denied = await requireSessionOrInternal(req);
+  if (denied) return denied;
   try {
     const { spec, build, research, repo_context, imported_files, prior_issues, prior_score } = await req.json();
     const apiKey = process.env.DEEPSEEK_API_KEY;

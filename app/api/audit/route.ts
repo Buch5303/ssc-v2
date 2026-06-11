@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireSessionOrInternal } from "@/lib/api-guard";
 import { z } from 'zod';
 import { db } from '@/db';
 import { auditLogs } from '@/db/schema/auditLog';
@@ -12,6 +13,8 @@ const AuditPayloadSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const denied = await requireSessionOrInternal(request);
+  if (denied) return denied;
   let body;
   
   try {

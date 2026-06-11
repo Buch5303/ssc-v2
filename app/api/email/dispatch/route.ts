@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireSessionOrInternal } from "@/lib/api-guard";
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { RFQ_EMAIL_TEMPLATES } from '../../../../lib/email/rfqTemplates';
@@ -38,6 +39,8 @@ async function sendViaSendGrid(to: string, cc: string|undefined, subject: string
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await requireSessionOrInternal(req);
+  if (denied) return denied;
   const body    = await req.json();
   const ids     = body.rfq_ids === 'all' ? Object.keys(RFQ_EMAIL_TEMPLATES) : (body.rfq_ids as string[]);
   const dryRun  = body.dry_run ?? false;
@@ -83,7 +86,9 @@ export async function POST(req: NextRequest) {
   });
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const denied = await requireSessionOrInternal(req);
+  if (denied) return denied;
   return NextResponse.json({
     total: Object.keys(RFQ_EMAIL_TEMPLATES).length,
     send_date: '2026-05-25',

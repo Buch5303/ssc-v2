@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireSessionOrInternal } from "@/lib/api-guard";
 import { sendAlert } from "@/lib/notify";
 
 /**
@@ -288,7 +289,7 @@ async function commitFiles(
   try {
     const res = await fetch(`${baseUrl}/api/github-commit`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-internal-secret": (process.env.CRON_SECRET || "").trim() },
       body: JSON.stringify({ files, message }),
     });
     const data = await res.json();
@@ -364,6 +365,8 @@ function buildFixDirective(err: BuildError, deploySha: string, queue: Queue): Di
 // ----------------------------------------------------------------------
 
 export async function GET(req: Request) {
+  const denied = await requireSessionOrInternal(req);
+  if (denied) return denied;
   const startedAt = Date.now();
   const log: string[] = [];
   const url = new URL(req.url);

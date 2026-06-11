@@ -87,7 +87,7 @@ async function saveState(state: AlertState, baseUrl: string): Promise<void> {
   try {
     await fetch(`${baseUrl}/api/github-commit`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-internal-secret": (process.env.CRON_SECRET || "").trim() },
       body: JSON.stringify({
         files: [{ path: STATE_PATH, content: JSON.stringify(state, null, 2) + "\n" }],
         message: "[alert] update notifier cooldown state",
