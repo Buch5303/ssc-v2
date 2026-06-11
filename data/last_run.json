@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T21:05:10.252Z",
+  "timestamp": "2026-06-11T21:20:27.265Z",
   "directive": {
-    "id": "AUTO-057",
-    "title": "FS-RESP-003: Mobile Chart Responsiveness — Remaining 9 Dashboard Pages",
-    "status": "failed"
+    "id": "AUTO-058",
+    "title": "FS-VIZ-MOB-002: Mobile Touch Interaction & Gesture Support for Charts",
+    "status": "complete"
   },
-  "elapsed_seconds": 213.024,
+  "elapsed_seconds": 283.033,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -21,7 +21,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 2,
+      "research_queries_count": 4,
       "spec_parse_error": false
     },
     "researcher": {
@@ -33,81 +33,89 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 8,
+      "files_count": 4,
       "parse_error": false,
-      "first_file_path": "components/charts/ChartWrapper.tsx"
+      "first_file_path": "hooks/useChartGestures.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "FAIL",
-      "score": 40,
-      "summary": "The build fails to meet critical acceptance criteria. Only 7 of 9 required page files were generated, the required Playwright test file was not created, and the ChartWrapper component was incorrectly created as new instead of being imported from the existing codebase. The generated pages that do exist correctly implement the ChartWrapper migration pattern with proper imports, tick font sizes, tooltip dimensions, and legend styling. However, the missing files and test suite make this build incomplete and unverifiable. The build also introduces a TypeScript `any` type violation in the PieChart label renderer.",
+      "verdict": "CONDITIONAL",
+      "score": 72,
+      "summary": "The build implements the gesture layer structure correctly with passive listeners, swipe logic, and modal components. However, two HIGH-severity issues from the prior audit remain unresolved: pinch-to-zoom scale calculation is still broken (scale always ~1.0), and long-press still uses mock data instead of actual chart data points. These directly violate acceptance criteria #2 and #4. Additionally, the cloneElement approach for injecting gesture props into Recharts components is architecturally incorrect. The build is recoverable but requires fixes to the core gesture logic before it can pass.",
       "pre_check_failed": false,
-      "issue_count": 8,
+      "issue_count": 6,
       "top_issues": [
         {
-          "severity": "CRITICAL",
-          "description": "The Playwright test file required by the build specification was not generated. The spec explicitly requires a single test suite covering all 14 dashboard pages."
+          "severity": "HIGH",
+          "description": "Pinch-to-zoom scale calculation still broken: initialDistanceRef is set in handlePointerDown, but pointer positions are updated in handlePointerMove before distance calculation, making currentDistance approximately equal to initialDistance on every frame. Scale always ~1.0."
         },
         {
-          "severity": "CRITICAL",
-          "description": "Required page file was not generated. The build spec lists 9 files to modify, but only 7 were generated. Missing: app/(dashboard)/purchase-orders/page.tsx"
+          "severity": "HIGH",
+          "description": "Long-press handler still generates mock data instead of using actual chart data point from touch coordinates. This violates acceptance criterion #4."
         },
         {
-          "severity": "CRITICAL",
-          "description": "Required page file was not generated. The build spec lists 9 files to modify, but only 7 were generated. Missing: app/(dashboard)/cost-avoidance/page.tsx"
+          "severity": "MEDIUM",
+          "description": "ChartContent uses React.cloneElement to inject 'gestureZoomDomain' and 'gestureActiveSeriesIndex' as props on arbitrary children. Recharts XAxis expects 'domain' as a direct prop, not a custom prop on wrapper elements. This will not affect Recharts rendering."
         }
       ]
     },
     "gate": {
-      "allowed": false,
-      "effective_verdict": "FAIL",
-      "reason": "Auditor rejected (score 40)"
+      "allowed": true,
+      "effective_verdict": "CONDITIONAL",
+      "reason": "Score 72, verdict CONDITIONAL"
     },
     "build_attempts": 2,
     "attempt_history": [
       {
         "attempt": 1,
-        "verdict": "COMPILE_FAIL",
-        "score": null,
-        "effective": "FAIL"
+        "verdict": "CONDITIONAL",
+        "score": 72,
+        "effective": "CONDITIONAL"
       },
       {
         "attempt": 2,
-        "verdict": "FAIL",
-        "score": 40,
-        "effective": "FAIL"
+        "verdict": "CONDITIONAL",
+        "score": 72,
+        "effective": "CONDITIONAL"
       }
     ]
   },
   "log": [
-    "[2026-06-11T21:01:37.228Z] Auto-builder cycle started",
+    "[2026-06-11T21:15:44.232Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy",
-    "[WATCHDOG] In sync at 64984ea",
-    "[QUEUE] Loaded via contents-api. Pending: 22, total: 79",
+    "[WATCHDOG] In sync at 94b4314",
+    "[QUEUE] Loaded via contents-api. Pending: 21, total: 79",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T21:01:39.667Z] Processing: AUTO-057 — FS-RESP-003: Mobile Chart Responsiveness — Remaining 9 Dashboard Pages",
+    "[2026-06-11T21:15:46.357Z] Processing: AUTO-058 — FS-VIZ-MOB-002: Mobile Touch Interaction & Gesture Support for Charts",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
+    "[ARCHITECT] Lossless split: 1 follow-up directive(s) appended to queue (origin AUTO-058)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 2 queries...",
+    "[RESEARCHER] Running 4 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
     "[COMPILE-GATE] Repo tree loaded (718 paths)",
     "[COMPILE-GATE] Manifest loaded (37 packages) — bare imports validated",
     "[GROUNDING] Builder context: 122 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 2 files",
-    "[COMPILE-GATE] Attempt 1: 2 unresolved import(s):\n  app/(dashboard)/forecast/page.tsx → '@/components/charts/ChartWrapper'\n  app/(dashboard)/vendor-performance/page.tsx → '@/components/charts/ChartWrapper'",
-    "[RETRY] Re-running Builder to fix unresolved imports (attempt 2/2)",
+    "[BUILDER] Attempt 1 complete — 4 files",
+    "[COMPILE-GATE] Attempt 1: all imports resolve",
+    "[COMPILE-GATE] Attempt 1: all Tailwind tokens defined",
+    "[COMPILE-GATE] Attempt 1: all named exports verified (0 repo file(s) inspected)",
+    "[AUDITOR] Reviewing attempt 1...",
+    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
+    "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 8 files",
+    "[BUILDER] Attempt 2 complete — 4 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
     "[COMPILE-GATE] Attempt 2: all Tailwind tokens defined",
     "[COMPILE-GATE] Attempt 2: all named exports verified (0 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: FAIL (40/100)",
-    "[GATE] Attempt 2: Auditor rejected (score 40) → FAIL",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): Auditor rejected (score 40)"
+    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
+    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[COMMIT] Committing 4 file(s) + queue status (CONDITIONAL-SHIP 72/100 (zero CRITICAL) on attempt 2/2)...",
+    "[QUEUE] Appended fix-up directive AUTO-058-FIX (6 residual finding(s))",
+    "[COMMIT] OK"
   ]
 }
