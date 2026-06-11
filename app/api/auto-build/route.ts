@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { validateTailwindTokens } from "@/lib/tailwind-gate";
 import { sendAlert, classifyApiError } from "@/lib/notify";
 
 // Vercel function timeout: 300s (Pro plan max). Was 60 on Hobby.
@@ -477,6 +478,9 @@ function importResolves(spec: string, importerPath: string, known: Set<string>, 
   for (const e of exts) if (known.has(target + e)) return true;
   return false;
 }
+
+// Layer 2c Tailwind token validation lives in lib/tailwind-gate.ts (shared
+// with __tests__/tailwind-gate.test.ts so the gate and its test never drift).
 
 function validateImports(
   files: Array<{ path: string; content: string }>,
@@ -1200,6 +1204,17 @@ export async function GET(req: Request) {
       ]);
     }
   } catch { /* fail open — gate skips bare-import validation this cycle */ }
+  // Tailwind config source for token validation (Layer 2c).
+  let tailwindConfigSrc: string | null = null;
+  try {
+    for (const cfgName of ["tailwind.config.js", "tailwind.config.ts", "tailwind.config.cjs"]) {
+      const cfgRes = await fetch(
+        `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${cfgName}`,
+        { cache: "no-store" }
+      );
+      if (cfgRes.ok) { tailwindConfigSrc = await cfgRes.text(); break; }
+    }
+  } catch { /* fail open — gate skips Tailwind token validation this cycle */ }
   log.push(
     installedPkgs
       ? `[COMPILE-GATE] Manifest loaded (${installedPkgs.size} packages) — bare imports validated`
@@ -1295,6 +1310,33 @@ export async function GET(req: Request) {
         break;
       }
       log.push(`[COMPILE-GATE] Attempt ${attempt}: all imports resolve`);
+
+      // Layer 2c — Tailwind token gate. Catches AUTO-048's class of break:
+      // a color utility (border-border, bg-card, bg-bg) whose token is absent
+      // from tailwind.config, which fails `next build` at the CSS layer.
+      const badTw = validateTailwindTokens(batch, tailwindConfigSrc);
+      if (badTw.length > 0) {
+        const detail = badTw.slice(0, 8).map(u => `  ${u.file} → '${u.cls}'`).join("\n");
+        log.push(`[COMPILE-GATE] Attempt ${attempt}: ${badTw.length} undefined Tailwind token(s):\n${detail}`);
+        attemptHistory.push({ attempt, verdict: "COMPILE_FAIL", score: null, effective: "FAIL" });
+        if (attempt < MAX_BUILD_ATTEMPTS) {
+          retryContext = [
+            `Your previous output uses Tailwind color utilities whose tokens are NOT defined in tailwind.config:`,
+            detail,
+            `Either use a token that exists in the config, or include the tailwind.config change that defines these tokens in your files array. A class like \`border-border\` requires a \`border\` color key under theme.extend.colors. Re-emit the COMPLETE set of files.`,
+          ].join("\n");
+          log.push(`[RETRY] Re-running Builder to fix undefined Tailwind tokens (attempt ${attempt + 1}/${MAX_BUILD_ATTEMPTS})`);
+          continue;
+        }
+        gate = {
+          allowed: false,
+          reason: `compile gate: ${badTw.length} undefined Tailwind token(s) after ${attempt} attempt(s)`,
+          effective_verdict: "FAIL",
+        };
+        rawVerdict = "COMPILE_FAIL";
+        break;
+      }
+      log.push(`[COMPILE-GATE] Attempt ${attempt}: all Tailwind tokens defined`);
 
       // Symbol-level pass (Layer 2b) — catches AUTO-039's class of break:
       // named import of a symbol the (existing) target file doesn't export.
