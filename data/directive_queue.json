@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T22:18:35.856Z",
+  "updated_at": "2026-06-11T22:30:45.432Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1504,9 +1504,10 @@
       "id": "AUTO-061",
       "title": "FS-VIZ-MOB-003 — Mobile Chart Interaction: Pinch-Zoom, Swipe-to-Pan & Touch Gesture Handling for W251 BOP Time-Series Ch",
       "directive": "DIRECTIVE: Following FS-VIZ-MOB-001 (mobile responsive charts), add touch gesture support to time-series and trend charts on the W251 BOP dashboard. Requirements: (1) pinch-to-zoom on time-series charts adjusts the visible X-axis date range (min zoom = 1 day, max = full dataset range); (2) horizontal swipe-to-pan shifts the visible window without triggering page scroll; (3) double-tap resets zoom to full range; (4) all gestures must have visual affordance (zoom level indicator, pan handle icons); (5) gesture state must be managed locally in a useChartGestures hook — no global state changes; (6) gestures must not interfere with page scroll on the vertical axis. CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. Recharts only — no additional charting libraries. EQS v1.0 enforced. Builds on ChartWrapper.tsx and BaseChart.tsx from FS-VIZ-MOB-001. Covers ONLY gesture interaction — no layout, accessibility, or data changes.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T06:02:17.586Z",
-      "origin": "split_from:AUTO-046"
+      "origin": "split_from:AUTO-046",
+      "started_at": "2026-06-11T22:30:45.340Z"
     },
     {
       "id": "AUTO-062",
