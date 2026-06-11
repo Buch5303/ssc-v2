@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T05:49:32.805Z",
+  "timestamp": "2026-06-11T06:05:42.766Z",
   "directive": {
     "id": "AUTO-046",
     "title": "Mobile Responsive — Charts and Data Visualizations",
-    "status": "pending"
+    "status": "failed"
   },
-  "elapsed_seconds": 239.674,
+  "elapsed_seconds": 260.453,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -21,7 +21,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 4,
+      "research_queries_count": 5,
       "spec_parse_error": false
     },
     "researcher": {
@@ -33,86 +33,81 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 15,
+      "files_count": 8,
       "parse_error": false,
-      "first_file_path": "components/charts/ResponsiveChartWrapper.tsx"
+      "first_file_path": "components/charts/ChartWrapper.tsx"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "FAIL",
+      "verdict": "COMPILE_FAIL",
       "score": 40,
-      "summary": "The build implements the core ResponsiveChartWrapper component and MobileChartConfig configuration as specified, but fails to meet several critical acceptance criteria. Only 11 of 14 dashboard pages were modified (missing page.tsx, log-response/page.tsx, send-rfq/page.tsx). The legend layout uses 'horizontal' instead of the required 'vertical' stacking. No unit tests or Playwright tests were created to verify the acceptance criteria. The tooltip wrapping approach may break Recharts' internal DOM structure. Several type safety issues exist in the component identification logic. The build is incomplete and requires significant fixes before it can pass audit. Score is 40 due to multiple critical failures on acceptance criteria and missing test infrastructure.",
+      "summary": "The build implements the core ChartWrapper infrastructure and modifies 4 of 14 required dashboard pages. However, it has critical issues: (1) incomplete coverage - only 4/14 pages modified due to truncation; (2) KPI component prop mismatch will cause TypeScript/runtime errors; (3) dynamic Tailwind class will be purged; (4) TouchTargetWrapper approach is architecturally incorrect for Recharts tooltips; (5) no test infrastructure created. The build is fundamentally incomplete and cannot pass without addressing the missing pages and critical TypeScript errors. Score is capped at 40 due to incomplete implementation and critical bugs.",
       "pre_check_failed": false,
-      "issue_count": 12,
+      "issue_count": 10,
       "top_issues": [
         {
           "severity": "CRITICAL",
-          "description": "Missing 3 dashboard page modifications: app/dashboard/page.tsx, app/dashboard/log-response/page.tsx, app/dashboard/send-rfq/page.tsx. The build spec requires all 14 dashboard pages to have chart components wrapped in ResponsiveChartWrapper. Only 11 pages were modified."
+          "description": "KPI component usage has wrong props. The actual KPI component (components/ui/KPI.tsx) expects { label, value, sub, badge, accent } but the generated code uses { title, change, trend }. This will cause TypeScript errors and runtime failures."
         },
         {
           "severity": "CRITICAL",
-          "description": "Legend layout is set to 'horizontal' instead of 'vertical' as specified in the build spec. The spec requires `<Legend layout='vertical' verticalAlign='bottom' align='center' />` on mobile, but the code uses `layout: 'horizontal'`. This will cause legends to render in a single row instead of stacked vertically, potentially causing overflow on narrow viewports."
+          "description": "Build was truncated at max_tokens - only 4 of 14 dashboard pages were modified. The directive requires ALL 14 dashboard pages to use ChartWrapper. Missing pages: audit-trail, automation, incentive-radar, log-response, risk, send-rfq, settings, supplier-network, threat-radar, and the root dashboard page."
         },
         {
           "severity": "CRITICAL",
-          "description": "The tooltip wrapper div is returned as a separate element with key=\"tooltip-wrapper\" inside the processedChildren array, but it wraps the Tooltip component. This creates an extra DOM node that may break Recharts' tooltip positioning logic. The Tooltip should be wrapped at the ResponsiveChartWrapper level, not inside the children mapping."
+          "description": "Dynamic Tailwind class `min-h-[${mobileHeight}px]` will be purged by Tailwind's JIT compiler since the value is dynamic. This breaks the min-height enforcement on mobile."
         }
       ]
     },
     "gate": {
       "allowed": false,
       "effective_verdict": "FAIL",
-      "reason": "Auditor rejected (score 40)"
+      "reason": "compile gate: 1 unresolved import(s) after 2 attempt(s)"
     },
     "build_attempts": 2,
     "attempt_history": [
       {
         "attempt": 1,
-        "verdict": "CONDITIONAL",
-        "score": 72,
-        "effective": "CONDITIONAL"
+        "verdict": "FAIL",
+        "score": 40,
+        "effective": "FAIL"
       },
       {
         "attempt": 2,
-        "verdict": "FAIL",
-        "score": 40,
+        "verdict": "COMPILE_FAIL",
+        "score": null,
         "effective": "FAIL"
       }
     ]
   },
   "log": [
-    "[2026-06-11T05:45:33.131Z] Auto-builder cycle started",
+    "[2026-06-11T06:01:22.313Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy",
-    "[WATCHDOG] In sync at 9513953",
-    "[QUEUE] Loaded via contents-api. Pending: 12, total: 57",
+    "[WATCHDOG] In sync at 7c47361",
+    "[QUEUE] Loaded via contents-api. Pending: 14, total: 59",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T05:45:37.734Z] Processing: AUTO-046 — Mobile Responsive — Charts and Data Visualizations",
+    "[2026-06-11T06:01:24.616Z] Processing: AUTO-046 — Mobile Responsive — Charts and Data Visualizations",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ARCHITECT] Lossless split: 2 follow-up directive(s) appended to queue (origin AUTO-046)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 4 queries...",
+    "[RESEARCHER] Running 5 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
     "[COMPILE-GATE] Repo tree loaded (693 paths)",
     "[GROUNDING] Builder context: 109 source paths, schema loaded",
     "[CARRYOVER] Attempt 1 seeded with prior cycle's audit findings",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 4 files",
+    "[BUILDER] Attempt 1 complete — 8 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
-    "[COMPILE-GATE] Attempt 1: all named exports verified (0 repo file(s) inspected)",
+    "[COMPILE-GATE] Attempt 1: all named exports verified (2 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
-    "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[AUDITOR] Attempt 1 verdict: FAIL (40/100)",
+    "[GATE] Attempt 1: Auditor rejected (score 40) → FAIL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 15 files",
-    "[COMPILE-GATE] Attempt 2: all imports resolve",
-    "[COMPILE-GATE] Attempt 2: all named exports verified (0 repo file(s) inspected)",
-    "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: FAIL (40/100)",
-    "[GATE] Attempt 2: Auditor rejected (score 40) → FAIL",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): Auditor rejected (score 40)",
-    "[QUEUE] AUTO-046 requeued as pending — near-miss best 72/100, feedback carried (2/2)"
+    "[BUILDER] Attempt 2 complete — 8 files",
+    "[COMPILE-GATE] Attempt 2: 1 unresolved import(s):\n  components/charts/ChartWrapper.tsx → './useIsMobile'",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 1 unresolved import(s) after 2 attempt(s)"
   ]
 }
