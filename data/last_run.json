@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T19:17:44.245Z",
+  "timestamp": "2026-06-11T19:32:33.067Z",
   "directive": {
-    "id": "AUTO-050-FIX",
-    "title": "Fix residual audit findings from AUTO-050",
+    "id": "AUTO-051",
+    "title": "Role-Based UI Visibility — Component-Level Access Control",
     "status": "failed"
   },
-  "elapsed_seconds": 156.862,
+  "elapsed_seconds": 145.376,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -21,7 +21,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 0,
+      "research_queries_count": 2,
       "spec_parse_error": false
     },
     "researcher": {
@@ -35,7 +35,7 @@
       "status": "complete",
       "files_count": 5,
       "parse_error": false,
-      "first_file_path": "middleware.ts"
+      "first_file_path": "components/auth/role-guard.types.ts"
     },
     "auditor": {
       "status": "complete",
@@ -48,7 +48,7 @@
     "gate": {
       "allowed": false,
       "effective_verdict": "FAIL",
-      "reason": "compile gate: 1 unresolved import(s) after 2 attempt(s)"
+      "reason": "compile gate: 1 undefined Tailwind token(s) after 2 attempt(s)"
     },
     "build_attempts": 2,
     "attempt_history": [
@@ -67,27 +67,30 @@
     ]
   },
   "log": [
-    "[2026-06-11T19:15:07.384Z] Auto-builder cycle started",
+    "[2026-06-11T19:30:07.692Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy @ 8dfa80b",
-    "[WATCHDOG] In sync at 8dfa80b",
-    "[QUEUE] Loaded via contents-api. Pending: 24, total: 74",
+    "[WATCHDOG] In sync at b2d3203",
+    "[QUEUE] Loaded via contents-api. Pending: 23, total: 74",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T19:15:09.300Z] Processing: AUTO-050-FIX — Fix residual audit findings from AUTO-050",
+    "[2026-06-11T19:30:10.174Z] Processing: AUTO-051 — Role-Based UI Visibility — Component-Level Access Control",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
+    "[ARCHITECT] Lossless split: 1 follow-up directive(s) appended to queue (origin AUTO-051)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Skipped — no research_queries in spec",
+    "[RESEARCHER] Running 2 queries...",
+    "[RESEARCHER] skipped — 0 result(s)",
     "[COMPILE-GATE] Repo tree loaded (715 paths)",
     "[COMPILE-GATE] Manifest loaded (37 packages) — bare imports validated",
     "[GROUNDING] Builder context: 122 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
     "[BUILDER] Attempt 1 complete — 5 files",
-    "[COMPILE-GATE] Attempt 1: 1 unresolved import(s):\n  lib/auth/__tests__/middleware.test.ts → 'vitest'",
+    "[COMPILE-GATE] Attempt 1: 6 unresolved import(s):\n  components/auth/role-guard.types.ts → 'lib/db/schema'\n  lib/auth/get-session-role.ts → 'lib/db/schema'\n  lib/auth/get-session-role.ts → 'lib/logger'\n  components/auth/RoleGuard.tsx → 'lib/auth/get-session-role'\n  components/dashboard/DashboardNav.tsx → 'components/auth/RoleGuard'\n  components/dashboard/DashboardActions.tsx → 'components/auth/RoleGuard'",
     "[RETRY] Re-running Builder to fix unresolved imports (attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
     "[BUILDER] Attempt 2 complete — 5 files",
-    "[COMPILE-GATE] Attempt 2: 1 unresolved import(s):\n  lib/auth/__tests__/middleware.test.ts → 'bun:test'",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 1 unresolved import(s) after 2 attempt(s)"
+    "[COMPILE-GATE] Attempt 2: all imports resolve",
+    "[COMPILE-GATE] Attempt 2: 1 undefined Tailwind token(s):\n  components/dashboard/DashboardActions.tsx → 'ring-offset-2'",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 1 undefined Tailwind token(s) after 2 attempt(s)"
   ]
 }
