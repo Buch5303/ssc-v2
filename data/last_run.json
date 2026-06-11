@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T22:18:35.772Z",
+  "timestamp": "2026-06-11T22:35:33.782Z",
   "directive": {
-    "id": "AUTO-060-FIX",
-    "title": "Fix residual audit findings from AUTO-060",
-    "status": "failed"
+    "id": "AUTO-061",
+    "title": "FS-VIZ-MOB-003 — Mobile Chart Interaction: Pinch-Zoom, Swipe-to-Pan & Touch Gesture Handling for W251 BOP Time-Series Ch",
+    "status": "complete"
   },
-  "elapsed_seconds": 172.502,
+  "elapsed_seconds": 290.489,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -33,48 +33,63 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 2,
+      "files_count": 4,
       "parse_error": false,
-      "first_file_path": "components/charts/BaseChart.tsx"
+      "first_file_path": "hooks/useChartGestures.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "COMPILE_FAIL",
-      "score": null,
+      "verdict": "CONDITIONAL",
+      "score": 78,
+      "summary": "The build implements the core gesture logic correctly: pinch-to-zoom with clamping, pan with proportional offset, double-tap reset, and vertical scroll isolation are all present in the hook. The GestureAffordance component renders zoom indicators and chevron icons with proper opacity transitions. ChartWrapper and BaseChart integrate with the hook via context. However, the build is critically missing all test files required by the acceptance criteria — this was the primary HIGH finding from the prior audit that remains unresolved. Additionally, the fragile child cloning pattern in BaseChart.tsx persists, and custom Tailwind tokens in GestureAffordance.tsx may not be configured. The build is functional but incomplete without tests. Score is 78 due to unresolved HIGH finding (missing tests) and multiple MEDIUM issues.",
       "pre_check_failed": false,
-      "issue_count": 0,
-      "top_issues": []
+      "issue_count": 6,
+      "top_issues": [
+        {
+          "severity": "HIGH",
+          "description": "Missing test file for useChartGestures hook. The build specification requires automated tests for all acceptance criteria (AC1-AC7), but no test files were generated. This was a prior HIGH finding that remains unresolved."
+        },
+        {
+          "severity": "MEDIUM",
+          "description": "Fragile child cloning pattern persists. React.cloneElement with children cast as React.ReactElement (line 52) will break with fragments, arrays of children, or string elements. This was a prior MEDIUM finding that remains unresolved."
+        },
+        {
+          "severity": "MEDIUM",
+          "description": "useChartGestures hook is called unconditionally even when enableGestures is false (line 32). This causes unnecessary state initialization and RAF setup for non-gesture charts. This was a prior LOW finding that remains unresolved."
+        }
+      ]
     },
     "gate": {
-      "allowed": false,
-      "effective_verdict": "FAIL",
-      "reason": "compile gate: 1 undefined Tailwind token(s) after 2 attempt(s)"
+      "allowed": true,
+      "effective_verdict": "CONDITIONAL",
+      "reason": "Score 78, verdict CONDITIONAL"
     },
     "build_attempts": 2,
     "attempt_history": [
       {
         "attempt": 1,
-        "verdict": "COMPILE_FAIL",
-        "score": null,
-        "effective": "FAIL"
+        "verdict": "CONDITIONAL",
+        "score": 72,
+        "effective": "CONDITIONAL"
       },
       {
         "attempt": 2,
-        "verdict": "COMPILE_FAIL",
-        "score": null,
-        "effective": "FAIL"
+        "verdict": "CONDITIONAL",
+        "score": 78,
+        "effective": "CONDITIONAL"
       }
     ]
   },
   "log": [
-    "[2026-06-11T22:15:43.271Z] Auto-builder cycle started",
+    "[2026-06-11T22:30:43.295Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy @ fe7d662",
-    "[WATCHDOG] In sync at 95aa3e4",
-    "[QUEUE] Loaded via contents-api. Pending: 21, total: 83",
+    "[WATCHDOG] In sync at 15f991a",
+    "[QUEUE] Loaded via contents-api. Pending: 20, total: 83",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T22:15:45.233Z] Processing: AUTO-060-FIX — Fix residual audit findings from AUTO-060",
+    "[2026-06-11T22:30:45.340Z] Processing: AUTO-061 — FS-VIZ-MOB-003 — Mobile Chart Interaction: Pinch-Zoom, Swipe-to-Pan & Touch Gesture Handling for W251 BOP Time-Series Ch",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
+    "[ARCHITECT] Lossless split: 2 follow-up directive(s) appended to queue (origin AUTO-061)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
     "[RESEARCHER] Running 4 queries...",
@@ -83,14 +98,24 @@
     "[COMPILE-GATE] Manifest loaded (37 packages) — bare imports validated",
     "[GROUNDING] Builder context: 131 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 2 files",
+    "[BUILDER] Attempt 1 complete — 4 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
-    "[COMPILE-GATE] Attempt 1: 4 undefined Tailwind token(s):\n  components/charts/BaseChart.tsx → 'bg-var'\n  components/charts/BaseChart.tsx → 'border-var'\n  components/charts/BaseChart.tsx → 'ring-offset-2'\n  components/charts/BaseChart.tsx → 'text-var'",
-    "[RETRY] Re-running Builder to fix undefined Tailwind tokens (attempt 2/2)",
+    "[COMPILE-GATE] Attempt 1: all Tailwind tokens defined",
+    "[COMPILE-GATE] Attempt 1: all named exports verified (0 repo file(s) inspected)",
+    "[AUDITOR] Reviewing attempt 1...",
+    "[AUDITOR] Attempt 1 verdict: CONDITIONAL (72/100)",
+    "[GATE] Attempt 1: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 2 files",
+    "[BUILDER] Attempt 2 complete — 4 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
-    "[COMPILE-GATE] Attempt 2: 1 undefined Tailwind token(s):\n  components/charts/BaseChart.tsx → 'ring-offset-2'",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 1 undefined Tailwind token(s) after 2 attempt(s)"
+    "[COMPILE-GATE] Attempt 2: all Tailwind tokens defined",
+    "[COMPILE-GATE] Attempt 2: all named exports verified (0 repo file(s) inspected)",
+    "[AUDITOR] Reviewing attempt 2...",
+    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (78/100)",
+    "[GATE] Attempt 2: Score 78, verdict CONDITIONAL → CONDITIONAL",
+    "[COMMIT] Committing 4 file(s) + queue status (CONDITIONAL-SHIP 78/100 (zero CRITICAL) on attempt 2/2)...",
+    "[QUEUE] Appended fix-up directive AUTO-061-FIX (6 residual finding(s))",
+    "[COMMIT] OK"
   ]
 }
