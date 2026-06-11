@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T04:00:35.340Z",
+  "updated_at": "2026-06-11T04:04:52.874Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -106,14 +106,32 @@
       "title": "Mobile responsive pass",
       "directive": "Make all 14 dashboard pages fully responsive. On mobile (< 768px): collapse the sidebar into a hamburger menu, stack KPI grids from 6-column to 2-column, make tables horizontally scrollable, ensure all text is readable at 14px minimum on mobile, and ensure touch targets are at least 44x44px. Test against iPhone 14 Pro viewport (393x852).",
       "priority": 5,
-      "status": "in_progress",
+      "status": "pending",
       "origin": "seed",
       "created_at": "2026-04-21T00:00:00Z",
       "started_at": "2026-06-11T04:00:35.250Z",
       "completed_at": null,
       "commit_sha": null,
-      "auditor_score": null,
-      "attempts": 1
+      "auditor_score": 72,
+      "attempts": 1,
+      "near_miss_retries": 1,
+      "carryover_feedback": "A previous cycle's best attempt scored 72/100 (CONDITIONAL). These are the EXACT remaining findings. Fix every one of them in your FIRST attempt this cycle:\n1. [HIGH] KpiGridItem uses 'text-xs' (12px) for subtitle and change percentage text, violating the 14px minimum font size requirement. This will cause acceptance criterion 5 to fail. FIX: Change 'text-xs' to 'text-sm' for subtitle and change percentage elements. The subtitle should use 'text-sm text-muted' and change percentage should use 'text-sm font-medium'.\n2. [MEDIUM] Interactive KpiGridItem wraps content in a button with 'min-h-[44px]' but the inner card div has no explicit min-height. If the card content is short, the touch target may be smaller than 44px. FIX: Add 'min-h-[44px]' to the inner card div or ensure the button wrapper's min-height propagates correctly. Consider adding 'min-h-[44px] flex items-center' to the card div.\n3. [MEDIUM] Desktop sidebar nav links use 'h-11' (44px) which is correct, but the links are inside a 'hidden md:flex' container. On mobile, the MobileSidebarDrawer nav links use 'min-h-[44px]' which is correct. However, the desktop sidebar links should also have 'min-h-[44px]' for consistency when viewport changes. FIX: Change 'h-11' to 'min-h-[44px]' on desktop sidebar links to ensure they remain touch-target compliant if the container layout changes.\n4. [LOW] Test uses 'devices' from '@playwright/test' which may not be the correct import. The iPhone 14 Pro device definition may not exist in all Playwright versions. FIX: Either use 'test.use({ viewport: { width: 393, height: 852 } })' directly or verify the device definition exists in the Playwright config. Remove the devices import if not needed.\n5. [LOW] Test for KPI grid columns uses 'page.locator(...).elementHandle()' which can return null. The test will fail with a cryptic error if the element is not found. FIX: Use 'const grid = await kpiGrid.elementHandle(); if (!grid) throw new Error('Grid not found');' or use a different approach like 'await page.evaluate(() => { ... })' directly.\n6. [LOW] The MobileSidebarDrawer component uses 'role=\"navigation\"' on the nav element, but the test selects '[role=\"navigation\"]' which may match multiple elements. The drawer visibility test could be flaky. FIX: Add a unique data-testid attribute to the drawer for more reliable test targeting, e.g., 'data-testid=\"mobile-sidebar-drawer\"'.",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100) — near-miss (best 72/100), requeued with carried feedback (carryover 1/2)",
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        }
+      ]
     },
     {
       "id": "AUTO-006",
@@ -1075,6 +1093,22 @@
       "status": "pending",
       "created_at": "2026-06-11T02:45:00.000Z",
       "origin": "split_from:AUTO-040"
+    },
+    {
+      "id": "AUTO-045",
+      "title": "Mobile Responsive — Per-Page Audit for Non-Shared Grids and Tables",
+      "directive": "DIRECTIVE: Audit all 14 dashboard pages in the FlowSeer W251 BOP platform for any KPI grids or data tables that are NOT rendered through the shared KpiGrid.tsx or DataTable.tsx components and therefore did not receive responsive treatment from FS-RESP-001. For each non-shared instance found: apply the same responsive rules — grid-cols-2 at mobile, overflow-x-auto table wrapper, 14px minimum font size, 44x44px touch targets — directly in the page or local component file. CONTEXT: Next.js 14, Tailwind, TypeScript. EQS v1.0. The 5-file limit per spec means this audit and remediation is a follow-up to FS-RESP-001 which handled only shared components. Verify all 14 pages against iPhone 14 Pro viewport (393x852) using Playwright device emulation.",
+      "status": "pending",
+      "created_at": "2026-06-11T04:01:19.251Z",
+      "origin": "split_from:AUTO-005"
+    },
+    {
+      "id": "AUTO-046",
+      "title": "Mobile Responsive — Charts and Data Visualizations",
+      "directive": "DIRECTIVE: Make all charts and data visualizations across the 14 FlowSeer W251 BOP dashboard pages responsive for mobile (< 768px). Charts must reflow to full container width on mobile, axis labels must remain readable at 14px minimum, legends must stack vertically below charts on screens < 768px, and chart containers must have a minimum touch-safe height of 200px on mobile. Tooltip tap targets must be >= 44x44px. Verify against iPhone 14 Pro viewport (393x852). CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced. This is a follow-up to FS-RESP-001 (layout responsiveness) and covers ONLY visualization components — no sidebar, grid, or table changes.",
+      "status": "pending",
+      "created_at": "2026-06-11T04:01:19.251Z",
+      "origin": "split_from:AUTO-005"
     }
   ]
 }
