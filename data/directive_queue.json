@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T07:30:16.501Z",
+  "updated_at": "2026-06-11T07:33:34.755Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1259,10 +1259,74 @@
       "id": "AUTO-050",
       "title": "Route Authorization Middleware for User Roles",
       "directive": "Using the 'role' column and 'UserRole' type established in FS-SCHEMA-001, implement route-level authorization for the FlowSeer W251 BOP procurement platform (Next.js 14, Vercel). Scope: middleware.ts (or equivalent) that reads the authenticated user's role from the session/JWT, enforces access rules (admin = full access; procurement_manager = read+write procurement routes; viewer = read-only), and returns 403 for unauthorized access. No schema changes — consume the existing UserRole type from lib/db/schema.ts only. EQS v1.0 standards apply: audit log every authorization denial (reuse schema_migration_audit pattern or a dedicated access_denied_audit table defined in its own schema directive), latency overhead of middleware < 20ms p99. Do not bundle schema changes in this directive.",
-      "status": "in_progress",
+      "status": "pending",
       "created_at": "2026-06-11T04:46:20.349Z",
       "origin": "split_from:AUTO-043",
-      "started_at": "2026-06-11T07:30:16.351Z"
+      "started_at": "2026-06-11T07:30:16.351Z",
+      "near_miss_retries": 1,
+      "carryover_issues": [
+        {
+          "severity": "HIGH",
+          "file": "middleware.ts",
+          "description": "userId is hardcoded to 'unknown' instead of being extracted from the JWT token. The spec requires capturing userId in audit logs. The getUserIdFromToken function exists in session.ts but is never used in middleware.",
+          "fix": "Import and call getUserIdFromToken in middleware.ts, pass the actual userId to logAuthDenial instead of 'unknown'"
+        },
+        {
+          "severity": "HIGH",
+          "file": "lib/auth/authorization-logger.ts",
+          "description": "The fire-and-forget pattern uses .catch() on the promise but the function is called without await. However, the implementation uses fetch() which is not guaranteed to be fire-and-forget in Edge Runtime - the promise rejection could cause unhandled promise rejections. Also, the INTERNAL_AUDIT_SECRET fallback to 'dev-secret' is a security risk.",
+          "fix": "Remove the .catch() and use void operator for true fire-and-forget. Remove the 'dev-secret' fallback - require the env var to be set or skip logging entirely."
+        },
+        {
+          "severity": "MEDIUM",
+          "file": "lib/auth/route-rules.ts",
+          "description": "The ROUTE_RULES does not include /api/health as a public route, but middleware.ts has it in PUBLIC_PATHS. This inconsistency could cause confusion. Also, the /api default rule catches all API routes including /api/health before middleware's public path check.",
+          "fix": "Either remove /api/health from PUBLIC_PATHS in middleware.ts or add it to route-rules.ts as a public route"
+        },
+        {
+          "severity": "MEDIUM",
+          "file": "middleware.ts",
+          "description": "The matcher pattern in config excludes api/auth but the middleware's isPublicPath function also checks for /api/auth. This is redundant but not harmful. However, the matcher does NOT exclude /api/health which is in PUBLIC_PATHS, causing unnecessary middleware execution.",
+          "fix": "Add api/health to the matcher exclusion pattern"
+        },
+        {
+          "severity": "MEDIUM",
+          "file": "lib/auth/session.ts",
+          "description": "The getRoleFromToken function validates roles against a hardcoded array ['admin', 'procurement_manager', 'viewer'] instead of using the UserRole type from schema.ts. This duplicates the role definition and could get out of sync.",
+          "fix": "Import the UserRole type values dynamically or export a VALID_ROLES constant from schema.ts"
+        },
+        {
+          "severity": "LOW",
+          "file": "lib/auth/authorization-logger.ts",
+          "description": "The logAuthDenialDirect function is exported but never used and contains only a console.log statement. Dead code should be removed.",
+          "fix": "Remove the logAuthDenialDirect function or implement it properly"
+        },
+        {
+          "severity": "LOW",
+          "file": "tests/middleware.test.ts",
+          "description": "The test for 'continues on logging error' does not verify the response body/headers are correct despite the logging failure.",
+          "fix": "Add assertions for response status, body, and headers in the logging error test"
+        }
+      ],
+      "carryover_score": 72,
+      "carryover_feedback": "A previous cycle's best attempt scored 72/100 (CONDITIONAL). These are the EXACT remaining findings. Fix every one of them in your FIRST attempt this cycle:\n1. [HIGH] userId is hardcoded to 'unknown' instead of being extracted from the JWT token. The spec requires capturing userId in audit logs. The getUserIdFromToken function exists in session.ts but is never used in middleware. FIX: Import and call getUserIdFromToken in middleware.ts, pass the actual userId to logAuthDenial instead of 'unknown'\n2. [HIGH] The fire-and-forget pattern uses .catch() on the promise but the function is called without await. However, the implementation uses fetch() which is not guaranteed to be fire-and-forget in Edge Runtime - the promise rejection could cause unhandled promise rejections. Also, the INTERNAL_AUDIT_SECRET fallback to 'dev-secret' is a security risk. FIX: Remove the .catch() and use void operator for true fire-and-forget. Remove the 'dev-secret' fallback - require the env var to be set or skip logging entirely.\n3. [MEDIUM] The ROUTE_RULES does not include /api/health as a public route, but middleware.ts has it in PUBLIC_PATHS. This inconsistency could cause confusion. Also, the /api default rule catches all API routes including /api/health before middleware's public path check. FIX: Either remove /api/health from PUBLIC_PATHS in middleware.ts or add it to route-rules.ts as a public route\n4. [MEDIUM] The matcher pattern in config excludes api/auth but the middleware's isPublicPath function also checks for /api/auth. This is redundant but not harmful. However, the matcher does NOT exclude /api/health which is in PUBLIC_PATHS, causing unnecessary middleware execution. FIX: Add api/health to the matcher exclusion pattern\n5. [MEDIUM] The getRoleFromToken function validates roles against a hardcoded array ['admin', 'procurement_manager', 'viewer'] instead of using the UserRole type from schema.ts. This duplicates the role definition and could get out of sync. FIX: Import the UserRole type values dynamically or export a VALID_ROLES constant from schema.ts\n6. [LOW] The logAuthDenialDirect function is exported but never used and contains only a console.log statement. Dead code should be removed. FIX: Remove the logAuthDenialDirect function or implement it properly\nNOTE: the most recent attempt ALSO failed the compile gate (compile gate: 2 missing named export(s) after 2 attempt(s)) — do not repeat that import/export mistake.",
+      "skip_reason": "gate blocked after 2 attempt(s): compile gate: 2 missing named export(s) after 2 attempt(s) — near-miss (best 72/100), requeued with carried feedback (carryover 1/2)",
+      "auditor_score": 72,
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        }
+      ]
     },
     {
       "id": "AUTO-051",
@@ -1415,6 +1479,22 @@
       "status": "pending",
       "created_at": "2026-06-11T07:16:10.497Z",
       "origin": "split_from:AUTO-049"
+    },
+    {
+      "id": "AUTO-070",
+      "title": "FS-SCHEMA-003: access_denied_audit Table DDL and Migration",
+      "directive": "Create a standalone schema directive for the access_denied_audit table required by the FS-AUTH-002 authorization middleware. Scope: add the following to lib/db/schema.ts — export const accessDeniedAudit table definition with columns: id (uuid, primary key, defaultRandom), userId (text, not null), role (text, not null), path (text, not null), method (text, not null), ip (text), reason (text), deniedAt (timestamp with timezone, defaultNow, not null). Generate the corresponding Drizzle (or chosen ORM) migration file. No application logic changes. EQS v1.0 audit requirements apply: table must be append-only with no DELETE or UPDATE grants to the application role. Include a DB index on (userId, deniedAt) for audit query performance. This directive is schema-only — no middleware, no UI, no API route changes.",
+      "status": "pending",
+      "created_at": "2026-06-11T07:31:06.499Z",
+      "origin": "split_from:AUTO-050"
+    },
+    {
+      "id": "AUTO-071",
+      "title": "FS-AUTH-003: /api/internal/audit Endpoint for Access Denial Log Ingestion",
+      "directive": "Implement the internal API route consumed by lib/auth/authorization-logger.ts (introduced in FS-AUTH-002). Scope: create app/api/internal/audit/route.ts (Next.js 14 App Router). This POST endpoint receives AuthDenialPayload { userId, role, path, method, ip, reason } and writes a row to the access_denied_audit table (defined in FS-SCHEMA-003). The route must: (1) verify the request carries a shared secret header X-FlowSeer-Internal-Token matching an env var INTERNAL_AUDIT_SECRET to prevent public access; (2) validate the payload with zod; (3) insert via the existing db client in lib/db; (4) respond 204 on success, 400 on validation failure, 401 on missing/invalid secret. No authentication middleware (this route is internal service-to-service). EQS v1.0: p99 response < 50ms, immutable insert only (no update/delete), full TypeScript strict mode. Depends on FS-SCHEMA-003 completing first.",
+      "status": "pending",
+      "created_at": "2026-06-11T07:31:06.499Z",
+      "origin": "split_from:AUTO-050"
     }
   ]
 }
