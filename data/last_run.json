@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-11T02:34:19.271Z",
+  "timestamp": "2026-06-11T02:49:11.318Z",
   "directive": {
-    "id": "AUTO-041",
-    "title": "RFQ detail page loading skeleton and error boundary",
-    "status": "failed"
+    "id": "AUTO-042",
+    "title": "Mailgun email notification on RFQ status change",
+    "status": "pending"
   },
-  "elapsed_seconds": 210.895,
+  "elapsed_seconds": 203.016,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -19,8 +19,8 @@
         "audit_focus",
         "estimated_complexity"
       ],
-      "acceptance_criteria_count": 12,
-      "research_queries_count": 5,
+      "acceptance_criteria_count": 13,
+      "research_queries_count": 0,
       "spec_parse_error": false
     },
     "researcher": {
@@ -34,34 +34,34 @@
       "status": "complete",
       "files_count": 4,
       "parse_error": false,
-      "first_file_path": "components/rfq/RFQDetailSkeleton.tsx"
+      "first_file_path": "lib/notifications/email.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "COMPILE_FAIL",
+      "verdict": "CONDITIONAL",
       "score": 72,
-      "summary": "The build implements the core requirements: RFQDetailSkeleton component with proper accessibility attributes, loading.tsx for SSR streaming, error card with retry functionality, and Playwright tests. However, there are critical issues with the ErrorBoundary integration - the existing ErrorBoundary component does not support the render-prop pattern used in the generated code, and it cannot catch errors from async server components. Additionally, TypeScript strict mode violations exist with 'any' type usage. The build needs restructuring to use the correct error handling pattern for Next.js App Router (error.tsx) and proper type definitions before it can pass.",
+      "summary": "The build implements the core Mailgun email notification functionality with proper fire-and-forget pattern, audit logging for failures, and configuration validation. However, it has a CRITICAL issue: unauthorized modification of lib/db/schema.ts which is outside the build specification's scope and introduces schema changes that may break existing code. The TypeScript compilation cannot be guaranteed to succeed due to these schema changes and potential import path issues. Additionally, several acceptance criteria lack corresponding integration tests. The build is CONDITIONAL - it can ship after reverting the unauthorized schema changes, fixing import paths, and adding the missing integration tests.",
       "pre_check_failed": false,
       "issue_count": 7,
       "top_issues": [
         {
-          "severity": "HIGH",
-          "description": "ErrorBoundary fallback prop type mismatch: The existing ErrorBoundary component expects fallbackTitle?: string as a prop, not a render function. The generated code passes fallback={(error: any) => <RFQErrorCard error={error} />} which is incompatible with the ErrorBoundary interface."
+          "severity": "CRITICAL",
+          "description": "Modified existing schema file that was not in the build specification's files_to_modify list. The build spec only lists lib/notifications/email.ts, app/api/rfq/[id]/status/route.ts, and .env.example as files to create/modify. Modifying lib/db/schema.ts without authorization could break other parts of the system that depend on the original schema."
+        },
+        {
+          "severity": "CRITICAL",
+          "description": "The actor_name field added to auditLogs table does not exist in the ground truth schema. This will cause TypeScript compilation errors in any existing code that imports auditLogs without the actor_name field."
         },
         {
           "severity": "HIGH",
-          "description": "The ErrorBoundary component from components/ui/ErrorBoundary.tsx does not catch errors thrown from async server components. ErrorBoundary is a client component that catches render errors, but errors thrown from async server components during data fetching are not caught by client-side error boundaries - they need to be handled by error.tsx or caught within the server component itself."
-        },
-        {
-          "severity": "MEDIUM",
-          "description": "The RFQDetailContent component uses 'any' type for lineItems and auditTrail items, violating TypeScript strict mode requirements."
+          "description": "Import path '@/lib/db' may not resolve correctly. The ground truth shows db/index.ts exists, but the import pattern '@/lib/db' could be ambiguous if there's also a lib/db.ts file. This is a BUILDABILITY violation."
         }
       ]
     },
     "gate": {
-      "allowed": false,
-      "effective_verdict": "FAIL",
-      "reason": "compile gate: 1 missing named export(s) after 2 attempt(s)"
+      "allowed": true,
+      "effective_verdict": "CONDITIONAL",
+      "reason": "Score 72, verdict CONDITIONAL"
     },
     "build_attempts": 2,
     "attempt_history": [
@@ -73,29 +73,28 @@
       },
       {
         "attempt": 2,
-        "verdict": "COMPILE_FAIL",
-        "score": null,
-        "effective": "FAIL"
+        "verdict": "CONDITIONAL",
+        "score": 72,
+        "effective": "CONDITIONAL"
       }
     ]
   },
   "log": [
-    "[2026-06-11T02:30:48.376Z] Auto-builder cycle started",
+    "[2026-06-11T02:45:48.302Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy @ 061068d",
-    "[WATCHDOG] In sync at a23601e",
-    "[QUEUE] Loaded via contents-api. Pending: 3, total: 42",
+    "[WATCHDOG] In sync at 6f5af19",
+    "[QUEUE] Loaded via contents-api. Pending: 2, total: 42",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-11T02:30:50.514Z] Processing: AUTO-041 — RFQ detail page loading skeleton and error boundary",
+    "[2026-06-11T02:45:50.463Z] Processing: AUTO-042 — Mailgun email notification on RFQ status change",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 5 queries...",
-    "[RESEARCHER] skipped — 0 result(s)",
+    "[RESEARCHER] Skipped — no research_queries in spec",
     "[COMPILE-GATE] Repo tree loaded (693 paths)",
     "[GROUNDING] Builder context: 109 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 4 files",
+    "[BUILDER] Attempt 1 complete — 2 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
     "[COMPILE-GATE] Attempt 1: all named exports verified (1 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 1...",
@@ -105,7 +104,11 @@
     "[BUILDER] Attempt 2/2 — generating code...",
     "[BUILDER] Attempt 2 complete — 4 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
-    "[COMPILE-GATE] Attempt 2: 1 missing named export(s):\n  app/rfq/[id]/page.tsx → '../../../lib/db/audit' has no export 'auditLog'",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 1 missing named export(s) after 2 attempt(s)"
+    "[COMPILE-GATE] Attempt 2: all named exports verified (0 repo file(s) inspected)",
+    "[AUDITOR] Reviewing attempt 2...",
+    "[AUDITOR] Attempt 2 verdict: CONDITIONAL (72/100)",
+    "[GATE] Attempt 2: Score 72, verdict CONDITIONAL → CONDITIONAL",
+    "[COMMIT] Skipped — did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100)",
+    "[QUEUE] AUTO-042 requeued as pending — near-miss 72/100, feedback carried to next cycle (1/2)"
   ]
 }
