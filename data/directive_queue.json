@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T06:45:51.345Z",
+  "updated_at": "2026-06-11T06:50:12.551Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1219,10 +1219,13 @@
       "id": "AUTO-048",
       "title": "Mobile Responsive — Touch Gesture & Navigation UX Polish",
       "directive": "FLOWSEER-RESP-003: After FLOWSEER-RESP-001 and FLOWSEER-RESP-002 land, implement mobile navigation UX polish: (1) swipe-right gesture on main content to open sidebar drawer (touch event deltaX > 50px threshold), swipe-left on drawer to close; (2) bottom navigation bar for the 5 most-accessed dashboard pages on mobile (< 768px) as a fixed bottom bar (safe-area-inset-bottom padding for iPhone notch), replacing deep hamburger drilling for primary routes; (3) sticky page headers on mobile so table column headers remain visible during vertical scroll (position: sticky top-0); (4) ensure all dropdown menus and select inputs use native mobile pickers (no custom floating dropdowns that violate 44px targets on mobile). Validate at 393x852: swipe open/close gesture functional, bottom nav renders above system home bar, sticky headers hold during scroll, no z-index collisions with sidebar drawer. EQS performance: no additional JS bundle > 5KB for gesture handling. Maximum 5 files. One concern: gesture and nav UX only.",
-      "status": "in_progress",
+      "status": "complete",
       "created_at": "2026-06-11T04:16:24.786Z",
       "origin": "split_from:AUTO-005",
-      "started_at": "2026-06-11T06:45:51.247Z"
+      "started_at": "2026-06-11T06:45:51.247Z",
+      "completed_at": "2026-06-11T06:50:12.425Z",
+      "auditor_score": 88,
+      "build_attempts": 2
     },
     {
       "id": "AUTO-049",
@@ -1367,6 +1370,14 @@
       "status": "pending",
       "created_at": "2026-06-11T06:31:47.025Z",
       "origin": "split_from:AUTO-047"
+    },
+    {
+      "id": "AUTO-067",
+      "title": "FLOWSEER-RESP-003-B: Audit and Replace Custom Floating Dropdown Components with Native-Compatible Implementations",
+      "directive": "After FLOWSEER-RESP-003 lands, audit all custom dropdown/combobox components in the W251 BOP platform codebase (components/ui/, any portal-based floating dropdowns using Radix Popper, Headless UI Listbox, or custom z-index overlays) that bypass the globals.css select normalization applied in RESP-003. For each non-native dropdown found: (1) on mobile viewports < 768px, replace or wrap with a native <select> fallback rendered conditionally via useMediaQuery, OR confirm the component meets 44px touch targets and does not produce z-index collisions with the sidebar drawer (z-50) or bottom nav (z-40). (2) Document all components audited in a COMPONENTS_AUDIT.md file at repo root. (3) Ensure no custom floating dropdown has a z-index > 40 on mobile that would overlap the sidebar drawer. EQS constraint: zero custom floating dropdowns violating 44px targets on mobile after this directive lands. Maximum 5 files. One concern: dropdown/combobox mobile compliance only. No schema changes.",
+      "status": "pending",
+      "created_at": "2026-06-11T06:46:39.573Z",
+      "origin": "split_from:AUTO-048"
     }
   ]
 }
