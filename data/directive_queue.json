@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-11T02:16:19.592Z",
+  "updated_at": "2026-06-11T02:16:21.320Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -973,11 +973,11 @@
       "title": "RBAC: role field on users and RFQ route authorization",
       "directive": "Add a `role` column (enum: 'admin' | 'manager' | 'viewer', default 'viewer') to the existing `users` table via a non-destructive Drizzle migration (ADD COLUMN only — no drops or renames). Implement a reusable `authorizeRole(requiredRoles: string[])` helper in `lib/auth/rbac.ts` that reads the session user's role and throws a 401/403 as appropriate. Wire this helper into the following existing API routes as the first middleware step: `POST /api/rfq` (requires 'admin' or 'manager'), `PATCH /api/rfq/[id]/status` (requires 'admin' or 'manager'), `GET /api/audit` (requires 'admin'). All authorization decisions must write an entry to `audit_logs` via the existing POST /api/audit endpoint (action: 'authz_denied', resource: route path, actor: user id or 'anonymous'). Do NOT modify middleware.ts or any file under /api/auth/**. EQS clauses: 100% auditable data, immutable audit logs, SOC 2 / Zero Trust orientation.",
       "priority": 1,
-      "status": "pending",
+      "status": "in_progress",
       "origin": "auto",
       "rationale": "AUTO-036 and AUTO-038 both failed attempting RBAC. This is a Week 2 roadmap deliverable now overdue. The directive is tightly scoped to a single non-destructive migration, a single helper module, and three specific route call sites — removing the ambiguity that likely caused prior failures. The audit_log and status-transition foundations (AUTO-033, AUTO-037) are now complete, making this the critical next unblocked dependency.",
       "created_at": "2026-06-11T02:16:19.580Z",
-      "started_at": null,
+      "started_at": "2026-06-11T02:16:21.320Z",
       "completed_at": null,
       "commit_sha": null,
       "auditor_score": null
