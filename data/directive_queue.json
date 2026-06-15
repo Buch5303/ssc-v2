@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T11:49:31.665Z",
+  "updated_at": "2026-06-15T12:00:39.067Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1518,9 +1518,10 @@
       "id": "AUTO-062",
       "title": "FLOWSEER-RESP-002b: Extend Responsive Chart Fixes to Remaining Dashboard Pages Beyond ChartComponents.tsx",
       "directive": "After FLOWSEER-RESP-002 lands, audit whether any of the 14 dashboard pages import chart components directly (not via ChartComponents.tsx) or contain inline SVG visualizations with fixed dimensions that were not covered by the shared ResponsiveChartWrapper introduced in FLOWSEER-RESP-002. For each such page file: (1) replace fixed width props with ResponsiveContainer wrappers, (2) apply useChartDimensions hook for tick interval and margin logic, (3) ensure tooltip overflow fix (allowEscapeViewBox, maxWidth: 90vw wrapperStyle) is applied. Validate at 393x852 viewport. Maximum 5 files modified. One concern: chart components only, no sidebar or grid changes. EQS v1.0 standards apply.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T06:16:22.645Z",
-      "origin": "split_from:AUTO-047"
+      "origin": "split_from:AUTO-047",
+      "started_at": "2026-06-15T12:00:38.017Z"
     },
     {
       "id": "AUTO-063",
