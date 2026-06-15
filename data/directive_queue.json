@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T19:15:35.714Z",
+  "updated_at": "2026-06-15T19:16:09.850Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2124,10 +2124,11 @@
       "id": "AUTO-084",
       "title": "FLOWSEER-RESP-005: ChartComponents.tsx Re-export Completeness Audit",
       "directive": "After FLOWSEER-RESP-003 and FLOWSEER-RESP-004 land, audit ChartComponents.tsx to ensure it re-exports every Recharts primitive used across all 14 dashboard pages. For any primitive currently imported directly from recharts in ChartComponents.tsx internals but not formally re-exported, add a named re-export. Add a barrel-export completeness test: a Jest or Vitest test that imports each expected primitive from ChartComponents.tsx and asserts it is not undefined. Ensure the re-export file does not exceed 120 lines — if it does, split into ChartComponents.primitives.tsx and ChartComponents.composed.tsx with an index barrel. One concern: ChartComponents.tsx exports only, no page-level changes. EQS v1.0 standards apply.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T12:01:34.835Z",
       "origin": "split_from:AUTO-062",
-      "started_at": "2026-06-15T19:15:35.625Z"
+      "started_at": "2026-06-15T19:15:35.625Z",
+      "completed_at": "2026-06-15T19:16:09.714Z"
     },
     {
       "id": "AUTO-085",
