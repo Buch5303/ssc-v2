@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T14:33:51.033Z",
+  "updated_at": "2026-06-15T14:45:10.727Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1737,9 +1737,10 @@
       "id": "AUTO-070",
       "title": "FS-SCHEMA-003: access_denied_audit Table DDL and Migration",
       "directive": "Create a standalone schema directive for the access_denied_audit table required by the FS-AUTH-002 authorization middleware. Scope: add the following to lib/db/schema.ts — export const accessDeniedAudit table definition with columns: id (uuid, primary key, defaultRandom), userId (text, not null), role (text, not null), path (text, not null), method (text, not null), ip (text), reason (text), deniedAt (timestamp with timezone, defaultNow, not null). Generate the corresponding Drizzle (or chosen ORM) migration file. No application logic changes. EQS v1.0 audit requirements apply: table must be append-only with no DELETE or UPDATE grants to the application role. Include a DB index on (userId, deniedAt) for audit query performance. This directive is schema-only — no middleware, no UI, no API route changes.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T07:31:06.499Z",
-      "origin": "split_from:AUTO-050"
+      "origin": "split_from:AUTO-050",
+      "started_at": "2026-06-15T14:45:10.528Z"
     },
     {
       "id": "AUTO-071",
