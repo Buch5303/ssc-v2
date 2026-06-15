@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T20:01:20.527Z",
+  "updated_at": "2026-06-15T20:15:35.604Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2164,9 +2164,10 @@
       "id": "AUTO-088",
       "title": "FLOWSEER-RESP-002c — Responsive Chart Standardization: Remaining 11 Dashboard Pages",
       "directive": "After FLOWSEER-RESP-002b lands, complete the responsive chart migration for the remaining 11 dashboard pages that were deferred from FLOWSEER-RESP-002b. The full set of 14 dashboard pages minus the 3 addressed in FLOWSEER-RESP-002b (Analytics, Spend Overview, Supplier Risk) leaves: (1) audit each of the remaining 11 page files under app/dashboard/ for inline recharts usage or one-off chart components NOT imported from the 4 shared primitives (components/charts/LineChart.tsx, BarChart.tsx, HeatmapChart.tsx, ScatterPlot.tsx); (2) for each such instance: replace fixed width props with ResponsiveChartWrapper from components/charts/ResponsiveChartWrapper.tsx, apply calcTickInterval and clampTooltipPosition from components/charts/chartUtils.ts, reduce mobile margins to top:8 right:8 bottom:24 left:32 at <640px breakpoint, and enforce tooltip viewport clamping; (3) process in batches of 5 files maximum per sub-iteration (002c-i, 002c-ii, 002c-iii as needed) following the same hard limits; (4) validate each batch at 393x852 (iPhone 14 Pro): no horizontal overflow, tooltips within bounds, chart render < 1500ms. Apply the same acceptance criteria pattern as FLOWSEER-RESP-002b: zero direct recharts imports in page files, zero hardcoded numeric width props on chart elements, Playwright overflow/tooltip/performance assertions passing, tsc --noEmit clean, bundle size delta <= +2 KB gzipped per page chunk. Platform: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T12:31:16.284Z",
-      "origin": "split_from:AUTO-064"
+      "origin": "split_from:AUTO-064",
+      "started_at": "2026-06-15T20:15:35.486Z"
     },
     {
       "id": "AUTO-089",
