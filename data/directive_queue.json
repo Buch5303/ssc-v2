@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T18:31:30.177Z",
+  "updated_at": "2026-06-15T18:45:36.586Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2074,9 +2074,10 @@
       "id": "AUTO-082",
       "title": "FS-VIZ-GESTURE-003 — Gesture State Persistence & URL-Synced Chart Zoom",
       "directive": "Following FS-VIZ-GESTURE-001 (touch gesture support), add optional URL-query-parameter synchronization for chart zoom/pan state so that users can share a bookmarked view. Requirements: (1) ChartWrapper accepts an optional syncToUrl?: boolean prop; when true, domainStart and domainEnd are serialized as ISO date strings into URL search params (keys: chartId_start, chartId_end) using Next.js 14 useSearchParams / useRouter — no full page reload; (2) on mount, if URL params are present and valid for the given chartId, useChartGestures initializes from those values rather than the full data range; (3) invalid or out-of-range URL params are silently discarded and full range is used; (4) URL update must be debounced 400ms to avoid excessive history entries during continuous pan; (5) when syncToUrl is false or absent, behavior is identical to FS-VIZ-GESTURE-001 (no URL side effects). Context: Next.js 14 App Router, TypeScript. Builds on hooks/useChartGestures.ts and ChartWrapper.tsx from FS-VIZ-GESTURE-001. Covers ONLY URL sync — no schema, API, layout, or accessibility changes.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T22:31:42.602Z",
-      "origin": "split_from:AUTO-061"
+      "origin": "split_from:AUTO-061",
+      "started_at": "2026-06-15T18:45:36.496Z"
     },
     {
       "id": "AUTO-061-FIX",
