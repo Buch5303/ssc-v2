@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T22:00:35.449Z",
+  "updated_at": "2026-06-15T22:01:13.407Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2234,10 +2234,11 @@
       "id": "AUTO-095",
       "title": "FS-AUTH-002 — Access Denied Audit Middleware Integration",
       "directive": "Implement the FS-AUTH-002 authorization middleware for the W251 BOP procurement platform (Next.js 14, TypeScript, Vercel). The access_denied_audit table defined in FS-SCHEMA-001 is now available. Scope: create or modify the authorization middleware (e.g. middleware.ts or lib/auth/authorizationMiddleware.ts) to insert a row into access_denied_audit on every authorization denial. The INSERT must capture: userId (from session/JWT), role (from session/JWT), path (from request URL), method (from request method), ip (from request headers, respecting x-forwarded-for on Vercel), reason (human-readable denial reason string). The middleware must not block the request path for more than 50ms for the audit write (use non-blocking fire-and-forget INSERT or background queue). EQS v1.0 applies: real-time latency budget for the middleware overhead is <300ms end-to-end; audit writes must not cause request failures if the DB is temporarily unavailable (graceful degradation with error logging). No schema changes — FS-SCHEMA-001 owns the table definition. No UI changes.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T14:45:49.131Z",
       "origin": "split_from:AUTO-070",
-      "started_at": "2026-06-15T22:00:35.306Z"
+      "started_at": "2026-06-15T22:00:35.306Z",
+      "completed_at": "2026-06-15T22:01:13.279Z"
     },
     {
       "id": "AUTO-096",
