@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T17:45:35.391Z",
+  "updated_at": "2026-06-15T17:47:45.285Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1957,10 +1957,28 @@
       "id": "AUTO-078",
       "title": "FS-RESP-SHARED-001: Harden Shared KpiGrid.tsx and DataTable.tsx with Canonical Mobile-Responsive Defaults",
       "directive": "After FS-RESP-003 and FS-RESP-004 complete all per-page patches, consolidate the responsive rules into the shared components so future pages are compliant by default. Modify app/components/KpiGrid.tsx to accept an optional 'mobileColumns' prop (default: 2) and render 'grid-cols-{mobileColumns} sm:grid-cols-3 lg:grid-cols-4' as its base grid className. Modify app/components/DataTable.tsx to always wrap its <table> in an overflow-x-auto container and enforce text-sm as the minimum font size on all cells. Add min-h-[44px] min-w-[44px] to all interactive cell/header elements inside DataTable.tsx. Apply audit comment '// FS-RESP-SHARED-001: canonical responsive defaults'. Add Playwright tests in tests/responsive/resp-shared-001.spec.ts covering KpiGrid and DataTable in isolation using iPhone 14 Pro emulation. TypeScript strict mode must remain satisfied. No schema changes. No page-level files changed in this spec.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-11T20:31:45.540Z",
       "origin": "split_from:AUTO-055",
-      "started_at": "2026-06-15T17:45:35.266Z"
+      "started_at": "2026-06-15T17:45:35.266Z",
+      "completed_at": "2026-06-15T17:47:45.176Z",
+      "skip_reason": "gate blocked after 2 attempt(s): compile gate: 1 unresolved import(s) after 2 attempt(s)",
+      "auditor_score": 40,
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "FAIL",
+          "score": 40,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        }
+      ]
     },
     {
       "id": "AUTO-079",
