@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T12:00:39.067Z",
+  "updated_at": "2026-06-15T12:04:54.006Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1518,10 +1518,28 @@
       "id": "AUTO-062",
       "title": "FLOWSEER-RESP-002b: Extend Responsive Chart Fixes to Remaining Dashboard Pages Beyond ChartComponents.tsx",
       "directive": "After FLOWSEER-RESP-002 lands, audit whether any of the 14 dashboard pages import chart components directly (not via ChartComponents.tsx) or contain inline SVG visualizations with fixed dimensions that were not covered by the shared ResponsiveChartWrapper introduced in FLOWSEER-RESP-002. For each such page file: (1) replace fixed width props with ResponsiveContainer wrappers, (2) apply useChartDimensions hook for tick interval and margin logic, (3) ensure tooltip overflow fix (allowEscapeViewBox, maxWidth: 90vw wrapperStyle) is applied. Validate at 393x852 viewport. Maximum 5 files modified. One concern: chart components only, no sidebar or grid changes. EQS v1.0 standards apply.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-11T06:16:22.645Z",
       "origin": "split_from:AUTO-047",
-      "started_at": "2026-06-15T12:00:38.017Z"
+      "started_at": "2026-06-15T12:00:38.017Z",
+      "completed_at": "2026-06-15T12:04:53.870Z",
+      "skip_reason": "gate blocked after 2 attempt(s): compile gate: 1 unresolved import(s) after 2 attempt(s)",
+      "auditor_score": 40,
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "FAIL",
+          "score": 40,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        }
+      ]
     },
     {
       "id": "AUTO-063",
@@ -1802,6 +1820,30 @@
           "effective": "FAIL"
         }
       ]
+    },
+    {
+      "id": "AUTO-083",
+      "title": "FLOWSEER-RESP-004: Chart Responsiveness Audit Fix — Remaining Dashboard Pages",
+      "directive": "After FLOWSEER-RESP-003 lands, re-run scripts/audit-chart-imports.ts. Any of the 14 dashboard pages under app/dashboard/**/page.tsx that still report violations (direct Recharts imports, inline SVG with fixed dimensions, missing ResponsiveChartWrapper, or Tooltip without overflow fix) must be remediated. Apply the same fix pattern as FLOWSEER-RESP-003: (1) replace fixed width props with ResponsiveContainer via ResponsiveChartWrapper, (2) apply useChartDimensions hook for tickInterval and margin logic, (3) apply tooltip overflow fix (allowEscapeViewBox={{ x: true, y: true }}, wrapperStyle={{ maxWidth: '90vw', zIndex: 50 }}). Maximum 5 files modified per this directive. One concern: chart components only, no sidebar or grid changes. Validate at 393x852 viewport. EQS v1.0 standards apply. If more than 5 files remain after FLOWSEER-RESP-003, issue additional follow-up directives in batches of 5 until scripts/audit-chart-imports.ts reports zero violations across all 14 pages.",
+      "status": "pending",
+      "created_at": "2026-06-15T12:01:34.835Z",
+      "origin": "split_from:AUTO-062"
+    },
+    {
+      "id": "AUTO-084",
+      "title": "FLOWSEER-RESP-005: ChartComponents.tsx Re-export Completeness Audit",
+      "directive": "After FLOWSEER-RESP-003 and FLOWSEER-RESP-004 land, audit ChartComponents.tsx to ensure it re-exports every Recharts primitive used across all 14 dashboard pages. For any primitive currently imported directly from recharts in ChartComponents.tsx internals but not formally re-exported, add a named re-export. Add a barrel-export completeness test: a Jest or Vitest test that imports each expected primitive from ChartComponents.tsx and asserts it is not undefined. Ensure the re-export file does not exceed 120 lines — if it does, split into ChartComponents.primitives.tsx and ChartComponents.composed.tsx with an index barrel. One concern: ChartComponents.tsx exports only, no page-level changes. EQS v1.0 standards apply.",
+      "status": "pending",
+      "created_at": "2026-06-15T12:01:34.835Z",
+      "origin": "split_from:AUTO-062"
+    },
+    {
+      "id": "AUTO-085",
+      "title": "FLOWSEER-RESP-006: Playwright Visual Regression Suite for Responsive Charts at 393x852",
+      "directive": "After FLOWSEER-RESP-003 and FLOWSEER-RESP-004 land, create a Playwright visual regression test suite that navigates to each of the 14 dashboard pages at 393x852 viewport (iPhone 14 Pro) and asserts: (1) no horizontal scroll (document.documentElement.scrollWidth === document.documentElement.clientWidth), (2) all chart containers have offsetWidth > 0 and offsetHeight > 0, (3) no tooltip DOM element overflows the right viewport edge when triggered by hover/tap on chart data points, (4) page load time from navigation start to largest contentful paint is under 1500ms (EQS dashboard load budget). Store baseline screenshots for each page. Tests must run in CI on every PR. Maximum 5 test files created. One concern: chart visual regression only, no other UI components. EQS v1.0 standards apply.",
+      "status": "pending",
+      "created_at": "2026-06-15T12:01:34.835Z",
+      "origin": "split_from:AUTO-062"
     }
   ]
 }
