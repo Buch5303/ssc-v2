@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T17:15:35.847Z",
+  "updated_at": "2026-06-15T17:19:18.257Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1912,10 +1912,28 @@
       "id": "AUTO-077",
       "title": "FS-RESP-004: Responsive Audit — Remaining Dashboard Pages (settings, notifications, reports, analytics-detail, user-prof",
       "directive": "Continue the FS-RESP responsive audit for the FlowSeer W251 BOP platform. FS-RESP-003 remediated app/dashboard/contract-management/page.tsx, app/dashboard/inventory/page.tsx, app/dashboard/purchase-orders/page.tsx, app/dashboard/vendor-management/page.tsx, and app/dashboard/forecasting/page.tsx. This directive covers any remaining dashboard pages not yet patched (e.g. settings, notifications, reports, analytics-detail, user-profile — confirm exact routes from the project file tree). For each page: identify any KPI grids or data tables NOT rendered through shared KpiGrid.tsx or DataTable.tsx components and apply identical responsive rules — grid-cols-2 at mobile, overflow-x-auto table wrapper, 14px minimum font size, 44×44px touch targets — directly in the page or local component file. Extend the Playwright test suite in tests/responsive/resp-004-audit.spec.ts using iPhone 14 Pro device emulation (393×852). Apply audit comment '// FS-RESP-004: responsive patch applied'. All EQS v1.0 constraints apply. No schema or shared component changes. TypeScript strict mode must remain satisfied. Dashboard load < 1.5s must not regress.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-11T20:31:45.540Z",
       "origin": "split_from:AUTO-055",
-      "started_at": "2026-06-15T17:15:35.740Z"
+      "started_at": "2026-06-15T17:15:35.740Z",
+      "completed_at": "2026-06-15T17:19:18.128Z",
+      "skip_reason": "gate blocked after 2 attempt(s): Auditor rejected (score 40)",
+      "auditor_score": 40,
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "FAIL",
+          "score": 40,
+          "effective": "FAIL"
+        }
+      ]
     },
     {
       "id": "AUTO-078",
@@ -2206,6 +2224,14 @@
       "status": "pending",
       "created_at": "2026-06-15T16:16:28.304Z",
       "origin": "split_from:AUTO-072"
+    },
+    {
+      "id": "AUTO-103",
+      "title": "FS-RESP-005: Responsive Audit Patch — Overflow Pages Beyond Five-File Limit",
+      "directive": "If the FlowSeer W251 BOP project file tree under app/dashboard/ contains additional unpatched page.tsx files beyond the five addressed in FS-RESP-004 (settings, notifications, reports, analytics-detail, user-profile), this directive covers those overflow pages. For each remaining unpatched page: (a) identify any KPI grids or data tables NOT rendered through shared KpiGrid.tsx or DataTable.tsx and apply identical responsive rules — grid-cols-2 at mobile (default Tailwind breakpoint, <640px), overflow-x-auto table wrapper, 14px minimum font size (Tailwind text-sm), 44×44px touch targets (min-h-[44px] min-w-[44px]) — directly in the page or its local component file; (b) add audit comment '// FS-RESP-005: responsive patch applied' at the top of each modified file below the import block. Extend the Playwright test suite by creating tests/responsive/resp-005-audit.spec.ts using iPhone 14 Pro device emulation (393×852). Each describe block must test: KPI grid renders with grid-cols-2 at 393px; table wrapper has overflow-x auto/scroll; no data text below 14px computed font-size; all interactive controls have clientHeight >= 44 and clientWidth >= 44. No shared component changes. No schema changes. TypeScript strict mode must remain satisfied. Dashboard load < 1.5s must not regress. All EQS v1.0 constraints apply.",
+      "status": "pending",
+      "created_at": "2026-06-15T17:16:18.878Z",
+      "origin": "split_from:AUTO-077"
     }
   ]
 }
