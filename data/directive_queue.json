@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T22:45:35.241Z",
+  "updated_at": "2026-06-15T22:46:30.970Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2264,10 +2264,11 @@
       "id": "AUTO-098",
       "title": "Access Audit Aggregate Summary Panel",
       "directive": "On the FlowSeer W251 BOP platform (Next.js 14, Tailwind, TypeScript, Drizzle ORM), add a C-suite-readable aggregate summary panel above the access audit table on the existing page at /dashboard/admin/access-audit (created in FS-UI-ACCESS-AUDIT-001). The panel must display: (1) total denied requests in the current filter window; (2) top 5 denied pathnames by count as a horizontal bar chart (Tableau-level, using an existing charting library already in the project); (3) breakdown of denials by role as a donut or stacked bar chart; (4) a 24-hour trend sparkline of denial counts. All aggregate data must be computed server-side via dedicated Drizzle aggregate queries in lib/queries/accessAudit.ts — no client-side aggregation. Summary panel must render within 500ms independent of table query. EQS v1.0: C-suite clarity in < 5 seconds, dashboard load < 1.5s total including both panel and table. No schema changes.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T15:31:31.420Z",
       "origin": "split_from:AUTO-073",
-      "started_at": "2026-06-15T22:45:35.139Z"
+      "started_at": "2026-06-15T22:45:35.139Z",
+      "completed_at": "2026-06-15T22:46:30.852Z"
     },
     {
       "id": "AUTO-099",
@@ -2452,6 +2453,22 @@
       "status": "pending",
       "created_at": "2026-06-15T22:16:25.752Z",
       "origin": "split_from:AUTO-096"
+    },
+    {
+      "id": "AUTO-122",
+      "title": "Access Audit Summary Panel — CSV/PDF Export of Aggregate Stats",
+      "directive": "On the FlowSeer W251 BOP platform (Next.js 14, Tailwind, TypeScript, Drizzle ORM), add export capability to the aggregate summary panel on /dashboard/admin/access-audit (implemented in FS-UI-ACCESS-AUDIT-002). The export must allow C-suite users to download a PDF snapshot of the summary panel (total denied, top pathnames, denial-by-role breakdown, 24h trend) and a CSV of the underlying aggregate rows. PDF generation must be server-side (e.g., via a Next.js Route Handler using an existing PDF library in the project or @vercel/og canvas). CSV generation must be a streaming Route Handler returning Content-Disposition: attachment. Both exports must include a timestamp, the active filter window parameters, and a data lineage footer citing the source table and query timestamp for EQS audit compliance. No schema changes.",
+      "status": "pending",
+      "created_at": "2026-06-15T22:46:30.099Z",
+      "origin": "split_from:AUTO-098"
+    },
+    {
+      "id": "AUTO-123",
+      "title": "Access Audit Aggregate Query Performance — DB Index Verification and Query Instrumentation",
+      "directive": "On the FlowSeer W251 BOP platform, instrument the four Drizzle aggregate queries added in FS-UI-ACCESS-AUDIT-002 (getAuditSummaryStats, getTopDeniedPathnames, getDenialsByRole, getDenialTrend24h in lib/queries/accessAudit.ts) with server-side timing via performance.now() and emit structured log entries to the existing logging transport (console or OpenTelemetry if configured). Add a Vitest test suite at lib/queries/__tests__/accessAudit.perf.test.ts that seeds 50,000 rows into a test DB and asserts each query completes in < 400ms. Verify that indexes on accessAuditLog(status), accessAuditLog(pathname), accessAuditLog(role), and accessAuditLog(createdAt) exist — if any are missing, produce a follow-up directive for schema/migration work (do NOT add migrations in this spec). No schema changes.",
+      "status": "pending",
+      "created_at": "2026-06-15T22:46:30.099Z",
+      "origin": "split_from:AUTO-098"
     }
   ]
 }
