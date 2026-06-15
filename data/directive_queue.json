@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T17:47:47.101Z",
+  "updated_at": "2026-06-15T18:00:36.263Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1984,9 +1984,10 @@
       "id": "AUTO-079",
       "title": "FS-VIZ-TOUCH-002: Per-Page Gesture Tuning & Series Visibility Integration for All 14 Dashboard Pages",
       "directive": "Following FS-VIZ-TOUCH-001 (touch gesture layer on BaseChart), audit all 14 W251 BOP dashboard pages to verify gesture inheritance and apply per-chart overrides where needed. Specifically: (1) For pages that render charts NOT using BaseChart (any legacy direct Recharts usage), migrate those chart instances to use BaseChart + TouchableChartWrapper. (2) For time-series charts on pages 3, 7, 9, and 11 (SpendTrend, ForecastVariance, PipelineVelocity, AnomalyTimeline — verify exact component names), validate that swipe-pan shifts the XAxis time domain correctly by one viewport-width of data rather than cycling series. (3) For categorical bar/pie charts where pinch-to-zoom is not meaningful, disable zoom gesture and ensure swipe cycles chart groupings instead. (4) Run Cypress E2E touch emulation tests against iPhone 14 Pro (393x852) and Android mid-range (360px width) viewport presets for all 14 pages, asserting: long-press modal appears, swipe changes visible data, pinch zoom is scoped only to line/area charts. (5) Confirm EQS dashboard load < 1.5s is maintained after gesture layer addition via Lighthouse CI budget file. Context: Next.js 14, Tailwind, TypeScript, Vercel. FS-VIZ-TOUCH-001 is prerequisite and must be merged first.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T21:16:34.220Z",
-      "origin": "split_from:AUTO-058"
+      "origin": "split_from:AUTO-058",
+      "started_at": "2026-06-15T18:00:36.131Z"
     },
     {
       "id": "AUTO-058-FIX",
