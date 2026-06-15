@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T16:15:37.841Z",
+  "updated_at": "2026-06-15T16:18:58.224Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1763,11 +1763,29 @@
       "id": "AUTO-072",
       "title": "FS-SCHEMA-003: access_denied_audit Table Schema Migration",
       "directive": "Using the FlowSeer W251 BOP platform schema conventions established in FS-SCHEMA-001 (lib/db/schema.ts, Drizzle ORM, PostgreSQL), add a new access_denied_audit table to capture authorization denial events emitted by the FS-AUTH-002 middleware. This is a schema-only directive. Columns required: id (uuid, primary key, default gen_random_uuid()), user_id (text, nullable — anonymous requests have no userId), role (UserRole enum, nullable), pathname (text, not null), method (text, not null), request_id (text, not null — correlates with the requestId generated in middleware), denied_at (timestamptz, not null, default now()), ip_address (text, nullable), user_agent (text, nullable). Table must be append-only by convention (no update/delete grants for the app role). Add the table definition to lib/db/schema.ts, generate and apply the Drizzle migration, and create the /api/internal/audit-denial POST endpoint stub (app/api/internal/audit-denial/route.ts) that validates the inbound payload with zod, inserts a row, and returns 202. The endpoint must be protected so only internal service calls (shared secret header or Vercel internal network) can invoke it — not exposed to end users. EQS v1.0 applies: insert latency < 50ms p99, immutable audit semantics, data lineage comment on table. No UI changes. No auth logic changes.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-11T07:46:06.537Z",
       "origin": "split_from:AUTO-050",
       "started_at": "2026-06-15T16:15:37.720Z",
-      "attempts": 2
+      "attempts": 2,
+      "completed_at": "2026-06-15T16:18:58.121Z",
+      "skip_reason": "gate blocked after 2 attempt(s): Auditor rejected (score 40)",
+      "auditor_score": 40,
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "FAIL",
+          "score": 55,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "FAIL",
+          "score": 40,
+          "effective": "FAIL"
+        }
+      ]
     },
     {
       "id": "AUTO-073",
@@ -2142,6 +2160,30 @@
       "status": "pending",
       "created_at": "2026-06-15T16:01:16.024Z",
       "origin": "split_from:AUTO-074"
+    },
+    {
+      "id": "AUTO-100",
+      "title": "FS-AUDIT-003-IDX — access_denied_audit Performance Indexes",
+      "directive": "Using the FlowSeer W251 BOP platform schema conventions (FS-SCHEMA-001, Drizzle ORM, PostgreSQL) and building on the access_denied_audit table introduced in FS-AUDIT-003, add the following indexes via a new Drizzle migration: (1) a BRIN index on denied_at for time-range scans across the append-only table, (2) a B-tree index on user_id for per-user audit lookups, (3) a B-tree index on request_id for correlation lookups from FS-AUTH-002 middleware traces. Add index definitions in lib/db/schema.ts using Drizzle's index() helper inside the table definition's third argument. Generate and apply the migration. No UI changes, no endpoint changes, no auth logic changes. EQS v1.0 applies: index creation must be CONCURRENTLY to avoid table locks; migration must be idempotent.",
+      "status": "pending",
+      "created_at": "2026-06-15T16:16:28.304Z",
+      "origin": "split_from:AUTO-072"
+    },
+    {
+      "id": "AUTO-101",
+      "title": "FS-AUDIT-003-MW — FS-AUTH-002 Middleware Integration: Fire-and-Forget Denial Ingest",
+      "directive": "Using the FlowSeer W251 BOP platform, integrate the FS-AUDIT-003 audit-denial ingest endpoint into the FS-AUTH-002 authorization middleware (middleware.ts or equivalent). When the middleware denies a request, it must emit a fire-and-forget POST to /api/internal/audit-denial with the AuditDenialPayload (userId, role, pathname, method, requestId, ipAddress, userAgent). The call must be non-blocking: use fetch() without await on the happy path, wrapped in a void expression with a .catch() that logs to the server console only — it must never delay the 401 response to the end user. The INTERNAL_API_SECRET must be read from process.env.INTERNAL_API_SECRET and attached as the x-internal-secret header. No schema changes, no UI changes, no new tables. EQS v1.0 applies: the denial response latency to the end user must not increase by more than 5ms due to this change — verified by a before/after benchmark. Import AuditDenialPayload type from app/api/internal/audit-denial/route.ts for type safety.",
+      "status": "pending",
+      "created_at": "2026-06-15T16:16:28.304Z",
+      "origin": "split_from:AUTO-072"
+    },
+    {
+      "id": "AUTO-102",
+      "title": "FS-AUDIT-003-UI — Access Denied Audit Log Admin View",
+      "directive": "Using the FlowSeer W251 BOP platform (Next.js 14, Tailwind, TypeScript), build a read-only admin UI page at /admin/audit/denials that displays the access_denied_audit table introduced in FS-AUDIT-003. Requirements: server-side paginated table (page size 50) sorted by denied_at DESC; columns displayed: denied_at (formatted local datetime), user_id (truncated with tooltip), role, pathname, method, ip_address, request_id (copyable chip); a date-range filter (from/to) and a free-text filter on pathname; data fetched via a new GET /api/internal/audit-denial route that enforces NextAuth admin session (not the shared-secret gate — this is user-facing admin); EQS v1.0: page load < 1.5s, C-suite clarity in < 5 seconds, Tableau-level table UX with zebra striping and sticky header. No schema changes, no middleware changes.",
+      "status": "pending",
+      "created_at": "2026-06-15T16:16:28.304Z",
+      "origin": "split_from:AUTO-072"
     }
   ]
 }
