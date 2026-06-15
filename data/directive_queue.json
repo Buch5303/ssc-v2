@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T20:30:37.210Z",
+  "updated_at": "2026-06-15T20:31:16.956Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2174,10 +2174,11 @@
       "id": "AUTO-089",
       "title": "FLOWSEER-RESP-004 — Inline Chart Remediation Batch 2 (Next 5 Remaining Pages)",
       "directive": "After FLOWSEER-RESP-003 lands, identify the next batch of up to 5 dashboard pages that still contain inline Recharts charts not wrapped by ResponsiveChartWrapper. Apply the same ResponsiveChartWrapper, calcTickInterval, and clampTooltipPosition patterns from FLOWSEER-RESP-002 to those pages. Validate all affected pages at 393x852: no horizontal overflow (scrollWidth === clientWidth), tooltips within bounds (clampTooltipPosition applied), chart render < 1500ms on Lighthouse mobile preset. Maximum 5 files per spec iteration. Repeat this pattern in subsequent directives (FLOWSEER-RESP-005, etc.) until every dashboard page is remediated. Do not modify schema, migrations, API routes, or the shared chart utility files.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T12:45:55.470Z",
       "origin": "split_from:AUTO-065",
-      "started_at": "2026-06-15T20:30:37.098Z"
+      "started_at": "2026-06-15T20:30:37.098Z",
+      "completed_at": "2026-06-15T20:31:16.847Z"
     },
     {
       "id": "AUTO-090",
@@ -2386,6 +2387,14 @@
       "status": "pending",
       "created_at": "2026-06-15T20:16:21.186Z",
       "origin": "split_from:AUTO-088"
+    },
+    {
+      "id": "AUTO-116",
+      "title": "FLOWSEER-RESP-005: ResponsiveChartWrapper Remediation — Batch 3 (Next Up to 5 Dashboard Pages)",
+      "directive": "After FLOWSEER-RESP-004 lands, identify the next batch of up to 5 dashboard pages that still contain inline Recharts charts (LineChart, BarChart, AreaChart, PieChart, RadarChart, ComposedChart, ScatterChart) not wrapped by ResponsiveChartWrapper. Apply the same ResponsiveChartWrapper, calcTickInterval, and clampTooltipPosition patterns from FLOWSEER-RESP-002 to those pages. Discovery: grep the repository for raw Recharts component usage not already a child of <ResponsiveChartWrapper> under app/dashboard/, exclude files already remediated by FLOWSEER-RESP-002, FLOWSEER-RESP-003, and FLOWSEER-RESP-004, rank alphabetically by file path, take the first 5 unique page files. Validate all affected pages at 393x852: no horizontal overflow (scrollWidth === clientWidth), tooltips within bounds (clampTooltipPosition applied), chart render < 1500ms on Lighthouse mobile preset. Maximum 5 files per spec iteration. Do not modify schema, migrations, API routes, or the shared chart utility files (components/charts/ResponsiveChartWrapper.tsx, lib/charts/chartUtils.ts). If more unremediated pages remain after this batch, produce FLOWSEER-RESP-006 with the same pattern until every dashboard page is remediated. Platform: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 standards enforced.",
+      "status": "pending",
+      "created_at": "2026-06-15T20:31:16.040Z",
+      "origin": "split_from:AUTO-089"
     }
   ]
 }
