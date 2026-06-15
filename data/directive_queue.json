@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T14:15:16.457Z",
+  "updated_at": "2026-06-15T14:18:55.226Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1754,10 +1754,28 @@
       "id": "AUTO-069",
       "title": "FS-RESP-002-C — Responsive Table Wrappers & Chart Containers: Dashboard Pages Batch 3 of 3",
       "directive": "This is the final continuation of FS-RESP-002-A and FS-RESP-002-B. The full directive scope (FS-RESP-001 follow-up) requires auditing all 14 dashboard pages. Batches 1 and 2 covered 10 pages. This batch must cover the remaining 4 dashboard page component files:\n\n- app/(dashboard)/purchase-orders/page.tsx\n- app/(dashboard)/compliance/page.tsx\n- app/(dashboard)/savings-tracker/page.tsx\n- app/(dashboard)/reports/page.tsx\n\nApply identical remediation rules as FS-RESP-002-A:\n1. Every <table> must have an explicit overflow-x-auto wrapper div in JSX (className='w-full overflow-x-auto rounded-md').\n2. Every Recharts chart component must be wrapped in <ResponsiveContainer width='100%' height={320}> with numeric width props removed from the inner chart.\n3. Victory or other library charts: set responsive={true} or remove fixed width, ensure container div is w-full.\n4. Import ResponsiveContainer from 'recharts' wherever added.\n5. Add comment // FS-RESP-002-C: tables wrapped, charts responsive — <date> in first 5 lines of each modified file.\n6. Do NOT modify globals.css, schema, API routes, or data logic.\n\nUpon completion of this batch, all 14 dashboard pages will have been audited and remediated. A final regression Playwright sweep across all 14 pages at 393px viewport must be run to confirm zero horizontal scroll and zero chart clipping across the full dashboard surface. EQS standards apply: no horizontal scroll at 393px, no chart clipping, dashboard load < 1.5s, CLS < 0.1.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-11T07:16:10.497Z",
       "origin": "split_from:AUTO-049",
-      "started_at": "2026-06-15T14:15:16.304Z"
+      "started_at": "2026-06-15T14:15:16.304Z",
+      "completed_at": "2026-06-15T14:18:55.088Z",
+      "skip_reason": "gate blocked after 2 attempt(s): Auditor rejected (score 40)",
+      "auditor_score": 40,
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "FAIL",
+          "score": 40,
+          "effective": "FAIL"
+        }
+      ]
     },
     {
       "id": "AUTO-070",
