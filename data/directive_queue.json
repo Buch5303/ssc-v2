@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T21:30:35.415Z",
+  "updated_at": "2026-06-15T21:31:31.732Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2214,10 +2214,11 @@
       "id": "AUTO-093",
       "title": "FLOWSEER-DROP-005: Mobile Compliance Audit — DropdownMenu & CommandMenu Components",
       "directive": "DIRECTIVE (follows FLOWSEER-DROP-004): Complete the mobile dropdown compliance audit and remediation for the remaining custom floating dropdown components NOT covered in FLOWSEER-DROP-004: specifically components/ui/DropdownMenu.tsx and components/ui/CommandMenu.tsx (and any additional portal-based floating dropdowns discovered during the FLOWSEER-DROP-004 audit as documented in COMPONENTS_AUDIT.md under 'Follow-Up Required: Yes'). For each component: (1) On mobile viewports < 768px, replace or wrap with a native <select> fallback rendered conditionally via the useMediaQuery hook introduced in FLOWSEER-DROP-004 (hooks/useMediaQuery.ts), OR confirm the component meets 44px touch targets and does not produce z-index collisions with the sidebar drawer (z-50) or bottom nav (z-40). (2) Update COMPONENTS_AUDIT.md at repo root to mark all previously deferred rows as resolved and add any newly discovered components. (3) Ensure no custom floating dropdown has a z-index > 40 on mobile. EQS constraint: after this directive lands, zero custom floating dropdowns in the entire components/ui/ directory may violate 44px touch targets or z-index policy on mobile. Maximum 5 files. One concern: dropdown/combobox mobile compliance only for the deferred component set. No schema changes. Depends on: FLOWSEER-DROP-004 merged and hooks/useMediaQuery.ts available. Context: Next.js 14, Tailwind, TypeScript, Vercel, EQS v1.0.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T13:46:05.474Z",
       "origin": "split_from:AUTO-067",
-      "started_at": "2026-06-15T21:30:35.322Z"
+      "started_at": "2026-06-15T21:30:35.322Z",
+      "completed_at": "2026-06-15T21:31:31.638Z"
     },
     {
       "id": "AUTO-094",
@@ -2410,6 +2411,14 @@
       "status": "pending",
       "created_at": "2026-06-15T21:01:43.348Z",
       "origin": "split_from:AUTO-091"
+    },
+    {
+      "id": "AUTO-118",
+      "title": "FLOWSEER-DROP-006: Mobile Dropdown Compliance — Overflow Portal Components Beyond 5-File Budget",
+      "directive": "DIRECTIVE (follows FLOWSEER-DROP-005): If the COMPONENTS_AUDIT.md audit conducted during FLOWSEER-DROP-005 discovered additional portal-based floating dropdown components in components/ui/ that could not be remediated within the 5-file budget of DROP-005 (recorded as 'Follow-Up Required: Yes, Deferred to FLOWSEER-DROP-006'), remediate those components now. For each component: (1) On mobile viewports < 768px, replace or wrap with a native <select> fallback rendered conditionally via the useMediaQuery hook at hooks/useMediaQuery.ts (introduced in FLOWSEER-DROP-004, consumed read-only), OR confirm the component meets 44px touch targets (min-height: 44px, min-width: 44px enforced via Tailwind arbitrary value classes) and does not produce z-index > 35 on mobile (z-index ≤ 35 to avoid collision with sidebar drawer z-50 and bottom nav z-40). (2) Add data-testid='[component-name]-mobile-fallback' to each mobile render path. (3) Guard all useMediaQuery-dependent renders with a mounted-state guard (useState + useEffect) to prevent Next.js 14 hydration mismatch. (4) Update COMPONENTS_AUDIT.md at repo root to mark all newly resolved rows as 'Resolved: FLOWSEER-DROP-006' and confirm zero remaining 'Follow-Up Required: Yes' rows exist in the entire file. EQS constraint: after this directive lands, zero custom floating dropdowns in the entire components/ui/ directory may violate 44px touch targets or z-index policy on mobile. Maximum 5 files. One concern: dropdown mobile compliance for overflow components from DROP-005 audit only. No schema changes. Depends on: FLOWSEER-DROP-005 merged. Context: Next.js 14, Tailwind, TypeScript, Vercel, EQS v1.0.",
+      "status": "pending",
+      "created_at": "2026-06-15T21:31:30.713Z",
+      "origin": "split_from:AUTO-093"
     }
   ]
 }
