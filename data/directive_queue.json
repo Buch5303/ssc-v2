@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T13:00:23.129Z",
+  "updated_at": "2026-06-15T13:04:17.711Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1626,10 +1626,28 @@
       "id": "AUTO-066",
       "title": "FLOWSEER-RESP-002d — Chart Accessibility & Touch Interaction Audit",
       "directive": "After FLOWSEER-RESP-002 and FLOWSEER-RESP-002b/c land, audit all chart components for mobile accessibility: (1) ensure ARIA labels and roles are set on SVG/canvas elements, (2) verify keyboard navigation does not break after ResponsiveContainer wrapping, (3) add touch swipe support for paginated charts on mobile (e.g., time-series charts with dense data points), (4) verify VoiceOver/TalkBack can announce chart data summaries. Validate: axe-core zero critical violations on chart components, touch swipe navigates paginated series correctly in Playwright iOS emulation. Maximum 5 files modified.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-11T06:31:47.025Z",
       "origin": "split_from:AUTO-047",
-      "started_at": "2026-06-15T13:00:22.972Z"
+      "started_at": "2026-06-15T13:00:22.972Z",
+      "completed_at": "2026-06-15T13:04:17.496Z",
+      "skip_reason": "gate blocked after 2 attempt(s): compile gate: 3 unresolved import(s) after 2 attempt(s)",
+      "auditor_score": null,
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        }
+      ]
     },
     {
       "id": "AUTO-067",
@@ -1934,6 +1952,22 @@
       "status": "pending",
       "created_at": "2026-06-15T12:45:55.470Z",
       "origin": "split_from:AUTO-065"
+    },
+    {
+      "id": "AUTO-090",
+      "title": "FLOWSEER-ACC-003b: Extend Accessibility Audit to Non-TimeSeriesChart Components (Bar, Pie, KPI Sparklines)",
+      "directive": "After FLOWSEER-ACC-003 lands, extend the mobile accessibility audit to all remaining chart component types in components/charts/ that are NOT TimeSeriesChart — specifically BarChart, PieChart, KPI sparkline components, and any heatmap or scatter plot variants. Requirements: (1) Apply AccessibleChartWrapper (introduced in FLOWSEER-ACC-003) to each component with appropriate title/description/dataTableFallback props. (2) Add axe-core jest-axe tests in chart-accessibility.spec.ts for each newly wrapped component. (3) For PieChart, implement a dedicated accessible data table fallback listing segment label and value/percentage pairs. (4) Verify keyboard focus order across a dashboard page containing multiple charts does not produce a logical tab order violation (WCAG 2.4.3). (5) Playwright desktop + iOS emulation: assert each chart type has role='img' and aria-label in rendered DOM. Validate: axe-core zero critical/serious violations for all chart types, Playwright tab order test passes. Maximum 5 files modified.",
+      "status": "pending",
+      "created_at": "2026-06-15T13:01:18.692Z",
+      "origin": "split_from:AUTO-066"
+    },
+    {
+      "id": "AUTO-091",
+      "title": "FLOWSEER-ACC-003c: Automated Accessibility Regression Gate in CI Pipeline",
+      "directive": "After FLOWSEER-ACC-003 and FLOWSEER-ACC-003b land, integrate accessibility regression gating into the CI pipeline. Requirements: (1) Add an axe-core full-page scan step to the GitHub Actions workflow that runs against the Next.js production build (next build && next start) on each PR targeting main. Scan the /dashboard and /procurement routes at minimum. Fail the CI job on any critical or serious axe-core violation. (2) Add Lighthouse CI (lhci) configuration with accessibility score threshold ≥ 95 for mobile emulation (Moto G4 preset). Fail CI if score drops below threshold. (3) Integrate Playwright accessibility snapshot assertions: for each chart page, capture an accessibility tree snapshot (page.accessibility.snapshot()) and assert the snapshot matches a stored baseline; fail on structural regressions. (4) Emit a machine-readable accessibility report artifact (JSON) per CI run for audit log compliance under EQS v1.0 immutable audit log requirement. Maximum 5 files modified (CI config, lhci config, Playwright baseline snapshots, report artifact script).",
+      "status": "pending",
+      "created_at": "2026-06-15T13:01:18.692Z",
+      "origin": "split_from:AUTO-066"
     }
   ]
 }
