@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T21:00:36.340Z",
+  "updated_at": "2026-06-15T21:01:44.386Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2194,10 +2194,11 @@
       "id": "AUTO-091",
       "title": "FLOWSEER-ACC-003c: Automated Accessibility Regression Gate in CI Pipeline",
       "directive": "After FLOWSEER-ACC-003 and FLOWSEER-ACC-003b land, integrate accessibility regression gating into the CI pipeline. Requirements: (1) Add an axe-core full-page scan step to the GitHub Actions workflow that runs against the Next.js production build (next build && next start) on each PR targeting main. Scan the /dashboard and /procurement routes at minimum. Fail the CI job on any critical or serious axe-core violation. (2) Add Lighthouse CI (lhci) configuration with accessibility score threshold ≥ 95 for mobile emulation (Moto G4 preset). Fail CI if score drops below threshold. (3) Integrate Playwright accessibility snapshot assertions: for each chart page, capture an accessibility tree snapshot (page.accessibility.snapshot()) and assert the snapshot matches a stored baseline; fail on structural regressions. (4) Emit a machine-readable accessibility report artifact (JSON) per CI run for audit log compliance under EQS v1.0 immutable audit log requirement. Maximum 5 files modified (CI config, lhci config, Playwright baseline snapshots, report artifact script).",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T13:01:18.692Z",
       "origin": "split_from:AUTO-066",
-      "started_at": "2026-06-15T21:00:36.239Z"
+      "started_at": "2026-06-15T21:00:36.239Z",
+      "completed_at": "2026-06-15T21:01:44.274Z"
     },
     {
       "id": "AUTO-092",
@@ -2398,6 +2399,14 @@
       "status": "pending",
       "created_at": "2026-06-15T20:31:16.040Z",
       "origin": "split_from:AUTO-089"
+    },
+    {
+      "id": "AUTO-117",
+      "title": "Playwright Accessibility Snapshot Baselines for Chart Pages",
+      "directive": "CONTEXT: FLOWSEER-CI-A11Y-001 has landed, establishing the CI pipeline with axe-core, Lighthouse CI, and Playwright infrastructure. The playwright.config.ts now includes an 'a11y-chromium' project scoped to 'e2e/accessibility/**/*.snap.spec.ts'.\n\nDIRECTIVE: Create Playwright accessibility snapshot baseline specs for each chart page in the FlowSeer W251 BOP procurement platform. Requirements:\n(1) Create e2e/accessibility/dashboard-charts.snap.spec.ts: navigate to /dashboard, wait for networkidle, call page.accessibility.snapshot() for each chart region (locate by role='img' or aria-label containing 'chart'), store snapshots using Playwright's built-in snapshot mechanism (expect(snapshot).toMatchSnapshot('dashboard-chart-N.snap')). Fail on structural regression.\n(2) Create e2e/accessibility/procurement-charts.snap.spec.ts: same pattern for /procurement chart regions.\n(3) Create the initial baseline snapshot files by running `npx playwright test --update-snapshots` once on a known-good build. Commit the generated .snap files under e2e/accessibility/snapshots/.\n(4) Ensure the specs handle dynamic content (loading states) by awaiting a stable DOM state before snapshotting — use waitForSelector on a chart container sentinel element.\n(5) Each spec must complete in < 30s per route to stay within EQS AI inference < 2s and dashboard load < 1.5s performance budget validation window.\nMaximum 5 files: dashboard-charts.snap.spec.ts, procurement-charts.snap.spec.ts, and up to 3 snapshot baseline files (.snap). No CI or config changes — those landed in FLOWSEER-CI-A11Y-001.",
+      "status": "pending",
+      "created_at": "2026-06-15T21:01:43.348Z",
+      "origin": "split_from:AUTO-091"
     }
   ]
 }
