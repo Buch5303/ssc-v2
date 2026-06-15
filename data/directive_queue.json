@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T19:30:35.917Z",
+  "updated_at": "2026-06-15T19:31:31.310Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2134,10 +2134,11 @@
       "id": "AUTO-085",
       "title": "FLOWSEER-RESP-006: Playwright Visual Regression Suite for Responsive Charts at 393x852",
       "directive": "After FLOWSEER-RESP-003 and FLOWSEER-RESP-004 land, create a Playwright visual regression test suite that navigates to each of the 14 dashboard pages at 393x852 viewport (iPhone 14 Pro) and asserts: (1) no horizontal scroll (document.documentElement.scrollWidth === document.documentElement.clientWidth), (2) all chart containers have offsetWidth > 0 and offsetHeight > 0, (3) no tooltip DOM element overflows the right viewport edge when triggered by hover/tap on chart data points, (4) page load time from navigation start to largest contentful paint is under 1500ms (EQS dashboard load budget). Store baseline screenshots for each page. Tests must run in CI on every PR. Maximum 5 test files created. One concern: chart visual regression only, no other UI components. EQS v1.0 standards apply.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T12:01:34.835Z",
       "origin": "split_from:AUTO-062",
-      "started_at": "2026-06-15T19:30:35.800Z"
+      "started_at": "2026-06-15T19:30:35.800Z",
+      "completed_at": "2026-06-15T19:31:31.193Z"
     },
     {
       "id": "AUTO-086",
@@ -2338,6 +2339,22 @@
       "status": "pending",
       "created_at": "2026-06-15T19:01:18.886Z",
       "origin": "split_from:AUTO-083"
+    },
+    {
+      "id": "AUTO-111",
+      "title": "Extend Visual Regression to Tablet and Desktop Viewports (1024x768, 1440x900)",
+      "directive": "After FLOWSEER-VRT-005 lands, extend the Playwright chart visual regression suite to cover tablet (1024x768) and desktop (1440x900) viewports for the same 14 dashboard pages. Add two new Playwright projects ('tablet', 'desktop') to tests/visual/playwright.visual.config.ts. Reuse the existing helper functions from tests/visual/helpers/chart-assertions.ts without modification. Create separate baseline screenshot directories: tests/visual/screenshots/baselines/tablet/ and tests/visual/screenshots/baselines/desktop/. All four assertions from FLOWSEER-VRT-005 (no horizontal scroll, chart dimensions, tooltip containment, LCP < 1500ms) must apply at each new viewport. Update .github/workflows/visual-regression.yml to run all three viewport projects in parallel matrix strategy. Maximum 3 files modified (playwright.visual.config.ts, visual-regression.yml, dashboard-pages.ts if viewport-specific selectors needed). One concern: viewport extension only, no new assertion types. EQS v1.0 standards apply.",
+      "status": "pending",
+      "created_at": "2026-06-15T19:31:30.212Z",
+      "origin": "split_from:AUTO-085"
+    },
+    {
+      "id": "AUTO-112",
+      "title": "Chart Animation and Interaction State Visual Regression — Hover, Active, Loading States",
+      "directive": "After FLOWSEER-VRT-005 lands, extend the Playwright chart visual regression suite to capture and assert on interactive chart states beyond the default render: (1) hover state on chart data points producing a highlighted series, (2) active/selected state after click on a data point, (3) loading skeleton state captured by throttling network to Slow 3G before navigation. For each of the 14 dashboard pages at 393x852 viewport, capture toHaveScreenshot baselines for each of these three states separately, stored under tests/visual/screenshots/baselines/states/{page-id}-{state}.png. Create a new spec file tests/visual/chart-interaction-states.spec.ts. Reuse helpers from tests/visual/helpers/chart-assertions.ts. Interaction state screenshots must pass maxDiffPixelRatio: 0.02 (slightly relaxed for animation frames). One concern: interaction and loading states only, no new viewport sizes. EQS v1.0 standards apply.",
+      "status": "pending",
+      "created_at": "2026-06-15T19:31:30.212Z",
+      "origin": "split_from:AUTO-085"
     }
   ]
 }
