@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T18:16:21.692Z",
+  "updated_at": "2026-06-15T18:30:36.007Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2064,9 +2064,10 @@
       "id": "AUTO-081",
       "title": "FS-VIZ-GESTURE-002 — Keyboard & Accessibility Equivalents for Chart Gesture Controls",
       "directive": "Following FS-VIZ-GESTURE-001 (touch gesture support), add keyboard-accessible equivalents for all gesture interactions on time-series and trend charts. Requirements: (1) When a chart is focused, left/right arrow keys pan the visible window by 10% of the current domain span per keypress; (2) plus/minus keys zoom in/out by a 1.5× scale factor per keypress, respecting the same 1-day minimum / full-range maximum constraints from FS-VIZ-GESTURE-001; (3) Home key resets to full range (equivalent to double-tap reset); (4) all keyboard interactions must update the same domainStart/domainEnd state produced by useChartGestures — extend the hook with a keyboardHandlers return value, no separate state; (5) focus ring must be visible on the chart container per WCAG 2.1 AA (3:1 contrast ratio); (6) aria-label on the chart container must dynamically reflect current zoom level and visible date range (e.g. 'Revenue trend chart, zoomed 2.4×, showing Jan 1 – Jan 15 2025'). Context: Next.js 14, Tailwind, TypeScript. Recharts only. Builds on ChartWrapper.tsx, BaseChart.tsx, hooks/useChartGestures.ts from FS-VIZ-GESTURE-001. Covers ONLY keyboard/accessibility interaction — no layout, data, or schema changes.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T22:31:42.602Z",
-      "origin": "split_from:AUTO-061"
+      "origin": "split_from:AUTO-061",
+      "started_at": "2026-06-15T18:30:35.836Z"
     },
     {
       "id": "AUTO-082",
