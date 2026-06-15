@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T17:00:37.770Z",
+  "updated_at": "2026-06-15T17:05:26.506Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1875,11 +1875,14 @@
       "id": "AUTO-075",
       "title": "AUTH-METRICS-002: Real-Time Denial Alert Streaming via SSE",
       "directive": "Extend the authorization denial metrics layer (built in AUTH-METRICS-001) to push real-time denial spike alerts to the C-suite dashboard tile. Implement a Server-Sent Events endpoint at GET /api/metrics/auth-denials/stream that tails authorization_audit_log using Postgres LISTEN/NOTIFY (trigger on INSERT where outcome='deny'). The SSE stream must emit an event within 300ms of a new denial row being committed (EQS real-time latency budget). On the client, AuthDenialTile's KPI counters must update without full page reload. Alert threshold: if denial count in any rolling 5-minute window exceeds 10, emit a 'spike' event that renders a red banner ('Unusual denial spike detected — {count} denials in 5 min') on the tile. All streamed data must reference authorization_audit_log row IDs for full auditability. No sampling. Depends on AUTH-METRICS-001 being merged.",
-      "status": "in_progress",
+      "status": "complete",
       "created_at": "2026-06-11T20:16:41.596Z",
       "origin": "split_from:AUTO-054",
       "started_at": "2026-06-15T17:00:37.618Z",
-      "attempts": 1
+      "attempts": 1,
+      "completed_at": "2026-06-15T17:05:26.409Z",
+      "auditor_score": 88,
+      "build_attempts": 2
     },
     {
       "id": "AUTO-076",
@@ -2205,6 +2208,22 @@
       "status": "pending",
       "created_at": "2026-06-15T16:16:28.304Z",
       "origin": "split_from:AUTO-072"
+    },
+    {
+      "id": "AUTO-103",
+      "title": "AUTH-METRICS-003: Multi-Client SSE Fan-Out and Postgres Listener Connection Guard",
+      "directive": "Currently AUTH-METRICS-002 instantiates a dedicated pg.Client per SSE connection. Under concurrent C-suite users this will exhaust Postgres connection limits. Implement a shared BroadcastChannel or EventEmitter-based fan-out layer in lib/db/listeners.ts so that a single pg.Client LISTEN connection serves all active SSE streams via an internal pub/sub. Requirements: (1) getDenialListener() must return a shared EventEmitter; a single pg.Client is created on first subscriber and reused for all subsequent SSE connections. (2) When the last SSE subscriber disconnects, the pg.Client must issue UNLISTEN and be destroyed. (3) The fan-out layer must be safe under Next.js hot reload (dev) — handle ECONNRESET and attempt reconnect with exponential backoff capped at 30s. (4) Add a Prometheus-compatible metric endpoint (or log line) at startup reporting active_denial_listeners count. (5) Acceptance: 10 concurrent SSE connections must share exactly 1 pg LISTEN client, verified by querying pg_stat_activity in a load test. Depends on AUTH-METRICS-002 being merged.",
+      "status": "pending",
+      "created_at": "2026-06-15T17:01:42.436Z",
+      "origin": "split_from:AUTO-075"
+    },
+    {
+      "id": "AUTO-104",
+      "title": "AUTH-METRICS-004: Persistent Spike Alert History and Audit Export for Compliance",
+      "directive": "The spike alerts emitted in AUTH-METRICS-002 are ephemeral (in-memory, lost on server restart). Implement persistent spike alert logging for compliance auditability. Requirements: (1) When DenialSpikeDetector.isSpiking() returns true, write a record to a new denial_spike_alerts table (schema directive — create as a separate migration): columns id (uuid pk), detected_at (timestamptz), window_start (timestamptz), window_end (timestamptz), denial_count (int), audit_row_ids (uuid[] or jsonb), acknowledged_at (timestamptz nullable), acknowledged_by (text nullable). (2) The SSE route must INSERT into denial_spike_alerts before enqueuing the 'spike' SSE frame, and include the spike_alert_id in the SSE payload for client-side reference. (3) Add a GET /api/metrics/auth-denials/spike-history endpoint returning paginated spike alert records with filter by date range and acknowledged status. (4) Add an acknowledge button to AuthDenialTile's spike banner that POSTs to PATCH /api/metrics/auth-denials/spike-alerts/{id}/acknowledge, stamping acknowledged_at and acknowledged_by (from session). (5) All spike_alert records must be immutable except acknowledged_at/by fields. (6) EQS audit requirement: spike_alert rows must be exportable as CSV with full audit_row_ids for compliance review. Depends on AUTH-METRICS-002 being merged. Schema change must be its own migration directive preceding this one.",
+      "status": "pending",
+      "created_at": "2026-06-15T17:01:42.436Z",
+      "origin": "split_from:AUTO-075"
     }
   ]
 }
