@@ -47,15 +47,35 @@ function ghHeaders(token: string) {
 async function atomicCommit(
   files: FileToCommit[],
   message: string,
-  token: string
-): Promise<{ ok: boolean; sha?: string; error?: string }> {
+  token: string,
+  branch: string = BRANCH
+): Promise<{ ok: boolean; sha?: string; error?: string; branch?: string }> {
   const h = ghHeaders(token);
   try {
-    // 1. Current branch head
-    const refRes = await fetch(`${API}/git/ref/heads/${BRANCH}`, { headers: h, cache: "no-store" });
-    if (!refRes.ok) return { ok: false, error: `read ref: HTTP ${refRes.status} ${(await refRes.text()).slice(0, 160)}` };
-    const baseCommitSha = (await refRes.json())?.object?.sha;
-    if (!baseCommitSha) return { ok: false, error: "could not resolve base commit sha" };
+    // 1. Resolve the base commit. main commits stack on main's head as before.
+    //    Candidate branches (promotion gate) are ALWAYS based on main's current
+    //    head — a candidate is exactly "main + this batch", so a later
+    //    fast-forward of main onto the candidate can never fail on a stale base.
+    const mainRefRes = await fetch(`${API}/git/ref/heads/${BRANCH}`, { headers: h, cache: "no-store" });
+    if (!mainRefRes.ok) return { ok: false, error: `read main ref: HTTP ${mainRefRes.status} ${(await mainRefRes.text()).slice(0, 160)}` };
+    const mainSha = (await mainRefRes.json())?.object?.sha;
+    if (!mainSha) return { ok: false, error: "could not resolve main head" };
+    const baseCommitSha = mainSha;
+    if (branch !== BRANCH) {
+      // Ensure the candidate ref exists; its head is irrelevant (we force-update
+      // it below and always tree off main), but the PATCH in step 6 needs a ref.
+      const candRes = await fetch(`${API}/git/ref/heads/${branch}`, { headers: h, cache: "no-store" });
+      if (candRes.status === 404) {
+        const createRes = await fetch(`${API}/git/refs`, {
+          method: "POST",
+          headers: h,
+          body: JSON.stringify({ ref: `refs/heads/${branch}`, sha: mainSha }),
+        });
+        if (!createRes.ok) return { ok: false, error: `create branch ${branch}: HTTP ${createRes.status} ${(await createRes.text()).slice(0, 160)}` };
+      } else if (!candRes.ok) {
+        return { ok: false, error: `read ref ${branch}: HTTP ${candRes.status} ${(await candRes.text()).slice(0, 160)}` };
+      }
+    }
 
     // 2. Base tree
     const baseCommitRes = await fetch(`${API}/git/commits/${baseCommitSha}`, { headers: h, cache: "no-store" });
@@ -104,15 +124,17 @@ async function atomicCommit(
     const newCommitSha = (await commitRes.json())?.sha;
     if (!newCommitSha) return { ok: false, error: "could not create commit" };
 
-    // 6. Advance the branch (non-force; rejects if someone else moved it)
-    const updRes = await fetch(`${API}/git/refs/heads/${BRANCH}`, {
+    // 6. Advance the target branch. main is non-force (rejects if someone else
+    //    moved it). Candidate branches are disposable and always rebuilt off
+    //    main, so they force-update to the new commit.
+    const updRes = await fetch(`${API}/git/refs/heads/${branch}`, {
       method: "PATCH",
       headers: h,
-      body: JSON.stringify({ sha: newCommitSha, force: false }),
+      body: JSON.stringify({ sha: newCommitSha, force: branch !== BRANCH }),
     });
-    if (!updRes.ok) return { ok: false, error: `update ref: HTTP ${updRes.status} ${(await updRes.text()).slice(0, 160)}` };
+    if (!updRes.ok) return { ok: false, error: `update ref ${branch}: HTTP ${updRes.status} ${(await updRes.text()).slice(0, 160)}` };
 
-    return { ok: true, sha: newCommitSha };
+    return { ok: true, sha: newCommitSha, branch };
   } catch (e: any) {
     return { ok: false, error: e?.message || "atomicCommit exception" };
   }
@@ -122,8 +144,9 @@ export async function POST(req: Request) {
   const denied = requireInternal(req);
   if (denied) return denied;
   try {
-    const { files, message, directive_id } = await req.json();
+    const { files, message, directive_id, branch } = await req.json();
     const token = process.env.GITHUB_PAT;
+    const targetBranch = typeof branch === "string" && branch.trim() ? branch.trim() : BRANCH;
 
     if (!token) {
       return NextResponse.json({ error: "GITHUB_PAT not set. Add it via /api/admin." }, { status: 500 });
@@ -154,7 +177,7 @@ export async function POST(req: Request) {
     }
 
     // ONE atomic commit for the whole batch → ONE deploy, never a half-applied tree.
-    const commit = await atomicCommit(valid, commitMessage, token);
+    const commit = await atomicCommit(valid, commitMessage, token, targetBranch);
 
     if (commit.ok) {
       for (const f of valid) results.push({ path: f.path, status: "committed", sha: commit.sha });
@@ -171,6 +194,7 @@ export async function POST(req: Request) {
       failed,
       total: files.length,
       sha: commit.sha,
+      branch: commit.branch || targetBranch,
       results,
       message: commitMessage,
       note: commit.ok ? "Single atomic commit pushed. Vercel will auto-deploy within 60 seconds." : `Commit failed: ${commit.error}`,
