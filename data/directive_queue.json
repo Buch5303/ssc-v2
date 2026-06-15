@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T22:31:19.222Z",
+  "updated_at": "2026-06-15T22:45:35.241Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2264,9 +2264,10 @@
       "id": "AUTO-098",
       "title": "Access Audit Aggregate Summary Panel",
       "directive": "On the FlowSeer W251 BOP platform (Next.js 14, Tailwind, TypeScript, Drizzle ORM), add a C-suite-readable aggregate summary panel above the access audit table on the existing page at /dashboard/admin/access-audit (created in FS-UI-ACCESS-AUDIT-001). The panel must display: (1) total denied requests in the current filter window; (2) top 5 denied pathnames by count as a horizontal bar chart (Tableau-level, using an existing charting library already in the project); (3) breakdown of denials by role as a donut or stacked bar chart; (4) a 24-hour trend sparkline of denial counts. All aggregate data must be computed server-side via dedicated Drizzle aggregate queries in lib/queries/accessAudit.ts — no client-side aggregation. Summary panel must render within 500ms independent of table query. EQS v1.0: C-suite clarity in < 5 seconds, dashboard load < 1.5s total including both panel and table. No schema changes.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T15:31:31.420Z",
-      "origin": "split_from:AUTO-073"
+      "origin": "split_from:AUTO-073",
+      "started_at": "2026-06-15T22:45:35.139Z"
     },
     {
       "id": "AUTO-099",
