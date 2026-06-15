@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T15:30:36.148Z",
+  "updated_at": "2026-06-15T15:34:23.504Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1772,10 +1772,28 @@
       "id": "AUTO-073",
       "title": "FS-AUTH-004: Authorization Denial Audit Dashboard UI",
       "directive": "Using the FlowSeer W251 BOP platform (Next.js 14, Tailwind, TypeScript), implement a read-only admin dashboard page at /dashboard/admin/access-audit that displays records from the access_denied_audit table (defined in FS-SCHEMA-003). Scope: server component page that queries access_denied_audit via Drizzle, renders a paginated table (50 rows/page) showing denied_at, user_id, role, pathname, method, request_id, ip_address columns. Filter controls: date range picker, role multi-select, pathname prefix text input. Accessible only to admin role (enforced by FS-AUTH-002 middleware). EQS v1.0 applies: page load < 1.5s, C-suite clarity in < 5 seconds, Tableau-level data table with sortable columns. No schema changes — consume access_denied_audit table from lib/db/schema.ts only.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-11T07:46:06.537Z",
       "origin": "split_from:AUTO-050",
-      "started_at": "2026-06-15T15:30:36.048Z"
+      "started_at": "2026-06-15T15:30:36.048Z",
+      "completed_at": "2026-06-15T15:34:23.395Z",
+      "skip_reason": "gate blocked after 2 attempt(s): compile gate: 2 missing named export(s) after 2 attempt(s)",
+      "auditor_score": null,
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        }
+      ]
     },
     {
       "id": "AUTO-050-FIX",
@@ -2080,6 +2098,22 @@
       "status": "pending",
       "created_at": "2026-06-15T14:45:49.132Z",
       "origin": "split_from:AUTO-070"
+    },
+    {
+      "id": "AUTO-097",
+      "title": "Access Audit CSV Export Endpoint",
+      "directive": "On the FlowSeer W251 BOP platform (Next.js 14, TypeScript, Drizzle ORM), implement a server-side CSV export for the access_denied_audit table. Create a Route Handler at app/dashboard/admin/access-audit/export/route.ts that accepts GET requests with the same filter query params as FS-UI-ACCESS-AUDIT-001 (dateFrom, dateTo, roles, pathnamePrefix) but with no pagination limit (export all matching rows up to a hard cap of 10,000 rows). The handler must: (1) enforce admin-only access via session check, returning 403 for non-admin; (2) stream a CSV response with Content-Disposition: attachment; filename=access-audit-{ISO-date}.csv; (3) include all seven columns (denied_at, user_id, role, pathname, method, request_id, ip_address) as CSV headers; (4) complete the full response within 5 seconds for 10,000 rows. Add an Export CSV button to AccessAuditFilters.tsx (from FS-UI-ACCESS-AUDIT-001) that constructs the export URL from current filter state and triggers a native browser download. No schema changes. EQS v1.0 applies: 100% auditable data reconciliation — every exported row must match what the paginated table would show for the same filters.",
+      "status": "pending",
+      "created_at": "2026-06-15T15:31:31.420Z",
+      "origin": "split_from:AUTO-073"
+    },
+    {
+      "id": "AUTO-098",
+      "title": "Access Audit Aggregate Summary Panel",
+      "directive": "On the FlowSeer W251 BOP platform (Next.js 14, Tailwind, TypeScript, Drizzle ORM), add a C-suite-readable aggregate summary panel above the access audit table on the existing page at /dashboard/admin/access-audit (created in FS-UI-ACCESS-AUDIT-001). The panel must display: (1) total denied requests in the current filter window; (2) top 5 denied pathnames by count as a horizontal bar chart (Tableau-level, using an existing charting library already in the project); (3) breakdown of denials by role as a donut or stacked bar chart; (4) a 24-hour trend sparkline of denial counts. All aggregate data must be computed server-side via dedicated Drizzle aggregate queries in lib/queries/accessAudit.ts — no client-side aggregation. Summary panel must render within 500ms independent of table query. EQS v1.0: C-suite clarity in < 5 seconds, dashboard load < 1.5s total including both panel and table. No schema changes.",
+      "status": "pending",
+      "created_at": "2026-06-15T15:31:31.420Z",
+      "origin": "split_from:AUTO-073"
     }
   ]
 }
