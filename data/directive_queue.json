@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T14:45:10.727Z",
+  "updated_at": "2026-06-15T14:46:23.778Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1737,10 +1737,13 @@
       "id": "AUTO-070",
       "title": "FS-SCHEMA-003: access_denied_audit Table DDL and Migration",
       "directive": "Create a standalone schema directive for the access_denied_audit table required by the FS-AUTH-002 authorization middleware. Scope: add the following to lib/db/schema.ts — export const accessDeniedAudit table definition with columns: id (uuid, primary key, defaultRandom), userId (text, not null), role (text, not null), path (text, not null), method (text, not null), ip (text), reason (text), deniedAt (timestamp with timezone, defaultNow, not null). Generate the corresponding Drizzle (or chosen ORM) migration file. No application logic changes. EQS v1.0 audit requirements apply: table must be append-only with no DELETE or UPDATE grants to the application role. Include a DB index on (userId, deniedAt) for audit query performance. This directive is schema-only — no middleware, no UI, no API route changes.",
-      "status": "in_progress",
+      "status": "complete",
       "created_at": "2026-06-11T07:31:06.499Z",
       "origin": "split_from:AUTO-050",
-      "started_at": "2026-06-15T14:45:10.528Z"
+      "started_at": "2026-06-15T14:45:10.528Z",
+      "completed_at": "2026-06-15T14:46:23.588Z",
+      "auditor_score": 95,
+      "build_attempts": 1
     },
     {
       "id": "AUTO-071",
@@ -2053,6 +2056,22 @@
       "status": "pending",
       "created_at": "2026-06-15T14:31:09.498Z",
       "origin": "split_from:AUTO-067"
+    },
+    {
+      "id": "AUTO-095",
+      "title": "FS-AUTH-002 — Access Denied Audit Middleware Integration",
+      "directive": "Implement the FS-AUTH-002 authorization middleware for the W251 BOP procurement platform (Next.js 14, TypeScript, Vercel). The access_denied_audit table defined in FS-SCHEMA-001 is now available. Scope: create or modify the authorization middleware (e.g. middleware.ts or lib/auth/authorizationMiddleware.ts) to insert a row into access_denied_audit on every authorization denial. The INSERT must capture: userId (from session/JWT), role (from session/JWT), path (from request URL), method (from request method), ip (from request headers, respecting x-forwarded-for on Vercel), reason (human-readable denial reason string). The middleware must not block the request path for more than 50ms for the audit write (use non-blocking fire-and-forget INSERT or background queue). EQS v1.0 applies: real-time latency budget for the middleware overhead is <300ms end-to-end; audit writes must not cause request failures if the DB is temporarily unavailable (graceful degradation with error logging). No schema changes — FS-SCHEMA-001 owns the table definition. No UI changes.",
+      "status": "pending",
+      "created_at": "2026-06-15T14:45:49.131Z",
+      "origin": "split_from:AUTO-070"
+    },
+    {
+      "id": "AUTO-096",
+      "title": "FS-AUDIT-UI-001 — Access Denied Audit Log Viewer (C-Suite Dashboard)",
+      "directive": "Build a read-only audit log viewer for the access_denied_audit table on the W251 BOP procurement platform (Next.js 14, Tailwind, TypeScript). The table is defined by FS-SCHEMA-001 and populated by FS-AUTH-002. Scope: create an API route (app/api/audit/access-denied/route.ts) that queries access_denied_audit with pagination, filtering by userId and date range, and returns rows ordered by deniedAt DESC. Create a dashboard page (app/audit/access-denied/page.tsx) displaying results in a sortable, filterable table. EQS v1.0 applies: dashboard load <1.5s, C-suite clarity in <5 seconds, zero training required for interpretation, Tableau-level visualization (include a sparkline or bar chart of denial frequency over time). Immutable display only — no delete or edit controls. Role-gate the page to admin/compliance roles only. No schema changes.",
+      "status": "pending",
+      "created_at": "2026-06-15T14:45:49.132Z",
+      "origin": "split_from:AUTO-070"
     }
   ]
 }

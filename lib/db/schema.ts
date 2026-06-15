@@ -39,6 +39,25 @@ export const authorizationAuditLog = pgTable('authorization_audit_log', {
   created_at: timestamp('created_at').notNull().defaultNow(),
 });
 
+// Access denied audit table - APPEND-ONLY: enforced at DB level via REVOKE permissions
+// Tracks all access denial events for security monitoring and compliance
+export const accessDeniedAudit = pgTable('access_denied_audit', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull(),
+  role: text('role').notNull(),
+  path: text('path').notNull(),
+  method: text('method').notNull(),
+  ip: text('ip'),
+  reason: text('reason'),
+  deniedAt: timestamp('denied_at', { withTimezone: true }).defaultNow().notNull(),
+}, (table) => ({
+  userDeniedAtIdx: index('access_denied_audit_user_denied_at_idx').on(table.userId, table.deniedAt),
+}));
+
 // Type exports for authorization audit log
 export type InsertAuthorizationAuditLog = InferInsertModel<typeof authorizationAuditLog>;
 export type SelectAuthorizationAuditLog = InferSelectModel<typeof authorizationAuditLog>;
+
+// Type exports for access denied audit
+export type InsertAccessDeniedAudit = InferInsertModel<typeof accessDeniedAudit>;
+export type SelectAccessDeniedAudit = InferSelectModel<typeof accessDeniedAudit>;
