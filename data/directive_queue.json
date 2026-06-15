@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T12:49:06.383Z",
+  "updated_at": "2026-06-15T13:00:23.129Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1626,9 +1626,10 @@
       "id": "AUTO-066",
       "title": "FLOWSEER-RESP-002d — Chart Accessibility & Touch Interaction Audit",
       "directive": "After FLOWSEER-RESP-002 and FLOWSEER-RESP-002b/c land, audit all chart components for mobile accessibility: (1) ensure ARIA labels and roles are set on SVG/canvas elements, (2) verify keyboard navigation does not break after ResponsiveContainer wrapping, (3) add touch swipe support for paginated charts on mobile (e.g., time-series charts with dense data points), (4) verify VoiceOver/TalkBack can announce chart data summaries. Validate: axe-core zero critical violations on chart components, touch swipe navigates paginated series correctly in Playwright iOS emulation. Maximum 5 files modified.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T06:31:47.025Z",
-      "origin": "split_from:AUTO-047"
+      "origin": "split_from:AUTO-047",
+      "started_at": "2026-06-15T13:00:22.972Z"
     },
     {
       "id": "AUTO-067",
