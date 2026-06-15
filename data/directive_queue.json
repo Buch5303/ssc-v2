@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T11:45:52.521Z",
+  "updated_at": "2026-06-15T11:49:29.744Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1777,14 +1777,30 @@
       "title": "Fix residual audit findings from AUTO-061",
       "directive": "AUTO-061 (\"FS-VIZ-MOB-003 — Mobile Chart Interaction: Pinch-Zoom, Swipe-to-Pan & Touch Gesture Handling for W251 BOP Time-Series Ch\") shipped via the conditional-ship valve at 78/100 with zero CRITICAL findings. Resolve every residual audit finding below in the files committed by that directive. Do not change unrelated files, do not regress passing acceptance criteria.\n\nRESIDUAL FINDINGS:\n1. [HIGH] hooks/useChartGestures.ts: Missing test file for useChartGestures hook. The build specification requires automated tests for all acceptance criteria (AC1-AC7), but no test files were generated. This was a prior HIGH finding that remains unresolved. FIX: Create tests/useChartGestures.test.ts with unit tests for pinch zoom (AC1), zoom clamp (AC2), pan shift (AC3), double-tap reset positive and negative cases (AC4), vertical scroll non-interference (AC5), and rAF throttle verification (AC7).\n2. [MEDIUM] components/charts/BaseChart.tsx: Fragile child cloning pattern persists. React.cloneElement with children cast as React.ReactElement (line 52) will break with fragments, arrays of children, or string elements. This was a prior MEDIUM finding that remains unresolved. FIX: Replace React.cloneElement with a pattern that handles multiple children, fragments, and string elements. Use React.Children.map or render children directly with the data prop passed via context or cloneElement with proper type checking.\n3. [MEDIUM] components/charts/ChartWrapper.tsx: useChartGestures hook is called unconditionally even when enableGestures is false (line 32). This causes unnecessary state initialization and RAF setup for non-gesture charts. This was a prior LOW finding that remains unresolved. FIX: Conditionally call useChartGestures only when enableGestures is true and dataMinMs/dataMaxMs are provided. Use a conditional hook pattern or move the hook call inside a conditional render.\n4. [MEDIUM] components/charts/GestureAffordance.tsx: Uses custom Tailwind theme tokens ('bg-card', 'border-border', 'text-muted') that may not exist in the project's Tailwind configuration. These classes could result in missing styles. This was a prior LOW finding that remains unresolved. FIX: Replace custom theme tokens with standard Tailwind classes (e.g., 'bg-white', 'border-gray-200', 'text-gray-500') or verify that these tokens are defined in the project's tailwind.config.ts and add them if missing.\n5. [LOW] hooks/useChartGestures.ts: The double-tap detection in onTouchStart (lines 103-108) uses Date.now() which is not mockable in tests. Consider using a configurable timestamp source for testability. FIX: Accept an optional getTime function parameter (defaulting to Date.now) in useChartGestures to allow test injection of controlled timestamps.\n6. [LOW] hooks/useChartGestures.ts: The containerWidthPx parameter defaults to 400 (line 69) when not provided, but ChartWrapper.tsx always passes a measured width. The default could cause incorrect pixel-to-ms calculations if the hook is used outside ChartWrapper. FIX: Consider making containerWidthPx required or providing a more meaningful default based on a ref callback.",
       "priority": 5,
-      "status": "in_progress",
+      "status": "failed",
       "origin": "auto",
       "rationale": "Auto-generated debt repayment for conditional-ship of AUTO-061",
       "created_at": "2026-06-11T22:35:31.015Z",
       "started_at": "2026-06-15T11:45:52.417Z",
-      "completed_at": null,
+      "completed_at": "2026-06-15T11:49:29.609Z",
       "commit_sha": null,
-      "auditor_score": null
+      "auditor_score": null,
+      "skip_reason": "gate blocked after 2 attempt(s): compile gate: 1 unresolved import(s) after 2 attempt(s)",
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        }
+      ]
     }
   ]
 }
