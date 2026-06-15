@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-15T12:18:57.339Z",
+  "timestamp": "2026-06-15T12:34:07.209Z",
   "directive": {
-    "id": "AUTO-063",
-    "title": "FLOWSEER-RESP-002c: Automated Visual Regression Suite for Chart Responsiveness",
+    "id": "AUTO-064",
+    "title": "FLOWSEER-RESP-002b — Inline Chart Instances Responsive Remediation",
     "status": "failed"
   },
-  "elapsed_seconds": 219.9,
+  "elapsed_seconds": 226.876,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -21,7 +21,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 5,
+      "research_queries_count": 3,
       "spec_parse_error": false
     },
     "researcher": {
@@ -33,9 +33,9 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 5,
+      "files_count": 3,
       "parse_error": false,
-      "first_file_path": "tests/responsive/charts/viewports.config.ts"
+      "first_file_path": "app/dashboard/analytics/page.tsx"
     },
     "auditor": {
       "status": "complete",
@@ -67,29 +67,31 @@
     ]
   },
   "log": [
-    "[2026-06-15T12:15:17.439Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 7b35800",
-    "[WATCHDOG] In sync at 7b35800",
-    "[QUEUE] Loaded via contents-api. Pending: 23, total: 89",
+    "[2026-06-15T12:30:20.333Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy @ caa5dce",
+    "[WATCHDOG] In sync at caa5dce",
+    "[QUEUE] Loaded via contents-api. Pending: 24, total: 91",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-15T12:15:19.677Z] Processing: AUTO-063 — FLOWSEER-RESP-002c: Automated Visual Regression Suite for Chart Responsiveness",
+    "[2026-06-15T12:30:22.353Z] Processing: AUTO-064 — FLOWSEER-RESP-002b — Inline Chart Instances Responsive Remediation",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
-    "[ARCHITECT] Lossless split: 2 follow-up directive(s) appended to queue (origin AUTO-063)",
+    "[ARCHITECT] Lossless split: 1 follow-up directive(s) appended to queue (origin AUTO-064)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 5 queries...",
+    "[RESEARCHER] Running 3 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
-    "[COMPILE-GATE] Repo tree loaded (729 paths)",
+    "[COMPILE-GATE] Repo tree loaded (730 paths)",
     "[COMPILE-GATE] Manifest loaded (37 packages) — bare imports validated",
-    "[GROUNDING] Builder context: 130 source paths, schema loaded",
+    "[GROUNDING] Builder context: 131 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 6 files",
-    "[COMPILE-GATE] Attempt 1: 4 unresolved import(s):\n  tests/responsive/charts/responsive-layout.spec.ts → '@playwright/test'\n  tests/responsive/charts/chart-interaction.spec.ts → '@playwright/test'\n  tests/responsive/charts/chart-performance.spec.ts → '@playwright/test'\n  playwright.config.ts → '@playwright/test'",
-    "[RETRY] Re-running Builder to fix unresolved imports (attempt 2/2)",
+    "[BUILDER] Attempt 1 complete — 4 files",
+    "[COMPILE-GATE] Attempt 1: all imports resolve",
+    "[COMPILE-GATE] Attempt 1: all Tailwind tokens defined",
+    "[COMPILE-GATE] Attempt 1: 4 missing named export(s):\n  app/dashboard/analytics/page.tsx → '@/components/charts/LineChart' has no export 'LineChart'\n  app/dashboard/analytics/page.tsx → '@/components/charts/BarChart' has no export 'BarChart'\n  app/dashboard/spend-overview/page.tsx → '@/components/charts/LineChart' has no export 'LineChart'\n  app/dashboard/spend-overview/page.tsx → '@/components/charts/BarChart' has no export 'BarChart'",
+    "[RETRY] Re-running Builder to fix missing exports (attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 5 files",
-    "[COMPILE-GATE] Attempt 2: 3 unresolved import(s):\n  tests/responsive/charts/responsive-layout.spec.ts → 'playwright/test'\n  tests/responsive/charts/chart-interaction.spec.ts → 'playwright/test'\n  tests/responsive/charts/chart-performance.spec.ts → 'playwright/test'",
+    "[BUILDER] Attempt 2 complete — 3 files",
+    "[COMPILE-GATE] Attempt 2: 3 unresolved import(s):\n  app/dashboard/analytics/page.tsx → '@/components/charts/chartUtils'\n  app/dashboard/spend-overview/page.tsx → '@/components/charts/chartUtils'\n  app/dashboard/supplier-risk/page.tsx → '@/components/charts/chartUtils'",
     "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 3 unresolved import(s) after 2 attempt(s)"
   ]
 }
