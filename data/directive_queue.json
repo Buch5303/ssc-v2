@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T23:16:09.923Z",
+  "updated_at": "2026-06-15T23:30:35.644Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2294,9 +2294,10 @@
       "id": "AUTO-101",
       "title": "FS-AUDIT-003-MW — FS-AUTH-002 Middleware Integration: Fire-and-Forget Denial Ingest",
       "directive": "Using the FlowSeer W251 BOP platform, integrate the FS-AUDIT-003 audit-denial ingest endpoint into the FS-AUTH-002 authorization middleware (middleware.ts or equivalent). When the middleware denies a request, it must emit a fire-and-forget POST to /api/internal/audit-denial with the AuditDenialPayload (userId, role, pathname, method, requestId, ipAddress, userAgent). The call must be non-blocking: use fetch() without await on the happy path, wrapped in a void expression with a .catch() that logs to the server console only — it must never delay the 401 response to the end user. The INTERNAL_API_SECRET must be read from process.env.INTERNAL_API_SECRET and attached as the x-internal-secret header. No schema changes, no UI changes, no new tables. EQS v1.0 applies: the denial response latency to the end user must not increase by more than 5ms due to this change — verified by a before/after benchmark. Import AuditDenialPayload type from app/api/internal/audit-denial/route.ts for type safety.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T16:16:28.304Z",
-      "origin": "split_from:AUTO-072"
+      "origin": "split_from:AUTO-072",
+      "started_at": "2026-06-15T23:30:35.558Z"
     },
     {
       "id": "AUTO-102",
