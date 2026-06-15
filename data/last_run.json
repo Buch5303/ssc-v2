@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-15T16:49:01.505Z",
+  "timestamp": "2026-06-15T17:34:59.354Z",
   "directive": {
-    "id": "AUTO-076",
-    "title": "AUTH-METRICS-003: Denial Metrics CSV Export + Audit Trail Download",
+    "id": "AUTO-075",
+    "title": "AUTH-METRICS-002: Real-Time Denial Alert Streaming via SSE",
     "status": "failed"
   },
-  "elapsed_seconds": 207.849,
+  "elapsed_seconds": 266.083,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -21,7 +21,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 3,
+      "research_queries_count": 4,
       "spec_parse_error": false
     },
     "researcher": {
@@ -33,86 +33,84 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 3,
+      "files_count": 4,
       "parse_error": false,
-      "first_file_path": "app/api/metrics/auth-denials/export/route.ts"
+      "first_file_path": "lib/db/pgListenClient.ts"
     },
     "auditor": {
       "status": "complete",
-      "verdict": "FAIL",
-      "score": 40,
-      "summary": "The build resolves all prior findings but introduces new critical issues. The most significant problem is querying from the wrong table (accessDeniedAudit instead of authorization_audit_log as specified), missing the required WHERE clause for deny filtering, and using the wrong CSV header column. While the streaming architecture, checksum computation, and security patterns are improved, the fundamental spec violations regarding which table to query and what columns to include make this build non-compliant. The build cannot pass until these critical issues are resolved.",
+      "verdict": "COMPILE_FAIL",
+      "score": 55,
+      "summary": "The build implements the SSE streaming architecture correctly in concept but has critical implementation bugs that prevent it from working. The most severe issue is in pgListenClient.ts where the notification event listener is never attached to the actual connected database client, meaning no SSE events will ever be emitted. The trigger SQL has an overly broad condition that could match unintended actions. The AuthDenialTile component uses incorrect prop names for KpiCard, causing TypeScript errors. The ReadableStream cleanup pattern is incorrect. These issues collectively make the build non-functional. The acceptance criteria for SSE streaming, spike detection, and client-side rendering are structurally present but cannot work due to the pgListenClient bug. Score is 55 due to critical bugs that prevent core functionality.",
       "pre_check_failed": false,
-      "issue_count": 8,
+      "issue_count": 9,
       "top_issues": [
         {
           "severity": "CRITICAL",
-          "description": "The route queries from accessDeniedAudit table but the build spec explicitly requires querying from authorization_audit_log table. The spec says 'Query authorization_audit_log WHERE outcome='deny''. The accessDeniedAudit table is a different table with different columns and semantics. This is a fundamental spec violation."
+          "description": "The getPgListenClient() function creates a new pg.Client on globalThis, but then creates a new PgListenClient wrapper and replaces its internal client with the global one. The wrapper's constructor sets up event listeners on its own client instance, but those listeners are never attached to the global client. The notification event handler is never registered on the actual connected client, so SSE events will never be received from Postgres LISTEN/NOTIFY."
         },
         {
           "severity": "CRITICAL",
-          "description": "The CSV header uses 'ip_address' but the build spec explicitly requires 'rfq_id' as the 6th column. The spec header is: 'id,user_id,role,action,resource,rfq_id,created_at'. The code uses 'ip_address' instead."
+          "description": "Trigger condition checks for action='deny' OR action='denied' OR action LIKE '%deny%' OR action LIKE '%denied%'. This is overly broad and could match unintended values (e.g., action='deny_override' or action='permit_deny'). The spec requires checking for outcome='deny', but the schema has an 'action' column, not 'outcome'. The trigger should only check NEW.action = 'deny' to match the schema and avoid false positives."
         },
         {
-          "severity": "CRITICAL",
-          "description": "No WHERE clause filtering for deny actions. The spec requires filtering WHERE outcome='deny' to only export denial records. Currently exports ALL records from the table."
+          "severity": "HIGH",
+          "description": "The PgListenClient class creates a new Client in its constructor, but getPgListenClient() replaces it with a global client. The constructor's client.connect() is never called on the global client. The connect() method on the wrapper calls this.client.connect(), but since this.client was replaced, it connects the global client. However, the global client's 'notification' event listener was set up on the original wrapper client, not the global one. This means notifications are never processed."
         }
       ]
     },
     "gate": {
       "allowed": false,
       "effective_verdict": "FAIL",
-      "reason": "Auditor rejected (score 40)"
+      "reason": "compile gate: 2 undefined Tailwind token(s) after 2 attempt(s)"
     },
     "build_attempts": 2,
     "attempt_history": [
       {
         "attempt": 1,
         "verdict": "FAIL",
-        "score": 40,
+        "score": 55,
         "effective": "FAIL"
       },
       {
         "attempt": 2,
-        "verdict": "FAIL",
-        "score": 40,
+        "verdict": "COMPILE_FAIL",
+        "score": null,
         "effective": "FAIL"
       }
     ]
   },
   "log": [
-    "[2026-06-15T16:45:33.656Z] Auto-builder cycle started",
+    "[2026-06-15T17:30:33.271Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy",
-    "[WATCHDOG] In sync at 8530c51",
-    "[QUEUE] Loaded via contents-api. Pending: 27, total: 106",
+    "[WATCHDOG] In sync at 9daa098",
+    "[QUEUE] Loaded via contents-api. Pending: 26, total: 107",
+    "[RECOVERY] AUTO-075 stuck in_progress for >30min — reset to pending (attempt #2)",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-15T16:45:36.386Z] Processing: AUTO-076 — AUTH-METRICS-003: Denial Metrics CSV Export + Audit Trail Download",
+    "[2026-06-15T17:30:37.531Z] Processing: AUTO-075 — AUTH-METRICS-002: Real-Time Denial Alert Streaming via SSE",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
+    "[ARCHITECT] Lossless split: 2 follow-up directive(s) appended to queue (origin AUTO-075)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 3 queries...",
+    "[RESEARCHER] Running 4 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
     "[COMPILE-GATE] Repo tree loaded (738 paths)",
     "[COMPILE-GATE] Manifest loaded (43 packages) — bare imports validated",
     "[GROUNDING] Builder context: 134 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 2 files",
+    "[BUILDER] Attempt 1 complete — 4 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
     "[COMPILE-GATE] Attempt 1: all Tailwind tokens defined",
-    "[COMPILE-GATE] Attempt 1: all named exports verified (3 repo file(s) inspected)",
+    "[COMPILE-GATE] Attempt 1: all named exports verified (2 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: FAIL (40/100)",
-    "[GATE] Attempt 1: Auditor rejected (score 40) → FAIL",
+    "[AUDITOR] Attempt 1 verdict: FAIL (55/100)",
+    "[GATE] Attempt 1: Auditor rejected (score 55) → FAIL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 3 files",
+    "[BUILDER] Attempt 2 complete — 4 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
-    "[COMPILE-GATE] Attempt 2: all Tailwind tokens defined",
-    "[COMPILE-GATE] Attempt 2: all named exports verified (1 repo file(s) inspected)",
-    "[AUDITOR] Reviewing attempt 2...",
-    "[AUDITOR] Attempt 2 verdict: FAIL (40/100)",
-    "[GATE] Attempt 2: Auditor rejected (score 40) → FAIL",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): Auditor rejected (score 40)"
+    "[COMPILE-GATE] Attempt 2: 2 undefined Tailwind token(s):\n  components/dashboard/AuthDenialTile.tsx → 'ring-offset-2'\n  components/dashboard/AuthDenialTile.tsx → 'ring-offset-red-50'",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 2 undefined Tailwind token(s) after 2 attempt(s)"
   ]
 }
