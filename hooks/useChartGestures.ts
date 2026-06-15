@@ -112,7 +112,7 @@ export function useChartGestures(
   );
   
   const touchStateRef = useRef({
-    startTouches: [] as Touch[],
+    startTouches: [] as React.Touch[],
     lastDistance: 0,
     lastCenter: { x: 0, y: 0 },
     lastPanX: 0,
@@ -132,13 +132,13 @@ export function useChartGestures(
     return (pixels / width) * currentSpan;
   }, [containerWidthPx]);
   
-  const getDistance = useCallback((touch1: Touch, touch2: Touch): number => {
+  const getDistance = useCallback((touch1: React.Touch, touch2: React.Touch): number => {
     const dx = touch2.clientX - touch1.clientX;
     const dy = touch2.clientY - touch1.clientY;
     return Math.sqrt(dx * dx + dy * dy);
   }, []);
   
-  const getCenter = useCallback((touch1: Touch, touch2: Touch) => ({
+  const getCenter = useCallback((touch1: React.Touch, touch2: React.Touch) => ({
     x: (touch1.clientX + touch2.clientX) / 2,
     y: (touch1.clientY + touch2.clientY) / 2
   }), []);
