@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { validateTailwindTokens } from "@/lib/tailwind-gate";
 import { runPromotionGate } from "@/lib/promotion-gate";
+import flowseerFlags from "@/data/flowseer-flags.json";
 import { sendAlert, classifyApiError } from "@/lib/notify";
 
 // Vercel function timeout: 300s (Pro plan max). Was 60 on Hobby.
@@ -1502,7 +1503,9 @@ export async function GET(req: Request) {
 
     const commitMsg = `[${next.id}] ${next.title} — ${shipLabel} (attempt ${buildAttempts}/${MAX_BUILD_ATTEMPTS})`;
     const codeFiles = buildResult.build.files.map((f: any) => ({ path: f.path, content: f.content }));
-    const promotionGateOn = (process.env.PROMOTION_GATE || "").trim() === "1";
+    const promotionGateOn =
+      (process.env.PROMOTION_GATE || "").trim() === "1" ||
+      (flowseerFlags as { promotion_gate?: boolean })?.promotion_gate === true;
 
     if (promotionGateOn) {
       // Layer 7 — Promotion gate. Commit to a disposable candidate branch,

@@ -1,0 +1,4 @@
+{
+  "promotion_gate": true,
+  "_comment": "FlowSeer feature flags. promotion_gate=true routes each shipped directive's commit to the flowseer/candidate branch, waits for Vercel's preview build (the real next build), and fast-forwards main ONLY on a READY build — broken code never reaches production. Set promotion_gate=false to revert to direct-to-main commits. This flag is also overridden ON by the PROMOTION_GATE=1 env var if present."
+}
