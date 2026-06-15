@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T15:45:34.397Z",
+  "updated_at": "2026-06-15T15:45:37.473Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1763,10 +1763,10 @@
       "id": "AUTO-072",
       "title": "FS-SCHEMA-003: access_denied_audit Table Schema Migration",
       "directive": "Using the FlowSeer W251 BOP platform schema conventions established in FS-SCHEMA-001 (lib/db/schema.ts, Drizzle ORM, PostgreSQL), add a new access_denied_audit table to capture authorization denial events emitted by the FS-AUTH-002 middleware. This is a schema-only directive. Columns required: id (uuid, primary key, default gen_random_uuid()), user_id (text, nullable — anonymous requests have no userId), role (UserRole enum, nullable), pathname (text, not null), method (text, not null), request_id (text, not null — correlates with the requestId generated in middleware), denied_at (timestamptz, not null, default now()), ip_address (text, nullable), user_agent (text, nullable). Table must be append-only by convention (no update/delete grants for the app role). Add the table definition to lib/db/schema.ts, generate and apply the Drizzle migration, and create the /api/internal/audit-denial POST endpoint stub (app/api/internal/audit-denial/route.ts) that validates the inbound payload with zod, inserts a row, and returns 202. The endpoint must be protected so only internal service calls (shared secret header or Vercel internal network) can invoke it — not exposed to end users. EQS v1.0 applies: insert latency < 50ms p99, immutable audit semantics, data lineage comment on table. No UI changes. No auth logic changes.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T07:46:06.537Z",
       "origin": "split_from:AUTO-050",
-      "started_at": null,
+      "started_at": "2026-06-15T15:45:37.326Z",
       "attempts": 1
     },
     {
