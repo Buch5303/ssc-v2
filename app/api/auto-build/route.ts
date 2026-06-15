@@ -1295,11 +1295,27 @@ export async function GET(req: Request) {
         log.push(`[COMPILE-GATE] Attempt ${attempt}: ${unresolved.length} unresolved import(s):\n${detail}`);
         attemptHistory.push({ attempt, verdict: "COMPILE_FAIL", score: null, effective: "FAIL" });
         if (attempt < MAX_BUILD_ATTEMPTS) {
-          retryContext = [
-            `Your previous output DOES NOT COMPILE. These imports point to files that do not exist in the repo and were not included in your output:`,
+          const isBare = (spec: string) => !spec.startsWith("@/") && !spec.startsWith("./") && !spec.startsWith("../");
+          const bare = unresolved.filter(u => isBare(u.import));
+          const local = unresolved.filter(u => !isBare(u.import));
+          const parts: string[] = [
+            `Your previous output DOES NOT COMPILE — ${unresolved.length} unresolved import(s):`,
             detail,
-            `Fix EVERY one — either import from the correct existing path, or include the missing file in your files array. Re-emit the COMPLETE set of files. Never import a module that does not exist.`,
-          ].join("\n");
+            "",
+          ];
+          if (bare.length > 0) {
+            parts.push(
+              `The above are NPM PACKAGES that are NOT in package.json — they are not installed and WILL fail the build. Do NOT import them. Use only packages already listed in package.json.`,
+              `For tests, the installed stack is: jest + ts-jest, @testing-library/react, @testing-library/jest-dom, @testing-library/user-event, and jest-axe (jsdom environment). Write component, accessibility, and touch/interaction tests with those (use @testing-library/user-event to simulate interaction). Do NOT use @playwright/test or any other e2e/test runner — it is not installed.`,
+            );
+          }
+          if (local.length > 0) {
+            parts.push(
+              `Any local imports above point to files that do not exist — either import the correct existing path, or include the missing file in your files array.`,
+            );
+          }
+          parts.push(`Re-emit the COMPLETE set of files. Never import a module that is not installed or does not exist.`);
+          retryContext = parts.join("\n");
           log.push(`[RETRY] Re-running Builder to fix unresolved imports (attempt ${attempt + 1}/${MAX_BUILD_ATTEMPTS})`);
           continue;
         }
