@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T14:18:57.398Z",
+  "updated_at": "2026-06-15T14:30:15.578Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1653,11 +1653,11 @@
       "id": "AUTO-067",
       "title": "FLOWSEER-RESP-003-B: Audit and Replace Custom Floating Dropdown Components with Native-Compatible Implementations",
       "directive": "After FLOWSEER-RESP-003 lands, audit all custom dropdown/combobox components in the W251 BOP platform codebase (components/ui/, any portal-based floating dropdowns using Radix Popper, Headless UI Listbox, or custom z-index overlays) that bypass the globals.css select normalization applied in RESP-003. For each non-native dropdown found: (1) on mobile viewports < 768px, replace or wrap with a native <select> fallback rendered conditionally via useMediaQuery, OR confirm the component meets 44px touch targets and does not produce z-index collisions with the sidebar drawer (z-50) or bottom nav (z-40). (2) Document all components audited in a COMPONENTS_AUDIT.md file at repo root. (3) Ensure no custom floating dropdown has a z-index > 40 on mobile that would overlap the sidebar drawer. EQS constraint: zero custom floating dropdowns violating 44px targets on mobile after this directive lands. Maximum 5 files. One concern: dropdown/combobox mobile compliance only. No schema changes.",
-      "status": "in_progress",
+      "status": "pending",
       "created_at": "2026-06-11T06:46:39.573Z",
       "origin": "split_from:AUTO-048",
-      "started_at": "2026-06-15T14:00:15.920Z",
-      "attempts": 1,
+      "started_at": null,
+      "attempts": 2,
       "near_miss_retries": 1,
       "carryover_issues": [
         {
