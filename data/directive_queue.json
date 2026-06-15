@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T22:46:30.970Z",
+  "updated_at": "2026-06-15T23:00:35.444Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2274,9 +2274,10 @@
       "id": "AUTO-099",
       "title": "FS-RBAC-UI-003: Component-Level Role Gating — Deferred Navigation and Action Components",
       "directive": "Using the <RoleGuard> component and getSessionRole utility delivered in FS-RBAC-UI-001, and following the same RSC-boundary, structural-exclusion, zero-hydration-flash pattern established in FS-RBAC-UI-001 and FS-RBAC-UI-002, extend component-level role gating to any remaining dashboard UI surfaces in the FlowSeer W251 BOP procurement platform that were deferred from FS-RBAC-UI-001 and FS-RBAC-UI-002 due to the 5-file-per-spec limit. Candidate surfaces include but are not limited to: (a) navigation sidebar or top-nav items that link to admin, approver, or analyst-only routes; (b) Dashboard summary action cards (e.g. 'Create BOP', 'Bulk Approve'); (c) User management or settings action controls; (d) any inline table row actions in procurement list views (e.g. components/procurement/BOPListRow.tsx or similar). Perform a codebase audit to enumerate all remaining action controls and navigation elements that are not yet gated by RoleGuard, then apply gating following the same pattern: role resolved at RSC boundary, passed as prop to Client Components, structural omission (not disabled/hidden) for unauthorized roles, RoleGuard fallback=null. No schema changes, no middleware changes. Maximum 5 files modified or created in this spec. Apply EQS v1.0 standards throughout: no hydration flash, restricted content never in HTML response for unauthorized users, C-suite clarity within 5 seconds, zero training required, dashboard load < 1.5s. If further components remain after this spec, defer to FS-RBAC-UI-004 using the same pattern. Context: FlowSeer W251 BOP procurement platform. Next.js 14, Tailwind, TypeScript, Vercel.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T16:01:16.024Z",
-      "origin": "split_from:AUTO-074"
+      "origin": "split_from:AUTO-074",
+      "started_at": "2026-06-15T23:00:35.339Z"
     },
     {
       "id": "AUTO-100",
