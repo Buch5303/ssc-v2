@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T12:45:23.220Z",
+  "updated_at": "2026-06-15T12:49:04.405Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1599,10 +1599,28 @@
       "id": "AUTO-065",
       "title": "FLOWSEER-RESP-002c — Remaining Dashboard Pages Inline Chart Remediation",
       "directive": "After FLOWSEER-RESP-002b lands, complete the inline chart remediation for the remaining dashboard pages not covered by FLOWSEER-RESP-002b. Apply the same ResponsiveChartWrapper, calcTickInterval, and clampTooltipPosition patterns from FLOWSEER-RESP-002. Validate all affected pages at 393x852: no horizontal overflow, tooltips within bounds, chart render < 1500ms on Lighthouse mobile. Maximum 5 files per spec iteration.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-11T06:31:47.025Z",
       "origin": "split_from:AUTO-047",
-      "started_at": "2026-06-15T12:45:23.113Z"
+      "started_at": "2026-06-15T12:45:23.113Z",
+      "completed_at": "2026-06-15T12:49:04.291Z",
+      "skip_reason": "gate blocked after 2 attempt(s): Auditor rejected (score 40)",
+      "auditor_score": 40,
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "FAIL",
+          "score": 40,
+          "effective": "FAIL"
+        }
+      ]
     },
     {
       "id": "AUTO-066",
@@ -1907,6 +1925,14 @@
       "status": "pending",
       "created_at": "2026-06-15T12:31:16.284Z",
       "origin": "split_from:AUTO-064"
+    },
+    {
+      "id": "AUTO-089",
+      "title": "FLOWSEER-RESP-004 — Inline Chart Remediation Batch 2 (Next 5 Remaining Pages)",
+      "directive": "After FLOWSEER-RESP-003 lands, identify the next batch of up to 5 dashboard pages that still contain inline Recharts charts not wrapped by ResponsiveChartWrapper. Apply the same ResponsiveChartWrapper, calcTickInterval, and clampTooltipPosition patterns from FLOWSEER-RESP-002 to those pages. Validate all affected pages at 393x852: no horizontal overflow (scrollWidth === clientWidth), tooltips within bounds (clampTooltipPosition applied), chart render < 1500ms on Lighthouse mobile preset. Maximum 5 files per spec iteration. Repeat this pattern in subsequent directives (FLOWSEER-RESP-005, etc.) until every dashboard page is remediated. Do not modify schema, migrations, API routes, or the shared chart utility files.",
+      "status": "pending",
+      "created_at": "2026-06-15T12:45:55.470Z",
+      "origin": "split_from:AUTO-065"
     }
   ]
 }
