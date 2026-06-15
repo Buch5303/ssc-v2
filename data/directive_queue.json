@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T17:19:18.257Z",
+  "updated_at": "2026-06-15T17:30:34.714Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1875,11 +1875,11 @@
       "id": "AUTO-075",
       "title": "AUTH-METRICS-002: Real-Time Denial Alert Streaming via SSE",
       "directive": "Extend the authorization denial metrics layer (built in AUTH-METRICS-001) to push real-time denial spike alerts to the C-suite dashboard tile. Implement a Server-Sent Events endpoint at GET /api/metrics/auth-denials/stream that tails authorization_audit_log using Postgres LISTEN/NOTIFY (trigger on INSERT where outcome='deny'). The SSE stream must emit an event within 300ms of a new denial row being committed (EQS real-time latency budget). On the client, AuthDenialTile's KPI counters must update without full page reload. Alert threshold: if denial count in any rolling 5-minute window exceeds 10, emit a 'spike' event that renders a red banner ('Unusual denial spike detected — {count} denials in 5 min') on the tile. All streamed data must reference authorization_audit_log row IDs for full auditability. No sampling. Depends on AUTH-METRICS-001 being merged.",
-      "status": "in_progress",
+      "status": "pending",
       "created_at": "2026-06-11T20:16:41.596Z",
       "origin": "split_from:AUTO-054",
-      "started_at": "2026-06-15T17:00:37.618Z",
-      "attempts": 1
+      "started_at": null,
+      "attempts": 2
     },
     {
       "id": "AUTO-076",
