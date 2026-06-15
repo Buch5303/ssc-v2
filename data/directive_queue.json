@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T22:15:35.637Z",
+  "updated_at": "2026-06-15T22:16:26.782Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2244,10 +2244,11 @@
       "id": "AUTO-096",
       "title": "FS-AUDIT-UI-001 — Access Denied Audit Log Viewer (C-Suite Dashboard)",
       "directive": "Build a read-only audit log viewer for the access_denied_audit table on the W251 BOP procurement platform (Next.js 14, Tailwind, TypeScript). The table is defined by FS-SCHEMA-001 and populated by FS-AUTH-002. Scope: create an API route (app/api/audit/access-denied/route.ts) that queries access_denied_audit with pagination, filtering by userId and date range, and returns rows ordered by deniedAt DESC. Create a dashboard page (app/audit/access-denied/page.tsx) displaying results in a sortable, filterable table. EQS v1.0 applies: dashboard load <1.5s, C-suite clarity in <5 seconds, zero training required for interpretation, Tableau-level visualization (include a sparkline or bar chart of denial frequency over time). Immutable display only — no delete or edit controls. Role-gate the page to admin/compliance roles only. No schema changes.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T14:45:49.132Z",
       "origin": "split_from:AUTO-070",
-      "started_at": "2026-06-15T22:15:35.539Z"
+      "started_at": "2026-06-15T22:15:35.539Z",
+      "completed_at": "2026-06-15T22:16:26.646Z"
     },
     {
       "id": "AUTO-097",
@@ -2432,6 +2433,22 @@
       "status": "pending",
       "created_at": "2026-06-15T21:46:25.656Z",
       "origin": "split_from:AUTO-094"
+    },
+    {
+      "id": "AUTO-120",
+      "title": "Audit Log CSV Export for Access Denied Records",
+      "directive": "On the W251 BOP procurement platform (Next.js 14, Tailwind, TypeScript), extend the audit log viewer built in FS-AUDIT-003 to support CSV export for compliance officers. Add an export endpoint GET /api/audit/access-denied/export that accepts the same userId and dateFrom/dateTo filter params as the main route, streams all matching rows from access_denied_audit as a CSV response (Content-Type: text/csv, Content-Disposition: attachment), with no pageSize cap. Role-gate to admin/compliance. Add an 'Export CSV' button to the AuditTable component header (app/audit/access-denied/AuditTable.tsx) that triggers a download using the current active filters. The button must be visually distinct (outline style, not red) to avoid confusion with destructive actions. EQS v1.0 applies: export must begin streaming within 2 seconds for datasets up to 10,000 rows. No schema changes. Immutable — export is read-only.",
+      "status": "pending",
+      "created_at": "2026-06-15T22:16:25.752Z",
+      "origin": "split_from:AUTO-096"
+    },
+    {
+      "id": "AUTO-121",
+      "title": "Audit Log Real-Time Denial Alerts via Server-Sent Events",
+      "directive": "On the W251 BOP procurement platform (Next.js 14, Tailwind, TypeScript), add real-time alerting to the access denied audit log viewer (FS-AUDIT-003). Create a Server-Sent Events endpoint at GET /api/audit/access-denied/stream that pushes new access_denied_audit rows to subscribed admin/compliance clients within 300ms of insertion (EQS real-time latency requirement). Implement a polling-based SSE handler (Vercel-compatible, no persistent WebSocket) that queries for rows inserted after the client's last-seen deniedAt timestamp, sent as SSE data events. In AuditTable.tsx (app/audit/access-denied/AuditTable.tsx), add a useEffect that subscribes to the SSE stream when the user is on page 1 with no active filters, prepends new rows to the top of the table, and increments a 'New alerts' badge counter. Badge resets on user scroll or manual refresh. No schema changes. Role-gate the SSE endpoint to admin/compliance (403 otherwise). EQS: real-time latency < 300ms end-to-end from DB insert to UI render.",
+      "status": "pending",
+      "created_at": "2026-06-15T22:16:25.752Z",
+      "origin": "split_from:AUTO-096"
     }
   ]
 }
