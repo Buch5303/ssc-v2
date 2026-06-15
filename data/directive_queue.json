@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T20:46:21.901Z",
+  "updated_at": "2026-06-15T21:00:36.340Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2194,9 +2194,10 @@
       "id": "AUTO-091",
       "title": "FLOWSEER-ACC-003c: Automated Accessibility Regression Gate in CI Pipeline",
       "directive": "After FLOWSEER-ACC-003 and FLOWSEER-ACC-003b land, integrate accessibility regression gating into the CI pipeline. Requirements: (1) Add an axe-core full-page scan step to the GitHub Actions workflow that runs against the Next.js production build (next build && next start) on each PR targeting main. Scan the /dashboard and /procurement routes at minimum. Fail the CI job on any critical or serious axe-core violation. (2) Add Lighthouse CI (lhci) configuration with accessibility score threshold ≥ 95 for mobile emulation (Moto G4 preset). Fail CI if score drops below threshold. (3) Integrate Playwright accessibility snapshot assertions: for each chart page, capture an accessibility tree snapshot (page.accessibility.snapshot()) and assert the snapshot matches a stored baseline; fail on structural regressions. (4) Emit a machine-readable accessibility report artifact (JSON) per CI run for audit log compliance under EQS v1.0 immutable audit log requirement. Maximum 5 files modified (CI config, lhci config, Playwright baseline snapshots, report artifact script).",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T13:01:18.692Z",
-      "origin": "split_from:AUTO-066"
+      "origin": "split_from:AUTO-066",
+      "started_at": "2026-06-15T21:00:36.239Z"
     },
     {
       "id": "AUTO-092",
