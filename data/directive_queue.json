@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T19:46:32.673Z",
+  "updated_at": "2026-06-15T20:00:36.352Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2154,9 +2154,10 @@
       "id": "AUTO-087",
       "title": "FLOWSEER-TEST-003b: Expand Chart Interaction Tests to All 14 Pages with Verified Selectors",
       "directive": "DIRECTIVE: Audit and harden the chartSelectors map in tests/responsive/charts/dashboard-pages.ts to ensure every chart type present on each of the 14 FlowSeer dashboard pages has a verified, non-flaky CSS selector targeting the first interactive data point.\n\nCONTEXT: FlowSeer W251 BOP procurement platform. Next.js 14, Tailwind, TypeScript, Recharts, Vercel. FLOWSEER-TEST-003 created the initial dashboard-pages.ts with placeholder selectors. This follow-up directive requires a human-verified (or Playwright codegen-assisted) audit pass to confirm each selector resolves to exactly one element per page, does not match hidden/offscreen elements, and correctly targets tappable data point elements for line, bar, scatter, and heatmap chart types.\n\nREQUIREMENTS:\n1. For each of the 14 dashboard pages, open the page in a browser and use Playwright codegen or DevTools to identify the exact CSS selector for the first data point of each chart type rendered on that page.\n2. Update dashboard-pages.ts chartSelectors with verified selectors. Each selector must match exactly 1 element (locator.count() === 1) on the target page.\n3. Add a selector-validation spec: tests/responsive/charts/selector-audit.spec.ts that iterates all defined chartSelectors and asserts locator.count() === 1 for each, failing loudly if a selector matches 0 or >1 elements.\n4. Update any selectors that rely on :first-of-type pseudo-class with nth=0 Playwright locator syntax for stability.\n5. Ensure the tooltip selector in chart-interaction.spec.ts ('[data-testid=\"chart-tooltip\"], .recharts-tooltip-wrapper, [role=\"tooltip\"]') matches the actual tooltip rendered by each chart type — update if needed.\n\nSCOPE CONSTRAINT: Changes to test files only (dashboard-pages.ts, chart-interaction.spec.ts, new selector-audit.spec.ts). No production code changes. Maximum 3 files modified/created.\n\nEQS REQUIREMENT: After this directive lands, `npx playwright test --project=responsive-charts --grep @chart-interaction` must have zero skipped tests due to missing selectors and zero selector-mismatch failures.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T12:16:37.153Z",
-      "origin": "split_from:AUTO-063"
+      "origin": "split_from:AUTO-063",
+      "started_at": "2026-06-15T20:00:36.241Z"
     },
     {
       "id": "AUTO-088",
