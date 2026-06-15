@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-15T17:34:59.354Z",
+  "timestamp": "2026-06-15T17:47:46.983Z",
   "directive": {
-    "id": "AUTO-075",
-    "title": "AUTH-METRICS-002: Real-Time Denial Alert Streaming via SSE",
+    "id": "AUTO-078",
+    "title": "FS-RESP-SHARED-001: Harden Shared KpiGrid.tsx and DataTable.tsx with Canonical Mobile-Responsive Defaults",
     "status": "failed"
   },
-  "elapsed_seconds": 266.083,
+  "elapsed_seconds": 133.689,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -21,7 +21,7 @@
         "estimated_complexity"
       ],
       "acceptance_criteria_count": 8,
-      "research_queries_count": 4,
+      "research_queries_count": 3,
       "spec_parse_error": false
     },
     "researcher": {
@@ -33,43 +33,43 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 4,
+      "files_count": 3,
       "parse_error": false,
-      "first_file_path": "lib/db/pgListenClient.ts"
+      "first_file_path": "app/components/KpiGrid.tsx"
     },
     "auditor": {
       "status": "complete",
       "verdict": "COMPILE_FAIL",
-      "score": 55,
-      "summary": "The build implements the SSE streaming architecture correctly in concept but has critical implementation bugs that prevent it from working. The most severe issue is in pgListenClient.ts where the notification event listener is never attached to the actual connected database client, meaning no SSE events will ever be emitted. The trigger SQL has an overly broad condition that could match unintended actions. The AuthDenialTile component uses incorrect prop names for KpiCard, causing TypeScript errors. The ReadableStream cleanup pattern is incorrect. These issues collectively make the build non-functional. The acceptance criteria for SSE streaming, spike detection, and client-side rendering are structurally present but cannot work due to the pgListenClient bug. Score is 55 due to critical bugs that prevent core functionality.",
+      "score": 40,
+      "summary": "The build partially satisfies the directive's acceptance criteria. KpiGrid correctly implements the safelisted colMap pattern and avoids dynamic class interpolation. DataTable has the overflow-x-auto wrapper and text-sm on all cells. However, critical issues exist: (1) Playwright test (b) does not actually test mobileColumns=1 as required, (2) interactive elements in DataTable lack comprehensive 44px touch target coverage, (3) TypeScript strict mode is violated by `any` type usage, (4) Playwright tests depend on pages that may not use the modified components. The build needs significant fixes before it can pass audit.",
       "pre_check_failed": false,
-      "issue_count": 9,
+      "issue_count": 6,
       "top_issues": [
         {
-          "severity": "CRITICAL",
-          "description": "The getPgListenClient() function creates a new pg.Client on globalThis, but then creates a new PgListenClient wrapper and replaces its internal client with the global one. The wrapper's constructor sets up event listeners on its own client instance, but those listeners are never attached to the global client. The notification event handler is never registered on the actual connected client, so SSE events will never be received from Postgres LISTEN/NOTIFY."
-        },
-        {
-          "severity": "CRITICAL",
-          "description": "Trigger condition checks for action='deny' OR action='denied' OR action LIKE '%deny%' OR action LIKE '%denied%'. This is overly broad and could match unintended values (e.g., action='deny_override' or action='permit_deny'). The spec requires checking for outcome='deny', but the schema has an 'action' column, not 'outcome'. The trigger should only check NEW.action = 'deny' to match the schema and avoid false positives."
+          "severity": "HIGH",
+          "description": "Test (b) does not actually test mobileColumns=1. It navigates to /dashboard/overview and checks the default grid class with a regex. No mechanism exists to pass mobileColumns=1 to KpiGrid in this test."
         },
         {
           "severity": "HIGH",
-          "description": "The PgListenClient class creates a new Client in its constructor, but getPgListenClient() replaces it with a global client. The constructor's client.connect() is never called on the global client. The connect() method on the wrapper calls this.client.connect(), but since this.client was replaced, it connects the global client. However, the global client's 'notification' event listener was set up on the original wrapper client, not the global one. This means notifications are never processed."
+          "description": "Non-sortable header cells and all <td> cells lack min-h-[44px] and min-w-[44px] classes. The spec requires ALL interactive elements to have 44px touch targets. Non-sortable headers rendered as <span> are not interactive, but <td> cells containing action buttons/links need the classes."
+        },
+        {
+          "severity": "MEDIUM",
+          "description": "DataTableWithColumns component uses `any` type for data records: `data: Record<string, any>[]`. This violates TypeScript strict mode requirement."
         }
       ]
     },
     "gate": {
       "allowed": false,
       "effective_verdict": "FAIL",
-      "reason": "compile gate: 2 undefined Tailwind token(s) after 2 attempt(s)"
+      "reason": "compile gate: 1 unresolved import(s) after 2 attempt(s)"
     },
     "build_attempts": 2,
     "attempt_history": [
       {
         "attempt": 1,
         "verdict": "FAIL",
-        "score": 55,
+        "score": 40,
         "effective": "FAIL"
       },
       {
@@ -81,36 +81,33 @@
     ]
   },
   "log": [
-    "[2026-06-15T17:30:33.271Z] Auto-builder cycle started",
+    "[2026-06-15T17:45:33.294Z] Auto-builder cycle started",
     "[SELF-HEAL] healthy",
-    "[WATCHDOG] In sync at 9daa098",
-    "[QUEUE] Loaded via contents-api. Pending: 26, total: 107",
-    "[RECOVERY] AUTO-075 stuck in_progress for >30min — reset to pending (attempt #2)",
+    "[WATCHDOG] In sync at 9b47fa3",
+    "[QUEUE] Loaded via contents-api. Pending: 28, total: 109",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-15T17:30:37.531Z] Processing: AUTO-075 — AUTH-METRICS-002: Real-Time Denial Alert Streaming via SSE",
+    "[2026-06-15T17:45:35.266Z] Processing: AUTO-078 — FS-RESP-SHARED-001: Harden Shared KpiGrid.tsx and DataTable.tsx with Canonical Mobile-Responsive Defaults",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
-    "[ARCHITECT] Lossless split: 2 follow-up directive(s) appended to queue (origin AUTO-075)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
-    "[RESEARCHER] Running 4 queries...",
+    "[RESEARCHER] Running 3 queries...",
     "[RESEARCHER] skipped — 0 result(s)",
     "[COMPILE-GATE] Repo tree loaded (738 paths)",
     "[COMPILE-GATE] Manifest loaded (43 packages) — bare imports validated",
     "[GROUNDING] Builder context: 134 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 4 files",
+    "[BUILDER] Attempt 1 complete — 2 files",
     "[COMPILE-GATE] Attempt 1: all imports resolve",
     "[COMPILE-GATE] Attempt 1: all Tailwind tokens defined",
-    "[COMPILE-GATE] Attempt 1: all named exports verified (2 repo file(s) inspected)",
+    "[COMPILE-GATE] Attempt 1: all named exports verified (0 repo file(s) inspected)",
     "[AUDITOR] Reviewing attempt 1...",
-    "[AUDITOR] Attempt 1 verdict: FAIL (55/100)",
-    "[GATE] Attempt 1: Auditor rejected (score 55) → FAIL",
+    "[AUDITOR] Attempt 1 verdict: FAIL (40/100)",
+    "[GATE] Attempt 1: Auditor rejected (score 40) → FAIL",
     "[RETRY] Re-running Builder with auditor feedback (next attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 4 files",
-    "[COMPILE-GATE] Attempt 2: all imports resolve",
-    "[COMPILE-GATE] Attempt 2: 2 undefined Tailwind token(s):\n  components/dashboard/AuthDenialTile.tsx → 'ring-offset-2'\n  components/dashboard/AuthDenialTile.tsx → 'ring-offset-red-50'",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 2 undefined Tailwind token(s) after 2 attempt(s)"
+    "[BUILDER] Attempt 2 complete — 3 files",
+    "[COMPILE-GATE] Attempt 2: 1 unresolved import(s):\n  tests/responsive/resp-shared-001.spec.ts → '@playwright/test'",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 1 unresolved import(s) after 2 attempt(s)"
   ]
 }
