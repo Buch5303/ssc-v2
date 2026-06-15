@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T19:16:09.850Z",
+  "updated_at": "2026-06-15T19:30:35.917Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2134,9 +2134,10 @@
       "id": "AUTO-085",
       "title": "FLOWSEER-RESP-006: Playwright Visual Regression Suite for Responsive Charts at 393x852",
       "directive": "After FLOWSEER-RESP-003 and FLOWSEER-RESP-004 land, create a Playwright visual regression test suite that navigates to each of the 14 dashboard pages at 393x852 viewport (iPhone 14 Pro) and asserts: (1) no horizontal scroll (document.documentElement.scrollWidth === document.documentElement.clientWidth), (2) all chart containers have offsetWidth > 0 and offsetHeight > 0, (3) no tooltip DOM element overflows the right viewport edge when triggered by hover/tap on chart data points, (4) page load time from navigation start to largest contentful paint is under 1500ms (EQS dashboard load budget). Store baseline screenshots for each page. Tests must run in CI on every PR. Maximum 5 test files created. One concern: chart visual regression only, no other UI components. EQS v1.0 standards apply.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T12:01:34.835Z",
-      "origin": "split_from:AUTO-062"
+      "origin": "split_from:AUTO-062",
+      "started_at": "2026-06-15T19:30:35.800Z"
     },
     {
       "id": "AUTO-086",
