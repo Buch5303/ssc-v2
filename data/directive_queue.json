@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T20:15:35.604Z",
+  "updated_at": "2026-06-15T20:16:22.246Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2164,10 +2164,11 @@
       "id": "AUTO-088",
       "title": "FLOWSEER-RESP-002c — Responsive Chart Standardization: Remaining 11 Dashboard Pages",
       "directive": "After FLOWSEER-RESP-002b lands, complete the responsive chart migration for the remaining 11 dashboard pages that were deferred from FLOWSEER-RESP-002b. The full set of 14 dashboard pages minus the 3 addressed in FLOWSEER-RESP-002b (Analytics, Spend Overview, Supplier Risk) leaves: (1) audit each of the remaining 11 page files under app/dashboard/ for inline recharts usage or one-off chart components NOT imported from the 4 shared primitives (components/charts/LineChart.tsx, BarChart.tsx, HeatmapChart.tsx, ScatterPlot.tsx); (2) for each such instance: replace fixed width props with ResponsiveChartWrapper from components/charts/ResponsiveChartWrapper.tsx, apply calcTickInterval and clampTooltipPosition from components/charts/chartUtils.ts, reduce mobile margins to top:8 right:8 bottom:24 left:32 at <640px breakpoint, and enforce tooltip viewport clamping; (3) process in batches of 5 files maximum per sub-iteration (002c-i, 002c-ii, 002c-iii as needed) following the same hard limits; (4) validate each batch at 393x852 (iPhone 14 Pro): no horizontal overflow, tooltips within bounds, chart render < 1500ms. Apply the same acceptance criteria pattern as FLOWSEER-RESP-002b: zero direct recharts imports in page files, zero hardcoded numeric width props on chart elements, Playwright overflow/tooltip/performance assertions passing, tsc --noEmit clean, bundle size delta <= +2 KB gzipped per page chunk. Platform: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T12:31:16.284Z",
       "origin": "split_from:AUTO-064",
-      "started_at": "2026-06-15T20:15:35.486Z"
+      "started_at": "2026-06-15T20:15:35.486Z",
+      "completed_at": "2026-06-15T20:16:22.119Z"
     },
     {
       "id": "AUTO-089",
@@ -2368,6 +2369,22 @@
       "status": "pending",
       "created_at": "2026-06-15T19:46:25.995Z",
       "origin": "split_from:AUTO-086"
+    },
+    {
+      "id": "AUTO-114",
+      "title": "FLOWSEER-RESP-002c-ii — Responsive Chart Migration Batch 2 of 3 (Pages 6–10)",
+      "directive": "After FLOWSEER-RESP-002c-i lands, continue the responsive chart migration for dashboard pages 6–10 of the 11 deferred pages. AUDIT each of the next 5 page files under app/dashboard/ (pages 6–10 alphabetically by directory name, excluding analytics, spend-overview, supplier-risk already done in 002b, and pages 1–5 done in 002c-i) for: (a) direct imports from 'recharts', (b) one-off chart components not imported from components/charts/{LineChart,BarChart,HeatmapChart,ScatterPlot}.tsx, (c) hardcoded numeric width/height props on chart elements. For each such instance: replace with the appropriate shared primitive, wrap in <ResponsiveChartWrapper> from components/charts/ResponsiveChartWrapper.tsx, apply calcTickInterval and clampTooltipPosition from components/charts/chartUtils.ts, reduce mobile margins to top:8 right:8 bottom:24 left:32 at <640px breakpoint using Tailwind responsive classes. VALIDATE at 393x852 (iPhone 14 Pro): no horizontal overflow, tooltips within bounds, chart render < 1500ms. Apply identical acceptance criteria as FLOWSEER-RESP-002c-i: zero direct recharts imports in page files, zero hardcoded numeric width props on chart elements, Playwright overflow/tooltip/performance assertions passing, tsc --noEmit clean, bundle size delta <= +2 KB gzipped per page chunk. Create tests/responsive/resp-002c-ii.spec.ts covering all 5 pages. DO NOT modify shared primitives, schema, API routes, or non-chart UI. Platform: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced.",
+      "status": "pending",
+      "created_at": "2026-06-15T20:16:21.186Z",
+      "origin": "split_from:AUTO-088"
+    },
+    {
+      "id": "AUTO-115",
+      "title": "FLOWSEER-RESP-002c-iii — Responsive Chart Migration Batch 3 of 3 (Page 11 + Full Regression)",
+      "directive": "After FLOWSEER-RESP-002c-ii lands, complete the responsive chart migration for the final remaining dashboard page (page 11 of 11 deferred, the single page not yet addressed after batches 002c-i and 002c-ii). AUDIT the page file under app/dashboard/ for: (a) direct imports from 'recharts', (b) one-off chart components not imported from components/charts/{LineChart,BarChart,HeatmapChart,ScatterPlot}.tsx, (c) hardcoded numeric width/height props on chart elements. Apply the same migration rules: replace with shared primitive, wrap in <ResponsiveChartWrapper>, apply calcTickInterval and clampTooltipPosition from components/charts/chartUtils.ts, mobile margins top:8 right:8 bottom:24 left:32 at <640px via Tailwind classes. Additionally, create tests/responsive/resp-002c-regression.spec.ts as a FULL regression suite covering ALL 11 previously migrated pages (002c-i pages 1–5, 002c-ii pages 6–10, plus this page 11) at 393x852 viewport, asserting: zero recharts imports across all 11 pages, no horizontal overflow, tooltips within viewport bounds, chart render < 1500ms, tsc --noEmit clean, and bundle delta <= +2 KB per page chunk. The regression suite must also run the 3 pages from FLOWSEER-RESP-002b (analytics, spend-overview, supplier-risk) in a smoke pass to confirm no regression. DO NOT modify shared primitives, schema, API routes, or non-chart UI. Platform: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced.",
+      "status": "pending",
+      "created_at": "2026-06-15T20:16:21.186Z",
+      "origin": "split_from:AUTO-088"
     }
   ]
 }
