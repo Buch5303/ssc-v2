@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T16:30:35.883Z",
+  "updated_at": "2026-06-15T16:45:36.509Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1884,9 +1884,10 @@
       "id": "AUTO-076",
       "title": "AUTH-METRICS-003: Denial Metrics CSV Export + Audit Trail Download",
       "directive": "Add a CSV export capability to the authorization denial metrics tile (built in AUTH-METRICS-001). Implement a GET /api/metrics/auth-denials/export endpoint that streams a CSV of all raw authorization_audit_log rows (outcome='deny', last 24h by default, configurable via ?hours=N up to 168) with columns: id, user_id, role, action, resource, rfq_id, created_at. The export must include a checksum footer row (SHA-256 of all data rows) to enable offline reconciliation. Endpoint must require METRICS_READ_KEY header (HTTP 401 otherwise). On the AuthDenialTile, add a small 'Export CSV' button (visible only to users with role='c_suite' or 'auditor' — check via existing session/auth pattern). Export must complete within 2s for up to 10,000 rows. Depends on AUTH-METRICS-001 being merged.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T20:16:41.596Z",
-      "origin": "split_from:AUTO-054"
+      "origin": "split_from:AUTO-054",
+      "started_at": "2026-06-15T16:45:36.386Z"
     },
     {
       "id": "AUTO-077",
