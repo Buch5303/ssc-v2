@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-06-15T15:34:25.939Z",
+  "timestamp": "2026-06-15T16:03:48.654Z",
   "directive": {
-    "id": "AUTO-073",
-    "title": "FS-AUTH-004: Authorization Denial Audit Dashboard UI",
+    "id": "AUTO-074",
+    "title": "FS-RBAC-UI-002: Role Gating for BOP Procurement Detail and Report Export Components",
     "status": "failed"
   },
-  "elapsed_seconds": 232.626,
+  "elapsed_seconds": 195.29,
   "pipeline": {
     "architect": {
       "status": "complete",
@@ -33,9 +33,9 @@
     },
     "builder": {
       "status": "complete",
-      "files_count": 4,
+      "files_count": 5,
       "parse_error": false,
-      "first_file_path": "lib/queries/accessAudit.ts"
+      "first_file_path": "lib/rbac/RoleGuard.tsx"
     },
     "auditor": {
       "status": "complete",
@@ -48,7 +48,7 @@
     "gate": {
       "allowed": false,
       "effective_verdict": "FAIL",
-      "reason": "compile gate: 2 missing named export(s) after 2 attempt(s)"
+      "reason": "compile gate: 1 missing named export(s) after 2 attempt(s)"
     },
     "build_attempts": 2,
     "attempt_history": [
@@ -67,15 +67,15 @@
     ]
   },
   "log": [
-    "[2026-06-15T15:30:33.313Z] Auto-builder cycle started",
-    "[SELF-HEAL] healthy @ 7e56f24",
-    "[WATCHDOG] In sync at c8b647b",
-    "[QUEUE] Loaded via contents-api. Pending: 24, total: 100",
+    "[2026-06-15T16:00:33.364Z] Auto-builder cycle started",
+    "[SELF-HEAL] healthy",
+    "[WATCHDOG] In sync at 80832a7",
+    "[QUEUE] Loaded via contents-api. Pending: 25, total: 102",
     "[PREFLIGHT] Anthropic API healthy",
-    "[2026-06-15T15:30:36.048Z] Processing: AUTO-073 — FS-AUTH-004: Authorization Denial Audit Dashboard UI",
+    "[2026-06-15T16:00:35.842Z] Processing: AUTO-074 — FS-RBAC-UI-002: Role Gating for BOP Procurement Detail and Report Export Components",
     "[ARCHITECT] Decomposing directive...",
     "[ARCHITECT] Complete",
-    "[ARCHITECT] Lossless split: 2 follow-up directive(s) appended to queue (origin AUTO-073)",
+    "[ARCHITECT] Lossless split: 1 follow-up directive(s) appended to queue (origin AUTO-074)",
     "[ANALYST] Reviewing codebase...",
     "[ANALYST] complete",
     "[RESEARCHER] Skipped — no research_queries in spec",
@@ -83,15 +83,14 @@
     "[COMPILE-GATE] Manifest loaded (43 packages) — bare imports validated",
     "[GROUNDING] Builder context: 134 source paths, schema loaded",
     "[BUILDER] Attempt 1/2 — generating code...",
-    "[BUILDER] Attempt 1 complete — 4 files",
-    "[COMPILE-GATE] Attempt 1: all imports resolve",
-    "[COMPILE-GATE] Attempt 1: 2 undefined Tailwind token(s):\n  app/dashboard/admin/access-audit/page.tsx → 'border-collapse'\n  app/dashboard/admin/access-audit/AccessAuditFilters.tsx → 'ring-offset-2'",
-    "[RETRY] Re-running Builder to fix undefined Tailwind tokens (attempt 2/2)",
+    "[BUILDER] Attempt 1 complete — 5 files",
+    "[COMPILE-GATE] Attempt 1: 2 unresolved import(s):\n  components/procurement/BOPDetail.tsx → '../rbac/RoleGuard'\n  components/reports/ReportExport.tsx → '../rbac/RoleGuard'",
+    "[RETRY] Re-running Builder to fix unresolved imports (attempt 2/2)",
     "[BUILDER] Attempt 2/2 — generating code...",
-    "[BUILDER] Attempt 2 complete — 4 files",
+    "[BUILDER] Attempt 2 complete — 5 files",
     "[COMPILE-GATE] Attempt 2: all imports resolve",
     "[COMPILE-GATE] Attempt 2: all Tailwind tokens defined",
-    "[COMPILE-GATE] Attempt 2: 2 missing named export(s):\n  app/dashboard/admin/access-audit/page.tsx → '@/lib/auth/session' has no export 'auth'\n  app/dashboard/admin/access-audit/page.tsx → '@/components/ui/Skeletons' has no export 'Skeletons'",
-    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 2 missing named export(s) after 2 attempt(s)"
+    "[COMPILE-GATE] Attempt 2: 1 missing named export(s):\n  lib/rbac/getSessionRole.ts → '@/lib/auth/session' has no export 'auth'",
+    "[COMMIT] Skipped — gate blocked after 2 attempt(s): compile gate: 1 missing named export(s) after 2 attempt(s)"
   ]
 }
