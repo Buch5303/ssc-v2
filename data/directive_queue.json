@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T21:31:31.732Z",
+  "updated_at": "2026-06-15T21:45:36.175Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2224,9 +2224,10 @@
       "id": "AUTO-094",
       "title": "FLOWSEER-DROP-002: Extended Dropdown Audit — Portal-Based & Remaining components/ui/ Floaters",
       "directive": "After FLOWSEER-DROP-001 lands, complete the mobile compliance remediation for any remaining custom dropdown, combobox, or floating overlay components in components/ui/ and any portal-based floating elements not covered in DROP-001 (i.e., components beyond combobox.tsx and dropdown-menu.tsx that were documented as DEFERRED in COMPONENTS_AUDIT.md). For each deferred component: (1) On mobile viewports < 768px, replace or wrap with a native <select> fallback rendered conditionally via the useIsMobile hook from hooks/useMediaQuery.ts (created in DROP-001), OR confirm the component meets 44px touch targets and does not produce z-index collisions with the sidebar drawer (z-50) or bottom nav (z-40). (2) Update COMPONENTS_AUDIT.md (repo root) to move all DEFERRED rows to PASS or FAIL with resolution notes. (3) Ensure no custom floating dropdown has a z-index > 40 on mobile. Scope: maximum 5 files per build spec; if more components require remediation, continue splitting into DROP-003, DROP-004, etc. One concern: dropdown/combobox mobile compliance only. No schema changes. No globals.css modifications. Use the useIsMobile hook from hooks/useMediaQuery.ts — do not create a duplicate hook. EQS constraint: zero custom floating dropdowns violating 44px targets on mobile after all DROP-series directives land. Context: Next.js 14, Tailwind, TypeScript, Vercel, W251 BOP procurement platform.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T14:31:09.498Z",
-      "origin": "split_from:AUTO-067"
+      "origin": "split_from:AUTO-067",
+      "started_at": "2026-06-15T21:45:36.042Z"
     },
     {
       "id": "AUTO-095",
