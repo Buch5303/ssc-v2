@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T12:18:57.444Z",
+  "updated_at": "2026-06-15T12:30:22.463Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1572,9 +1572,10 @@
       "id": "AUTO-064",
       "title": "FLOWSEER-RESP-002b — Inline Chart Instances Responsive Remediation",
       "directive": "After FLOWSEER-RESP-002 lands, audit all 14 dashboard pages for chart components that are NOT imported from the 4 shared primitives (components/charts/LineChart.tsx, BarChart.tsx, HeatmapChart.tsx, ScatterPlot.tsx) — i.e., any inline recharts usage or one-off chart components defined directly in page files. For each such instance: (1) replace fixed width props with ResponsiveChartWrapper from components/charts/ResponsiveChartWrapper.tsx, (2) apply the same calcTickInterval and clampTooltipPosition utilities, (3) reduce mobile margins, (4) ensure tooltip viewport clamping. Validate at 393x852 (iPhone 14 Pro): no horizontal overflow, tooltips within bounds, chart render < 1500ms. Maximum 5 files modified per spec iteration — scope to highest-traffic pages first (Analytics, Spend Overview, Supplier Risk) and defer remaining pages to FLOWSEER-RESP-002c.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T06:31:47.025Z",
-      "origin": "split_from:AUTO-047"
+      "origin": "split_from:AUTO-047",
+      "started_at": "2026-06-15T12:30:22.353Z"
     },
     {
       "id": "AUTO-065",
