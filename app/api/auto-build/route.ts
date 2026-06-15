@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { validateTailwindTokens } from "@/lib/tailwind-gate";
+import { runPromotionGate } from "@/lib/promotion-gate";
 import { sendAlert, classifyApiError } from "@/lib/notify";
 
 // Vercel function timeout: 300s (Pro plan max). Was 60 on Hobby.
@@ -215,7 +216,8 @@ async function saveQueue(
   message: string,
   baseUrl: string,
   extraFiles: Array<{ path: string; content: string }> = [],
-  touchedIds: string[] | null = null
+  touchedIds: string[] | null = null,
+  branch: string = "main"
 ): Promise<{ ok: boolean; sha?: string; error?: string }> {
   try {
     // MERGE-BEFORE-WRITE (2026-06-11). Last-writer-wins clobbered the queue
@@ -253,7 +255,7 @@ async function saveQueue(
     const res = await fetch(`${baseUrl}/api/github-commit`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-internal-secret": (process.env.CRON_SECRET || "").trim() },
-      body: JSON.stringify({ files, message }),
+      body: JSON.stringify({ files, message, branch }),
     });
     const data = await res.json();
     const ok = data.status === "success" || (typeof data.committed === "number" && data.committed > 0);
@@ -1499,21 +1501,61 @@ export async function GET(req: Request) {
     }
 
     const commitMsg = `[${next.id}] ${next.title} — ${shipLabel} (attempt ${buildAttempts}/${MAX_BUILD_ATTEMPTS})`;
+    const codeFiles = buildResult.build.files.map((f: any) => ({ path: f.path, content: f.content }));
+    const promotionGateOn = (process.env.PROMOTION_GATE || "").trim() === "1";
 
-    const persist = await saveQueue(
-      queue,
-      commitMsg,
-      baseUrl,
-      buildResult.build.files.map((f: any) => ({ path: f.path, content: f.content })),
-      [next.id]
-    );
-    commitResult = { ok: persist.ok, sha: persist.sha, error: persist.error };
-    if (persist.ok) {
-      next.commit_sha = persist.sha || null;
-      log.push(`[COMMIT] OK`);
+    if (promotionGateOn) {
+      // Layer 7 — Promotion gate. Commit to a disposable candidate branch,
+      // let Vercel build its preview (the real `next build` — the check the
+      // in-function compile gate can't run), and fast-forward main ONLY if
+      // that preview goes READY. Broken code never reaches production; the
+      // queue status is still recorded on main so the loop always advances.
+      const candidateBranch = "flowseer/candidate";
+      const candidate = await saveQueue(queue, commitMsg, baseUrl, codeFiles, [next.id], candidateBranch);
+      if (!candidate.ok || !candidate.sha) {
+        log.push(`[GATE-7] Candidate commit FAILED: ${candidate.error || "no sha"}`);
+        next.status = "failed";
+        (next as any).skip_reason = `promotion gate: candidate commit error — ${candidate.error || "no sha"}`;
+        commitResult = { ok: false, sha: candidate.sha, error: candidate.error };
+        await saveQueue(queue, `[QUEUE] ${next.id} failed — candidate commit error`, baseUrl, [], [next.id]).catch(() => {});
+      } else {
+        log.push(`[GATE-7] Candidate ${candidate.sha.slice(0, 7)} on ${candidateBranch} — awaiting preview build...`);
+        const result = await runPromotionGate({
+          candidateSha: candidate.sha,
+          vercelToken: (process.env.VERCEL_TOKEN || "").trim(),
+          githubPat: (process.env.GITHUB_PAT || "").trim(),
+        });
+        log.push(`[GATE-7] ${result.reason}${result.inspectorUrl ? ` (${result.inspectorUrl})` : ""}`);
+        if (result.promoted) {
+          // Fast-forward already moved main to the candidate (code + complete
+          // status committed together) — no extra commit needed.
+          next.commit_sha = result.candidateSha;
+          commitResult = { ok: true, sha: result.candidateSha };
+          log.push(`[COMMIT] OK (promoted to main via gate)`);
+        } else {
+          next.status = "failed";
+          (next as any).skip_reason = `promotion gate: ${result.verdict} — ${result.reason}`;
+          commitResult = { ok: false, sha: candidate.sha, error: result.reason };
+          await saveQueue(queue, `[QUEUE] ${next.id} blocked by promotion gate (${result.verdict}) — main unchanged`, baseUrl, [], [next.id]).catch(() => {});
+          log.push(`[COMMIT] BLOCKED by promotion gate — main unchanged, candidate left for inspection`);
+        }
+      }
     } else {
-      log.push(`[COMMIT] FAILED: ${persist.error}`);
-      next.status = "failed";
+      const persist = await saveQueue(
+        queue,
+        commitMsg,
+        baseUrl,
+        codeFiles,
+        [next.id]
+      );
+      commitResult = { ok: persist.ok, sha: persist.sha, error: persist.error };
+      if (persist.ok) {
+        next.commit_sha = persist.sha || null;
+        log.push(`[COMMIT] OK`);
+      } else {
+        log.push(`[COMMIT] FAILED: ${persist.error}`);
+        next.status = "failed";
+      }
     }
   } else {
     let skipReason: string;
