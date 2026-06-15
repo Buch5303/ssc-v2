@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T20:31:16.956Z",
+  "updated_at": "2026-06-15T20:45:35.317Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2184,9 +2184,10 @@
       "id": "AUTO-090",
       "title": "FLOWSEER-ACC-003b: Extend Accessibility Audit to Non-TimeSeriesChart Components (Bar, Pie, KPI Sparklines)",
       "directive": "After FLOWSEER-ACC-003 lands, extend the mobile accessibility audit to all remaining chart component types in components/charts/ that are NOT TimeSeriesChart — specifically BarChart, PieChart, KPI sparkline components, and any heatmap or scatter plot variants. Requirements: (1) Apply AccessibleChartWrapper (introduced in FLOWSEER-ACC-003) to each component with appropriate title/description/dataTableFallback props. (2) Add axe-core jest-axe tests in chart-accessibility.spec.ts for each newly wrapped component. (3) For PieChart, implement a dedicated accessible data table fallback listing segment label and value/percentage pairs. (4) Verify keyboard focus order across a dashboard page containing multiple charts does not produce a logical tab order violation (WCAG 2.4.3). (5) Playwright desktop + iOS emulation: assert each chart type has role='img' and aria-label in rendered DOM. Validate: axe-core zero critical/serious violations for all chart types, Playwright tab order test passes. Maximum 5 files modified.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T13:01:18.692Z",
-      "origin": "split_from:AUTO-066"
+      "origin": "split_from:AUTO-066",
+      "started_at": "2026-06-15T20:45:35.208Z"
     },
     {
       "id": "AUTO-091",
