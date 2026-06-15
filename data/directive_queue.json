@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T21:16:12.703Z",
+  "updated_at": "2026-06-15T21:30:35.415Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2214,9 +2214,10 @@
       "id": "AUTO-093",
       "title": "FLOWSEER-DROP-005: Mobile Compliance Audit — DropdownMenu & CommandMenu Components",
       "directive": "DIRECTIVE (follows FLOWSEER-DROP-004): Complete the mobile dropdown compliance audit and remediation for the remaining custom floating dropdown components NOT covered in FLOWSEER-DROP-004: specifically components/ui/DropdownMenu.tsx and components/ui/CommandMenu.tsx (and any additional portal-based floating dropdowns discovered during the FLOWSEER-DROP-004 audit as documented in COMPONENTS_AUDIT.md under 'Follow-Up Required: Yes'). For each component: (1) On mobile viewports < 768px, replace or wrap with a native <select> fallback rendered conditionally via the useMediaQuery hook introduced in FLOWSEER-DROP-004 (hooks/useMediaQuery.ts), OR confirm the component meets 44px touch targets and does not produce z-index collisions with the sidebar drawer (z-50) or bottom nav (z-40). (2) Update COMPONENTS_AUDIT.md at repo root to mark all previously deferred rows as resolved and add any newly discovered components. (3) Ensure no custom floating dropdown has a z-index > 40 on mobile. EQS constraint: after this directive lands, zero custom floating dropdowns in the entire components/ui/ directory may violate 44px touch targets or z-index policy on mobile. Maximum 5 files. One concern: dropdown/combobox mobile compliance only for the deferred component set. No schema changes. Depends on: FLOWSEER-DROP-004 merged and hooks/useMediaQuery.ts available. Context: Next.js 14, Tailwind, TypeScript, Vercel, EQS v1.0.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T13:46:05.474Z",
-      "origin": "split_from:AUTO-067"
+      "origin": "split_from:AUTO-067",
+      "started_at": "2026-06-15T21:30:35.322Z"
     },
     {
       "id": "AUTO-094",
