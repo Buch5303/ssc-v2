@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T18:01:32.953Z",
+  "updated_at": "2026-06-15T18:15:35.232Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2024,9 +2024,10 @@
       "id": "AUTO-080",
       "title": "FS-VIZ-MOB-003: Propagate Adaptive Density Context to All 14 Dashboard Page Chart Instances",
       "directive": "DIRECTIVE: After FS-VIZ-MOB-002 is merged, update every chart component instance across all 14 FlowSeer W251 BOP dashboard pages to consume the ChartDensityContext render-prop from ChartWrapper. Required: (1) Each line and area chart must call `ctx.downsample(data, 50, valueKey)` before passing data to the Recharts LineChart/AreaChart component — when isMobile the downsampled array is used, otherwise raw data. (2) Each XAxis within line, area, and bar charts must receive `ticks={ctx.ticks}` from context and apply `tickFormatter={truncatedTickFormatter}` with the tick element's title set via the Recharts custom `tick` render prop so full label is accessible on hover. (3) Bar chart wrappers must pass `barCount={data.length}` to MobileScrollBarContainer (already integrated in ChartWrapper via chartType='bar' prop — callers must set this prop). (4) All 14 pages must be verified via Playwright mobile viewport snapshot tests (375px width, iPhone 12 preset) showing no overlapping axis labels and no bar width below 20px. CONTEXT: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0. Prerequisites: FS-VIZ-MOB-001 and FS-VIZ-MOB-002 merged. Scope limited to chart component wiring — no new utilities, no schema changes, no layout changes.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T21:46:13.411Z",
-      "origin": "split_from:AUTO-059"
+      "origin": "split_from:AUTO-059",
+      "started_at": "2026-06-15T18:15:35.114Z"
     },
     {
       "id": "AUTO-060-FIX",
