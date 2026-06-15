@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T18:46:14.270Z",
+  "updated_at": "2026-06-15T19:00:36.298Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2114,9 +2114,10 @@
       "id": "AUTO-083",
       "title": "FLOWSEER-RESP-004: Chart Responsiveness Audit Fix — Remaining Dashboard Pages",
       "directive": "After FLOWSEER-RESP-003 lands, re-run scripts/audit-chart-imports.ts. Any of the 14 dashboard pages under app/dashboard/**/page.tsx that still report violations (direct Recharts imports, inline SVG with fixed dimensions, missing ResponsiveChartWrapper, or Tooltip without overflow fix) must be remediated. Apply the same fix pattern as FLOWSEER-RESP-003: (1) replace fixed width props with ResponsiveContainer via ResponsiveChartWrapper, (2) apply useChartDimensions hook for tickInterval and margin logic, (3) apply tooltip overflow fix (allowEscapeViewBox={{ x: true, y: true }}, wrapperStyle={{ maxWidth: '90vw', zIndex: 50 }}). Maximum 5 files modified per this directive. One concern: chart components only, no sidebar or grid changes. Validate at 393x852 viewport. EQS v1.0 standards apply. If more than 5 files remain after FLOWSEER-RESP-003, issue additional follow-up directives in batches of 5 until scripts/audit-chart-imports.ts reports zero violations across all 14 pages.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T12:01:34.835Z",
-      "origin": "split_from:AUTO-062"
+      "origin": "split_from:AUTO-062",
+      "started_at": "2026-06-15T19:00:36.214Z"
     },
     {
       "id": "AUTO-084",
