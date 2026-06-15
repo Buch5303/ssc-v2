@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T13:45:21.265Z",
+  "updated_at": "2026-06-15T13:49:33.970Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1653,11 +1653,75 @@
       "id": "AUTO-067",
       "title": "FLOWSEER-RESP-003-B: Audit and Replace Custom Floating Dropdown Components with Native-Compatible Implementations",
       "directive": "After FLOWSEER-RESP-003 lands, audit all custom dropdown/combobox components in the W251 BOP platform codebase (components/ui/, any portal-based floating dropdowns using Radix Popper, Headless UI Listbox, or custom z-index overlays) that bypass the globals.css select normalization applied in RESP-003. For each non-native dropdown found: (1) on mobile viewports < 768px, replace or wrap with a native <select> fallback rendered conditionally via useMediaQuery, OR confirm the component meets 44px touch targets and does not produce z-index collisions with the sidebar drawer (z-50) or bottom nav (z-40). (2) Document all components audited in a COMPONENTS_AUDIT.md file at repo root. (3) Ensure no custom floating dropdown has a z-index > 40 on mobile that would overlap the sidebar drawer. EQS constraint: zero custom floating dropdowns violating 44px targets on mobile after this directive lands. Maximum 5 files. One concern: dropdown/combobox mobile compliance only. No schema changes.",
-      "status": "in_progress",
+      "status": "pending",
       "created_at": "2026-06-11T06:46:39.573Z",
       "origin": "split_from:AUTO-048",
       "started_at": "2026-06-15T13:45:21.145Z",
-      "attempts": 1
+      "attempts": 1,
+      "near_miss_retries": 1,
+      "carryover_issues": [
+        {
+          "severity": "CRITICAL",
+          "file": "components/ui/Select.tsx",
+          "description": "Desktop path renders a native <select> instead of the existing Radix Select primitive. The spec explicitly states 'On desktop, render existing Radix Select primitive unchanged.' This breaks existing functionality and snapshots.",
+          "fix": "Restore the original Radix Select implementation for desktop viewport. Only use native <select> for mobile path."
+        },
+        {
+          "severity": "CRITICAL",
+          "file": "components/ui/Combobox.tsx",
+          "description": "Desktop path renders a custom button-based combobox instead of the existing Radix Popper/Headless UI implementation. The spec requires preserving existing behavior on desktop.",
+          "fix": "Restore the original Combobox implementation for desktop viewport. Only apply mobile-specific changes."
+        },
+        {
+          "severity": "HIGH",
+          "file": "components/ui/Select.tsx",
+          "description": "The ...props spread onto the native <select> element may cause TypeScript errors because the interface defines 'data-testid' as a destructured prop, but it's also included in the spread. This creates duplicate attributes.",
+          "fix": "Remove 'data-testid' from the interface destructuring or use a separate rest parameter to avoid duplicate props."
+        },
+        {
+          "severity": "HIGH",
+          "file": "components/ui/Combobox.tsx",
+          "description": "The data-mobile CSS override '[data-mobile] [data-radix-popper-content-wrapper]:z-[39]' targets a Radix-specific class that may not exist in the simplified implementation. The actual dropdown panel uses a plain div with z-[39] class, but the container div has no z-index cap.",
+          "fix": "Ensure the container div also has z-index capped at 39 on mobile, or remove the data-mobile attribute approach and use direct className overrides."
+        },
+        {
+          "severity": "MEDIUM",
+          "file": "components/ui/Combobox.tsx",
+          "description": "The backdrop div has z-[38] which is below the dropdown z-[39], but the backdrop is a fixed overlay that could interfere with other page elements. The spec requires no element to have z-index > 39, which is satisfied, but the backdrop pattern is unconventional.",
+          "fix": "Consider using a simpler click-outside handler instead of a fixed backdrop overlay to avoid potential interaction issues."
+        },
+        {
+          "severity": "MEDIUM",
+          "file": "tests/useMediaQuery.test.ts",
+          "description": "The SSR test deletes global.window which may cause test environment instability. The test doesn't actually verify the hook returns false during SSR because renderHook still runs in a jsdom environment.",
+          "fix": "Use a proper SSR mock that simulates the server environment without window, or test the initial state before useEffect runs."
+        },
+        {
+          "severity": "LOW",
+          "file": "COMPONENTS_AUDIT.md",
+          "description": "The audit document lists DropdownMenu and CommandMenu as having 'Unknown' z-index and touch target compliance. The spec requires documenting actual findings, not unknowns.",
+          "fix": "Either inspect the actual files and document real values, or note that these are deferred and will be audited in FLOWSEER-DROP-005."
+        }
+      ],
+      "carryover_score": 72,
+      "carryover_feedback": "A previous cycle's best attempt scored 72/100 (CONDITIONAL). These are the EXACT remaining findings. Fix every one of them in your FIRST attempt this cycle:\n1. [CRITICAL] Desktop path renders a native <select> instead of the existing Radix Select primitive. The spec explicitly states 'On desktop, render existing Radix Select primitive unchanged.' This breaks existing functionality and snapshots. FIX: Restore the original Radix Select implementation for desktop viewport. Only use native <select> for mobile path.\n2. [CRITICAL] Desktop path renders a custom button-based combobox instead of the existing Radix Popper/Headless UI implementation. The spec requires preserving existing behavior on desktop. FIX: Restore the original Combobox implementation for desktop viewport. Only apply mobile-specific changes.\n3. [HIGH] The ...props spread onto the native <select> element may cause TypeScript errors because the interface defines 'data-testid' as a destructured prop, but it's also included in the spread. This creates duplicate attributes. FIX: Remove 'data-testid' from the interface destructuring or use a separate rest parameter to avoid duplicate props.\n4. [HIGH] The data-mobile CSS override '[data-mobile] [data-radix-popper-content-wrapper]:z-[39]' targets a Radix-specific class that may not exist in the simplified implementation. The actual dropdown panel uses a plain div with z-[39] class, but the container div has no z-index cap. FIX: Ensure the container div also has z-index capped at 39 on mobile, or remove the data-mobile attribute approach and use direct className overrides.\n5. [MEDIUM] The backdrop div has z-[38] which is below the dropdown z-[39], but the backdrop is a fixed overlay that could interfere with other page elements. The spec requires no element to have z-index > 39, which is satisfied, but the backdrop pattern is unconventional. FIX: Consider using a simpler click-outside handler instead of a fixed backdrop overlay to avoid potential interaction issues.\n6. [MEDIUM] The SSR test deletes global.window which may cause test environment instability. The test doesn't actually verify the hook returns false during SSR because renderHook still runs in a jsdom environment. FIX: Use a proper SSR mock that simulates the server environment without window, or test the initial state before useEffect runs.",
+      "skip_reason": "did not reach PASS after 2 attempt(s) — final CONDITIONAL (CONDITIONAL 72/100) — near-miss (best 72/100), requeued with carried feedback (carryover 1/2)",
+      "auditor_score": 72,
+      "build_attempts": 2,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "verdict": "COMPILE_FAIL",
+          "score": null,
+          "effective": "FAIL"
+        },
+        {
+          "attempt": 2,
+          "verdict": "CONDITIONAL",
+          "score": 72,
+          "effective": "CONDITIONAL"
+        }
+      ]
     },
     {
       "id": "AUTO-068",
@@ -1997,6 +2061,14 @@
       "status": "pending",
       "created_at": "2026-06-15T13:30:57.158Z",
       "origin": "split_from:AUTO-068"
+    },
+    {
+      "id": "AUTO-093",
+      "title": "FLOWSEER-DROP-005: Mobile Compliance Audit — DropdownMenu & CommandMenu Components",
+      "directive": "DIRECTIVE (follows FLOWSEER-DROP-004): Complete the mobile dropdown compliance audit and remediation for the remaining custom floating dropdown components NOT covered in FLOWSEER-DROP-004: specifically components/ui/DropdownMenu.tsx and components/ui/CommandMenu.tsx (and any additional portal-based floating dropdowns discovered during the FLOWSEER-DROP-004 audit as documented in COMPONENTS_AUDIT.md under 'Follow-Up Required: Yes'). For each component: (1) On mobile viewports < 768px, replace or wrap with a native <select> fallback rendered conditionally via the useMediaQuery hook introduced in FLOWSEER-DROP-004 (hooks/useMediaQuery.ts), OR confirm the component meets 44px touch targets and does not produce z-index collisions with the sidebar drawer (z-50) or bottom nav (z-40). (2) Update COMPONENTS_AUDIT.md at repo root to mark all previously deferred rows as resolved and add any newly discovered components. (3) Ensure no custom floating dropdown has a z-index > 40 on mobile. EQS constraint: after this directive lands, zero custom floating dropdowns in the entire components/ui/ directory may violate 44px touch targets or z-index policy on mobile. Maximum 5 files. One concern: dropdown/combobox mobile compliance only for the deferred component set. No schema changes. Depends on: FLOWSEER-DROP-004 merged and hooks/useMediaQuery.ts available. Context: Next.js 14, Tailwind, TypeScript, Vercel, EQS v1.0.",
+      "status": "pending",
+      "created_at": "2026-06-15T13:46:05.474Z",
+      "origin": "split_from:AUTO-067"
     }
   ]
 }
