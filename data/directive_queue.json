@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T23:01:31.442Z",
+  "updated_at": "2026-06-15T23:15:35.458Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2284,9 +2284,10 @@
       "id": "AUTO-100",
       "title": "FS-AUDIT-003-IDX — access_denied_audit Performance Indexes",
       "directive": "Using the FlowSeer W251 BOP platform schema conventions (FS-SCHEMA-001, Drizzle ORM, PostgreSQL) and building on the access_denied_audit table introduced in FS-AUDIT-003, add the following indexes via a new Drizzle migration: (1) a BRIN index on denied_at for time-range scans across the append-only table, (2) a B-tree index on user_id for per-user audit lookups, (3) a B-tree index on request_id for correlation lookups from FS-AUTH-002 middleware traces. Add index definitions in lib/db/schema.ts using Drizzle's index() helper inside the table definition's third argument. Generate and apply the migration. No UI changes, no endpoint changes, no auth logic changes. EQS v1.0 applies: index creation must be CONCURRENTLY to avoid table locks; migration must be idempotent.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T16:16:28.304Z",
-      "origin": "split_from:AUTO-072"
+      "origin": "split_from:AUTO-072",
+      "started_at": "2026-06-15T23:15:35.375Z"
     },
     {
       "id": "AUTO-101",
