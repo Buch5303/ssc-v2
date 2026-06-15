@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-15T15:15:36.077Z",
+  "updated_at": "2026-06-15T15:30:36.148Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -1772,9 +1772,10 @@
       "id": "AUTO-073",
       "title": "FS-AUTH-004: Authorization Denial Audit Dashboard UI",
       "directive": "Using the FlowSeer W251 BOP platform (Next.js 14, Tailwind, TypeScript), implement a read-only admin dashboard page at /dashboard/admin/access-audit that displays records from the access_denied_audit table (defined in FS-SCHEMA-003). Scope: server component page that queries access_denied_audit via Drizzle, renders a paginated table (50 rows/page) showing denied_at, user_id, role, pathname, method, request_id, ip_address columns. Filter controls: date range picker, role multi-select, pathname prefix text input. Accessible only to admin role (enforced by FS-AUTH-002 middleware). EQS v1.0 applies: page load < 1.5s, C-suite clarity in < 5 seconds, Tableau-level data table with sortable columns. No schema changes — consume access_denied_audit table from lib/db/schema.ts only.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-11T07:46:06.537Z",
-      "origin": "split_from:AUTO-050"
+      "origin": "split_from:AUTO-050",
+      "started_at": "2026-06-15T15:30:36.048Z"
     },
     {
       "id": "AUTO-050-FIX",
