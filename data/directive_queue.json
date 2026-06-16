@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T06:00:36.436Z",
+  "updated_at": "2026-06-16T06:01:27.295Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2554,10 +2554,11 @@
       "id": "AUTO-127",
       "title": "FS-VIZ-TOUCH-003-B: Migrate Direct Recharts Usages in Storybook Stories and Non-Dashboard Components",
       "directive": "Following FS-VIZ-TOUCH-003, extend the Recharts migration audit to cover: (1) All Storybook story files (stories/**/*.stories.tsx, src/**/*.stories.tsx) that import chart-root Recharts components (LineChart, BarChart, PieChart, AreaChart, ComposedChart, RadarChart, ScatterChart, RadialBarChart, FunnelChart) directly from 'recharts' outside of BaseChart. (2) Any non-dashboard page components outside app/dashboard/ and components/charts/ (e.g., app/reports/, app/analytics/, app/admin/) that contain direct Recharts chart-root imports. Migration pattern is identical to FS-VIZ-TOUCH-003: wrap each instance in TouchableChartWrapper (with correct gestureMode/chartType per FS-VIZ-TOUCH-002 mapping) containing BaseChart as render slot host, preserving all data props, formatters, color configs, and axis configurations exactly. Update ChartMigrationRegistry.ts with lineage entries for every newly migrated file. Run scripts/audit-recharts-imports.ts against full repo scope (not just app/dashboard/ and components/charts/) and confirm exit code 0. Confirm FS-VIZ-TOUCH-002 Cypress E2E suite still passes at 100%. Bundle delta check must remain <= 5KB gzipped cumulative vs pre-FS-VIZ-TOUCH-003 baseline. Context: Next.js 14, Tailwind, TypeScript, Vercel. Prerequisites: FS-VIZ-TOUCH-003 merged.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-16T00:46:19.439Z",
       "origin": "split_from:AUTO-106",
-      "started_at": "2026-06-16T06:00:36.209Z"
+      "started_at": "2026-06-16T06:00:36.209Z",
+      "completed_at": "2026-06-16T06:01:27.125Z"
     },
     {
       "id": "AUTO-128",
@@ -2710,6 +2711,14 @@
       "status": "pending",
       "created_at": "2026-06-16T05:31:28.155Z",
       "origin": "split_from:AUTO-125"
+    },
+    {
+      "id": "AUTO-147",
+      "title": "FS-VIZ-TOUCH-005: Recharts Migration Audit — Test Fixtures, Utility Modules, and Remaining Glob Gaps",
+      "directive": "Following FS-VIZ-TOUCH-004, perform a final sweep of any remaining direct chart-root Recharts imports (LineChart, BarChart, PieChart, AreaChart, ComposedChart, RadarChart, ScatterChart, RadialBarChart, FunnelChart) from 'recharts' outside of BaseChart.tsx that were not covered by FS-VIZ-TOUCH-003 or FS-VIZ-TOUCH-004. Specifically: (1) Test fixture files under __tests__/, __mocks__/, and cypress/fixtures/ that instantiate chart-root components directly and may interfere with the audit script exit code. (2) Utility/helper modules (lib/, utils/, hooks/) that re-export or instantiate chart-root Recharts components outside BaseChart. (3) Any app/ route segments not covered by app/dashboard/, app/reports/, app/analytics/, app/admin/ (e.g., app/settings/, app/onboarding/, app/public-reports/ if they exist). Migration pattern is identical to FS-VIZ-TOUCH-003/004: wrap in TouchableChartWrapper (gestureMode/chartType per FS-VIZ-TOUCH-002 mapping) containing BaseChart as render slot host, preserve all data props/formatters/color configs/axis configurations exactly. Update ChartMigrationRegistry.ts with lineage entries (migratedInDirective='FS-VIZ-TOUCH-005'). Confirm scripts/audit-recharts-imports.ts exits code 0 repo-wide. Confirm FS-VIZ-TOUCH-002 Cypress E2E suite passes at 100%. Bundle delta must remain <= 5KB gzipped cumulative vs pre-FS-VIZ-TOUCH-003 baseline. Prerequisites: FS-VIZ-TOUCH-004 merged. Context: Next.js 14, Tailwind, TypeScript, Vercel, EQS v1.0.",
+      "status": "pending",
+      "created_at": "2026-06-16T06:01:25.505Z",
+      "origin": "split_from:AUTO-127"
     }
   ]
 }
