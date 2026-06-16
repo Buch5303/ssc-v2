@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T07:46:19.951Z",
+  "updated_at": "2026-06-16T08:00:36.410Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2634,9 +2634,10 @@
       "id": "AUTO-135",
       "title": "FLOWSEER-ARCH-003-C — Web Performance API Instrumentation Batch 2 (FunnelChart, WaterfallChart, BubbleChart, GaugeChart)",
       "directive": "DIRECTIVE: Complete the Web Performance API instrumentation for the final 4 un-instrumented dashboard chart wrappers not covered by FLOWSEER-ARCH-003-A or FLOWSEER-ARCH-003-B, so that all 14 FLOWSEER-TEST-003 desktop chart-performance tests pass end-to-end.\n\nCONTEXT:\n- FLOWSEER-ARCH-003-A instrumented: LineChartWrapper, BarChartWrapper, ScatterChartWrapper, HeatmapChartWrapper.\n- FLOWSEER-ARCH-003-B instrumented: AreaChartWrapper, ComposedChartWrapper, RadarChartWrapper, PieChartWrapper, TreemapWrapper.\n- Remaining 4 wrappers: FunnelChartWrapper, WaterfallChartWrapper, BubbleChartWrapper, GaugeChartWrapper (or the actual filenames as found in components/charts/).\n- Shared hook lib/perf/useChartPerformanceMark.ts (exports: emitChartRenderedMark, useChartRenderedFallback) is already in place and must not be modified.\n\nREQUIREMENTS:\n1. For each of the 4 remaining chart wrapper components:\n   a. If Recharts-based (FunnelChart uses Recharts <Funnel>; ScatterChart-variant BubbleChartWrapper may use <Scatter> with size encoding): import emitChartRenderedMark from '@/lib/perf/useChartPerformanceMark'. Declare firedRef = useRef(false). Attach onAnimationEnd to the last animated series element with the firedRef guard pattern.\n   b. If custom SVG/canvas (WaterfallChartWrapper, GaugeChartWrapper are commonly custom): import useChartRenderedFallback. Declare containerRef = useRef<HTMLDivElement>(null). Call useChartRenderedFallback(containerRef, '<ComponentName>') inside the component. Attach ref={containerRef} to the outermost wrapper div.\n   c. Confirm actual implementation by inspecting the file before deciding which branch applies.\n2. Add data-testid='dashboard-content' to the top-level wrapper div of each host dashboard page layout that does not already have it. Do not duplicate on pages already handled by 003-A or 003-B.\n3. The mark must fire AFTER SVG paint (onAnimationEnd for Recharts; MutationObserver/ResizeObserver fallback via useChartRenderedFallback for custom). Not on mount, not during loading states.\n4. firedRef pattern is mandatory — exactly one emission per component lifecycle.\n5. No changes to test files, schema files, migration files, or any wrapper already covered by 003-A or 003-B.\n6. TypeScript strict mode: zero new errors.\n7. Performance budget: markTime - navStart <= 1500ms under 1440x900 desktop, no CPU throttle.\n\nFINAL GATE: After this directive lands, run `npx playwright test --project=responsive-charts --grep @chart-performance` — ALL 14 desktop performance tests must pass. Also run `npx tsc --noEmit` — zero errors. Confirm zero duplicate data-testid='dashboard-content' attributes across all page files via grep.\n\nEQS REQUIREMENT: Dashboard load < 1.5s, AI inference < 2s, real-time latency < 300ms. Financial accuracy ±0.1%. Immutable audit logs unaffected. No module approved unless pass rate = 100%, zero critical vulnerabilities.\n\nPlatform: FlowSeer W251 BOP procurement, Next.js 14, Tailwind, TypeScript, Vercel.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-16T02:31:32.884Z",
-      "origin": "split_from:AUTO-113"
+      "origin": "split_from:AUTO-113",
+      "started_at": "2026-06-16T08:00:36.276Z"
     },
     {
       "id": "AUTO-136",
