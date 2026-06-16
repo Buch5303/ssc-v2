@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T00:01:26.536Z",
+  "updated_at": "2026-06-16T00:15:35.442Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2324,9 +2324,10 @@
       "id": "AUTO-104",
       "title": "AUTH-METRICS-002-PERSIST: Persist Spike Events to audit_spike_log Table for Historical C-Suite Reporting",
       "directive": "Depends on AUTH-METRICS-002 being merged. The SSE spike detection introduced in AUTH-METRICS-002 is ephemeral (per-connection, in-process). This directive adds durable persistence of spike events. Create a migration (lib/db/migrations/YYYYMMDD_create_audit_spike_log.ts) that adds an audit_spike_log table with columns: id (uuid pk), window_start (timestamptz), window_end (timestamptz), denial_count (int), row_ids (uuid[]), created_at (timestamptz default now()). Update the SSE route handler (app/api/metrics/auth-denials/stream/route.ts) so that when a spike is detected, a single INSERT is made into audit_spike_log with the full row_ids array before the SSE spike event is emitted to the client. This INSERT must be fire-and-forget (non-blocking to the SSE path) but must log errors. Add a GET /api/metrics/auth-denials/spikes endpoint that returns paginated audit_spike_log rows for the AuthDenialTile historical spike chart. Schema changes (migration file) are the primary concern of this spec. EQS financial accuracy and audit reconciliation standards apply: audit_spike_log.row_ids must be verifiable as a subset of authorization_audit_log IDs via a reconciliation query.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T17:31:37.978Z",
-      "origin": "split_from:AUTO-075"
+      "origin": "split_from:AUTO-075",
+      "started_at": "2026-06-16T00:15:35.357Z"
     },
     {
       "id": "AUTO-105",
