@@ -2,7 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { neon } from '@neondatabase/serverless';
 import { markStart, markEnd } from '@/lib/perf';
 
-const sql = neon(process.env.DATABASE_URL!);
+// 2026-06-16: lazy neon client. A module-scope `neon(process.env.DATABASE_URL!)`
+// throws during `next build` page-data collection when DATABASE_URL isn't in the
+// build env, failing the whole production build (this was the second route to
+// crash the first real build after the auto-build loop was halted). Deferring
+// client creation to first query keeps the build env-free.
+let _sql: ReturnType<typeof makeSql> | null = null;
+function makeSql() {
+  return neon<false, false>(process.env.DATABASE_URL!);
+}
+function sql(strings: TemplateStringsArray, ...values: unknown[]) {
+  if (!_sql) {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL environment variable is required');
+    }
+    _sql = makeSql();
+  }
+  return _sql(strings, ...values);
+}
 
 export async function GET(request: NextRequest) {
   try {

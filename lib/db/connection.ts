@@ -1,44 +1,55 @@
 import { Pool } from 'pg';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL environment variable is required');
+// 2026-06-16: Made pool lazy. Previously this module (a) threw at import scope
+// if DATABASE_URL was unset and (b) ran initializeTables() as an import side
+// effect — so `next build` page-data collection crashed/connected during build.
+// That latent break surfaced the moment a real (non docs-only) commit forced a
+// production build. The pool is now created on first use via a Proxy, so
+// importing this module neither throws nor opens a connection at build time.
+let _pool: Pool | null = null;
+
+function getPool(): Pool {
+  if (_pool) return _pool;
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL environment variable is required');
+  }
+  _pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+    statement_timeout: 5000,
+    query_timeout: 5000,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  });
+  _pool.on('error', (err) => {
+    console.error('PostgreSQL pool error:', err);
+  });
+  return _pool;
 }
 
-// Create connection pool with optimized settings
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 20, // Maximum connections in pool
-  idleTimeoutMillis: 30000, // Close idle connections after 30s
-  connectionTimeoutMillis: 2000, // Timeout connection attempts after 2s
-  statement_timeout: 5000, // Statement timeout 5s
-  query_timeout: 5000, // Query timeout 5s
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+// Lazy proxy preserves the existing `import pool from '@/lib/db/connection'`
+// interface (pool.query(...), pool.connect(...)) while deferring creation.
+const pool = new Proxy({} as Pool, {
+  get(_target, prop) {
+    const p = getPool();
+    const value = (p as unknown as Record<string | symbol, unknown>)[prop];
+    return typeof value === 'function' ? (value as (...args: unknown[]) => unknown).bind(p) : value;
+  },
 });
 
-// Pool error handling
-pool.on('error', (err) => {
-  console.error('PostgreSQL pool error:', err);
-});
-
-// Graceful shutdown
+// Graceful shutdown — only act if a pool was actually created.
 process.on('SIGINT', () => {
-  pool.end(() => {
-    console.log('PostgreSQL pool has ended');
-    process.exit(0);
-  });
+  if (_pool) { _pool.end(() => process.exit(0)); } else { process.exit(0); }
 });
-
 process.on('SIGTERM', () => {
-  pool.end(() => {
-    console.log('PostgreSQL pool has ended');
-    process.exit(0);
-  });
+  if (_pool) { _pool.end(() => process.exit(0)); } else { process.exit(0); }
 });
 
 // Health check function
 export async function checkDatabaseHealth(): Promise<boolean> {
   try {
-    const client = await pool.connect();
+    const client = await getPool().connect();
     await client.query('SELECT 1');
     client.release();
     return true;
@@ -48,12 +59,11 @@ export async function checkDatabaseHealth(): Promise<boolean> {
   }
 }
 
-// Initialize database tables if they don't exist
+// Initialize database tables if they don't exist. Call explicitly — no longer
+// run as an import side effect (that opened a DB connection during build).
 export async function initializeTables(): Promise<void> {
-  const client = await pool.connect();
-  
+  const client = await getPool().connect();
   try {
-    // Create audit_log table
     await client.query(`
       CREATE TABLE IF NOT EXISTS audit_log (
         id UUID PRIMARY KEY,
@@ -70,24 +80,18 @@ export async function initializeTables(): Promise<void> {
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
-    
-    // Create indexes for performance
     await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_audit_log_table_record 
+      CREATE INDEX IF NOT EXISTS idx_audit_log_table_record
       ON audit_log(table_name, record_id)
     `);
-    
     await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_audit_log_timestamp 
+      CREATE INDEX IF NOT EXISTS idx_audit_log_timestamp
       ON audit_log(timestamp)
     `);
-    
     await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_audit_log_audit_trail_id 
+      CREATE INDEX IF NOT EXISTS idx_audit_log_audit_trail_id
       ON audit_log(audit_trail_id)
     `);
-    
-    // Create pricing table
     await client.query(`
       CREATE TABLE IF NOT EXISTS pricing (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -102,8 +106,6 @@ export async function initializeTables(): Promise<void> {
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
-    
-    // Create contacts table
     await client.query(`
       CREATE TABLE IF NOT EXISTS contacts (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -120,8 +122,6 @@ export async function initializeTables(): Promise<void> {
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
-    
-    // Create rfq table
     await client.query(`
       CREATE TABLE IF NOT EXISTS rfq (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -138,7 +138,6 @@ export async function initializeTables(): Promise<void> {
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
-    
     console.log('Database tables initialized successfully');
   } catch (error) {
     console.error('Error initializing database tables:', error);
@@ -147,8 +146,5 @@ export async function initializeTables(): Promise<void> {
     client.release();
   }
 }
-
-// Initialize on import
-initializeTables().catch(console.error);
 
 export default pool;
