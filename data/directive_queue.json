@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T07:15:36.409Z",
+  "updated_at": "2026-06-16T07:16:18.354Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2604,10 +2604,11 @@
       "id": "AUTO-132",
       "title": "FLOWSEER-RESP-006 — Recharts Responsiveness Fix — Dashboard Pages Batch 4 (Files 11–14)",
       "directive": "After FLOWSEER-RESP-005 merges, re-run scripts/audit-chart-imports.ts. Collect all remaining violating files matching app/dashboard/**/page.tsx. Sort results alphabetically by full file path. Select positions 11–14 (1-indexed, up to 4 files, or fewer if fewer remain). If zero violations remain, this directive is a no-op — close without action and update the audit log. Apply the identical fix pattern used in FLOWSEER-RESP-003 through FLOWSEER-RESP-005: (1) replace fixed width/height props on Recharts root chart elements (BarChart, LineChart, AreaChart, PieChart, RadarChart, ScatterChart, ComposedChart, RadialBarChart) with ResponsiveChartWrapper from '@/components/charts/ResponsiveChartWrapper'; (2) apply useChartDimensions from '@/hooks/useChartDimensions' for tickInterval and margin logic; (3) apply tooltip overflow fix — allowEscapeViewBox={{ x: true, y: true }}, wrapperStyle={{ maxWidth: '90vw', zIndex: 50 }} — on every <Tooltip> in modified files. Maximum 5 files modified. One concern: chart components only — no sidebar, grid, schema, auth, or layout changes. Validate at 393×852 viewport. After this batch, re-run the audit across all 14 dashboard pages and confirm zero violations remain. If violations still exist in files outside the original 14-page scope (e.g., new pages added after FLOWSEER-RESP-003), open a new FLOWSEER-RESP-007 directive scoped to those files. EQS v1.0 standards apply: dashboard load < 1.5s, no horizontal overflow at 393×852, TypeScript strict mode, Next.js build zero warnings, Playwright viewport snapshot assertions pass.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-16T01:31:15.825Z",
       "origin": "split_from:AUTO-109",
-      "started_at": "2026-06-16T07:15:36.302Z"
+      "started_at": "2026-06-16T07:15:36.302Z",
+      "completed_at": "2026-06-16T07:16:18.229Z"
     },
     {
       "id": "AUTO-133",
@@ -2776,6 +2777,14 @@
       "status": "pending",
       "created_at": "2026-06-16T07:01:44.499Z",
       "origin": "split_from:AUTO-131"
+    },
+    {
+      "id": "AUTO-154",
+      "title": "FLOWSEER-RESP-007 — Responsive Chart Fix for Out-of-Scope Violating Pages",
+      "directive": "DIRECTIVE: After FLOWSEER-RESP-006 merges, re-run scripts/audit-chart-imports.ts across the entire app/dashboard directory. Collect all violating files that were NOT part of the original 14-page scope tracked by FLOWSEER-RESP-003 through FLOWSEER-RESP-006 (i.e., pages added or discovered after FLOWSEER-RESP-003 was opened). Sort results alphabetically by full file path. If zero such out-of-scope violations exist, this directive is a no-op — close without action and update docs/audit-log.md. Otherwise apply the identical fix pattern: (1) replace fixed width/height props on Recharts root chart elements (BarChart, LineChart, AreaChart, PieChart, RadarChart, ScatterChart, ComposedChart, RadialBarChart) with ResponsiveChartWrapper from '@/components/charts/ResponsiveChartWrapper'; (2) apply useChartDimensions from '@/hooks/useChartDimensions' for tickInterval and margin logic; (3) apply tooltip overflow fix — allowEscapeViewBox={{ x: true, y: true }}, wrapperStyle={{ maxWidth: '90vw', zIndex: 50 }} — on every <Tooltip> in modified files. Process in alphabetical batches of up to 4 files per directive if more than 4 out-of-scope violations exist, opening FLOWSEER-RESP-008 for the next batch. Maximum 5 files modified per directive. One concern: chart components only — no sidebar, grid, schema, auth, or layout changes. Validate at 393×852 viewport. EQS v1.0 standards apply: dashboard load < 1.5s, no horizontal overflow at 393×852, TypeScript strict mode, Next.js build zero warnings, Playwright viewport snapshot assertions pass. Update docs/audit-log.md with a structured entry recording directive ID, ISO timestamp, files modified, and pre/post violation counts.",
+      "status": "pending",
+      "created_at": "2026-06-16T07:16:16.453Z",
+      "origin": "split_from:AUTO-132"
     }
   ]
 }
