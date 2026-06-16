@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T06:31:21.635Z",
+  "updated_at": "2026-06-16T06:45:35.488Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2584,9 +2584,10 @@
       "id": "AUTO-130",
       "title": "FS-VIZ-MOB-004-C: Wrapper Remediation for Resistant Dashboard Page Rank 5",
       "directive": "Prerequisite: FS-VIZ-MOB-004-B merged. Using the JSON report emitted by scripts/audit-chart-wrapper-coverage.ts, identify the resistant W251 BOP dashboard page ranked 5th by priority (wrapperApplied === false). Refactor that single page's chart rendering logic: extract data and valueKey cleanly into typed variables, then wire through LineAreaChartWrapper or BarChartWrapper (or a page-local custom wrapper if the Recharts composition is genuinely non-standard) with ctx.downsample, ctx.ticks, and truncatedTickFormatter as specified in FS-VIZ-MOB-003. Ensure the page-level Playwright iPhone 12 (390x844) snapshot test in e2e/chart-density-mobile.spec.ts passes for this page with: (a) zero overlapping x-axis tick label bounding boxes asserted programmatically, (b) all bar rect elements with height > 0 having pixel width >= 20 asserted programmatically. Do not alter layout, schema, server actions, or non-chart elements. CI must pass at 100% with no regression on previously passing pages. If additional resistant pages remain beyond rank 5, raise FS-VIZ-MOB-004-D for rank 6 following the same pattern. Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-16T01:16:29.713Z",
-      "origin": "split_from:AUTO-108"
+      "origin": "split_from:AUTO-108",
+      "started_at": "2026-06-16T06:45:35.383Z"
     },
     {
       "id": "AUTO-131",
