@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T03:16:11.910Z",
+  "updated_at": "2026-06-16T03:30:35.961Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2454,9 +2454,10 @@
       "id": "AUTO-117",
       "title": "Playwright Accessibility Snapshot Baselines for Chart Pages",
       "directive": "CONTEXT: FLOWSEER-CI-A11Y-001 has landed, establishing the CI pipeline with axe-core, Lighthouse CI, and Playwright infrastructure. The playwright.config.ts now includes an 'a11y-chromium' project scoped to 'e2e/accessibility/**/*.snap.spec.ts'.\n\nDIRECTIVE: Create Playwright accessibility snapshot baseline specs for each chart page in the FlowSeer W251 BOP procurement platform. Requirements:\n(1) Create e2e/accessibility/dashboard-charts.snap.spec.ts: navigate to /dashboard, wait for networkidle, call page.accessibility.snapshot() for each chart region (locate by role='img' or aria-label containing 'chart'), store snapshots using Playwright's built-in snapshot mechanism (expect(snapshot).toMatchSnapshot('dashboard-chart-N.snap')). Fail on structural regression.\n(2) Create e2e/accessibility/procurement-charts.snap.spec.ts: same pattern for /procurement chart regions.\n(3) Create the initial baseline snapshot files by running `npx playwright test --update-snapshots` once on a known-good build. Commit the generated .snap files under e2e/accessibility/snapshots/.\n(4) Ensure the specs handle dynamic content (loading states) by awaiting a stable DOM state before snapshotting — use waitForSelector on a chart container sentinel element.\n(5) Each spec must complete in < 30s per route to stay within EQS AI inference < 2s and dashboard load < 1.5s performance budget validation window.\nMaximum 5 files: dashboard-charts.snap.spec.ts, procurement-charts.snap.spec.ts, and up to 3 snapshot baseline files (.snap). No CI or config changes — those landed in FLOWSEER-CI-A11Y-001.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T21:01:43.348Z",
-      "origin": "split_from:AUTO-091"
+      "origin": "split_from:AUTO-091",
+      "started_at": "2026-06-16T03:30:35.874Z"
     },
     {
       "id": "AUTO-118",
