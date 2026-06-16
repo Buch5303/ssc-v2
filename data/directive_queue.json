@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T03:00:35.410Z",
+  "updated_at": "2026-06-16T03:01:14.373Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2434,10 +2434,11 @@
       "id": "AUTO-115",
       "title": "FLOWSEER-RESP-002c-iii — Responsive Chart Migration Batch 3 of 3 (Page 11 + Full Regression)",
       "directive": "After FLOWSEER-RESP-002c-ii lands, complete the responsive chart migration for the final remaining dashboard page (page 11 of 11 deferred, the single page not yet addressed after batches 002c-i and 002c-ii). AUDIT the page file under app/dashboard/ for: (a) direct imports from 'recharts', (b) one-off chart components not imported from components/charts/{LineChart,BarChart,HeatmapChart,ScatterPlot}.tsx, (c) hardcoded numeric width/height props on chart elements. Apply the same migration rules: replace with shared primitive, wrap in <ResponsiveChartWrapper>, apply calcTickInterval and clampTooltipPosition from components/charts/chartUtils.ts, mobile margins top:8 right:8 bottom:24 left:32 at <640px via Tailwind classes. Additionally, create tests/responsive/resp-002c-regression.spec.ts as a FULL regression suite covering ALL 11 previously migrated pages (002c-i pages 1–5, 002c-ii pages 6–10, plus this page 11) at 393x852 viewport, asserting: zero recharts imports across all 11 pages, no horizontal overflow, tooltips within viewport bounds, chart render < 1500ms, tsc --noEmit clean, and bundle delta <= +2 KB per page chunk. The regression suite must also run the 3 pages from FLOWSEER-RESP-002b (analytics, spend-overview, supplier-risk) in a smoke pass to confirm no regression. DO NOT modify shared primitives, schema, API routes, or non-chart UI. Platform: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T20:16:21.186Z",
       "origin": "split_from:AUTO-088",
-      "started_at": "2026-06-16T03:00:35.306Z"
+      "started_at": "2026-06-16T03:00:35.306Z",
+      "completed_at": "2026-06-16T03:01:13.994Z"
     },
     {
       "id": "AUTO-116",
