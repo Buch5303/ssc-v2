@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T06:15:35.502Z",
+  "updated_at": "2026-06-16T06:16:25.082Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2564,10 +2564,11 @@
       "id": "AUTO-128",
       "title": "FS-VIZ-TOUCH-005: Animated Domain Transition with Easing on Swipe-Pan Charts",
       "directive": "Following FS-VIZ-TOUCH-004, add animated easing to the XAxis domain transition when a swipe-pan gesture completes on the four time-series charts (SpendTrend, ForecastVariance, PipelineVelocity, AnomalyTimeline — verify exact component names in codebase). Requirements: (1) When domain state updates via useSwipePanDomain, interpolate from oldDomain to newDomain over a configurable duration (default 200ms) using requestAnimationFrame, so intermediate domain values are emitted to the XAxis domain prop at each frame — this must remain fully controlled state, no Recharts animation props. (2) Easing function: ease-out cubic (t => 1 - Math.pow(1-t, 3)). (3) Animation must complete within 200ms so that total gesture-to-settled latency stays under the 300ms EQS real-time budget (the 100ms gap accounts for touch event processing). (4) If a new swipe gesture begins while animation is in progress, cancel the current rAF loop and start a new one from the current intermediate domain value. (5) Add a prop animationEnabled: boolean (default true) to useSwipePanDomain so Cypress tests can disable animation for assertion stability. (6) Update cypress/e2e/fs-viz-touch-004-domain-shift.cy.ts (or a companion spec) to set animationEnabled=false via a data attribute or window flag during tests, ensuring domain assertions read the final settled value. (7) EQS: verify that enabling animation does not cause total re-render time to exceed 300ms by adding a Cypress performance mark from gesture touchend to animation-complete. Context: Next.js 14, Tailwind, TypeScript, Vercel, Recharts. Prerequisites: FS-VIZ-TOUCH-004 merged.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-16T01:01:32.503Z",
       "origin": "split_from:AUTO-107",
-      "started_at": "2026-06-16T06:15:35.381Z"
+      "started_at": "2026-06-16T06:15:35.381Z",
+      "completed_at": "2026-06-16T06:16:24.977Z"
     },
     {
       "id": "AUTO-129",
@@ -2720,6 +2721,14 @@
       "status": "pending",
       "created_at": "2026-06-16T06:01:25.505Z",
       "origin": "split_from:AUTO-127"
+    },
+    {
+      "id": "AUTO-148",
+      "title": "Apply useAnimatedSwipePanDomain to ForecastVariance, PipelineVelocity, AnomalyTimeline",
+      "directive": "FS-VIZ-TOUCH-005 scoped its chart-component changes to SpendTrend.tsx as the reference implementation. Apply the identical useAnimatedSwipePanDomain integration to the remaining three time-series chart components: ForecastVariance, PipelineVelocity, and AnomalyTimeline (verify exact file paths in codebase). Each component must: (1) replace useSwipePanDomain with useAnimatedSwipePanDomain, (2) derive animationEnabled from window.__FS_ANIMATION_ENABLED__ ?? true, (3) add data-testid and data-animation-enabled attributes on the chart wrapper div, (4) pass the returned domain directly to the Recharts XAxis domain prop with no Recharts animation props set. Update cypress/e2e/fs-viz-touch-005-domain-easing.cy.ts to include performance mark assertions for all three additional components (the SpendTrend assertion was added in FS-VIZ-TOUCH-005). All AC from FS-VIZ-TOUCH-005 must remain passing. Prerequisites: FS-VIZ-TOUCH-005 merged.",
+      "status": "pending",
+      "created_at": "2026-06-16T06:16:23.870Z",
+      "origin": "split_from:AUTO-128"
     }
   ]
 }
