@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T02:31:34.186Z",
+  "updated_at": "2026-06-16T02:45:35.415Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2424,9 +2424,10 @@
       "id": "AUTO-114",
       "title": "FLOWSEER-RESP-002c-ii — Responsive Chart Migration Batch 2 of 3 (Pages 6–10)",
       "directive": "After FLOWSEER-RESP-002c-i lands, continue the responsive chart migration for dashboard pages 6–10 of the 11 deferred pages. AUDIT each of the next 5 page files under app/dashboard/ (pages 6–10 alphabetically by directory name, excluding analytics, spend-overview, supplier-risk already done in 002b, and pages 1–5 done in 002c-i) for: (a) direct imports from 'recharts', (b) one-off chart components not imported from components/charts/{LineChart,BarChart,HeatmapChart,ScatterPlot}.tsx, (c) hardcoded numeric width/height props on chart elements. For each such instance: replace with the appropriate shared primitive, wrap in <ResponsiveChartWrapper> from components/charts/ResponsiveChartWrapper.tsx, apply calcTickInterval and clampTooltipPosition from components/charts/chartUtils.ts, reduce mobile margins to top:8 right:8 bottom:24 left:32 at <640px breakpoint using Tailwind responsive classes. VALIDATE at 393x852 (iPhone 14 Pro): no horizontal overflow, tooltips within bounds, chart render < 1500ms. Apply identical acceptance criteria as FLOWSEER-RESP-002c-i: zero direct recharts imports in page files, zero hardcoded numeric width props on chart elements, Playwright overflow/tooltip/performance assertions passing, tsc --noEmit clean, bundle size delta <= +2 KB gzipped per page chunk. Create tests/responsive/resp-002c-ii.spec.ts covering all 5 pages. DO NOT modify shared primitives, schema, API routes, or non-chart UI. Platform: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T20:16:21.186Z",
-      "origin": "split_from:AUTO-088"
+      "origin": "split_from:AUTO-088",
+      "started_at": "2026-06-16T02:45:35.328Z"
     },
     {
       "id": "AUTO-115",
