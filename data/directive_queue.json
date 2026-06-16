@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T05:30:35.415Z",
+  "updated_at": "2026-06-16T05:31:29.215Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2534,10 +2534,11 @@
       "id": "AUTO-125",
       "title": "FS-RESP-005B — Responsive Patch for Fifth-and-Beyond Overflow Pages",
       "directive": "If the overflow set discovered during FS-RESP-005 contains more than four page.tsx files beyond the FS-RESP-004 set (settings, notifications, reports, analytics-detail, user-profile), this directive covers all remaining unpatched pages that were deferred. For each deferred page: (a) identify any KPI grids or data tables NOT rendered through shared KpiGrid.tsx or DataTable.tsx and apply identical responsive rules — grid-cols-2 at mobile (default Tailwind breakpoint, <640px), overflow-x-auto table wrapper, 14px minimum font size (Tailwind text-sm), 44×44px touch targets (min-h-[44px] min-w-[44px]) — directly in the page or its local component file; (b) add audit comment '// FS-RESP-005B: responsive patch applied' at the top of each modified file below the import block. Extend the Playwright test suite by appending additional describe blocks to tests/responsive/resp-005-audit.spec.ts (or creating tests/responsive/resp-005b-audit.spec.ts if the original file is at line-count limits) using iPhone 14 Pro device emulation (393×852). Each describe block must test: KPI grid renders with grid-cols-2 at 393px; table wrapper has overflow-x auto/scroll; no data text below 14px computed font-size; all interactive controls have clientHeight >= 44 and clientWidth >= 44. No shared component changes. No schema changes. TypeScript strict mode must remain satisfied. Dashboard load < 1.5s must not regress. All EQS v1.0 constraints apply. Cap this directive at 4 additional overflow pages; if further pages remain, create FS-RESP-005C with the identical pattern.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-16T00:01:25.490Z",
       "origin": "split_from:AUTO-103",
-      "started_at": "2026-06-16T05:30:35.329Z"
+      "started_at": "2026-06-16T05:30:35.329Z",
+      "completed_at": "2026-06-16T05:31:29.113Z"
     },
     {
       "id": "AUTO-126",
@@ -2698,6 +2699,14 @@
       "status": "pending",
       "created_at": "2026-06-16T05:16:32.657Z",
       "origin": "split_from:AUTO-124"
+    },
+    {
+      "id": "AUTO-146",
+      "title": "FS-RESP-005C — Responsive Patch Overflow Pages Batch C",
+      "directive": "DIRECTIVE FS-RESP-005C: If after applying FS-RESP-005B further unpatched page.tsx files remain in the FS-RESP-005 overflow set (i.e., the full overflow set minus FS-RESP-004 set {settings, notifications, reports, analytics-detail, user-profile} minus FS-RESP-005 batch minus FS-RESP-005B batch of 4 still has remaining pages), this directive covers the next batch of up to 4 such pages. For each deferred page: (a) identify any KPI grids or data tables NOT rendered through shared KpiGrid.tsx or DataTable.tsx and apply identical responsive rules — grid-cols-2 at mobile (default Tailwind breakpoint, <640px), overflow-x-auto table wrapper, 14px minimum font size (Tailwind text-sm), 44×44px touch targets (min-h-[44px] min-w-[44px]) — directly in the page or its local component file; (b) add audit comment '// FS-RESP-005C: responsive patch applied' at the top of each modified file below the import block. Extend the Playwright test suite by appending additional describe blocks to tests/responsive/resp-005b-audit.spec.ts or creating tests/responsive/resp-005c-audit.spec.ts if the prior file is at line-count limits (>400 lines), using iPhone 14 Pro device emulation (393×852). Each describe block must test: KPI grid renders with grid-cols-2 at 393px; table wrapper has overflow-x auto/scroll; no data text below 14px computed font-size; all interactive controls have clientHeight >= 44 and clientWidth >= 44; dashboard load < 1500ms. No shared component changes. No schema changes. TypeScript strict mode must remain satisfied. Dashboard load < 1.5s must not regress. All EQS v1.0 constraints apply. Cap this directive at 4 additional overflow pages; if further pages remain, create FS-RESP-005D with the identical pattern. Platform context: FlowSeer W251 BOP procurement platform, Next.js 14, Tailwind, TypeScript, Vercel.",
+      "status": "pending",
+      "created_at": "2026-06-16T05:31:28.155Z",
+      "origin": "split_from:AUTO-125"
     }
   ]
 }
