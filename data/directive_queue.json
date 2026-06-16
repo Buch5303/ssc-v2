@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T07:00:35.716Z",
+  "updated_at": "2026-06-16T07:01:46.574Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2594,10 +2594,11 @@
       "id": "AUTO-131",
       "title": "FS-VIZ-MOB-004-D: Wrapper Remediation for Resistant Dashboard Pages Ranks 6–14 (Batch Sweep)",
       "directive": "Prerequisite: FS-VIZ-MOB-004-C merged. Using the JSON report emitted by scripts/audit-chart-wrapper-coverage.ts, identify all remaining resistant W251 BOP dashboard pages ranked 6 through 14 (wrapperApplied === false). Process each page one at a time in priority order: refactor chart rendering logic to extract data and valueKey cleanly, wire through LineAreaChartWrapper or BarChartWrapper (or a page-local custom wrapper for genuinely non-standard Recharts compositions) with ctx.downsample, ctx.ticks, and truncatedTickFormatter per FS-VIZ-MOB-003. For each page, ensure the Playwright iPhone 12 (390x844) test block in e2e/chart-density-mobile.spec.ts passes with: (a) zero overlapping x-axis tick label bounding boxes asserted programmatically, (b) all bar rect elements with height > 0 having pixel width >= 20 asserted programmatically. Do not alter layout, schema, server actions, or non-chart elements on any page. If complexity of any individual page among ranks 6–14 is HIGH (dual-axis, animated, or WebGL-backed chart), isolate it into a dedicated follow-up directive rather than bundling. CI must pass at 100% across all 14 dashboard pages upon completion of this directive. Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-16T01:16:29.713Z",
       "origin": "split_from:AUTO-108",
-      "started_at": "2026-06-16T07:00:35.606Z"
+      "started_at": "2026-06-16T07:00:35.606Z",
+      "completed_at": "2026-06-16T07:01:46.439Z"
     },
     {
       "id": "AUTO-132",
@@ -2750,6 +2751,30 @@
       "status": "pending",
       "created_at": "2026-06-16T06:46:16.581Z",
       "origin": "split_from:AUTO-130"
+    },
+    {
+      "id": "AUTO-151",
+      "title": "FS-VIZ-MOB-005-B: Chart Wrapper Coverage — Dashboard Pages Ranks 9–11 (wrapperApplied === false, Non-Complex)",
+      "directive": "Prerequisite: FS-VIZ-MOB-005 merged. Using the JSON report emitted by `scripts/audit-chart-wrapper-coverage.ts --ranks 9,10,11`, identify the next batch of W251 BOP dashboard pages ranked 9–11 where wrapperApplied === false. Apply the same complexity gate as FS-VIZ-MOB-005: any page with dual Y-axes (YAxis yAxisId prop), animated charts (isAnimationActive not explicitly false), or WebGL rendering must be isolated into a follow-up directive and skipped. For each qualifying non-complex page: refactor chart rendering to extract data and valueKey cleanly, wire LineAreaChartWrapper or BarChartWrapper (or a page-local custom wrapper defined in the same file for non-standard Recharts compositions) with ctx.downsample(data), ctx.ticks, and truncatedTickFormatter imported from the FS-VIZ-MOB-003 canonical path as XAxis tickFormatter. Do not alter layout, schema, server actions, or non-chart elements. Add Playwright iPhone 12 (390x844) test blocks in e2e/chart-density-mobile-pages-6-14.spec.ts (extend the existing file from FS-VIZ-MOB-005) for each page: (a) zero overlapping x-axis tick label bounding boxes asserted programmatically via rect-intersection, (b) all bar rect elements with height > 0 having pixel width >= 20 asserted programmatically, (c) page load within 1500ms via waitForLoadState. Maximum 5 files: the e2e spec file, the audit script (if --ranks flag not yet added), and up to 3 page files. CI must pass 100% across all 14 dashboard pages. Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0.",
+      "status": "pending",
+      "created_at": "2026-06-16T07:01:44.499Z",
+      "origin": "split_from:AUTO-131"
+    },
+    {
+      "id": "AUTO-152",
+      "title": "FS-VIZ-MOB-005-C: Chart Wrapper Coverage — Dashboard Pages Ranks 12–14 (wrapperApplied === false, Non-Complex)",
+      "directive": "Prerequisite: FS-VIZ-MOB-005-B merged. Using the JSON report emitted by `scripts/audit-chart-wrapper-coverage.ts --ranks 12,13,14`, identify the final batch of W251 BOP dashboard pages ranked 12–14 where wrapperApplied === false. Apply the same complexity gate: any page with dual Y-axes, animated charts (isAnimationActive not explicitly false), or WebGL rendering must be isolated into a dedicated follow-up directive. For each qualifying non-complex page: refactor chart rendering to extract data and valueKey cleanly, wire LineAreaChartWrapper or BarChartWrapper (or a page-local custom wrapper in the same file for non-standard Recharts compositions) with ctx.downsample(data), ctx.ticks, and truncatedTickFormatter imported from the FS-VIZ-MOB-003 canonical path. Do not alter layout, schema, server actions, or non-chart elements. Extend e2e/chart-density-mobile-pages-6-14.spec.ts with Playwright iPhone 12 (390x844) test blocks for each page: (a) zero overlapping x-axis tick label bounding boxes programmatically asserted, (b) bar rect width >= 20px for all rects with height > 0, (c) page load within 1500ms. Upon merge, `npx ts-node scripts/audit-chart-wrapper-coverage.ts` must emit wrapperApplied === true for all 14 entries. CI must pass 100% across the complete 14-page suite. This directive completes the full FS-VIZ-MOB-005 series for non-complex pages. Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0.",
+      "status": "pending",
+      "created_at": "2026-06-16T07:01:44.499Z",
+      "origin": "split_from:AUTO-131"
+    },
+    {
+      "id": "AUTO-153",
+      "title": "FS-VIZ-MOB-005-COMPLEX: Chart Wrapper Coverage — HIGH Complexity Pages (Dual-Axis, Animated, WebGL) Isolated from Ranks ",
+      "directive": "Prerequisite: FS-VIZ-MOB-005 merged. After running `npx ts-node scripts/audit-chart-wrapper-coverage.ts`, collect all pages from ranks 6–14 where wrapperApplied === false AND at least one of the following is true: (a) any Recharts component uses a YAxis with a yAxisId prop (dual-axis), (b) any Recharts component has isAnimationActive not explicitly set to false (animated), (c) the page imports echarts-gl, deck.gl, or uses a canvas element with a WebGL context (WebGL-backed). For each such HIGH complexity page, create a dedicated, isolated sub-directive (one page per spec, one spec per directive iteration) that: refactors the dual-axis/animated/WebGL chart to extract data and valueKey cleanly; authors a page-local custom wrapper that calls ctx.downsample(data), applies ctx.ticks to all XAxis instances, applies truncatedTickFormatter to all XAxis tickFormatter props, and preserves all dual-axis semantics, animation configuration, and WebGL rendering fidelity; wires the wrapper without altering layout, schema, server actions, or non-chart elements. Each sub-directive must add Playwright iPhone 12 (390x844) test blocks with: zero overlapping x-axis tick label bounding boxes programmatically asserted, bar/line rect minimum dimensions enforced, and page load within 1500ms (EQS). CI must pass 100% after each sub-directive merge. Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0. Process one HIGH complexity page per directive to maintain the 5-file hard limit.",
+      "status": "pending",
+      "created_at": "2026-06-16T07:01:44.499Z",
+      "origin": "split_from:AUTO-131"
     }
   ]
 }
