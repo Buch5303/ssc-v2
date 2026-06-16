@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T01:16:30.757Z",
+  "updated_at": "2026-06-16T01:30:35.397Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2374,9 +2374,10 @@
       "id": "AUTO-109",
       "title": "FLOWSEER-RESP-005 — Dashboard Chart Remediation Batch 2 (files 6–10)",
       "directive": "After FLOWSEER-RESP-004 merges, re-run scripts/audit-chart-imports.ts. Take the next batch of up to 5 dashboard pages under app/dashboard/**/page.tsx that still report violations (direct Recharts imports, inline SVG with fixed dimensions, missing ResponsiveChartWrapper, or Tooltip without overflow fix). Sort remaining violating files alphabetically; take files 6–10 (or fewer if fewer remain). Apply the identical fix pattern: (1) replace fixed width/height props on Recharts root chart elements with ResponsiveChartWrapper from '@/components/charts/ResponsiveChartWrapper', (2) apply useChartDimensions from '@/hooks/useChartDimensions' for tickInterval and margin logic, (3) apply tooltip overflow fix — allowEscapeViewBox={{ x: true, y: true }}, wrapperStyle={{ maxWidth: '90vw', zIndex: 50 }} — on every <Tooltip> in modified files. Maximum 5 files modified. One concern: chart components only, no sidebar, grid, schema, or auth changes. Validate at 393x852 viewport. EQS v1.0 standards apply. After this batch, if violations remain across the 14 dashboard pages, issue FLOWSEER-RESP-006 for files 11–14.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T19:01:18.886Z",
-      "origin": "split_from:AUTO-083"
+      "origin": "split_from:AUTO-083",
+      "started_at": "2026-06-16T01:30:35.312Z"
     },
     {
       "id": "AUTO-110",
