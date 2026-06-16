@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T01:01:33.459Z",
+  "updated_at": "2026-06-16T01:15:36.152Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2364,9 +2364,10 @@
       "id": "AUTO-108",
       "title": "FS-VIZ-MOB-003-B: Per-Page Isolation Fixes for Any Dashboard Pages Incompatible with Wrapper Pattern",
       "directive": "After FS-VIZ-MOB-003 is merged, audit CI results for any of the 14 W251 BOP dashboard pages where the glob-level wrapper pattern (LineAreaChartWrapper / BarChartWrapper) could not be applied cleanly due to page-specific data shapes, custom Recharts compositions, or co-located chart logic that resists extraction. For each such page: (1) Refactor the page's chart rendering logic to extract data and valueKey cleanly, then wire through LineAreaChartWrapper or BarChartWrapper with ctx.downsample, ctx.ticks, and truncatedTickFormatter as specified in FS-VIZ-MOB-003. (2) Ensure the page-level Playwright iPhone 12 snapshot test from e2e/chart-density-mobile.spec.ts passes for that page with zero overlapping axis labels and no bar width below 20px. (3) Do not alter layout, schema, or non-chart elements. (4) One page per follow-up sub-task if more than 3 pages require isolation — raise further follow-ups as needed. Context: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0. Prerequisites: FS-VIZ-MOB-001, FS-VIZ-MOB-002, and FS-VIZ-MOB-003 merged.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T18:16:20.690Z",
-      "origin": "split_from:AUTO-080"
+      "origin": "split_from:AUTO-080",
+      "started_at": "2026-06-16T01:15:36.058Z"
     },
     {
       "id": "AUTO-109",
