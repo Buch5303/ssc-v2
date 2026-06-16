@@ -92,7 +92,13 @@ Build the code now. Output ONLY JSON with the files array.`;
     // 16384 gives headroom for 5-6 file directives in one pass. Override
     // per-env via BUILDER_MAX_TOKENS if a directive needs even more.
     const model = process.env.BUILDER_MODEL || "claude-sonnet-4-6";
-    const maxTokens = parseInt(process.env.BUILDER_MAX_TOKENS || "16384", 10);
+    // 2026-06-16: reverted 16384 -> 8192. The 16384 bump correlated with the
+    // builder returning HTTP 500 every cycle (Anthropic API error on the large
+    // request) and triggered the AUTO-125..135 runaway loop. 8192 is the
+    // known-good Pro-v1 value; truncation-recovery below salvages multi-file
+    // overruns, and the promotion gate blocks any incomplete ship. Override via
+    // BUILDER_MAX_TOKENS once the real error is confirmed from the logs added below.
+    const maxTokens = parseInt(process.env.BUILDER_MAX_TOKENS || "8192", 10);
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -110,7 +116,14 @@ Build the code now. Output ONLY JSON with the files array.`;
     });
 
     const data = await res.json();
-    if (data.error) return NextResponse.json({ error: data.error.message }, { status: 500 });
+    if (data.error) {
+      // Surface the real cause. For 135 cycles this 500 was returned silently,
+      // making the runaway loop undebuggable without repo archaeology.
+      console.error(
+        `[BUILDER] Anthropic API error (HTTP ${res.status}): ${data.error.type || "unknown"} — ${data.error.message}`
+      );
+      return NextResponse.json({ error: data.error.message, anthropic_status: res.status, anthropic_type: data.error.type }, { status: 500 });
+    }
 
     const text = data.content?.[0]?.text || "";
     const stopReason = data.stop_reason;
@@ -173,6 +186,7 @@ Build the code now. Output ONLY JSON with the files array.`;
       ...(parseRecovery ? { parse_recovery: parseRecovery } : {}),
     });
   } catch (e: any) {
+    console.error(`[BUILDER] Exception: ${e?.message || e}`);
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
