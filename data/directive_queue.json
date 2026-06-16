@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T00:15:35.442Z",
+  "updated_at": "2026-06-16T00:16:19.359Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2324,10 +2324,11 @@
       "id": "AUTO-104",
       "title": "AUTH-METRICS-002-PERSIST: Persist Spike Events to audit_spike_log Table for Historical C-Suite Reporting",
       "directive": "Depends on AUTH-METRICS-002 being merged. The SSE spike detection introduced in AUTH-METRICS-002 is ephemeral (per-connection, in-process). This directive adds durable persistence of spike events. Create a migration (lib/db/migrations/YYYYMMDD_create_audit_spike_log.ts) that adds an audit_spike_log table with columns: id (uuid pk), window_start (timestamptz), window_end (timestamptz), denial_count (int), row_ids (uuid[]), created_at (timestamptz default now()). Update the SSE route handler (app/api/metrics/auth-denials/stream/route.ts) so that when a spike is detected, a single INSERT is made into audit_spike_log with the full row_ids array before the SSE spike event is emitted to the client. This INSERT must be fire-and-forget (non-blocking to the SSE path) but must log errors. Add a GET /api/metrics/auth-denials/spikes endpoint that returns paginated audit_spike_log rows for the AuthDenialTile historical spike chart. Schema changes (migration file) are the primary concern of this spec. EQS financial accuracy and audit reconciliation standards apply: audit_spike_log.row_ids must be verifiable as a subset of authorization_audit_log IDs via a reconciliation query.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T17:31:37.978Z",
       "origin": "split_from:AUTO-075",
-      "started_at": "2026-06-16T00:15:35.357Z"
+      "started_at": "2026-06-16T00:15:35.357Z",
+      "completed_at": "2026-06-16T00:16:19.232Z"
     },
     {
       "id": "AUTO-105",
@@ -2496,6 +2497,14 @@
       "status": "pending",
       "created_at": "2026-06-16T00:01:25.490Z",
       "origin": "split_from:AUTO-103"
+    },
+    {
+      "id": "AUTO-126",
+      "title": "AuthDenialTile Historical Spike Chart — UI Integration",
+      "directive": "Depends on AUDIT-SPIKE-LOG-001 being merged. The GET /api/metrics/auth-denials/spikes endpoint is now available. Wire it into the AuthDenialTile component to render a historical spike chart. Fetch paginated spike rows (page=1, limit=50 initial load) from /api/metrics/auth-denials/spikes. Render a time-series bar or area chart (using the project's existing Recharts/Victory/D3 library) with window_start on the x-axis and denial_count on the y-axis. Each bar/point must be clickable to expand a detail panel showing the row_ids count and window duration. Apply EQS standards: chart must render within 1.5s of tile mount, zero-training interpretation (axis labels, tooltips with human-readable timestamps, colour-coded severity thresholds). Add a Load More / pagination control. No schema or API changes are in scope for this directive — UI and data-fetching only.",
+      "status": "pending",
+      "created_at": "2026-06-16T00:16:18.344Z",
+      "origin": "split_from:AUTO-104"
     }
   ]
 }
