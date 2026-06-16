@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T03:30:35.961Z",
+  "updated_at": "2026-06-16T03:31:37.865Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2454,10 +2454,11 @@
       "id": "AUTO-117",
       "title": "Playwright Accessibility Snapshot Baselines for Chart Pages",
       "directive": "CONTEXT: FLOWSEER-CI-A11Y-001 has landed, establishing the CI pipeline with axe-core, Lighthouse CI, and Playwright infrastructure. The playwright.config.ts now includes an 'a11y-chromium' project scoped to 'e2e/accessibility/**/*.snap.spec.ts'.\n\nDIRECTIVE: Create Playwright accessibility snapshot baseline specs for each chart page in the FlowSeer W251 BOP procurement platform. Requirements:\n(1) Create e2e/accessibility/dashboard-charts.snap.spec.ts: navigate to /dashboard, wait for networkidle, call page.accessibility.snapshot() for each chart region (locate by role='img' or aria-label containing 'chart'), store snapshots using Playwright's built-in snapshot mechanism (expect(snapshot).toMatchSnapshot('dashboard-chart-N.snap')). Fail on structural regression.\n(2) Create e2e/accessibility/procurement-charts.snap.spec.ts: same pattern for /procurement chart regions.\n(3) Create the initial baseline snapshot files by running `npx playwright test --update-snapshots` once on a known-good build. Commit the generated .snap files under e2e/accessibility/snapshots/.\n(4) Ensure the specs handle dynamic content (loading states) by awaiting a stable DOM state before snapshotting — use waitForSelector on a chart container sentinel element.\n(5) Each spec must complete in < 30s per route to stay within EQS AI inference < 2s and dashboard load < 1.5s performance budget validation window.\nMaximum 5 files: dashboard-charts.snap.spec.ts, procurement-charts.snap.spec.ts, and up to 3 snapshot baseline files (.snap). No CI or config changes — those landed in FLOWSEER-CI-A11Y-001.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T21:01:43.348Z",
       "origin": "split_from:AUTO-091",
-      "started_at": "2026-06-16T03:30:35.874Z"
+      "started_at": "2026-06-16T03:30:35.874Z",
+      "completed_at": "2026-06-16T03:31:37.773Z"
     },
     {
       "id": "AUTO-118",
@@ -2626,6 +2627,22 @@
       "status": "pending",
       "created_at": "2026-06-16T03:16:10.945Z",
       "origin": "split_from:AUTO-116"
+    },
+    {
+      "id": "AUTO-139",
+      "title": "Add chart-container sentinel data-testid to Dashboard and Procurement chart components",
+      "directive": "CONTEXT: FLOWSEER-A11Y-SNAP-001 established Playwright accessibility snapshot specs for /dashboard and /procurement. Those specs depend on a sentinel element [data-testid='chart-container'] being present in the rendered DOM of both routes to gate snapshot capture on a stable DOM state.\n\nDIRECTIVE: Audit the existing chart wrapper components rendered on /dashboard and /procurement. For every chart container component that does not already carry data-testid='chart-container', add that attribute. Requirements:\n(1) Locate all chart wrapper components used on /dashboard (e.g. components/charts/, app/dashboard/). Add data-testid='chart-container' to the outermost DOM element of each chart wrapper.\n(2) Repeat for /procurement chart wrapper components.\n(3) Ensure the attribute is present in the server-rendered HTML (not injected only after a client-side effect) so waitForSelector resolves reliably.\n(4) Do not change any visual styling, chart logic, or accessibility attributes beyond adding the data-testid.\n(5) After changes, confirm that a local Playwright run of e2e/accessibility/dashboard-charts.snap.spec.ts and e2e/accessibility/procurement-charts.snap.spec.ts no longer times out on waitForSelector.\n\nCONSTRAINTS: ONE concern — data-testid sentinel only. No schema, no CI, no snapshot updates in this directive. If snapshot baselines become invalid after adding the attribute, re-run --update-snapshots as a follow-on step documented in the PR description.",
+      "status": "pending",
+      "created_at": "2026-06-16T03:31:36.934Z",
+      "origin": "split_from:AUTO-117"
+    },
+    {
+      "id": "AUTO-140",
+      "title": "Migrate accessibility snapshot specs from page.accessibility.snapshot() to Playwright aria snapshot matchers (Playwright",
+      "directive": "CONTEXT: FLOWSEER-A11Y-SNAP-001 created accessibility snapshot baseline specs using page.accessibility.snapshot() scoped to chart ElementHandles. Playwright >= 1.46 soft-deprecates this API in favour of expect(locator).toMatchAriaSnapshot(). If the platform is confirmed to be on Playwright >= 1.46, the specs must be migrated to avoid deprecation warnings blocking CI and to adopt the supported API surface.\n\nDIRECTIVE: Migrate e2e/accessibility/dashboard-charts.snap.spec.ts and e2e/accessibility/procurement-charts.snap.spec.ts from page.accessibility.snapshot() + expect(snapshot).toMatchSnapshot() to the new aria snapshot API. Requirements:\n(1) Replace the page.accessibility.snapshot({ root: elementHandle }) call with await expect(handle).toMatchAriaSnapshot() using Playwright's aria snapshot file mechanism.\n(2) Delete old .snap baseline files under e2e/accessibility/snapshots/ and regenerate using npx playwright test --project=a11y-chromium --update-snapshots on the known-good build.\n(3) Commit regenerated aria snapshot files.\n(4) Preserve all existing acceptance criteria: dynamic chart discovery, sentinel gate, performance assertion < 28s, regression detection verified by mutation test.\n(5) Zero changes to playwright.config.ts or CI workflow.\n\nCONSTRAINTS: ONE concern — API migration only. No new routes, no new chart instrumentation. Confirm installed Playwright version before proceeding; if < 1.46, close this directive as not-yet-applicable.",
+      "status": "pending",
+      "created_at": "2026-06-16T03:31:36.935Z",
+      "origin": "split_from:AUTO-117"
     }
   ]
 }
