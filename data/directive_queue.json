@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T04:00:35.690Z",
+  "updated_at": "2026-06-16T04:01:29.748Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2474,10 +2474,11 @@
       "id": "AUTO-119",
       "title": "FLOWSEER-DROP-003: Mobile Compliance Remediation — Remaining Deferred Dropdown/Overlay Components (Batch 2)",
       "directive": "After FLOWSEER-DROP-002 lands, complete mobile compliance remediation for any components still listed as DEFERRED in COMPONENTS_AUDIT.md (repo root) that were not covered in DROP-001 (combobox.tsx, dropdown-menu.tsx) or DROP-002 (select.tsx, popover.tsx, command.tsx, navigation-menu.tsx). For each remaining DEFERRED component: (1) On mobile viewports < 768px, replace or wrap with a native <select> fallback rendered conditionally via the useIsMobile hook from hooks/useMediaQuery.ts (do NOT create a duplicate hook), OR confirm the component meets 44px touch targets and does not produce z-index collisions with the sidebar drawer (z-50) or bottom nav (z-40). (2) Update COMPONENTS_AUDIT.md to move all remaining DEFERRED rows to PASS or FAIL with resolution notes referencing FLOWSEER-DROP-003. (3) Ensure no custom floating dropdown has a z-index > 40 on mobile. Scope: maximum 5 files per build spec (COMPONENTS_AUDIT.md counts as one file); if more than 4 component files remain DEFERRED, continue splitting into DROP-004, DROP-005, etc. One concern: dropdown/combobox/overlay mobile compliance only. No schema changes. No globals.css modifications. Context: Next.js 14, Tailwind, TypeScript, Vercel, W251 BOP procurement platform. EQS constraint: zero custom floating dropdowns violating 44px targets on mobile after all DROP-series directives land.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T21:46:25.656Z",
       "origin": "split_from:AUTO-094",
-      "started_at": "2026-06-16T04:00:35.582Z"
+      "started_at": "2026-06-16T04:00:35.582Z",
+      "completed_at": "2026-06-16T04:01:29.588Z"
     },
     {
       "id": "AUTO-120",
@@ -2654,6 +2655,22 @@
       "status": "pending",
       "created_at": "2026-06-16T03:46:24.692Z",
       "origin": "split_from:AUTO-118"
+    },
+    {
+      "id": "AUTO-142",
+      "title": "FLOWSEER-DROP-004: Mobile Compliance Remediation — Remaining DEFERRED Components Batch 2",
+      "directive": "After FLOWSEER-DROP-003 lands, complete mobile compliance remediation for any components still listed as DEFERRED in COMPONENTS_AUDIT.md (repo root) that were not covered in DROP-001 (combobox.tsx, dropdown-menu.tsx), DROP-002 (select.tsx, popover.tsx, command.tsx, navigation-menu.tsx), or DROP-003 (first 4 DEFERRED components processed in DROP-003). For each remaining DEFERRED component (up to 4 in this batch): (1) On mobile viewports < 768px, replace or wrap with a native <select> fallback rendered conditionally via the useIsMobile hook from hooks/useMediaQuery.ts (do NOT create a duplicate hook), OR confirm the component meets 44px touch targets and does not produce z-index collisions with the sidebar drawer (z-50) or bottom nav (z-40). (2) Update COMPONENTS_AUDIT.md to move all targeted DEFERRED rows to PASS or FAIL with resolution notes referencing FLOWSEER-DROP-004. (3) Ensure no custom floating dropdown has a z-index > 40 on mobile. Scope: maximum 5 files per build spec (COMPONENTS_AUDIT.md counts as one file); if more than 4 component files remain DEFERRED after DROP-003, continue splitting into DROP-005, etc. One concern: dropdown/combobox/overlay mobile compliance only. No schema changes. No globals.css modifications. Context: Next.js 14, Tailwind, TypeScript, Vercel, W251 BOP procurement platform. EQS constraint: zero custom floating dropdowns violating 44px targets on mobile after all DROP-series directives land.",
+      "status": "pending",
+      "created_at": "2026-06-16T04:01:28.798Z",
+      "origin": "split_from:AUTO-119"
+    },
+    {
+      "id": "AUTO-143",
+      "title": "FLOWSEER-DROP-005: Mobile Compliance Remediation — Remaining DEFERRED Components Batch 3",
+      "directive": "After FLOWSEER-DROP-004 lands, complete mobile compliance remediation for any components still listed as DEFERRED in COMPONENTS_AUDIT.md (repo root) that were not covered in DROP-001 through DROP-004. For each remaining DEFERRED component (up to 4 in this batch): (1) On mobile viewports < 768px, replace or wrap with a native <select> fallback rendered conditionally via the useIsMobile hook from hooks/useMediaQuery.ts (do NOT create a duplicate hook), OR confirm the component meets 44px touch targets and does not produce z-index collisions with the sidebar drawer (z-50) or bottom nav (z-40). (2) Update COMPONENTS_AUDIT.md to move all targeted DEFERRED rows to PASS or FAIL with resolution notes referencing FLOWSEER-DROP-005. (3) Ensure no custom floating dropdown has a z-index > 40 on mobile. Scope: maximum 5 files per build spec (COMPONENTS_AUDIT.md counts as one file); if more than 4 component files remain DEFERRED after DROP-004, continue splitting into DROP-006, etc. One concern: dropdown/combobox/overlay mobile compliance only. No schema changes. No globals.css modifications. Context: Next.js 14, Tailwind, TypeScript, Vercel, W251 BOP procurement platform. EQS constraint: zero custom floating dropdowns violating 44px targets on mobile after all DROP-series directives land. This batch continues until COMPONENTS_AUDIT.md contains zero DEFERRED rows.",
+      "status": "pending",
+      "created_at": "2026-06-16T04:01:28.798Z",
+      "origin": "split_from:AUTO-119"
     }
   ]
 }
