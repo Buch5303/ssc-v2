@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T05:31:29.215Z",
+  "updated_at": "2026-06-16T05:45:35.856Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2544,9 +2544,10 @@
       "id": "AUTO-126",
       "title": "AuthDenialTile Historical Spike Chart — UI Integration",
       "directive": "Depends on AUDIT-SPIKE-LOG-001 being merged. The GET /api/metrics/auth-denials/spikes endpoint is now available. Wire it into the AuthDenialTile component to render a historical spike chart. Fetch paginated spike rows (page=1, limit=50 initial load) from /api/metrics/auth-denials/spikes. Render a time-series bar or area chart (using the project's existing Recharts/Victory/D3 library) with window_start on the x-axis and denial_count on the y-axis. Each bar/point must be clickable to expand a detail panel showing the row_ids count and window duration. Apply EQS standards: chart must render within 1.5s of tile mount, zero-training interpretation (axis labels, tooltips with human-readable timestamps, colour-coded severity thresholds). Add a Load More / pagination control. No schema or API changes are in scope for this directive — UI and data-fetching only.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-16T00:16:18.344Z",
-      "origin": "split_from:AUTO-104"
+      "origin": "split_from:AUTO-104",
+      "started_at": "2026-06-16T05:45:35.742Z"
     },
     {
       "id": "AUTO-127",
