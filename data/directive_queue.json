@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T02:01:04.670Z",
+  "updated_at": "2026-06-16T02:15:36.314Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2404,9 +2404,10 @@
       "id": "AUTO-112",
       "title": "Chart Animation and Interaction State Visual Regression — Hover, Active, Loading States",
       "directive": "After FLOWSEER-VRT-005 lands, extend the Playwright chart visual regression suite to capture and assert on interactive chart states beyond the default render: (1) hover state on chart data points producing a highlighted series, (2) active/selected state after click on a data point, (3) loading skeleton state captured by throttling network to Slow 3G before navigation. For each of the 14 dashboard pages at 393x852 viewport, capture toHaveScreenshot baselines for each of these three states separately, stored under tests/visual/screenshots/baselines/states/{page-id}-{state}.png. Create a new spec file tests/visual/chart-interaction-states.spec.ts. Reuse helpers from tests/visual/helpers/chart-assertions.ts. Interaction state screenshots must pass maxDiffPixelRatio: 0.02 (slightly relaxed for animation frames). One concern: interaction and loading states only, no new viewport sizes. EQS v1.0 standards apply.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T19:31:30.212Z",
-      "origin": "split_from:AUTO-085"
+      "origin": "split_from:AUTO-085",
+      "started_at": "2026-06-16T02:15:36.214Z"
     },
     {
       "id": "AUTO-113",
