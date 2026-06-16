@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T01:15:36.152Z",
+  "updated_at": "2026-06-16T01:16:30.757Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2364,10 +2364,11 @@
       "id": "AUTO-108",
       "title": "FS-VIZ-MOB-003-B: Per-Page Isolation Fixes for Any Dashboard Pages Incompatible with Wrapper Pattern",
       "directive": "After FS-VIZ-MOB-003 is merged, audit CI results for any of the 14 W251 BOP dashboard pages where the glob-level wrapper pattern (LineAreaChartWrapper / BarChartWrapper) could not be applied cleanly due to page-specific data shapes, custom Recharts compositions, or co-located chart logic that resists extraction. For each such page: (1) Refactor the page's chart rendering logic to extract data and valueKey cleanly, then wire through LineAreaChartWrapper or BarChartWrapper with ctx.downsample, ctx.ticks, and truncatedTickFormatter as specified in FS-VIZ-MOB-003. (2) Ensure the page-level Playwright iPhone 12 snapshot test from e2e/chart-density-mobile.spec.ts passes for that page with zero overlapping axis labels and no bar width below 20px. (3) Do not alter layout, schema, or non-chart elements. (4) One page per follow-up sub-task if more than 3 pages require isolation — raise further follow-ups as needed. Context: Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0. Prerequisites: FS-VIZ-MOB-001, FS-VIZ-MOB-002, and FS-VIZ-MOB-003 merged.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T18:16:20.690Z",
       "origin": "split_from:AUTO-080",
-      "started_at": "2026-06-16T01:15:36.058Z"
+      "started_at": "2026-06-16T01:15:36.058Z",
+      "completed_at": "2026-06-16T01:16:30.652Z"
     },
     {
       "id": "AUTO-109",
@@ -2528,6 +2529,30 @@
       "status": "pending",
       "created_at": "2026-06-16T01:01:32.503Z",
       "origin": "split_from:AUTO-107"
+    },
+    {
+      "id": "AUTO-129",
+      "title": "FS-VIZ-MOB-004-B: Wrapper Remediation for Resistant Dashboard Page Rank 4",
+      "directive": "Prerequisite: FS-VIZ-MOB-004 merged. Using the JSON report emitted by scripts/audit-chart-wrapper-coverage.ts, identify the resistant W251 BOP dashboard page ranked 4th by priority (wrapperApplied === false). Refactor that single page's chart rendering logic: extract data and valueKey cleanly into typed variables, then wire through LineAreaChartWrapper or BarChartWrapper (or a page-local custom wrapper if the Recharts composition is genuinely non-standard) with ctx.downsample, ctx.ticks, and truncatedTickFormatter as specified in FS-VIZ-MOB-003. Ensure the page-level Playwright iPhone 12 (390x844) snapshot test in e2e/chart-density-mobile.spec.ts passes for this page with: (a) zero overlapping x-axis tick label bounding boxes asserted programmatically, (b) all bar rect elements with height > 0 having pixel width >= 20 asserted programmatically. Do not alter layout, schema, server actions, or non-chart elements. CI must pass at 100% with no regression on previously passing pages. If additional resistant pages remain beyond rank 4, raise FS-VIZ-MOB-004-C for rank 5 following the same pattern. Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0.",
+      "status": "pending",
+      "created_at": "2026-06-16T01:16:29.713Z",
+      "origin": "split_from:AUTO-108"
+    },
+    {
+      "id": "AUTO-130",
+      "title": "FS-VIZ-MOB-004-C: Wrapper Remediation for Resistant Dashboard Page Rank 5",
+      "directive": "Prerequisite: FS-VIZ-MOB-004-B merged. Using the JSON report emitted by scripts/audit-chart-wrapper-coverage.ts, identify the resistant W251 BOP dashboard page ranked 5th by priority (wrapperApplied === false). Refactor that single page's chart rendering logic: extract data and valueKey cleanly into typed variables, then wire through LineAreaChartWrapper or BarChartWrapper (or a page-local custom wrapper if the Recharts composition is genuinely non-standard) with ctx.downsample, ctx.ticks, and truncatedTickFormatter as specified in FS-VIZ-MOB-003. Ensure the page-level Playwright iPhone 12 (390x844) snapshot test in e2e/chart-density-mobile.spec.ts passes for this page with: (a) zero overlapping x-axis tick label bounding boxes asserted programmatically, (b) all bar rect elements with height > 0 having pixel width >= 20 asserted programmatically. Do not alter layout, schema, server actions, or non-chart elements. CI must pass at 100% with no regression on previously passing pages. If additional resistant pages remain beyond rank 5, raise FS-VIZ-MOB-004-D for rank 6 following the same pattern. Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0.",
+      "status": "pending",
+      "created_at": "2026-06-16T01:16:29.713Z",
+      "origin": "split_from:AUTO-108"
+    },
+    {
+      "id": "AUTO-131",
+      "title": "FS-VIZ-MOB-004-D: Wrapper Remediation for Resistant Dashboard Pages Ranks 6–14 (Batch Sweep)",
+      "directive": "Prerequisite: FS-VIZ-MOB-004-C merged. Using the JSON report emitted by scripts/audit-chart-wrapper-coverage.ts, identify all remaining resistant W251 BOP dashboard pages ranked 6 through 14 (wrapperApplied === false). Process each page one at a time in priority order: refactor chart rendering logic to extract data and valueKey cleanly, wire through LineAreaChartWrapper or BarChartWrapper (or a page-local custom wrapper for genuinely non-standard Recharts compositions) with ctx.downsample, ctx.ticks, and truncatedTickFormatter per FS-VIZ-MOB-003. For each page, ensure the Playwright iPhone 12 (390x844) test block in e2e/chart-density-mobile.spec.ts passes with: (a) zero overlapping x-axis tick label bounding boxes asserted programmatically, (b) all bar rect elements with height > 0 having pixel width >= 20 asserted programmatically. Do not alter layout, schema, server actions, or non-chart elements on any page. If complexity of any individual page among ranks 6–14 is HIGH (dual-axis, animated, or WebGL-backed chart), isolate it into a dedicated follow-up directive rather than bundling. CI must pass at 100% across all 14 dashboard pages upon completion of this directive. Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0.",
+      "status": "pending",
+      "created_at": "2026-06-16T01:16:29.713Z",
+      "origin": "split_from:AUTO-108"
     }
   ]
 }
