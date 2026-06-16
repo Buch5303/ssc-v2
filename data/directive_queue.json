@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T06:46:17.476Z",
+  "updated_at": "2026-06-16T07:00:35.716Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2594,9 +2594,10 @@
       "id": "AUTO-131",
       "title": "FS-VIZ-MOB-004-D: Wrapper Remediation for Resistant Dashboard Pages Ranks 6–14 (Batch Sweep)",
       "directive": "Prerequisite: FS-VIZ-MOB-004-C merged. Using the JSON report emitted by scripts/audit-chart-wrapper-coverage.ts, identify all remaining resistant W251 BOP dashboard pages ranked 6 through 14 (wrapperApplied === false). Process each page one at a time in priority order: refactor chart rendering logic to extract data and valueKey cleanly, wire through LineAreaChartWrapper or BarChartWrapper (or a page-local custom wrapper for genuinely non-standard Recharts compositions) with ctx.downsample, ctx.ticks, and truncatedTickFormatter per FS-VIZ-MOB-003. For each page, ensure the Playwright iPhone 12 (390x844) test block in e2e/chart-density-mobile.spec.ts passes with: (a) zero overlapping x-axis tick label bounding boxes asserted programmatically, (b) all bar rect elements with height > 0 having pixel width >= 20 asserted programmatically. Do not alter layout, schema, server actions, or non-chart elements on any page. If complexity of any individual page among ranks 6–14 is HIGH (dual-axis, animated, or WebGL-backed chart), isolate it into a dedicated follow-up directive rather than bundling. CI must pass at 100% across all 14 dashboard pages upon completion of this directive. Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-16T01:16:29.713Z",
-      "origin": "split_from:AUTO-108"
+      "origin": "split_from:AUTO-108",
+      "started_at": "2026-06-16T07:00:35.606Z"
     },
     {
       "id": "AUTO-132",
