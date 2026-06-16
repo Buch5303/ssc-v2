@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T05:15:35.648Z",
+  "updated_at": "2026-06-16T05:16:33.587Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2524,10 +2524,11 @@
       "id": "AUTO-124",
       "title": "FS-RBAC-UI-004 — Component-Level Role Gating, Remaining Surfaces (Batch 4)",
       "directive": "Using the <RoleGuard> component and getSessionRole utility delivered in FS-RBAC-UI-001, and following the RSC-boundary, structural-exclusion, zero-hydration-flash pattern established in FS-RBAC-UI-001, FS-RBAC-UI-002, and FS-RBAC-UI-003, extend component-level role gating to any dashboard UI surfaces in the FlowSeer W251 BOP procurement platform that remain ungated after FS-RBAC-UI-003. Perform a codebase audit after FS-RBAC-UI-003 is merged to enumerate all action controls, navigation elements, inline controls, modal triggers, and contextual menus that are still not wrapped in RoleGuard. Priority surfaces to check include but are not limited to: (a) any modal or drawer trigger buttons in procurement detail views (e.g. components/procurement/BOPDetailActions.tsx or similar); (b) notification or alert dismissal controls scoped to admin/approver; (c) any bulk-action toolbars in list views not covered in FS-RBAC-UI-003; (d) report export or data download buttons in analytics views; (e) any remaining settings sub-sections (e.g. integrations, audit log export) with role-restricted access. Apply gating: role resolved at RSC boundary, passed as prop to Client Components, structural omission via RoleGuard fallback=null, unauthorized content never in HTML response. No schema changes, no middleware changes. Maximum 5 files modified or created. If further components remain, defer to FS-RBAC-UI-005. Context: FlowSeer W251 BOP procurement platform. Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced: no hydration flash, dashboard load < 1.5s, C-suite clarity within 5 seconds, zero training required.",
-      "status": "in_progress",
+      "status": "failed",
       "created_at": "2026-06-15T23:01:30.493Z",
       "origin": "split_from:AUTO-099",
-      "started_at": "2026-06-16T05:15:35.561Z"
+      "started_at": "2026-06-16T05:15:35.561Z",
+      "completed_at": "2026-06-16T05:16:33.475Z"
     },
     {
       "id": "AUTO-125",
@@ -2688,6 +2689,14 @@
       "status": "pending",
       "created_at": "2026-06-16T05:02:16.581Z",
       "origin": "split_from:AUTO-123"
+    },
+    {
+      "id": "AUTO-145",
+      "title": "FS-RBAC-UI-005 — Component-Level Role Gating Round 5 (Remaining Ungated Surfaces)",
+      "directive": "After FS-RBAC-UI-004 is merged, perform a final codebase audit of the FlowSeer W251 BOP procurement platform to enumerate any UI surfaces still not wrapped in RoleGuard. Using the RoleGuard component and getSessionRole utility from FS-RBAC-UI-001, and following the RSC-boundary, structural-exclusion, zero-hydration-flash pattern established in FS-RBAC-UI-001 through FS-RBAC-UI-004, gate all remaining ungated controls. Surfaces to audit include but are not limited to: (a) notification/alert dismissal controls scoped to admin or approver that were not reached in FS-RBAC-UI-004; (b) contextual menu items in any data table row-action menus (e.g. right-click or kebab menus) in procurement list, vendor list, or contract list views; (c) any inline edit controls (e.g. editable table cells, inline status dropdowns) in BOP line-item tables; (d) any remaining analytics sub-pages or embedded dashboard widgets with export or drill-down controls not covered in FS-RBAC-UI-004; (e) any onboarding or wizard step controls gated by role; (f) any admin-only banner or announcement creation controls. Apply gating: role resolved at RSC boundary, passed as prop to Client Components, structural omission via RoleGuard fallback=null, unauthorized content never in HTML response. No schema changes, no middleware changes. Maximum 5 files modified or created per directive; if further surfaces remain, defer to FS-RBAC-UI-006. Context: FlowSeer W251 BOP procurement platform. Next.js 14, Tailwind, TypeScript, Vercel. EQS v1.0 enforced: no hydration flash, dashboard load < 1.5s, C-suite clarity within 5 seconds, zero training required.",
+      "status": "pending",
+      "created_at": "2026-06-16T05:16:32.657Z",
+      "origin": "split_from:AUTO-124"
     }
   ]
 }
