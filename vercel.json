@@ -1,12 +1,5 @@
 {
   "framework": "nextjs",
   "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude)data' ':(exclude)tools' ':(exclude)docs'",
-  "crons": [],
-  "_crons_disabled_2026_06_16": {
-    "reason": "INCIDENT PAUSE: /api/orchestrator/builder returned HTTP 500 every cycle (Anthropic API error on the 16384-token call). The */15 auto-build + deploy-sentinel crons formed a runaway loop (AUTO-125..135+), each fire burning API credits and committing a failure marker with zero successful ships. Re-enable only after a clean manual /api/auto-build run confirms the Builder error is resolved.",
-    "crons": [
-      { "path": "/api/auto-build", "schedule": "*/15 * * * *" },
-      { "path": "/api/deploy-sentinel", "schedule": "*/15 * * * *" }
-    ]
-  }
+  "crons": []
 }
