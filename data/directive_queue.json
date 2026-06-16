@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-06-16T00:46:20.338Z",
+  "updated_at": "2026-06-16T01:00:36.057Z",
   "description": "FlowSeer Directive Queue — source of truth for autonomous build pipeline. Every directive is auditable via git history. Status transitions: pending → in_progress → complete | failed. Generated directives have origin=\"auto\", seeded ones have origin=\"seed\", CEO-authored ones have origin=\"ceo\".",
   "directives": [
     {
@@ -2354,9 +2354,10 @@
       "id": "AUTO-107",
       "title": "FS-VIZ-TOUCH-004: Time-Series XAxis Domain Shift on Swipe-Pan (Pages 3, 7, 9, 11)",
       "directive": "Following FS-VIZ-TOUCH-002, implement the swipe-pan XAxis domain shift logic for the four time-series charts on pages 3 (SpendTrend), 7 (ForecastVariance), 9 (PipelineVelocity), and 11 (AnomalyTimeline) — verify exact component names in codebase before implementing. Requirements: (1) When gestureMode='pan-x-domain' and a swipe gesture completes, calculate the time delta equivalent to one full viewport-width of currently visible data (e.g., if viewport shows 30 days, a full swipe shifts domain by 30 days). Partial swipes shift proportionally. (2) Domain shift must be implemented as controlled state on the XAxis `domain` prop — no internal Recharts mutations. (3) Domain must be clamped to available data boundaries (no scrolling past data start/end). (4) Forward swipe (left) advances time forward; backward swipe (right) retreats — validate against mobile UX convention for time-series pan. (5) Add Cypress assertions to the FS-VIZ-TOUCH-002 test file (or a companion spec) verifying that after a full-width swipe on each of the four pages, the data-domain attribute on the chart reflects a shifted time range matching the expected viewport-width delta. (6) EQS: domain state update must complete and re-render within 300ms (real-time latency budget) — measure via Cypress performance marks. Context: Next.js 14, Tailwind, TypeScript, Vercel, Recharts. Prerequisites: FS-VIZ-TOUCH-001, FS-VIZ-TOUCH-002, FS-VIZ-TOUCH-003 merged.",
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2026-06-15T18:01:31.962Z",
-      "origin": "split_from:AUTO-079"
+      "origin": "split_from:AUTO-079",
+      "started_at": "2026-06-16T01:00:35.960Z"
     },
     {
       "id": "AUTO-108",
