@@ -61,3 +61,47 @@ export type SelectAuthorizationAuditLog = InferSelectModel<typeof authorizationA
 // Type exports for access denied audit
 export type InsertAccessDeniedAudit = InferInsertModel<typeof accessDeniedAudit>;
 export type SelectAccessDeniedAudit = InferSelectModel<typeof accessDeniedAudit>;
+
+// --- TG20 / W251 procurement scope + supplier base (2026-06-26) ---
+// Gives the DOR line items and qualified supplier base a real DB home in Neon,
+// replacing the file-based supplier_network.json store. Confidential procurement
+// data lives here, never in the repo. Loaded via POST /api/suppliers/ingest (admin-gated).
+
+export const lineItems = pgTable('line_items', {
+  id: text('id').primaryKey(),                       // e.g. TG20-001
+  program: text('program').notNull().default('TG20'),
+  item_no: text('item_no').notNull(),
+  system_category: text('system_category'),
+  equipment: text('equipment'),
+  note: text('note'),
+  responsibility: text('responsibility'),
+  source_page: text('source_page'),
+  created_at: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  programIdx: index('line_items_program_idx').on(table.program),
+}));
+
+export const suppliers = pgTable('suppliers', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  program: text('program').notNull().default('TG20'),
+  system_no: text('system_no'),
+  system: text('system'),
+  line_item_no: text('line_item_no').notNull(),
+  line_item: text('line_item'),
+  supplier_rank: text('supplier_rank'),
+  supplier: text('supplier').notNull(),
+  website: text('website'),
+  contact_note: text('contact_note'),
+  usa_first_status: text('usa_first_status'),
+  location: text('location'),
+  confidence: text('confidence'),
+  fit_rationale: text('fit_rationale'),
+  created_at: timestamp('created_at').notNull().defaultNow(),
+}, (table) => ({
+  programLineIdx: index('suppliers_program_line_item_no_idx').on(table.program, table.line_item_no),
+}));
+
+export type InsertLineItem = InferInsertModel<typeof lineItems>;
+export type SelectLineItem = InferSelectModel<typeof lineItems>;
+export type InsertSupplier = InferInsertModel<typeof suppliers>;
+export type SelectSupplier = InferSelectModel<typeof suppliers>;
