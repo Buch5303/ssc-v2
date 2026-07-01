@@ -16,6 +16,7 @@ const NAVIGATION_ITEMS = [
   { href: '/rfq', label: 'RFQ Pipeline' },
   { href: '/dashboard/analytics', label: 'Analytics' },
   { href: '/dashboard/cost-intel', label: 'Cost Intelligence' },
+  { href: '/dashboard/pricing-directives', label: 'Pricing Directives' },
   { href: '/dashboard/supplier-network', label: 'Supplier Network' },
   { href: '/dashboard/risk', label: 'Risk Analysis' },
   { href: '/dashboard/automation', label: 'Automation' },
