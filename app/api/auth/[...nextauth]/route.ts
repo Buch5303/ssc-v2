@@ -17,6 +17,21 @@ const handler = NextAuth({
       },
     }),
   ],
+  callbacks: {
+    // Single shared access-code login: every authenticated session is a full admin.
+    // Without this, the JWT carries no `role`, so route-permissions denies all
+    // /dashboard and gated /api routes with a 403.
+    async jwt({ token }) {
+      token.role = 'admin';
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        (session.user as any).role = token.role;
+      }
+      return session;
+    },
+  },
   pages: { signIn: '/login' },
   session: { strategy: 'jwt', maxAge: 30 * 24 * 60 * 60 },
   secret: process.env.NEXTAUTH_SECRET || 'flowseer-dev-secret-change-in-production',
