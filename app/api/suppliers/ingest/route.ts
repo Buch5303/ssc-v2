@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireInternal } from '@/lib/api-guard';
 import { pool } from '@/lib/db';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,11 +56,48 @@ export async function POST(req: NextRequest) {
   const denied = requireInternal(req);
   if (denied) return denied;
 
-  let body: { program?: string; mode?: string; line_items?: LineItemRow[]; suppliers?: SupplierRow[] };
+  let body: { program?: string; mode?: string; source?: string; line_items?: LineItemRow[]; suppliers?: SupplierRow[] };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  // Bundle mode — {"source":"bundle"} loads the repo-bundled consolidated
+  // supplier directory (tools/dashboard/data/supplier_directory.json) into
+  // program 'TG20-DIRECTORY'. Same auth, same transaction path. Used as the
+  // manual fallback for scripts/load-supplier-directory.mjs (deploy-time).
+  if (body?.source === 'bundle') {
+    try {
+      const p = join(process.cwd(), 'tools', 'dashboard', 'data', 'supplier_directory.json');
+      const dir = JSON.parse(readFileSync(p, 'utf8'));
+      const mapped: SupplierRow[] = [];
+      for (const s of dir?.suppliers ?? []) {
+        const contactBits: string[] = [];
+        if (s.phone_number) contactBits.push(`Tel: ${s.phone_number}`);
+        for (const c of s.contacts ?? []) {
+          const line = [c.name, c.title, c.details].filter(Boolean).join(' — ');
+          if (line) contactBits.push(line);
+        }
+        const location = [s.street_address, s.city_state_country_postal].filter(Boolean).join('; ') || undefined;
+        for (const li of s.line_items ?? []) {
+          mapped.push({
+            line_item_no: String(li),
+            supplier: s.heading || s.company,
+            website: s.web_address || undefined,
+            contact_note: contactBits.join(' | ') || undefined,
+            location,
+            confidence: s.verification_status || undefined,
+            fit_rationale: s.blurb || undefined,
+          });
+        }
+      }
+      body.program = body.program ?? 'TG20-DIRECTORY';
+      body.suppliers = mapped;
+      body.line_items = body.line_items ?? [];
+    } catch (err) {
+      return NextResponse.json({ error: `Bundle load failed: ${String(err)}` }, { status: 500 });
+    }
   }
 
   const program = (body?.program ?? 'TG20').toString();
