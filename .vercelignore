@@ -2,7 +2,9 @@ node_modules
 .next
 src
 frontend
-scripts
+scripts/*
+!scripts/load-supplier-directory.mjs
+!scripts/load-bop-repricing.mjs
 benchmarks
 docs
 tests

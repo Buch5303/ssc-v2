@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build && node scripts/load-supplier-directory.mjs && node scripts/load-bop-repricing.mjs",
+    "build": "next build && (node scripts/load-supplier-directory.mjs || echo \"[loader] supplier-directory skipped\") && (node scripts/load-bop-repricing.mjs || echo \"[loader] bop-repricing skipped\")",
     "typecheck": "tsc --noEmit",
     "dev": "next dev",
     "lint": "next lint",
