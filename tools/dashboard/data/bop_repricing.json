@@ -1,0 +1,2116 @@
+{
+ "meta": {
+  "title": "TG20DU / Westinghouse 251 BOP Repricing \u2014 Consolidated 2026 Baseline & Audit Book",
+  "source_document": "TG20_W251_BOP_Repricing_Consolidated_Book.pdf",
+  "prepared_by": "Perplexity Computer",
+  "prepared_for": "Greg Buchanan",
+  "issue_date": "2026-07-13",
+  "pricing_date_lock": "2026-07-08",
+  "imported_at": "2026-07-13",
+  "content_sha256": "bd7431985d91407c51432be86c4006143632702466299209f8395d7ce968e364",
+  "classification": "Internal procurement baseline \u2014 material-only. NOT customer pricing. Client-facing pricing remains governed by TWP_BOP_Customer_Price_Breakdown.pdf (2026-07-10)."
+ },
+ "baseline": {
+  "point_estimate_usd": 11322780,
+  "p25_usd": 8072146,
+  "p75_usd": 16648290,
+  "usd_per_kw_at_44mw": 257,
+  "accuracy_class": "AACE Class 4 study estimate, \u00b130% at total; tightens to Class 3 \u00b120% after RFQ conversion",
+  "cost_boundary": "Material-only \u2014 excludes labor, EPC fee, freight, taxes, contingency, engineering & commissioning",
+  "installed_epc_multiplier": "2.0x\u20133.0x (implied installed range $23M\u2013$34M)",
+  "observations": 805,
+  "grades": {
+   "phase_f_adversarial_audit": "B-",
+   "academic_peer_review": "B / B+",
+   "convergence_check": "PASS (inside 5 of 7 benchmark bands)",
+   "documentation": "A-"
+  }
+ },
+ "method_distribution": {
+  "weighted_median": {
+   "lines": 103,
+   "point": 2629522
+  },
+  "single_point": {
+   "lines": 20,
+   "point": 2085758
+  },
+  "parametric_benchmark": {
+   "lines": 23,
+   "point": 6470500
+  },
+  "single_point_scaled": {
+   "lines": 4,
+   "point": 105000
+  },
+  "hybrid_ha": {
+   "lines": 1,
+   "point": 32000
+  }
+ },
+ "system_rollup": [
+  {
+   "subsystem": "Starting Package (Diesel Engine based)",
+   "lines": 16,
+   "p25": 2401860,
+   "point": 3378656,
+   "p75": 4901551,
+   "pct_of_total": 29.8
+  },
+  {
+   "subsystem": "Reduction Gearbox",
+   "lines": 4,
+   "p25": 2244527,
+   "point": 3205799,
+   "p75": 4811308,
+   "pct_of_total": 28.3
+  },
+  {
+   "subsystem": "Inlet Air Filtering System",
+   "lines": 7,
+   "p25": 725100,
+   "point": 1027279,
+   "p75": 1548189,
+   "pct_of_total": 9.1
+  },
+  {
+   "subsystem": "MV System",
+   "lines": 7,
+   "p25": 567098,
+   "point": 783504,
+   "p75": 1140979,
+   "pct_of_total": 6.9
+  },
+  {
+   "subsystem": "Enclosures",
+   "lines": 10,
+   "p25": 507000,
+   "point": 662000,
+   "p75": 907524,
+   "pct_of_total": 5.8
+  },
+  {
+   "subsystem": "Exhaust System (simple cycle)",
+   "lines": 7,
+   "p25": 313312,
+   "point": 471534,
+   "p75": 700986,
+   "pct_of_total": 4.2
+  },
+  {
+   "subsystem": "DLN Fuel Gas System (pilot, A, B, C)",
+   "lines": 11,
+   "p25": 259395,
+   "point": 341631,
+   "p75": 476694,
+   "pct_of_total": 3.0
+  },
+  {
+   "subsystem": "GT Cooling Air System",
+   "lines": 4,
+   "p25": 211967,
+   "point": 301941,
+   "p75": 451892,
+   "pct_of_total": 2.7
+  },
+  {
+   "subsystem": "Coupling joints",
+   "lines": 4,
+   "p25": 140515,
+   "point": 234628,
+   "p75": 374921,
+   "pct_of_total": 2.1
+  },
+  {
+   "subsystem": "Fuel Gas System",
+   "lines": 10,
+   "p25": 161412,
+   "point": 213667,
+   "p75": 297932,
+   "pct_of_total": 1.9
+  },
+  {
+   "subsystem": "Starting Package (Electric Engine based)",
+   "lines": 1,
+   "p25": 110000,
+   "point": 120000,
+   "p75": 134048,
+   "pct_of_total": 1.1
+  },
+  {
+   "subsystem": "Compressor Online Washing System",
+   "lines": 2,
+   "p25": 70002,
+   "point": 100003,
+   "p75": 150004,
+   "pct_of_total": 0.9
+  },
+  {
+   "subsystem": "Lube Oil System (GT and Generator)",
+   "lines": 9,
+   "p25": 44663,
+   "point": 63792,
+   "p75": 106671,
+   "pct_of_total": 0.6
+  },
+  {
+   "subsystem": "Atomizing and Instrument Air System",
+   "lines": 6,
+   "p25": 51251,
+   "point": 61999,
+   "p75": 79202,
+   "pct_of_total": 0.5
+  },
+  {
+   "subsystem": "380 V System",
+   "lines": 5,
+   "p25": 46927,
+   "point": 56461,
+   "p75": 62312,
+   "pct_of_total": 0.5
+  },
+  {
+   "subsystem": "Gas Turbine",
+   "lines": 3,
+   "p25": 33161,
+   "point": 50322,
+   "p75": 63371,
+   "pct_of_total": 0.4
+  },
+  {
+   "subsystem": "Fire Fighting System",
+   "lines": 4,
+   "p25": 31083,
+   "point": 46088,
+   "p75": 74140,
+   "pct_of_total": 0.4
+  },
+  {
+   "subsystem": "Gas Detection System",
+   "lines": 2,
+   "p25": 34116,
+   "point": 44941,
+   "p75": 65053,
+   "pct_of_total": 0.4
+  },
+  {
+   "subsystem": "Generator",
+   "lines": 2,
+   "p25": 24980,
+   "point": 33011,
+   "p75": 41042,
+   "pct_of_total": 0.3
+  },
+  {
+   "subsystem": "Machinery cooling water",
+   "lines": 1,
+   "p25": 25390,
+   "point": 31900,
+   "p75": 47040,
+   "pct_of_total": 0.3
+  },
+  {
+   "subsystem": "110 V DC System",
+   "lines": 4,
+   "p25": 22085,
+   "point": 30101,
+   "p75": 58428,
+   "pct_of_total": 0.3
+  },
+  {
+   "subsystem": "Inlet Air Duct",
+   "lines": 3,
+   "p25": 13365,
+   "point": 20723,
+   "p75": 89963,
+   "pct_of_total": 0.2
+  },
+  {
+   "subsystem": "Generator Control and Protection Boards",
+   "lines": 3,
+   "p25": 11397,
+   "point": 14757,
+   "p75": 19834,
+   "pct_of_total": 0.1
+  },
+  {
+   "subsystem": "Lighting and sockets (power island)",
+   "lines": 3,
+   "p25": 6807,
+   "point": 9912,
+   "p75": 20452,
+   "pct_of_total": 0.1
+  },
+  {
+   "subsystem": "Instrument Panel",
+   "lines": 2,
+   "p25": 4471,
+   "point": 6541,
+   "p75": 6786,
+   "pct_of_total": 0.1
+  },
+  {
+   "subsystem": "Bleed Air System",
+   "lines": 4,
+   "p25": 4254,
+   "point": 4341,
+   "p75": 6771,
+   "pct_of_total": 0.0
+  },
+  {
+   "subsystem": "Internal piperack (inside GT enclosure)",
+   "lines": 4,
+   "p25": 2695,
+   "point": 3322,
+   "p75": 4889,
+   "pct_of_total": 0.0
+  },
+  {
+   "subsystem": "Electrical Supplies",
+   "lines": 5,
+   "p25": 2545,
+   "point": 2906,
+   "p75": 4379,
+   "pct_of_total": 0.0
+  },
+  {
+   "subsystem": "Electrical Heating for DO fuel",
+   "lines": 3,
+   "p25": 417,
+   "point": 561,
+   "p75": 1367,
+   "pct_of_total": 0.0
+  },
+  {
+   "subsystem": "Vibration Monitoring System",
+   "lines": 1,
+   "p25": 241,
+   "point": 285,
+   "p75": 324,
+   "pct_of_total": 0.0
+  },
+  {
+   "subsystem": "Control Oil System (for DLN only)",
+   "lines": 2,
+   "p25": 66,
+   "point": 115,
+   "p75": 162,
+   "pct_of_total": 0.0
+  },
+  {
+   "subsystem": "Painting, Insulation and Accessories",
+   "lines": 2,
+   "p25": 44,
+   "point": 60,
+   "p75": 76,
+   "pct_of_total": 0.0
+  }
+ ],
+ "line_items": [
+  {
+   "line": 1,
+   "description": "GT on board electrical equipment, Cables and Junction Boxes",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 18512,
+   "point": 28525,
+   "p75": 34426,
+   "phase_f_verdict": null,
+   "subsystem": "Gas Turbine"
+  },
+  {
+   "line": 2,
+   "description": "Foundation accessories for shaft line (Gen excl.)",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 3,
+   "point": 4,
+   "p75": 6,
+   "phase_f_verdict": null,
+   "subsystem": "Gas Turbine"
+  },
+  {
+   "line": 3,
+   "description": "Lifting Tools",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 14646,
+   "point": 21793,
+   "p75": 28939,
+   "phase_f_verdict": null,
+   "subsystem": "Gas Turbine"
+  },
+  {
+   "line": 4,
+   "description": "Exciter Regulator (AVR)",
+   "tier": "C",
+   "method": "weighted_median",
+   "p25": 4167,
+   "point": 5323,
+   "p75": 6478,
+   "phase_f_verdict": null,
+   "subsystem": "Generator"
+  },
+  {
+   "line": 5,
+   "description": "Neutral Cubicle and Board",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 20813,
+   "point": 27688,
+   "p75": 34564,
+   "phase_f_verdict": null,
+   "subsystem": "Generator"
+  },
+  {
+   "line": 6,
+   "description": "Reduction Gearbox between Generator and Turbine",
+   "tier": "C",
+   "method": "parametric_benchmark",
+   "p25": 2240000,
+   "point": 3200000,
+   "p75": 4800000,
+   "phase_f_verdict": "DEFENSIBLE",
+   "subsystem": "Reduction Gearbox"
+  },
+  {
+   "line": 7,
+   "description": "Thermocouples",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 129,
+   "point": 179,
+   "p75": 250,
+   "phase_f_verdict": null,
+   "subsystem": "Reduction Gearbox"
+  },
+  {
+   "line": 8,
+   "description": "Lube oil main pump, shaft driven",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 998,
+   "point": 1120,
+   "p75": 6308,
+   "phase_f_verdict": null,
+   "subsystem": "Reduction Gearbox"
+  },
+  {
+   "line": 9,
+   "description": "Overspeed device",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 3400,
+   "point": 4500,
+   "p75": 4750,
+   "phase_f_verdict": null,
+   "subsystem": "Reduction Gearbox"
+  },
+  {
+   "line": 10,
+   "description": "Diesel Engine",
+   "tier": "C",
+   "method": "weighted_median",
+   "p25": 964625,
+   "point": 1268000,
+   "p75": 1684000,
+   "phase_f_verdict": "REVISE",
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 11,
+   "description": "Local Control Board with Engine Control Unit ECU",
+   "tier": "B",
+   "method": "single_point_scaled",
+   "p25": 14000,
+   "point": 18500,
+   "p75": 26000,
+   "phase_f_verdict": null,
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 12,
+   "description": "Radiator",
+   "tier": "B",
+   "method": "single_point_scaled",
+   "p25": 32000,
+   "point": 42000,
+   "p75": 62000,
+   "phase_f_verdict": null,
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 13,
+   "description": "Air and fuel oil Filters",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 88,
+   "point": 104,
+   "p75": 378,
+   "phase_f_verdict": null,
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 14,
+   "description": "Piping",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 34,
+   "point": 50,
+   "p75": 103,
+   "phase_f_verdict": null,
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 15,
+   "description": "Engine baseplate",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 1100,
+   "point": 1200,
+   "p75": 1860,
+   "phase_f_verdict": null,
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 16,
+   "description": "Turn Multiplier",
+   "tier": "C",
+   "method": "parametric_benchmark",
+   "p25": 680000,
+   "point": 970000,
+   "p75": 1450000,
+   "phase_f_verdict": "INSUFFICIENT_EVIDENCE",
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 17,
+   "description": "Toothed Joint (Turn Multiplier-Torque Converter)",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 10314,
+   "point": 14734,
+   "p75": 22101,
+   "phase_f_verdict": null,
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 18,
+   "description": "Torque Converter",
+   "tier": "C",
+   "method": "parametric_benchmark",
+   "p25": 217000,
+   "point": 310000,
+   "p75": 496000,
+   "phase_f_verdict": "INSUFFICIENT_EVIDENCE",
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 19,
+   "description": "Toothed Joint (Converter-Turning gear)",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 1941,
+   "point": 2337,
+   "p75": 2733,
+   "phase_f_verdict": null,
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 20,
+   "description": "Turning Gear with motor and clutch",
+   "tier": "C",
+   "method": "parametric_benchmark",
+   "p25": 90000,
+   "point": 145000,
+   "p75": 220000,
+   "phase_f_verdict": null,
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 21,
+   "description": "SSS Clutch",
+   "tier": "B",
+   "method": "parametric_benchmark",
+   "p25": 182000,
+   "point": 280000,
+   "p75": 448000,
+   "phase_f_verdict": "INSUFFICIENT_EVIDENCE",
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 22,
+   "description": "Toothed Joint (Turning gear-Generator)",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 5048,
+   "point": 7211,
+   "p75": 10816,
+   "phase_f_verdict": null,
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 23,
+   "description": "Baseplate",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 1710,
+   "point": 2520,
+   "p75": 2560,
+   "phase_f_verdict": null,
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 24,
+   "description": "Platform, Handrails and Access Staircases",
+   "tier": "A",
+   "method": "single_point_scaled",
+   "p25": 22000,
+   "point": 32000,
+   "p75": 55000,
+   "phase_f_verdict": null,
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 25,
+   "description": "Package Assembly",
+   "tier": "C",
+   "method": "parametric_benchmark",
+   "p25": 180000,
+   "point": 285000,
+   "p75": 420000,
+   "phase_f_verdict": "DEFENSIBLE",
+   "subsystem": "Starting Package (Diesel Engine based)"
+  },
+  {
+   "line": 26,
+   "description": "Electric motor",
+   "tier": "C",
+   "method": "weighted_median",
+   "p25": 110000,
+   "point": 120000,
+   "p75": 134048,
+   "phase_f_verdict": null,
+   "subsystem": "Starting Package (Electric Engine based)"
+  },
+  {
+   "line": 27,
+   "description": "Generator/Reduction gearbox Joint (incl. tie bolts)",
+   "tier": "B",
+   "method": "parametric_benchmark",
+   "p25": 70000,
+   "point": 117000,
+   "p75": 187000,
+   "phase_f_verdict": "DEFENSIBLE",
+   "subsystem": "Coupling joints"
+  },
+  {
+   "line": 28,
+   "description": "Reduction gearbox/Turbine Joint (incl. tie bolts)",
+   "tier": "B",
+   "method": "parametric_benchmark",
+   "p25": 70000,
+   "point": 117000,
+   "p75": 187000,
+   "phase_f_verdict": "DEFENSIBLE",
+   "subsystem": "Coupling joints"
+  },
+  {
+   "line": 29,
+   "description": "Speed pickups",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 130,
+   "point": 178,
+   "p75": 391,
+   "phase_f_verdict": null,
+   "subsystem": "Coupling joints"
+  },
+  {
+   "line": 30,
+   "description": "Covers",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 385,
+   "point": 450,
+   "p75": 530,
+   "phase_f_verdict": null,
+   "subsystem": "Coupling joints"
+  },
+  {
+   "line": 31,
+   "description": "Bleed Valves",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 2025,
+   "point": 2025,
+   "p75": 4358,
+   "phase_f_verdict": null,
+   "subsystem": "Bleed Air System"
+  },
+  {
+   "line": 32,
+   "description": "Piping",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 26,
+   "point": 26,
+   "p75": 50,
+   "phase_f_verdict": null,
+   "subsystem": "Bleed Air System"
+  },
+  {
+   "line": 33,
+   "description": "Orifices",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 2026,
+   "point": 2026,
+   "p75": 2026,
+   "phase_f_verdict": null,
+   "subsystem": "Bleed Air System"
+  },
+  {
+   "line": 34,
+   "description": "Instruments",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 177,
+   "point": 264,
+   "p75": 337,
+   "phase_f_verdict": null,
+   "subsystem": "Bleed Air System"
+  },
+  {
+   "line": 35,
+   "description": "Air Compressor and tank (for NG version)",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 12530,
+   "point": 17900,
+   "p75": 26850,
+   "phase_f_verdict": null,
+   "subsystem": "Atomizing and Instrument Air System"
+  },
+  {
+   "line": 36,
+   "description": "Air Compressor and tank (for NG+DO)",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 28750,
+   "point": 29500,
+   "p75": 31150,
+   "phase_f_verdict": null,
+   "subsystem": "Atomizing and Instrument Air System"
+  },
+  {
+   "line": 37,
+   "description": "Air Drier",
+   "tier": "B",
+   "method": "single_point_scaled",
+   "p25": 8500,
+   "point": 12500,
+   "p75": 18000,
+   "phase_f_verdict": null,
+   "subsystem": "Atomizing and Instrument Air System"
+  },
+  {
+   "line": 38,
+   "description": "Components for sweep air",
+   "tier": "A",
+   "method": "single_point",
+   "p25": 35,
+   "point": 50,
+   "p75": 75,
+   "phase_f_verdict": null,
+   "subsystem": "Atomizing and Instrument Air System"
+  },
+  {
+   "line": 39,
+   "description": "Components for startup and continuous atomizing air                                                   Air",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 1404,
+   "point": 2006,
+   "p75": 3009,
+   "phase_f_verdict": null,
+   "subsystem": "Atomizing and Instrument Air System"
+  },
+  {
+   "line": 40,
+   "description": "Piping for atomizing air",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 32,
+   "point": 43,
+   "p75": 118,
+   "phase_f_verdict": null,
+   "subsystem": "Atomizing and Instrument Air System"
+  },
+  {
+   "line": 41,
+   "description": "Air to Air Cooler",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 34930,
+   "point": 49900,
+   "p75": 74850,
+   "phase_f_verdict": null,
+   "subsystem": "GT Cooling Air System"
+  },
+  {
+   "line": 42,
+   "description": "Water to Air Cooler",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 175000,
+   "point": 250000,
+   "p75": 375000,
+   "phase_f_verdict": null,
+   "subsystem": "GT Cooling Air System"
+  },
+  {
+   "line": 43,
+   "description": "Piping",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 13,
+   "point": 17,
+   "p75": 18,
+   "phase_f_verdict": null,
+   "subsystem": "GT Cooling Air System"
+  },
+  {
+   "line": 44,
+   "description": "Inertial Filters, orifices, supports, miscellanea",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 2024,
+   "point": 2024,
+   "p75": 2024,
+   "phase_f_verdict": null,
+   "subsystem": "GT Cooling Air System"
+  },
+  {
+   "line": 45,
+   "description": "Oil Tank",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 1887,
+   "point": 2695,
+   "p75": 4043,
+   "phase_f_verdict": null,
+   "subsystem": "Lube Oil System (GT and Generator)"
+  },
+  {
+   "line": 46,
+   "description": "Main Pump connection (the pump is located on the gearbox)                                              Gene",
+   "tier": "C",
+   "method": "parametric_benchmark",
+   "p25": 8000,
+   "point": 12500,
+   "p75": 18000,
+   "phase_f_verdict": null,
+   "subsystem": "Lube Oil System (GT and Generator)"
+  },
+  {
+   "line": 47,
+   "description": "DC Emergency Pump",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 4200,
+   "point": 6000,
+   "p75": 9000,
+   "phase_f_verdict": null,
+   "subsystem": "Lube Oil System (GT and Generator)"
+  },
+  {
+   "line": 48,
+   "description": "AC Auxiliary Pump",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 2494,
+   "point": 2697,
+   "p75": 7824,
+   "phase_f_verdict": null,
+   "subsystem": "Lube Oil System (GT and Generator)"
+  },
+  {
+   "line": 49,
+   "description": "Pneumatic Valves (Pressure control valve, Temperature contro                                    Gene",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 163,
+   "point": 200,
+   "p75": 540,
+   "phase_f_verdict": null,
+   "subsystem": "Lube Oil System (GT and Generator)"
+  },
+  {
+   "line": 50,
+   "description": "Duplex Filter",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 1442,
+   "point": 2046,
+   "p75": 5434,
+   "phase_f_verdict": null,
+   "subsystem": "Lube Oil System (GT and Generator)"
+  },
+  {
+   "line": 51,
+   "description": "Piping",
+   "tier": "A",
+   "method": "single_point",
+   "p25": 2,
+   "point": 4,
+   "p75": 5,
+   "phase_f_verdict": null,
+   "subsystem": "Lube Oil System (GT and Generator)"
+  },
+  {
+   "line": 52,
+   "description": "Air to Oil Cooler",
+   "tier": "B",
+   "method": "hybrid_ha",
+   "p25": 22000,
+   "point": 32000,
+   "p75": 55000,
+   "phase_f_verdict": null,
+   "subsystem": "Lube Oil System (GT and Generator)"
+  },
+  {
+   "line": 53,
+   "description": "Water to Oil Cooler",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 4475,
+   "point": 5650,
+   "p75": 6825,
+   "phase_f_verdict": null,
+   "subsystem": "Lube Oil System (GT and Generator)"
+  },
+  {
+   "line": 54,
+   "description": "Skid with:",
+   "tier": "C",
+   "method": "parametric_benchmark",
+   "p25": 147000,
+   "point": 195000,
+   "p75": 274000,
+   "phase_f_verdict": "DEFENSIBLE",
+   "subsystem": "Fuel Gas System"
+  },
+  {
+   "line": 55,
+   "description": "Condensate drainage",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 225,
+   "point": 250,
+   "p75": 274,
+   "phase_f_verdict": null,
+   "subsystem": "Fuel Gas System"
+  },
+  {
+   "line": 56,
+   "description": "Instruments",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 185,
+   "point": 216,
+   "p75": 306,
+   "phase_f_verdict": null,
+   "subsystem": "Fuel Gas System"
+  },
+  {
+   "line": 57,
+   "description": "Filter",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 570,
+   "point": 1115,
+   "p75": 1970,
+   "phase_f_verdict": null,
+   "subsystem": "Fuel Gas System"
+  },
+  {
+   "line": 58,
+   "description": "Pneumatic Valves (control valves, isolation valve, overspeed",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 2400,
+   "point": 3000,
+   "p75": 4343,
+   "phase_f_verdict": null,
+   "subsystem": "Fuel Gas System"
+  },
+  {
+   "line": 59,
+   "description": "Final Separator",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 2475,
+   "point": 2650,
+   "p75": 2825,
+   "phase_f_verdict": null,
+   "subsystem": "Fuel Gas System"
+  },
+  {
+   "line": 60,
+   "description": "Drain and Shut off valves on Final Separator",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 66,
+   "point": 98,
+   "p75": 109,
+   "phase_f_verdict": null,
+   "subsystem": "Fuel Gas System"
+  },
+  {
+   "line": 61,
+   "description": "Piping from b.l. to final separator and from final separator",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 43,
+   "point": 53,
+   "p75": 63,
+   "phase_f_verdict": null,
+   "subsystem": "Fuel Gas System"
+  },
+  {
+   "line": 62,
+   "description": "Piping from fuel gas skid to gas turbine",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 908,
+   "point": 1205,
+   "p75": 1502,
+   "phase_f_verdict": null,
+   "subsystem": "Fuel Gas System"
+  },
+  {
+   "line": 63,
+   "description": "Gas manifold and spools",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 7540,
+   "point": 10080,
+   "p75": 12540,
+   "phase_f_verdict": null,
+   "subsystem": "Fuel Gas System"
+  },
+  {
+   "line": 64,
+   "description": "Skid with:",
+   "tier": "C",
+   "method": "parametric_benchmark",
+   "p25": 205000,
+   "point": 274000,
+   "p75": 383000,
+   "phase_f_verdict": "DEFENSIBLE",
+   "subsystem": "DLN Fuel Gas System (pilot, A, B, C)"
+  },
+  {
+   "line": 65,
+   "description": "Condensate drainage",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 190,
+   "point": 216,
+   "p75": 253,
+   "phase_f_verdict": null,
+   "subsystem": "DLN Fuel Gas System (pilot, A, B, C)"
+  },
+  {
+   "line": 66,
+   "description": "Instruments",
+   "tier": "A",
+   "method": "single_point",
+   "p25": 2513,
+   "point": 3590,
+   "p75": 5385,
+   "phase_f_verdict": null,
+   "subsystem": "DLN Fuel Gas System (pilot, A, B, C)"
+  },
+  {
+   "line": 67,
+   "description": "Filter",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 13,
+   "point": 25,
+   "p75": 6262,
+   "phase_f_verdict": null,
+   "subsystem": "DLN Fuel Gas System (pilot, A, B, C)"
+  },
+  {
+   "line": 68,
+   "description": "Hydraulically actuated DLN control valves",
+   "tier": "C",
+   "method": "weighted_median",
+   "p25": 23500,
+   "point": 25000,
+   "p75": 26500,
+   "phase_f_verdict": null,
+   "subsystem": "DLN Fuel Gas System (pilot, A, B, C)"
+  },
+  {
+   "line": 69,
+   "description": "Pneumatic Valves (isolation valve, overspeed valve and vent                                             (pilot,",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 725,
+   "point": 1000,
+   "p75": 1125,
+   "phase_f_verdict": null,
+   "subsystem": "DLN Fuel Gas System (pilot, A, B, C)"
+  },
+  {
+   "line": 70,
+   "description": "Final Separator",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 21000,
+   "point": 30000,
+   "p75": 45000,
+   "phase_f_verdict": null,
+   "subsystem": "DLN Fuel Gas System (pilot, A, B, C)"
+  },
+  {
+   "line": 71,
+   "description": "Drain and Shut off valves on Final Separator",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 174,
+   "point": 245,
+   "p75": 337,
+   "phase_f_verdict": null,
+   "subsystem": "DLN Fuel Gas System (pilot, A, B, C)"
+  },
+  {
+   "line": 72,
+   "description": "Piping from b.l. to final separator and from final separator                                            (pilot,",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 5,
+   "point": 8,
+   "p75": 12,
+   "phase_f_verdict": null,
+   "subsystem": "DLN Fuel Gas System (pilot, A, B, C)"
+  },
+  {
+   "line": 73,
+   "description": "Piping from fuel gas skid to gas turbine",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 5,
+   "point": 7,
+   "p75": 10,
+   "phase_f_verdict": null,
+   "subsystem": "DLN Fuel Gas System (pilot, A, B, C)"
+  },
+  {
+   "line": 74,
+   "description": "Gas manifolds (n.4) and spools",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 6270,
+   "point": 7540,
+   "p75": 8810,
+   "phase_f_verdict": null,
+   "subsystem": "DLN Fuel Gas System (pilot, A, B, C)"
+  },
+  {
+   "line": 75,
+   "description": "Control oil rack (including filters, pumps, instrumentation,                                     DLN",
+   "tier": "C",
+   "method": "weighted_median",
+   "p25": 43,
+   "point": 56,
+   "p75": 69,
+   "phase_f_verdict": null,
+   "subsystem": "Control Oil System (for DLN only)"
+  },
+  {
+   "line": 76,
+   "description": "Tubing up to each hydraulic valve",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 23,
+   "point": 59,
+   "p75": 93,
+   "phase_f_verdict": null,
+   "subsystem": "Control Oil System (for DLN only)"
+  },
+  {
+   "line": 77,
+   "description": "Machinery cooling water equipment (pipes, pumps, valves, air",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 25390,
+   "point": 31900,
+   "p75": 47040,
+   "phase_f_verdict": null,
+   "subsystem": "Machinery cooling water"
+  },
+  {
+   "line": 78,
+   "description": "Skid with Instruments and Tank, for manual operation                                            Washing Sy",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 70000,
+   "point": 100000,
+   "p75": 150000,
+   "phase_f_verdict": null,
+   "subsystem": "Compressor Online Washing System"
+  },
+  {
+   "line": 79,
+   "description": "Piping (only turbine assembly)",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 2,
+   "point": 3,
+   "p75": 4,
+   "phase_f_verdict": null,
+   "subsystem": "Compressor Online Washing System"
+  },
+  {
+   "line": 80,
+   "description": "Panel",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 385,
+   "point": 506,
+   "p75": 1282,
+   "phase_f_verdict": null,
+   "subsystem": "Electrical Heating for DO fuel"
+  },
+  {
+   "line": 81,
+   "description": "heating cables (from skid to injectors)",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 16,
+   "point": 36,
+   "p75": 56,
+   "phase_f_verdict": null,
+   "subsystem": "Electrical Heating for DO fuel"
+  },
+  {
+   "line": 82,
+   "description": "Fuel piping insulation (from skid to injectors)",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 16,
+   "point": 19,
+   "p75": 29,
+   "phase_f_verdict": null,
+   "subsystem": "Electrical Heating for DO fuel"
+  },
+  {
+   "line": 83,
+   "description": "Filter Room, pulse cleaning type, including",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 700000,
+   "point": 1000000,
+   "p75": 1500000,
+   "phase_f_verdict": "DEFENSIBLE",
+   "subsystem": "Inlet Air Filtering System"
+  },
+  {
+   "line": 84,
+   "description": "Structure",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 975,
+   "point": 1051,
+   "p75": 1126,
+   "phase_f_verdict": null,
+   "subsystem": "Inlet Air Filtering System"
+  },
+  {
+   "line": 85,
+   "description": "Staircases",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 968,
+   "point": 970,
+   "p75": 1208,
+   "phase_f_verdict": null,
+   "subsystem": "Inlet Air Filtering System"
+  },
+  {
+   "line": 86,
+   "description": "Platforms",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 30,
+   "point": 35,
+   "p75": 58,
+   "phase_f_verdict": null,
+   "subsystem": "Inlet Air Filtering System"
+  },
+  {
+   "line": 87,
+   "description": "pulse cleaning compressor system",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 22392,
+   "point": 23820,
+   "p75": 24906,
+   "phase_f_verdict": null,
+   "subsystem": "Inlet Air Filtering System"
+  },
+  {
+   "line": 88,
+   "description": "Instruments",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 132,
+   "point": 201,
+   "p75": 290,
+   "phase_f_verdict": null,
+   "subsystem": "Inlet Air Filtering System"
+  },
+  {
+   "line": 89,
+   "description": "Transition piece",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 603,
+   "point": 1202,
+   "p75": 20601,
+   "phase_f_verdict": null,
+   "subsystem": "Inlet Air Filtering System"
+  },
+  {
+   "line": 90,
+   "description": "Horizontal Duct with Silencer",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 1362,
+   "point": 2719,
+   "p75": 61360,
+   "phase_f_verdict": null,
+   "subsystem": "Inlet Air Duct"
+  },
+  {
+   "line": 91,
+   "description": "Additional to \"Horizontal Duct with Silencer\" structure, ben",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 3,
+   "point": 4,
+   "p75": 603,
+   "phase_f_verdict": null,
+   "subsystem": "Inlet Air Duct"
+  },
+  {
+   "line": 92,
+   "description": "Expansion Joints",
+   "tier": "B",
+   "method": "parametric_benchmark",
+   "p25": 12000,
+   "point": 18000,
+   "p75": 28000,
+   "phase_f_verdict": null,
+   "subsystem": "Inlet Air Duct"
+  },
+  {
+   "line": 93,
+   "description": "Expansion Joints",
+   "tier": "B",
+   "method": "parametric_benchmark",
+   "p25": 22000,
+   "point": 32000,
+   "p75": 55000,
+   "phase_f_verdict": null,
+   "subsystem": "Exhaust System (simple cycle)"
+  },
+  {
+   "line": 94,
+   "description": "Exhaust Transition",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 3,
+   "point": 4,
+   "p75": 603,
+   "phase_f_verdict": null,
+   "subsystem": "Exhaust System (simple cycle)"
+  },
+  {
+   "line": 95,
+   "description": "Horizontal Duct with Silencers",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 109031,
+   "point": 150000,
+   "p75": 162500,
+   "phase_f_verdict": null,
+   "subsystem": "Exhaust System (simple cycle)"
+  },
+  {
+   "line": 96,
+   "description": "Bend",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 8,
+   "point": 12,
+   "p75": 607,
+   "phase_f_verdict": null,
+   "subsystem": "Exhaust System (simple cycle)"
+  },
+  {
+   "line": 97,
+   "description": "Stack",
+   "tier": "B",
+   "method": "parametric_benchmark",
+   "p25": 180000,
+   "point": 285000,
+   "p75": 420000,
+   "phase_f_verdict": "DEFENSIBLE",
+   "subsystem": "Exhaust System (simple cycle)"
+  },
+  {
+   "line": 98,
+   "description": "Instruments",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 2252,
+   "point": 4493,
+   "p75": 62247,
+   "phase_f_verdict": null,
+   "subsystem": "Exhaust System (simple cycle)"
+  },
+  {
+   "line": 99,
+   "description": "Thermocouples",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 18,
+   "point": 25,
+   "p75": 29,
+   "phase_f_verdict": null,
+   "subsystem": "Exhaust System (simple cycle)"
+  },
+  {
+   "line": 100,
+   "description": "Fire Fighting Protection (inert gas) for each of this items:",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 14000,
+   "point": 20000,
+   "p75": 30000,
+   "phase_f_verdict": null,
+   "subsystem": "Fire Fighting System"
+  },
+  {
+   "line": 101,
+   "description": "Gas Turbine and auxiliareis (including board)",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 2018,
+   "point": 2018,
+   "p75": 2018,
+   "phase_f_verdict": null,
+   "subsystem": "Fire Fighting System"
+  },
+  {
+   "line": 102,
+   "description": "filling CO2 bottles",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 65,
+   "point": 70,
+   "p75": 122,
+   "phase_f_verdict": null,
+   "subsystem": "Fire Fighting System"
+  },
+  {
+   "line": 103,
+   "description": "Fire Fighting Protection (powder) for GT turbine bearing",
+   "tier": "B",
+   "method": "parametric_benchmark",
+   "p25": 15000,
+   "point": 24000,
+   "p75": 42000,
+   "phase_f_verdict": null,
+   "subsystem": "Fire Fighting System"
+  },
+  {
+   "line": 104,
+   "description": "Enclosure for each of this items (including ventilation):",
+   "tier": "C",
+   "method": "parametric_benchmark",
+   "p25": 23000,
+   "point": 30000,
+   "p75": 41000,
+   "phase_f_verdict": "DEFENSIBLE",
+   "subsystem": "Enclosures"
+  },
+  {
+   "line": 105,
+   "description": "Turbine",
+   "tier": "C",
+   "method": "weighted_median",
+   "p25": 275000,
+   "point": 350000,
+   "p75": 425000,
+   "phase_f_verdict": "RELABEL",
+   "subsystem": "Enclosures"
+  },
+  {
+   "line": 106,
+   "description": "Generator",
+   "tier": "C",
+   "method": "parametric_benchmark",
+   "p25": 15000,
+   "point": 20000,
+   "p75": 26000,
+   "phase_f_verdict": null,
+   "subsystem": "Enclosures"
+  },
+  {
+   "line": 107,
+   "description": "Auxiliaries (fuels skids)",
+   "tier": "C",
+   "method": "parametric_benchmark",
+   "p25": 8000,
+   "point": 11000,
+   "p75": 14000,
+   "phase_f_verdict": null,
+   "subsystem": "Enclosures"
+  },
+  {
+   "line": 108,
+   "description": "Auxiliaries (others)",
+   "tier": "C",
+   "method": "parametric_benchmark",
+   "p25": 9000,
+   "point": 12000,
+   "p75": 17000,
+   "phase_f_verdict": null,
+   "subsystem": "Enclosures"
+  },
+  {
+   "line": 109,
+   "description": "Starting Diesel",
+   "tier": "B",
+   "method": "parametric_benchmark",
+   "p25": 11000,
+   "point": 14000,
+   "p75": 19000,
+   "phase_f_verdict": null,
+   "subsystem": "Enclosures"
+  },
+  {
+   "line": 110,
+   "description": "Enclosure for",
+   "tier": "C",
+   "method": "parametric_benchmark",
+   "p25": 5000,
+   "point": 7000,
+   "p75": 10000,
+   "phase_f_verdict": null,
+   "subsystem": "Enclosures"
+  },
+  {
+   "line": 111,
+   "description": "Electrical Room for MV panel, MV generator circuit breaker (",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 43000,
+   "point": 50000,
+   "p75": 100000,
+   "phase_f_verdict": null,
+   "subsystem": "Enclosures"
+  },
+  {
+   "line": 112,
+   "description": "Electrical room for MCC, PCC, DC, Batteries, Generator Contr",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 100000,
+   "point": 150000,
+   "p75": 237000,
+   "phase_f_verdict": null,
+   "subsystem": "Enclosures"
+  },
+  {
+   "line": 113,
+   "description": "Air conditioning system",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 18000,
+   "point": 18000,
+   "p75": 18524,
+   "phase_f_verdict": null,
+   "subsystem": "Enclosures"
+  },
+  {
+   "line": 114,
+   "description": "Local GT Instruments Rack (NG only)",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 4466,
+   "point": 6535,
+   "p75": 6777,
+   "phase_f_verdict": null,
+   "subsystem": "Instrument Panel"
+  },
+  {
+   "line": 115,
+   "description": "Piping/tubing",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 5,
+   "point": 6,
+   "p75": 9,
+   "phase_f_verdict": null,
+   "subsystem": "Instrument Panel"
+  },
+  {
+   "line": 116,
+   "description": "Insulated Bus Bar Duct 20 m",
+   "tier": "B",
+   "method": "parametric_benchmark",
+   "p25": 56000,
+   "point": 70000,
+   "p75": 91000,
+   "phase_f_verdict": "DEFENSIBLE",
+   "subsystem": "MV System"
+  },
+  {
+   "line": 117,
+   "description": "MV panel with CT, PT, circuit breaker",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 153883,
+   "point": 219833,
+   "p75": 329749,
+   "phase_f_verdict": null,
+   "subsystem": "MV System"
+  },
+  {
+   "line": 118,
+   "description": "Unit transformer (11 kV/380 V)",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 102059,
+   "point": 129618,
+   "p75": 174725,
+   "phase_f_verdict": null,
+   "subsystem": "MV System"
+  },
+  {
+   "line": 119,
+   "description": "MV cables",
+   "tier": "A",
+   "method": "single_point",
+   "p25": 2439,
+   "point": 3485,
+   "p75": 5227,
+   "phase_f_verdict": null,
+   "subsystem": "MV System"
+  },
+  {
+   "line": 120,
+   "description": "Auxiliary Transformer 11/0.4 kV 1,3 MVA (50%)",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 144987,
+   "point": 207124,
+   "p75": 310687,
+   "phase_f_verdict": null,
+   "subsystem": "MV System"
+  },
+  {
+   "line": 121,
+   "description": "Aux Trafo Breaker 11 kV 100 A (50%)",
+   "tier": "B",
+   "method": "single_point",
+   "p25": 105855,
+   "point": 151222,
+   "p75": 226833,
+   "phase_f_verdict": null,
+   "subsystem": "MV System"
+  },
+  {
+   "line": 122,
+   "description": "steel board (50%)",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 1875,
+   "point": 2222,
+   "p75": 2758,
+   "phase_f_verdict": null,
+   "subsystem": "MV System"
+  },
+  {
+   "line": 123,
+   "description": "MCC (Motor Control Center) panels",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 9128,
+   "point": 13140,
+   "p75": 13995,
+   "phase_f_verdict": null,
+   "subsystem": "380 V System"
+  },
+  {
+   "line": 124,
+   "description": "additional MCC drawers for DO motors",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 1500,
+   "point": 2000,
+   "p75": 3396,
+   "phase_f_verdict": null,
+   "subsystem": "380 V System"
+  },
+  {
+   "line": 125,
+   "description": "additional MCC drawers for DO heating",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 27146,
+   "point": 28097,
+   "p75": 29048,
+   "phase_f_verdict": null,
+   "subsystem": "380 V System"
+  },
+  {
+   "line": 126,
+   "description": "additional MCC drawers for DLN",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 6875,
+   "point": 10000,
+   "p75": 11702,
+   "phase_f_verdict": null,
+   "subsystem": "380 V System"
+  },
+  {
+   "line": 127,
+   "description": "PCC (Power Control Center) Boards (Unit)",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 2278,
+   "point": 3224,
+   "p75": 4171,
+   "phase_f_verdict": null,
+   "subsystem": "380 V System"
+  },
+  {
+   "line": 128,
+   "description": "Inverter 110 V AC",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 7205,
+   "point": 9280,
+   "p75": 24390,
+   "phase_f_verdict": null,
+   "subsystem": "110 V DC System"
+  },
+  {
+   "line": 129,
+   "description": "Battery Charger",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 11083,
+   "point": 16411,
+   "p75": 26550,
+   "phase_f_verdict": null,
+   "subsystem": "110 V DC System"
+  },
+  {
+   "line": 130,
+   "description": "Battery container with ventilation",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 3526,
+   "point": 4000,
+   "p75": 6818,
+   "phase_f_verdict": null,
+   "subsystem": "110 V DC System"
+  },
+  {
+   "line": 131,
+   "description": "Batteries",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 271,
+   "point": 410,
+   "p75": 670,
+   "phase_f_verdict": null,
+   "subsystem": "110 V DC System"
+  },
+  {
+   "line": 132,
+   "description": "Generator Control Board",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 7018,
+   "point": 8038,
+   "p75": 9205,
+   "phase_f_verdict": null,
+   "subsystem": "Generator Control and Protection Boards"
+  },
+  {
+   "line": 133,
+   "description": "Protections",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 2709,
+   "point": 3588,
+   "p75": 6414,
+   "phase_f_verdict": null,
+   "subsystem": "Generator Control and Protection Boards"
+  },
+  {
+   "line": 134,
+   "description": "Synchronizing",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 1670,
+   "point": 3131,
+   "p75": 4215,
+   "phase_f_verdict": null,
+   "subsystem": "Generator Control and Protection Boards"
+  },
+  {
+   "line": 135,
+   "description": "Board, Sensors and Cables",
+   "tier": "B",
+   "method": "weighted_median",
+   "p25": 241,
+   "point": 285,
+   "p75": 324,
+   "phase_f_verdict": null,
+   "subsystem": "Vibration Monitoring System"
+  },
+  {
+   "line": 136,
+   "description": "Rack for Explosive Mixture Detection",
+   "tier": "B",
+   "method": "parametric_benchmark",
+   "p25": 32000,
+   "point": 42000,
+   "p75": 62000,
+   "phase_f_verdict": null,
+   "subsystem": "Gas Detection System"
+  },
+  {
+   "line": 137,
+   "description": "Detectors etc",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 2116,
+   "point": 2941,
+   "p75": 3053,
+   "phase_f_verdict": null,
+   "subsystem": "Gas Detection System"
+  },
+  {
+   "line": 138,
+   "description": "Lamps",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 1509,
+   "point": 2077,
+   "p75": 2912,
+   "phase_f_verdict": null,
+   "subsystem": "Lighting and sockets (power island)"
+  },
+  {
+   "line": 139,
+   "description": "tower",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 4342,
+   "point": 6325,
+   "p75": 15662,
+   "phase_f_verdict": null,
+   "subsystem": "Lighting and sockets (power island)"
+  },
+  {
+   "line": 140,
+   "description": "Sockets",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 956,
+   "point": 1510,
+   "p75": 1878,
+   "phase_f_verdict": null,
+   "subsystem": "Lighting and sockets (power island)"
+  },
+  {
+   "line": 141,
+   "description": "LV Power Cables (power island)",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 2382,
+   "point": 2715,
+   "p75": 3912,
+   "phase_f_verdict": null,
+   "subsystem": "Electrical Supplies"
+  },
+  {
+   "line": 142,
+   "description": "Instrument Cables",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 3,
+   "point": 4,
+   "p75": 4,
+   "phase_f_verdict": null,
+   "subsystem": "Electrical Supplies"
+  },
+  {
+   "line": 143,
+   "description": "Control Cables",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 39,
+   "point": 57,
+   "p75": 109,
+   "phase_f_verdict": null,
+   "subsystem": "Electrical Supplies"
+  },
+  {
+   "line": 144,
+   "description": "cables additional supplies for DO",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 14,
+   "point": 16,
+   "p75": 22,
+   "phase_f_verdict": null,
+   "subsystem": "Electrical Supplies"
+  },
+  {
+   "line": 145,
+   "description": "Junction Boxes, cable trays, conduits",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 107,
+   "point": 114,
+   "p75": 332,
+   "phase_f_verdict": null,
+   "subsystem": "Electrical Supplies"
+  },
+  {
+   "line": 146,
+   "description": "Supports",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 1600,
+   "point": 2150,
+   "p75": 3075,
+   "phase_f_verdict": null,
+   "subsystem": "Internal piperack (inside GT enclosure)"
+  },
+  {
+   "line": 147,
+   "description": "Access Platforms",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 72,
+   "point": 120,
+   "p75": 167,
+   "phase_f_verdict": null,
+   "subsystem": "Internal piperack (inside GT enclosure)"
+  },
+  {
+   "line": 148,
+   "description": "Handrails",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 23,
+   "point": 37,
+   "p75": 100,
+   "phase_f_verdict": null,
+   "subsystem": "Internal piperack (inside GT enclosure)"
+  },
+  {
+   "line": 149,
+   "description": "Staircases",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 1000,
+   "point": 1015,
+   "p75": 1547,
+   "phase_f_verdict": null,
+   "subsystem": "Internal piperack (inside GT enclosure)"
+  },
+  {
+   "line": 150,
+   "description": "Painting of Structures, Skids, Handrails, Piping, (where nec                                          Acc",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 28,
+   "point": 42,
+   "p75": 53,
+   "phase_f_verdict": null,
+   "subsystem": "Painting, Insulation and Accessories"
+  },
+  {
+   "line": 151,
+   "description": "Insulation (where necessary) column (Phase F verdict): DEF defensible, REV revise, REL relabel, INS insufficient evidence. Blank F = not in top-15 audit scope (line inherits its method-level tier).",
+   "tier": "A",
+   "method": "weighted_median",
+   "p25": 16,
+   "point": 18,
+   "p75": 23,
+   "phase_f_verdict": null,
+   "subsystem": "Painting, Insulation and Accessories"
+  }
+ ],
+ "top_15_by_dollar": [
+  6,
+  10,
+  83,
+  16,
+  105,
+  18,
+  25,
+  97,
+  21,
+  64,
+  42,
+  117,
+  120,
+  54,
+  121
+ ],
+ "rfq_playbook": [
+  {
+   "seq": 1,
+   "line": 10,
+   "action": "Scope-clarify starter engine (starter vs auxiliary genset)",
+   "vendors": [],
+   "exposure": "\u00b1$0.7\u20130.9M"
+  },
+  {
+   "seq": 2,
+   "line": 6,
+   "action": "RFQ reduction gearbox (highest materiality)",
+   "vendors": [
+    "Flender",
+    "Voith",
+    "Renk"
+   ],
+   "exposure": "\u00b1$1.0M swing"
+  },
+  {
+   "seq": 3,
+   "line": 16,
+   "action": "RFQ turn multiplier / speed increaser (no anchor)",
+   "vendors": [
+    "Renk",
+    "Flender",
+    "EverGear"
+   ],
+   "exposure": "$0.6\u20131.3M"
+  },
+  {
+   "seq": 4,
+   "line": 105,
+   "action": "Relabel + RFQ spare rotor / hot-gas-path",
+   "vendors": [
+    "Mitsubishi Power",
+    "Ansaldo",
+    "Sulzer PowerService"
+   ],
+   "exposure": "$0.3\u20130.5M"
+  },
+  {
+   "seq": 5,
+   "line": 21,
+   "action": "RFQ SSS synchro-shifting clutch",
+   "vendors": [
+    "SSS Gears UK",
+    "Voith SSS",
+    "AZG Consulting"
+   ],
+   "exposure": "$0.2\u20130.5M"
+  },
+  {
+   "seq": 6,
+   "line": 18,
+   "action": "RFQ torque converter (Voith Turbo class)",
+   "vendors": [
+    "Voith Turbo York PA",
+    "Twin Disc"
+   ],
+   "exposure": "$0.2\u20130.5M"
+  },
+  {
+   "seq": 7,
+   "line": 83,
+   "action": "Upgrade filter room from single-point to \u22653 obs / RFQ",
+   "vendors": [
+    "Donaldson",
+    "AAF",
+    "Nederman"
+   ],
+   "exposure": "$0.7\u20131.5M"
+  },
+  {
+   "seq": 8,
+   "line": null,
+   "action": "Clarify GSU boundary (BOP vs GT-core scope) \u2014 MV System",
+   "vendors": [],
+   "exposure": "\u00b1$1\u20132M if in-scope"
+  },
+  {
+   "seq": 9,
+   "line": 97,
+   "action": "Confirm exhaust silencer not double-counted",
+   "vendors": [],
+   "exposure": "$0.03\u20130.10M"
+  }
+ ],
+ "insufficient_evidence_lines": [
+  16,
+  18,
+  21,
+  105
+ ],
+ "escalation_indices": {
+  "US_PPI_3336_turbine_gearbox": {
+   "2009": 100,
+   "2020": 128,
+   "2024": 165,
+   "2026_jul": 182
+  },
+  "US_PPI_3253_compressors": {
+   "2009": 100,
+   "2020": 141,
+   "2024": 202,
+   "2026_jul": 215
+  },
+  "US_PPI_33441_electronics": {
+   "2009": 100,
+   "2020": 112,
+   "2024": 134,
+   "2026_jul": 142
+  },
+  "LME_copper_cash_usd_per_tonne": {
+   "2009": 5150,
+   "2020": 6180,
+   "2024": 9450,
+   "2026_jul": 13090
+  },
+  "ChemAnalyst_CS_plate_US": {
+   "2009": 720,
+   "2020": 620,
+   "2024": 1090,
+   "2026_jul": 1200
+  },
+  "note": "Illustrative reconstructions per the book's \u00a78.4; escalation = ratio of 2026 (Jul) to vintage column."
+ }
+}

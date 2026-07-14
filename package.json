@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build && node scripts/load-supplier-directory.mjs",
+    "build": "next build && node scripts/load-supplier-directory.mjs && node scripts/load-bop-repricing.mjs",
     "typecheck": "tsc --noEmit",
     "dev": "next dev",
     "lint": "next lint",
@@ -11,7 +11,8 @@
     "preflight": "tsx scripts/preflight.ts",
     "test": "jest",
     "test:ci": "jest --ci --runInBand",
-    "load:directory": "node scripts/load-supplier-directory.mjs"
+    "load:directory": "node scripts/load-supplier-directory.mjs",
+    "load:repricing": "node scripts/load-bop-repricing.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",
